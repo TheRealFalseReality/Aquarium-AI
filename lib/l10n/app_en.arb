@@ -5555,6 +5555,31 @@
     "description": "Placeholder text shown when a fish has no description"
   },
 
+  "fishOriginHabitat": "Origin & Habitat",
+  "@fishOriginHabitat": {
+    "description": "Section label for the fish origin and habitat information"
+  },
+
+  "fishCareFacts": "Care Facts",
+  "@fishCareFacts": {
+    "description": "Section label for fish care facts (bullet list)"
+  },
+
+  "fishGeneralInfo": "General Aquarium Information",
+  "@fishGeneralInfo": {
+    "description": "Section label for general aquarium information about the fish"
+  },
+
+  "fishCompatibilityHighlights": "Compatibility Highlights",
+  "@fishCompatibilityHighlights": {
+    "description": "Section label for fish compatibility highlights (bullet list)"
+  },
+
+  "fishFunFact": "Fun Fact",
+  "@fishFunFact": {
+    "description": "Section label for a short fun fact about the fish"
+  },
+
   "fishTypeInfo": "Fish Info",
   "@fishTypeInfo": {
     "description": "Title for the fish type information bottom sheet shown from the fish card speed-dial"

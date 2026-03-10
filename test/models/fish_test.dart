@@ -45,6 +45,45 @@ void main() {
       expect(fish.withCaution, isEmpty);
     });
 
+    test('New info fields default to null / empty list', () {
+      final fish = Fish(
+        name: 'Neon Tetra',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      expect(fish.originHabitat, isNull);
+      expect(fish.careFacts, isEmpty);
+      expect(fish.generalInfo, isNull);
+      expect(fish.compatibilityHighlights, isEmpty);
+      expect(fish.funFact, isNull);
+    });
+
+    test('Fish creation with all new info fields', () {
+      final fish = Fish(
+        name: 'Neon Tetra',
+        commonNames: ['Neon'],
+        imageURL: '',
+        originHabitat: 'Originates from the Amazon basin.',
+        careFacts: ['Soft, acidic water preferred', 'Keep in groups of 6+'],
+        generalInfo: 'A popular beginner fish.',
+        compatibilityHighlights: ['Peaceful community fish', 'Avoid large predators'],
+        funFact: 'Their bright stripe is used to communicate.',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      expect(fish.originHabitat, equals('Originates from the Amazon basin.'));
+      expect(fish.careFacts, containsAll(['Soft, acidic water preferred', 'Keep in groups of 6+']));
+      expect(fish.generalInfo, equals('A popular beginner fish.'));
+      expect(fish.compatibilityHighlights, containsAll(['Peaceful community fish', 'Avoid large predators']));
+      expect(fish.funFact, equals('Their bright stripe is used to communicate.'));
+    });
+
     test('reefSafe is null by default (freshwater fish)', () {
       final fish = Fish(
         name: 'Neon Tetra',
@@ -187,6 +226,47 @@ void main() {
       expect(fish.reefSafe, isNull);
     });
 
+    test('Fish.fromJson parses new info fields', () {
+      final json = {
+        'name': 'Neon Tetra',
+        'commonNames': ['Neon'],
+        'imageURL': '',
+        'originHabitat': 'Amazon basin',
+        'careFacts': ['Soft water', 'Groups of 6+'],
+        'generalInfo': 'A popular beginner fish.',
+        'compatibilityHighlights': ['Peaceful', 'Avoid predators'],
+        'funFact': 'Communicates via colour.',
+        'compatible': [],
+        'notRecommended': [],
+        'notCompatible': [],
+        'withCaution': [],
+      };
+      final fish = Fish.fromJson(json);
+      expect(fish.originHabitat, equals('Amazon basin'));
+      expect(fish.careFacts, containsAll(['Soft water', 'Groups of 6+']));
+      expect(fish.generalInfo, equals('A popular beginner fish.'));
+      expect(fish.compatibilityHighlights, containsAll(['Peaceful', 'Avoid predators']));
+      expect(fish.funFact, equals('Communicates via colour.'));
+    });
+
+    test('Fish.fromJson defaults new info fields to null / empty when absent', () {
+      final json = {
+        'name': 'Betta',
+        'commonNames': [],
+        'imageURL': '',
+        'compatible': [],
+        'notRecommended': [],
+        'notCompatible': [],
+        'withCaution': [],
+      };
+      final fish = Fish.fromJson(json);
+      expect(fish.originHabitat, isNull);
+      expect(fish.careFacts, isEmpty);
+      expect(fish.generalInfo, isNull);
+      expect(fish.compatibilityHighlights, isEmpty);
+      expect(fish.funFact, isNull);
+    });
+
     test('Fish.toJson omits reefSafe when null', () {
       final fish = Fish(
         name: 'Betta',
@@ -246,6 +326,47 @@ void main() {
       final json = fish.toJson();
       expect(json.containsKey('reefSafe'), isTrue);
       expect(json['reefSafe'], equals('Yes'));
+    });
+
+    test('Fish.toJson omits new info fields when null/empty', () {
+      final fish = Fish(
+        name: 'Betta',
+        commonNames: [],
+        imageURL: '',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      final json = fish.toJson();
+      expect(json.containsKey('originHabitat'), isFalse);
+      expect(json.containsKey('careFacts'), isFalse);
+      expect(json.containsKey('generalInfo'), isFalse);
+      expect(json.containsKey('compatibilityHighlights'), isFalse);
+      expect(json.containsKey('funFact'), isFalse);
+    });
+
+    test('Fish.toJson includes new info fields when set', () {
+      final fish = Fish(
+        name: 'Neon Tetra',
+        commonNames: ['Neon'],
+        imageURL: '',
+        originHabitat: 'Amazon basin',
+        careFacts: ['Soft water'],
+        generalInfo: 'Popular beginner fish.',
+        compatibilityHighlights: ['Peaceful'],
+        funFact: 'Communicates via colour.',
+        compatible: [],
+        notRecommended: [],
+        notCompatible: [],
+        withCaution: [],
+      );
+      final json = fish.toJson();
+      expect(json['originHabitat'], equals('Amazon basin'));
+      expect(json['careFacts'], equals(['Soft water']));
+      expect(json['generalInfo'], equals('Popular beginner fish.'));
+      expect(json['compatibilityHighlights'], equals(['Peaceful']));
+      expect(json['funFact'], equals('Communicates via colour.'));
     });
   });
 }

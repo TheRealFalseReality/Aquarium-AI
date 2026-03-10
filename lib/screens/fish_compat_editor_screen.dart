@@ -30,6 +30,11 @@ class _FishEntry {
   String name;
   String imageURL;
   String? description; // Optional plain-text description of this fish type
+  String? originHabitat; // Where the fish originates / its natural habitat
+  List<String> careFacts; // Bullet-point care information
+  String? generalInfo; // General aquarium information (short paragraph)
+  List<String> compatibilityHighlights; // Compatibility highlight bullets
+  String? funFact; // Short fun fact about the species
   List<String> commonNames;
   String? reefSafe;
   List<String> compatible;
@@ -42,19 +47,33 @@ class _FishEntry {
     required this.name,
     required this.imageURL,
     this.description,
+    this.originHabitat,
+    List<String>? careFacts,
+    this.generalInfo,
+    List<String>? compatibilityHighlights,
+    this.funFact,
     required this.commonNames,
     this.reefSafe,
     required this.compatible,
     required this.notRecommended,
     required this.notCompatible,
     required this.withCaution,
-  }) : uuid = uuid ?? const Uuid().v4();
+  })  : uuid = uuid ?? const Uuid().v4(),
+        careFacts = careFacts ?? [],
+        compatibilityHighlights = compatibilityHighlights ?? [];
 
   factory _FishEntry.fromJson(Map<String, dynamic> j) => _FishEntry(
     uuid: j['uuid'] as String?,
     name: j['name'] as String? ?? '',
     imageURL: j['imageURL'] as String? ?? '',
     description: j['description'] as String?,
+    originHabitat: j['originHabitat'] as String?,
+    careFacts: List<String>.from(j['careFacts'] ?? []),
+    generalInfo: j['generalInfo'] as String?,
+    compatibilityHighlights: List<String>.from(
+      j['compatibilityHighlights'] ?? [],
+    ),
+    funFact: j['funFact'] as String?,
     commonNames: List<String>.from(j['commonNames'] ?? []),
     reefSafe: j['reefSafe'] as String?,
     compatible: List<String>.from(j['compatible'] ?? []),
@@ -70,6 +89,14 @@ class _FishEntry {
     'imageURL': imageURL,
     if (description != null && description!.isNotEmpty)
       'description': description,
+    if (originHabitat != null && originHabitat!.isNotEmpty)
+      'originHabitat': originHabitat,
+    if (careFacts.isNotEmpty) 'careFacts': careFacts,
+    if (generalInfo != null && generalInfo!.isNotEmpty)
+      'generalInfo': generalInfo,
+    if (compatibilityHighlights.isNotEmpty)
+      'compatibilityHighlights': compatibilityHighlights,
+    if (funFact != null && funFact!.isNotEmpty) 'funFact': funFact,
     if (reefSafe != null) 'reefSafe': reefSafe,
     'compatible': compatible,
     'notRecommended': notRecommended,
@@ -84,6 +111,11 @@ class _FishEntry {
     String? name,
     String? imageURL,
     Object? description = _sentinel,
+    Object? originHabitat = _sentinel,
+    List<String>? careFacts,
+    Object? generalInfo = _sentinel,
+    List<String>? compatibilityHighlights,
+    Object? funFact = _sentinel,
     List<String>? commonNames,
     Object? reefSafe = _sentinel,
     List<String>? compatible,
@@ -96,6 +128,15 @@ class _FishEntry {
     imageURL: imageURL ?? this.imageURL,
     description:
         description == _sentinel ? this.description : description as String?,
+    originHabitat: originHabitat == _sentinel
+        ? this.originHabitat
+        : originHabitat as String?,
+    careFacts: careFacts ?? List<String>.from(this.careFacts),
+    generalInfo:
+        generalInfo == _sentinel ? this.generalInfo : generalInfo as String?,
+    compatibilityHighlights: compatibilityHighlights ??
+        List<String>.from(this.compatibilityHighlights),
+    funFact: funFact == _sentinel ? this.funFact : funFact as String?,
     commonNames: commonNames ?? List<String>.from(this.commonNames),
     reefSafe: reefSafe == _sentinel ? this.reefSafe : reefSafe as String?,
     compatible: compatible ?? List<String>.from(this.compatible),
@@ -620,6 +661,11 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                   name: f.name,
                   imageURL: f.imageURL,
                   description: f.description,
+                  originHabitat: f.originHabitat,
+                  careFacts: f.careFacts,
+                  generalInfo: f.generalInfo,
+                  compatibilityHighlights: f.compatibilityHighlights,
+                  funFact: f.funFact,
                   commonNames: f.commonNames,
                   reefSafe: f.reefSafe,
                   compatible: inCompatible
@@ -653,6 +699,11 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                     name: sf.name,
                     imageURL: sf.imageURL,
                     description: sf.description,
+                    originHabitat: sf.originHabitat,
+                    careFacts: sf.careFacts,
+                    generalInfo: sf.generalInfo,
+                    compatibilityHighlights: sf.compatibilityHighlights,
+                    funFact: sf.funFact,
                     commonNames: sf.commonNames,
                     reefSafe: sf.reefSafe,
                     compatible: inCompatible
@@ -737,6 +788,11 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               name: newFish.name,
               imageURL: newFish.imageURL,
               description: newFish.description,
+              originHabitat: newFish.originHabitat,
+              careFacts: newFish.careFacts,
+              generalInfo: newFish.generalInfo,
+              compatibilityHighlights: newFish.compatibilityHighlights,
+              funFact: newFish.funFact,
               commonNames: newFish.commonNames,
               reefSafe: newFish.reefSafe,
               compatible: [newFish.name], // self-reference: compatible with itself
@@ -753,6 +809,11 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 name: f.name,
                 imageURL: f.imageURL,
                 description: f.description,
+                originHabitat: f.originHabitat,
+                careFacts: f.careFacts,
+                generalInfo: f.generalInfo,
+                compatibilityHighlights: f.compatibilityHighlights,
+                funFact: f.funFact,
                 commonNames: f.commonNames,
                 reefSafe: f.reefSafe,
                 compatible: f.compatible,
@@ -786,6 +847,11 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               name: fish.name,
               imageURL: fish.imageURL,
               description: fish.description,
+              originHabitat: fish.originHabitat,
+              careFacts: fish.careFacts,
+              generalInfo: fish.generalInfo,
+              compatibilityHighlights: fish.compatibilityHighlights,
+              funFact: fish.funFact,
               commonNames: fish.commonNames,
               reefSafe: fish.reefSafe,
               compatible: updatedLists['compatible']!,
@@ -854,6 +920,11 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       name: f.name,
       imageURL: f.imageURL,
       description: f.description,
+      originHabitat: f.originHabitat,
+      careFacts: f.careFacts,
+      generalInfo: f.generalInfo,
+      compatibilityHighlights: f.compatibilityHighlights,
+      funFact: f.funFact,
       commonNames: f.commonNames,
       reefSafe: f.reefSafe,
       compatible: newKey == 'compatible'
@@ -1376,8 +1447,15 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   late TextEditingController _nameCtrl;
   late TextEditingController _urlCtrl;
   late TextEditingController _descriptionCtrl;
+  late TextEditingController _originHabitatCtrl;
+  late TextEditingController _generalInfoCtrl;
+  late TextEditingController _funFactCtrl;
   late List<TextEditingController> _commonNameCtrls;
+  late List<TextEditingController> _careFactCtrls;
+  late List<TextEditingController> _compatHighlightCtrls;
   final TextEditingController _newCommonNameCtrl = TextEditingController();
+  final TextEditingController _newCareFactCtrl = TextEditingController();
+  final TextEditingController _newCompatHighlightCtrl = TextEditingController();
   late String? _reefSafe;
 
   @override
@@ -1387,8 +1465,19 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     _urlCtrl = TextEditingController(text: widget.fish.imageURL);
     _descriptionCtrl =
         TextEditingController(text: widget.fish.description ?? '');
+    _originHabitatCtrl =
+        TextEditingController(text: widget.fish.originHabitat ?? '');
+    _generalInfoCtrl =
+        TextEditingController(text: widget.fish.generalInfo ?? '');
+    _funFactCtrl = TextEditingController(text: widget.fish.funFact ?? '');
     _commonNameCtrls = widget.fish.commonNames
         .map((n) => TextEditingController(text: n))
+        .toList();
+    _careFactCtrls = widget.fish.careFacts
+        .map((f) => TextEditingController(text: f))
+        .toList();
+    _compatHighlightCtrls = widget.fish.compatibilityHighlights
+        .map((h) => TextEditingController(text: h))
         .toList();
     _reefSafe = widget.fish.reefSafe;
   }
@@ -1398,8 +1487,19 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     _nameCtrl.dispose();
     _urlCtrl.dispose();
     _descriptionCtrl.dispose();
+    _originHabitatCtrl.dispose();
+    _generalInfoCtrl.dispose();
+    _funFactCtrl.dispose();
     _newCommonNameCtrl.dispose();
+    _newCareFactCtrl.dispose();
+    _newCompatHighlightCtrl.dispose();
     for (final ctrl in _commonNameCtrls) {
+      ctrl.dispose();
+    }
+    for (final ctrl in _careFactCtrls) {
+      ctrl.dispose();
+    }
+    for (final ctrl in _compatHighlightCtrls) {
       ctrl.dispose();
     }
     super.dispose();
@@ -1418,6 +1518,24 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     setState(() {
       _commonNameCtrls.add(TextEditingController(text: value));
       _newCommonNameCtrl.clear();
+    });
+  }
+
+  void _addCareFact() {
+    final value = _newCareFactCtrl.text.trim();
+    if (value.isEmpty) return;
+    setState(() {
+      _careFactCtrls.add(TextEditingController(text: value));
+      _newCareFactCtrl.clear();
+    });
+  }
+
+  void _addCompatHighlight() {
+    final value = _newCompatHighlightCtrl.text.trim();
+    if (value.isEmpty) return;
+    setState(() {
+      _compatHighlightCtrls.add(TextEditingController(text: value));
+      _newCompatHighlightCtrl.clear();
     });
   }
 
@@ -1449,13 +1567,24 @@ class _FishEditDialogState extends State<_FishEditDialog> {
       return;
     }
 
+    String? _trimOrNull(String s) => s.trim().isEmpty ? null : s.trim();
+
     final updated = _FishEntry(
       uuid: widget.fish.uuid,
       name: name,
       imageURL: imageURL,
-      description: _descriptionCtrl.text.trim().isEmpty
-          ? null
-          : _descriptionCtrl.text.trim(),
+      description: _trimOrNull(_descriptionCtrl.text),
+      originHabitat: _trimOrNull(_originHabitatCtrl.text),
+      careFacts: _careFactCtrls
+          .map((c) => c.text.trim())
+          .where((s) => s.isNotEmpty)
+          .toList(),
+      generalInfo: _trimOrNull(_generalInfoCtrl.text),
+      compatibilityHighlights: _compatHighlightCtrls
+          .map((c) => c.text.trim())
+          .where((s) => s.isNotEmpty)
+          .toList(),
+      funFact: _trimOrNull(_funFactCtrl.text),
       commonNames: commonNames,
       reefSafe: _reefSafe,
       compatible: widget.fish.compatible,
@@ -1465,6 +1594,74 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     );
     widget.onSave(updated);
     Navigator.pop(context);
+  }
+
+  Widget _buildListEditor({
+    required String sectionLabel,
+    required List<TextEditingController> controllers,
+    required TextEditingController newItemCtrl,
+    required VoidCallback onAdd,
+    required String addLabel,
+    required String addHint,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(sectionLabel, style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 6),
+        ...controllers.asMap().entries.map(
+          (e) => Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: e.value,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.remove_circle_outline, size: 20),
+                  tooltip: 'Remove',
+                  onPressed: () {
+                    final ctrl = e.value;
+                    setState(() => controllers.removeAt(e.key));
+                    ctrl.dispose();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: newItemCtrl,
+                decoration: InputDecoration(
+                  labelText: addLabel,
+                  hintText: addHint,
+                  border: const OutlineInputBorder(),
+                  isDense: true,
+                ),
+                onSubmitted: (_) => onAdd(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline),
+              tooltip: 'Add',
+              onPressed: onAdd,
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   @override
@@ -1508,6 +1705,66 @@ class _FishEditDialogState extends State<_FishEditDialog> {
                 ),
                 maxLines: 3,
                 minLines: 2,
+                keyboardType: TextInputType.multiline,
+              ),
+              const SizedBox(height: 12),
+              // Origin & Habitat
+              TextField(
+                controller: _originHabitatCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Origin & Habitat',
+                  border: OutlineInputBorder(),
+                  hintText:
+                      'Where does this fish come from and what is its natural habitat?',
+                ),
+                maxLines: 3,
+                minLines: 2,
+                keyboardType: TextInputType.multiline,
+              ),
+              const SizedBox(height: 12),
+              // Care Facts (list editor)
+              _buildListEditor(
+                sectionLabel: 'Care Facts',
+                controllers: _careFactCtrls,
+                newItemCtrl: _newCareFactCtrl,
+                onAdd: _addCareFact,
+                addLabel: 'Add care fact',
+                addHint: 'e.g. Requires soft, acidic water',
+              ),
+              const SizedBox(height: 12),
+              // General Aquarium Information
+              TextField(
+                controller: _generalInfoCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'General Aquarium Information',
+                  border: OutlineInputBorder(),
+                  hintText: 'General information about keeping this fish…',
+                ),
+                maxLines: 3,
+                minLines: 2,
+                keyboardType: TextInputType.multiline,
+              ),
+              const SizedBox(height: 12),
+              // Compatibility Highlights (list editor)
+              _buildListEditor(
+                sectionLabel: 'Compatibility Highlights',
+                controllers: _compatHighlightCtrls,
+                newItemCtrl: _newCompatHighlightCtrl,
+                onAdd: _addCompatHighlight,
+                addLabel: 'Add highlight',
+                addHint: 'e.g. Peaceful with most community fish',
+              ),
+              const SizedBox(height: 12),
+              // Fun Fact
+              TextField(
+                controller: _funFactCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Fun Fact',
+                  border: OutlineInputBorder(),
+                  hintText: 'An interesting fact about this species…',
+                ),
+                maxLines: 2,
+                minLines: 1,
                 keyboardType: TextInputType.multiline,
               ),
               const SizedBox(height: 12),

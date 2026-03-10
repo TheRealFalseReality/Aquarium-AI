@@ -460,8 +460,13 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
             category: category,
           ),
         ),
-        // Description card (shown when the fish has a description)
-        if (selected.description?.isNotEmpty == true)
+        // Info sections card (description + collapsible sections)
+        if (selected.description?.isNotEmpty == true ||
+            selected.originHabitat?.isNotEmpty == true ||
+            selected.careFacts.isNotEmpty ||
+            selected.generalInfo?.isNotEmpty == true ||
+            selected.compatibilityHighlights.isNotEmpty ||
+            selected.funFact?.isNotEmpty == true)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
@@ -471,22 +476,73 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        l10n.fishDescription,
-                        style:
-                            Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        selected.description!,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
+                      if (selected.description?.isNotEmpty == true) ...[
+                        Text(
+                          selected.description!,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                      if (selected.originHabitat?.isNotEmpty == true)
+                        _BrowserInfoSection(
+                          title: l10n.fishOriginHabitat,
+                          icon: Icons.public,
+                          initiallyExpanded: true,
+                          child: Text(
+                            selected.originHabitat!,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      if (selected.careFacts.isNotEmpty)
+                        _BrowserInfoSection(
+                          title: l10n.fishCareFacts,
+                          icon: Icons.health_and_safety_outlined,
+                          initiallyExpanded: false,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: selected.careFacts
+                                .map((fact) => _BrowserBulletItem(text: fact))
+                                .toList(),
+                          ),
+                        ),
+                      if (selected.generalInfo?.isNotEmpty == true)
+                        _BrowserInfoSection(
+                          title: l10n.fishGeneralInfo,
+                          icon: Icons.info_outline,
+                          initiallyExpanded: false,
+                          child: Text(
+                            selected.generalInfo!,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      if (selected.compatibilityHighlights.isNotEmpty)
+                        _BrowserInfoSection(
+                          title: l10n.fishCompatibilityHighlights,
+                          icon: Icons.people_outline,
+                          initiallyExpanded: false,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: selected.compatibilityHighlights
+                                .map(
+                                  (item) => _BrowserBulletItem(text: item),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      if (selected.funFact?.isNotEmpty == true)
+                        _BrowserInfoSection(
+                          title: l10n.fishFunFact,
+                          icon: Icons.lightbulb_outline,
+                          initiallyExpanded: false,
+                          child: Text(
+                            selected.funFact!,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      const SizedBox(height: 8),
                     ],
                   ),
                 ),
@@ -1442,6 +1498,111 @@ class _ViewToggleChip extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Fish info expansion widgets (used in the detail panel info card)
+// ---------------------------------------------------------------------------
+
+/// Collapsible section inside the info card in the browser detail panel.
+class _BrowserInfoSection extends StatefulWidget {
+  final String title;
+  final IconData icon;
+  final bool initiallyExpanded;
+  final Widget child;
+
+  const _BrowserInfoSection({
+    required this.title,
+    required this.icon,
+    required this.initiallyExpanded,
+    required this.child,
+  });
+
+  @override
+  State<_BrowserInfoSection> createState() => _BrowserInfoSectionState();
+}
+
+class _BrowserInfoSectionState extends State<_BrowserInfoSection> {
+  late bool _expanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _expanded = widget.initiallyExpanded;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(height: 16),
+        InkWell(
+          onTap: () => setState(() => _expanded = !_expanded),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                Icon(widget.icon, size: 16, color: cs.primary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+                Icon(
+                  _expanded ? Icons.expand_less : Icons.expand_more,
+                  size: 18,
+                  color: cs.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_expanded) ...[
+          const SizedBox(height: 6),
+          widget.child,
+        ],
+      ],
+    );
+  }
+}
+
+/// Single bullet-point list item used in the browser info card.
+class _BrowserBulletItem extends StatelessWidget {
+  final String text;
+  const _BrowserBulletItem({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 5, right: 6),
+            child: Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+        ],
       ),
     );
   }

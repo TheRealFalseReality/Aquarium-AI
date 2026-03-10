@@ -1454,5 +1454,30 @@
   "onboardingApiKeyNote": "Tankmanagement, Harmoniebewertungen und alle Rechner funktionieren immer ohne API-Schlüssel.",
   "@onboardingApiKeyNote": {
     "description": "Footnote in the API key onboarding step noting that calculators work without a key"
+  },
+
+  "fishOriginHabitat": "Herkunft & Lebensraum",
+  "@fishOriginHabitat": {
+    "description": "Section label for the fish origin and habitat information"
+  },
+
+  "fishCareFacts": "Pflegefakten",
+  "@fishCareFacts": {
+    "description": "Section label for fish care facts (bullet list)"
+  },
+
+  "fishGeneralInfo": "Allgemeine Aquariuminfos",
+  "@fishGeneralInfo": {
+    "description": "Section label for general aquarium information about the fish"
+  },
+
+  "fishCompatibilityHighlights": "Verträglichkeitshinweise",
+  "@fishCompatibilityHighlights": {
+    "description": "Section label for fish compatibility highlights (bullet list)"
+  },
+
+  "fishFunFact": "Wusstest du schon?",
+  "@fishFunFact": {
+    "description": "Section label for a short fun fact about the fish"
   }
 }

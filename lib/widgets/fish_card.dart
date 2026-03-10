@@ -644,37 +644,9 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
                         l10n: l10n,
                       ),
                     ],
-                    // Category chip
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      children: [
-                        Chip(
-                          label: Text(
-                            widget.category == 'marine'
-                                ? l10n.marine
-                                : l10n.freshwater,
-                          ),
-                          avatar: Icon(
-                            widget.category == 'marine'
-                                ? Icons.waves
-                                : Icons.water,
-                            size: 16,
-                          ),
-                        ),
-                      ],
-                    ),
                     // Description
                     const SizedBox(height: 12),
                     const Divider(),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.fishDescription,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
                     const SizedBox(height: 4),
                     Text(
                       widget.fish.description?.isNotEmpty == true
@@ -694,6 +666,8 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
                                     : FontStyle.italic,
                           ),
                     ),
+                    // Extended info sections
+                    ..._buildInfoSections(context, l10n, cs),
                     // Compatibility section
                     if (grouped.values.any((l) => l.isNotEmpty)) ...[
                       const SizedBox(height: 16),
@@ -856,6 +830,89 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
       ],
     );
   }
+
+  /// Builds the collapsible extended-information sections for the fish.
+  ///
+  /// Origin & Habitat defaults to expanded; all other sections start collapsed.
+  List<Widget> _buildInfoSections(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
+    final fish = widget.fish;
+    final sections = <Widget>[];
+
+    // Origin & Habitat — defaults to expanded
+    if (fish.originHabitat?.isNotEmpty == true) {
+      sections.add(_InfoExpansionSection(
+        title: l10n.fishOriginHabitat,
+        icon: Icons.public,
+        initiallyExpanded: true,
+        child: Text(
+          fish.originHabitat!,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ));
+    }
+
+    // Care Facts — collapsed by default
+    if (fish.careFacts.isNotEmpty) {
+      sections.add(_InfoExpansionSection(
+        title: l10n.fishCareFacts,
+        icon: Icons.health_and_safety_outlined,
+        initiallyExpanded: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: fish.careFacts
+              .map((fact) => _BulletItem(text: fact))
+              .toList(),
+        ),
+      ));
+    }
+
+    // General Aquarium Information — collapsed by default
+    if (fish.generalInfo?.isNotEmpty == true) {
+      sections.add(_InfoExpansionSection(
+        title: l10n.fishGeneralInfo,
+        icon: Icons.info_outline,
+        initiallyExpanded: false,
+        child: Text(
+          fish.generalInfo!,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ));
+    }
+
+    // Compatibility Highlights — collapsed by default
+    if (fish.compatibilityHighlights.isNotEmpty) {
+      sections.add(_InfoExpansionSection(
+        title: l10n.fishCompatibilityHighlights,
+        icon: Icons.people_outline,
+        initiallyExpanded: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: fish.compatibilityHighlights
+              .map((item) => _BulletItem(text: item))
+              .toList(),
+        ),
+      ));
+    }
+
+    // Fun Fact — collapsed by default
+    if (fish.funFact?.isNotEmpty == true) {
+      sections.add(_InfoExpansionSection(
+        title: l10n.fishFunFact,
+        icon: Icons.lightbulb_outline,
+        initiallyExpanded: false,
+        child: Text(
+          fish.funFact!,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ));
+    }
+
+    return sections;
+  }
 }
 
 /// Small chip showing a fish name with a color-coded border.
@@ -954,6 +1011,109 @@ class _ReefSafeRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Collapsible information section used in the fish info bottom sheet.
+class _InfoExpansionSection extends StatefulWidget {
+  final String title;
+  final IconData icon;
+  final bool initiallyExpanded;
+  final Widget child;
+
+  const _InfoExpansionSection({
+    required this.title,
+    required this.icon,
+    required this.initiallyExpanded,
+    required this.child,
+  });
+
+  @override
+  State<_InfoExpansionSection> createState() => _InfoExpansionSectionState();
+}
+
+class _InfoExpansionSectionState extends State<_InfoExpansionSection> {
+  late bool _expanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _expanded = widget.initiallyExpanded;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        const Divider(height: 1),
+        InkWell(
+          onTap: () => setState(() => _expanded = !_expanded),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Icon(widget.icon, size: 16, color: cs.primary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+                Icon(
+                  _expanded ? Icons.expand_less : Icons.expand_more,
+                  size: 18,
+                  color: cs.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_expanded) ...[
+          const SizedBox(height: 4),
+          widget.child,
+          const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+}
+
+/// A single bullet-point list item.
+class _BulletItem extends StatelessWidget {
+  final String text;
+  const _BulletItem({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 5, right: 6),
+            child: Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+        ],
+      ),
     );
   }
 }
