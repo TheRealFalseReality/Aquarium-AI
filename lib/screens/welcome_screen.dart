@@ -188,6 +188,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   // Promo card visibility
   bool _showDocsPromoCard = false;
   bool _showCommunityPromoCard = false;
+  bool _showReviewBanner = false;
 
   // Welcome header visibility
   bool _hideWelcomeHeader = false;
@@ -199,6 +200,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     _loadVersion();
     _loadHiddenFeatures();
     _loadPromoCards();
+    _checkReviewBanner();
     // Record the first launch timestamp (no-op after the very first call)
     InAppReviewService.recordFirstLaunch();
     // Request an in-app review if conditions are met (≥3 days since first launch)
@@ -334,6 +336,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     } catch (e) {
       // ignore
     }
+  }
+
+  Future<void> _checkReviewBanner() async {
+    final show = await InAppReviewService.shouldShowReviewBanner();
+    if (mounted) setState(() => _showReviewBanner = show);
+  }
+
+  Future<void> _dismissReviewBanner() async {
+    setState(() => _showReviewBanner = false);
+    await InAppReviewService.dismissReviewBanner();
   }
 
   Future<void> _saveHiddenFeatures() async {
@@ -953,6 +965,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         const SizedBox(height: 16),
                       ],
 
+                      // Review reminder banner (shown after 7 days, dismissible)
+                      if (_showReviewBanner) ...[
+                        _buildReviewReminderCard(context),
+                        const SizedBox(height: 16),
+                      ],
+
                       // Prominent My Tanks Section
                       _buildMyTanksSection(
                         context,
@@ -1358,6 +1376,97 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 icon: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
                 tooltip: l10n.close,
                 onPressed: _dismissCommunityPromoCard,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReviewReminderCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    return AnimatedFeatureCard(
+      delay: const Duration(milliseconds: 590),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.amber.shade400.withOpacity(0.12),
+              cs.primaryContainer.withOpacity(0.5),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: cs.outlineVariant.withOpacity(0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 12, 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade400.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text('⭐', style: TextStyle(fontSize: 24)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.reviewReminderBannerTitle,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.reviewReminderBannerBody,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.tonalIcon(
+                      onPressed: () {
+                        _dismissReviewBanner();
+                        InAppReviewService.openStoreListing();
+                      },
+                      icon: const Icon(Icons.star_rate_outlined, size: 16),
+                      label: Text(l10n.leaveAReview),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        textStyle: Theme.of(context).textTheme.labelMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
+                tooltip: l10n.close,
+                onPressed: _dismissReviewBanner,
               ),
             ],
           ),

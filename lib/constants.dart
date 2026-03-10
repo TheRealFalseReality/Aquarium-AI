@@ -74,6 +74,12 @@ const int rcDefaultInterstitialCooldownHours = 6;
 const String adSenseAppId = 'ca-pub-5701077439648731';
 const String adSenseAdUnitId = '9994371406';
 
+// Google Play Store listing URL (production package ID).
+// Used as the fallback URL when the in-app review API is unavailable.
+// Not yet available on iOS.
+const String googlePlayStoreUrl =
+    'https://play.google.com/store/apps/details?id=com.cca.fishai';
+
 // In-app purchase product IDs
 const String earlySupporterLifetimeProductId =
     'remove_ads_early_supporter_lifetime';
