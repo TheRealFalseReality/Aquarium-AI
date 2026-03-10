@@ -460,9 +460,8 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
             category: category,
           ),
         ),
-        // Info sections card (description + collapsible sections)
-        if (selected.description?.isNotEmpty == true ||
-            selected.originHabitat?.isNotEmpty == true ||
+        // Info sections card (collapsible sections)
+        if (selected.originHabitat?.isNotEmpty == true ||
             selected.careFacts.isNotEmpty ||
             selected.generalInfo?.isNotEmpty == true ||
             selected.compatibilityHighlights.isNotEmpty ||
@@ -477,16 +476,10 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 4),
+                  padding: const EdgeInsets.fromLTRB(14, 4, 14, 4),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (selected.description?.isNotEmpty == true) ...[
-                        Text(
-                          selected.description!,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
                       if (selected.originHabitat?.isNotEmpty == true)
                         _BrowserInfoSection(
                           title: l10n.fishOriginHabitat,

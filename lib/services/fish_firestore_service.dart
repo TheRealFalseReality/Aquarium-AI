@@ -17,7 +17,6 @@ import 'package:flutter/foundation.dart';
 //   name        (String)
 //   commonNames (Array<String>)
 //   imageURL    (String)
-//   description (String | null)  — optional plain-text description of the fish
 //   originHabitat (String | null) — origin and natural habitat paragraph
 //   careFacts   (Array<String> | null) — bullet-point care information
 //   generalInfo (String | null)  — general aquarium information paragraph

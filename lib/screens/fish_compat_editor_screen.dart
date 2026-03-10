@@ -29,7 +29,6 @@ class _FishEntry {
   String uuid;
   String name;
   String imageURL;
-  String? description; // Optional plain-text description of this fish type
   String? originHabitat; // Where the fish originates / its natural habitat
   List<String> careFacts; // Bullet-point care information
   String? generalInfo; // General aquarium information (short paragraph)
@@ -46,7 +45,6 @@ class _FishEntry {
     String? uuid,
     required this.name,
     required this.imageURL,
-    this.description,
     this.originHabitat,
     List<String>? careFacts,
     this.generalInfo,
@@ -66,7 +64,6 @@ class _FishEntry {
     uuid: j['uuid'] as String?,
     name: j['name'] as String? ?? '',
     imageURL: j['imageURL'] as String? ?? '',
-    description: j['description'] as String?,
     originHabitat: j['originHabitat'] as String?,
     careFacts: List<String>.from(j['careFacts'] ?? []),
     generalInfo: j['generalInfo'] as String?,
@@ -87,8 +84,6 @@ class _FishEntry {
     'name': name,
     'commonNames': commonNames,
     'imageURL': imageURL,
-    if (description != null && description!.isNotEmpty)
-      'description': description,
     if (originHabitat != null && originHabitat!.isNotEmpty)
       'originHabitat': originHabitat,
     if (careFacts.isNotEmpty) 'careFacts': careFacts,
@@ -110,7 +105,6 @@ class _FishEntry {
     String? uuid,
     String? name,
     String? imageURL,
-    Object? description = _sentinel,
     Object? originHabitat = _sentinel,
     List<String>? careFacts,
     Object? generalInfo = _sentinel,
@@ -126,8 +120,6 @@ class _FishEntry {
     uuid: uuid ?? this.uuid,
     name: name ?? this.name,
     imageURL: imageURL ?? this.imageURL,
-    description:
-        description == _sentinel ? this.description : description as String?,
     originHabitat: originHabitat == _sentinel
         ? this.originHabitat
         : originHabitat as String?,
@@ -660,7 +652,6 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                   uuid: f.uuid,
                   name: f.name,
                   imageURL: f.imageURL,
-                  description: f.description,
                   originHabitat: f.originHabitat,
                   careFacts: f.careFacts,
                   generalInfo: f.generalInfo,
@@ -698,7 +689,6 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                     uuid: sf.uuid,
                     name: sf.name,
                     imageURL: sf.imageURL,
-                    description: sf.description,
                     originHabitat: sf.originHabitat,
                     careFacts: sf.careFacts,
                     generalInfo: sf.generalInfo,
@@ -787,7 +777,6 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               uuid: newFish.uuid,
               name: newFish.name,
               imageURL: newFish.imageURL,
-              description: newFish.description,
               originHabitat: newFish.originHabitat,
               careFacts: newFish.careFacts,
               generalInfo: newFish.generalInfo,
@@ -808,7 +797,6 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
                 uuid: f.uuid,
                 name: f.name,
                 imageURL: f.imageURL,
-                description: f.description,
                 originHabitat: f.originHabitat,
                 careFacts: f.careFacts,
                 generalInfo: f.generalInfo,
@@ -846,7 +834,6 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               uuid: fish.uuid,
               name: fish.name,
               imageURL: fish.imageURL,
-              description: fish.description,
               originHabitat: fish.originHabitat,
               careFacts: fish.careFacts,
               generalInfo: fish.generalInfo,
@@ -919,7 +906,6 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       uuid: f.uuid,
       name: f.name,
       imageURL: f.imageURL,
-      description: f.description,
       originHabitat: f.originHabitat,
       careFacts: f.careFacts,
       generalInfo: f.generalInfo,
@@ -1446,7 +1432,6 @@ class _FishEditDialog extends StatefulWidget {
 class _FishEditDialogState extends State<_FishEditDialog> {
   late TextEditingController _nameCtrl;
   late TextEditingController _urlCtrl;
-  late TextEditingController _descriptionCtrl;
   late TextEditingController _originHabitatCtrl;
   late TextEditingController _generalInfoCtrl;
   late TextEditingController _funFactCtrl;
@@ -1463,8 +1448,6 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     super.initState();
     _nameCtrl = TextEditingController(text: widget.fish.name);
     _urlCtrl = TextEditingController(text: widget.fish.imageURL);
-    _descriptionCtrl =
-        TextEditingController(text: widget.fish.description ?? '');
     _originHabitatCtrl =
         TextEditingController(text: widget.fish.originHabitat ?? '');
     _generalInfoCtrl =
@@ -1486,7 +1469,6 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   void dispose() {
     _nameCtrl.dispose();
     _urlCtrl.dispose();
-    _descriptionCtrl.dispose();
     _originHabitatCtrl.dispose();
     _generalInfoCtrl.dispose();
     _funFactCtrl.dispose();
@@ -1573,7 +1555,6 @@ class _FishEditDialogState extends State<_FishEditDialog> {
       uuid: widget.fish.uuid,
       name: name,
       imageURL: imageURL,
-      description: _trimOrNull(_descriptionCtrl.text),
       originHabitat: _trimOrNull(_originHabitatCtrl.text),
       careFacts: _careFactCtrls
           .map((c) => c.text.trim())
@@ -1693,19 +1674,6 @@ class _FishEditDialogState extends State<_FishEditDialog> {
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.url,
-              ),
-              const SizedBox(height: 12),
-              // Description
-              TextField(
-                controller: _descriptionCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter a brief description of this fish type…',
-                ),
-                maxLines: 3,
-                minLines: 2,
-                keyboardType: TextInputType.multiline,
               ),
               const SizedBox(height: 12),
               // Origin & Habitat

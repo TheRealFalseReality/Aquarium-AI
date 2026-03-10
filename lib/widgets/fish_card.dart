@@ -644,29 +644,7 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
                         l10n: l10n,
                       ),
                     ],
-                    // Description
-                    const SizedBox(height: 12),
-                    const Divider(),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.fish.description?.isNotEmpty == true
-                          ? widget.fish.description!
-                          : l10n.noDescriptionAvailable,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(
-                            color:
-                                widget.fish.description?.isNotEmpty == true
-                                    ? null
-                                    : cs.onSurface.withOpacity(0.5),
-                            fontStyle:
-                                widget.fish.description?.isNotEmpty == true
-                                    ? FontStyle.normal
-                                    : FontStyle.italic,
-                          ),
-                    ),
-                    // Extended info sections
+                    // Info sections
                     ..._buildInfoSections(context, l10n, cs),
                     // Compatibility section
                     if (grouped.values.any((l) => l.isNotEmpty)) ...[

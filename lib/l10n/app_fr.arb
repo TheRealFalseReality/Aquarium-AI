@@ -1323,16 +1323,6 @@
     "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
   },
 
-  "fishDescription": "Description",
-  "@fishDescription": {
-    "description": "Label for the fish description field in the fish compat browser and editor"
-  },
-
-  "noDescriptionAvailable": "Aucune description disponible.",
-  "@noDescriptionAvailable": {
-    "description": "Placeholder text shown when a fish has no description"
-  },
-
   "fishOriginHabitat": "Origine et Habitat",
   "@fishOriginHabitat": {
     "description": "Section label for the fish origin and habitat information"
