@@ -7,7 +7,7 @@ Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert
 ### Hinzugefügt
 
 - **Fischkompatibilitätsbrowser** – sehen Sie sich die Kompatibilität der Fische auf einen Blick an. Ich möchte, dass die Community dabei hilft, dies zu erweitern.
-- **Überspringbaren 6-stufigen Onboarding-Ablauf hinzufügen**
+- **Überspringbaren 6-stufigen Onboarding-Ablauf hinzufügen** - Sie können dies in den Einstellungen erneut aufrufen
 
 ### Geändert
 
