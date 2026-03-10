@@ -1451,7 +1451,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     FilledButton.tonalIcon(
                       onPressed: () {
                         _dismissReviewBanner();
-                        InAppReviewService.forceRequestReview();
+                        InAppReviewService.openStoreListing();
                       },
                       icon: const Icon(Icons.star_rate_outlined, size: 16),
                       label: Text(l10n.leaveAReview),

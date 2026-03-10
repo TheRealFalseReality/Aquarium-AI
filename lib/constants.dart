@@ -80,10 +80,6 @@ const String adSenseAdUnitId = '9994371406';
 const String googlePlayStoreUrl =
     'https://play.google.com/store/apps/details?id=com.cca.fishai';
 
-// Delay (ms) between dismissing a dialog and calling the in-app review API.
-// Gives the foreground activity time to stabilise after the dialog animation.
-const int reviewDialogDismissDelayMs = 300;
-
 // In-app purchase product IDs
 const String earlySupporterLifetimeProductId =
     'remove_ads_early_supporter_lifetime';
