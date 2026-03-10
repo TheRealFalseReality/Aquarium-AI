@@ -2,6 +2,22 @@
 
 Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
 
+## [3.2.00] – 2026-3-10 • Fischkompatibilitätsbrowser und Onboarding
+
+### Hinzugefügt
+
+- **Fischkompatibilitätsbrowser** – sehen Sie sich die Kompatibilität der Fische auf einen Blick an. Ich möchte, dass die Community dabei hilft, dies zu erweitern.
+- **Überspringbaren 6-stufigen Onboarding-Ablauf hinzufügen**
+
+### Geändert
+
+- Tankkopf-Aktionen auf FAB-Kurzwahl verschieben; Fügen Sie TankInhabitantScreen mit Alterschips, Harmonie-Delta, dauerhaften Filtern, FAB zum Bearbeiten/Löschen von Bewohnern und Schnellwahl hinzu
+- Migrieren Sie Fischkompatibilitätsdaten zu Cloud Firestore mit der Integration des Fish Compat Editor und lokalen WebP-Bildern
+
+### ENTFERNT
+
+- Entfernen Sie die gebündelte Datei „fishcompat.json“; Verwenden Sie Firestore ausschließlich mit SP-Cache-Fallback und versuchen Sie es erneut mit UX
+
 ## [3.1.03] – 7.3.2026 – UUIDs, hauptsächlich Autorisierungsprüfungen, Facebook-Login-Unterstützung
 
 ### Geändert

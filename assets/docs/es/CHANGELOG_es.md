@@ -2,6 +2,22 @@
 
 Todos los cambios notables de este proyecto se documentan en este archivo.
 
+## [3.2.00] - 2026-3-10 • Navegador de compatibilidad con Fish e incorporación
+
+### Agregado
+
+- **Navegador de compatibilidad de peces**: comprueba la compatibilidad de los peces de un vistazo. Quiero que la comunidad ayude a ampliar esto.
+- **Agregar flujo de incorporación de 6 pasos que se puede omitir**
+
+### Cambió
+
+- Mover las acciones del cabezal del tanque a marcación rápida FAB; agregue TankInhabitantScreen con chips de edad, delta de armonía, filtros persistentes, edición/eliminación de FAB de habitantes y marcación rápida de acción rápida
+- Migre datos de compatibilidad de peces a Cloud Firestore con la integración de Fish Compat Editor e imágenes WebP locales
+
+### Eliminado
+
+- Eliminar fishcompat.json incluido; use Firestore exclusivamente con respaldo de caché de SP y vuelva a intentar UX
+
 ## [3.1.03] - 2026-3-7 - UUID, principalmente comprobaciones de autorización, soporte de inicio de sesión de Facebook
 
 ### Cambió
