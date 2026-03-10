@@ -684,7 +684,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                         ),
                         title: const Text('Fish Compat Editor'),
                         subtitle: const Text(
-                          'Debug: edit & validate fishcompat.json',
+                          'Debug: edit & validate fish data',
                         ),
                         onTap: () => navigate('/fishcompat-editor'),
                       ),

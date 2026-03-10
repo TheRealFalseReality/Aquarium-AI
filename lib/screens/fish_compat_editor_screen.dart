@@ -6,7 +6,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
 import '../main_layout.dart';
@@ -288,7 +287,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       _loadError = null;
     });
 
-    // 1. Try Firestore first (primary source).
+    // Try Firestore (primary and only source).
     if (fromFirestore) {
       try {
         final firestoreData = await FishFirestoreService.fetchFishData()
@@ -316,62 +315,25 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
             return;
           }
         }
+        // Firestore returned empty / null data.
+        setState(() {
+          _loadError = 'Firestore returned no fish data. '
+              'Please upload data first or check your connection.';
+          _isLoading = false;
+        });
       } catch (e) {
         if (kDebugMode) {
-          debugPrint('FishCompatEditor: Firestore load failed ($e). Falling back to local asset.');
+          debugPrint('FishCompatEditor: Firestore load failed ($e).');
         }
+        setState(() {
+          _loadError = e.toString();
+          _isLoading = false;
+        });
       }
-    }
-
-    // 2. Fall back to the bundled local asset (human-readable reference copy).
-    try {
-      final jsonString = await rootBundle.loadString(
-        'assets/data/fishcompat.json',
-      );
-      final raw = json.decode(jsonString) as Map<String, dynamic>;
-      final result = <String, List<_FishEntry>>{};
-      for (final category in ['freshwater', 'marine']) {
-        if (raw.containsKey(category)) {
-          final list = (raw[category] as List)
-              .map((e) => _FishEntry.fromJson(e as Map<String, dynamic>))
-              .toList();
-          list.sort(
-            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-          );
-          // Backwards compat: ensure each fish references itself in one
-          // of its four sub-categories, defaulting to "compatible".
-          for (final fish in list) {
-            final hasSelf =
-                fish.compatible.contains(fish.name) ||
-                fish.notRecommended.contains(fish.name) ||
-                fish.notCompatible.contains(fish.name) ||
-                fish.withCaution.contains(fish.name);
-            if (!hasSelf) {
-              fish.compatible.add(fish.name);
-            }
-          }
-          result[category] = list;
-        }
-      }
-      setState(() {
-        _data = result;
-        _savedData = _deepCopy(result);
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _loadError = e.toString();
-        _isLoading = false;
-      });
     }
   }
 
   Future<void> _saveChanges() async {
-    // Commit the local snapshot immediately so dirty tracking clears.
-    setState(() {
-      _savedData = _deepCopy(_data);
-    });
-
     if (_isAuthorizedEditor) {
       // Build the JSON map from the working copy and upload to Firestore.
       setState(() => _isSavingToFirestore = true);
@@ -383,6 +345,10 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
           }
         }
         await FishFirestoreService.uploadJsonData(output);
+        // Only mark as saved after a successful Firestore upload.
+        setState(() {
+          _savedData = _deepCopy(_data);
+        });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -404,6 +370,10 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
         if (mounted) setState(() => _isSavingToFirestore = false);
       }
     } else {
+      // Local-only save (non-editor): commit working copy as the baseline.
+      setState(() {
+        _savedData = _deepCopy(_data);
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -929,9 +899,23 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
       body = Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(
-            'Error loading fish data:\n$_loadError',
-            style: TextStyle(color: colorScheme.error),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.cloud_off, size: 48, color: colorScheme.error),
+              const SizedBox(height: 16),
+              Text(
+                'Error loading fish data:\n$_loadError',
+                style: TextStyle(color: colorScheme.error),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                onPressed: () => _loadData(fromFirestore: true),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+            ],
           ),
         ),
       );

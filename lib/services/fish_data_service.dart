@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,11 +13,13 @@ import 'remote_config_service.dart';
 //   1. In-memory cache
 //   2. Cloud Firestore (fish_compat collection) — persisted to SP on success
 //   3. SharedPreferences (last successful Firestore fetch) — offline fallback
-//   4. Bundled local asset (assets/data/fishcompat.json) — last resort
+//
+// If all sources fail a [StateError] is thrown so the caller can surface an
+// appropriate error to the user.
 // ---------------------------------------------------------------------------
 
 /// SharedPreferences key used to persist the last successful Firestore fetch
-/// so that subsequent offline launches can use it instead of the bundled asset.
+/// so that subsequent offline launches can use it as a fallback.
 const String _prefKeyJson = 'fishcompat_cached_json';
 
 /// SharedPreferences key storing the epoch-millisecond timestamp of the last
@@ -33,8 +34,8 @@ const String _prefKeyLastFetchMs = 'fishcompat_last_fetch_ms';
 ///      updates).  On success the result is persisted to SharedPreferences.
 ///   3. SharedPreferences persistent cache (the data from the last successful
 ///      Firestore fetch).  Used when Firestore is unreachable / offline.
-///   4. Bundled local asset `assets/data/fishcompat.json` (always available
-///      offline, used as the last-resort fallback).
+///
+/// Throws a [StateError] if no source can provide valid data.
 class FishDataService {
   Map<String, List<Fish>>? _cachedFishData;
 
@@ -59,6 +60,13 @@ class FishDataService {
     }
     return fishData;
   }
+
+  /// Returns `true` only when at least one category contains actual fish.
+  ///
+  /// An empty map, or a map whose lists are all empty, is considered invalid
+  /// so the service will not cache empty datasets as if they were successful.
+  bool _isValidFishData(Map<String, List<Fish>> data) =>
+      data.values.any((list) => list.isNotEmpty);
 
   /// Persist [firestoreData] to SharedPreferences so it is available on the
   /// next offline launch.  Errors are swallowed — persistence is best-effort.
@@ -93,6 +101,9 @@ class FishDataService {
   /// `fish_data_cooldown_hours`) is enforced on Firestore fetches: if a fresh
   /// SP cache exists the SP cache is returned directly without contacting
   /// Firestore.
+  ///
+  /// Throws a [StateError] if both Firestore and the SP cache are unavailable
+  /// or contain no usable data.
   Future<Map<String, List<Fish>>> loadFishData() async {
     if (_cachedFishData != null) {
       return _cachedFishData!;
@@ -122,7 +133,7 @@ class FishDataService {
             if (cachedJson != null && cachedJson.isNotEmpty) {
               final raw = json.decode(cachedJson) as Map<String, dynamic>;
               final fishData = _parseFishMap(raw);
-              if (fishData.isNotEmpty) {
+              if (_isValidFishData(fishData)) {
                 _cachedFishData = fishData;
                 return fishData;
               }
@@ -146,7 +157,7 @@ class FishDataService {
           // Map<String, List<Map<String,dynamic>>> → Map<String, dynamic>
           firestoreData.map((k, v) => MapEntry(k, v)),
         );
-        if (fishData.isNotEmpty) {
+        if (_isValidFishData(fishData)) {
           // Persist to SP so the next offline launch can use this data.
           await _persistToSpCache(firestoreData);
           _cachedFishData = fishData;
@@ -169,7 +180,7 @@ class FishDataService {
       if (cachedJson != null && cachedJson.isNotEmpty) {
         final raw = json.decode(cachedJson) as Map<String, dynamic>;
         final fishData = _parseFishMap(raw);
-        if (fishData.isNotEmpty) {
+        if (_isValidFishData(fishData)) {
           if (kDebugMode) {
             debugPrint('FishDataService: using SP cache (offline).');
           }
@@ -180,53 +191,47 @@ class FishDataService {
     } catch (e) {
       if (kDebugMode) {
         debugPrint(
-          'FishDataService: SP cache failed ($e), using local asset.',
+          'FishDataService: SP cache failed ($e).',
         );
       }
     }
 
-    // 3. Fall back to the bundled local asset (always available offline).
-    final jsonString = await rootBundle.loadString(
-      'assets/data/fishcompat.json',
+    // All sources exhausted — surface a meaningful error to the caller.
+    throw StateError(
+      'Fish data could not be loaded from Firestore or cache. '
+      'Please check your internet connection and try again.',
     );
-    final fishData = _parseFishMap(
-      json.decode(jsonString) as Map<String, dynamic>,
-    );
-    _cachedFishData = fishData;
-    return fishData;
   }
 
-  /// Load raw fish data JSON for tag initialisation.
+  /// Load raw fish data for tag initialisation.
   ///
-  /// Always reads directly from the bundled local asset so the full
-  /// common-name arrays are available without Firestore access.
+  /// Returns data in the same shape expected by [SpeciesTagsNotifier.initializeDefaultTags]:
+  /// `{category: [{'name': ..., 'commonNames': [...], ...}, ...]}`.
+  ///
+  /// Delegates to [loadFishData] so the same caching and cooldown logic
+  /// applies; the typed [Fish] objects are then serialised back to maps.
   Future<Map<String, List<dynamic>>> loadRawFishData() async {
-    final jsonString = await rootBundle.loadString(
-      'assets/data/fishcompat.json',
+    final typedData = await loadFishData();
+    return typedData.map(
+      (category, fishList) => MapEntry(
+        category,
+        fishList.map((f) => f.toJson()).toList(),
+      ),
     );
-    final jsonResponse = json.decode(jsonString) as Map<String, dynamic>;
-
-    final fishData = <String, List<dynamic>>{};
-    for (final category in ['freshwater', 'marine']) {
-      if (jsonResponse.containsKey(category)) {
-        fishData[category] = jsonResponse[category] as List<dynamic>;
-      }
-    }
-    return fishData;
   }
 
   /// Clear the in-memory cache.
   ///
-  /// The next call to [loadFishData] will reload from Firestore, the SP cache,
-  /// or the local asset.
+  /// The next call to [loadFishData] will reload from Firestore or the SP
+  /// cache.
   void clearCache() {
     _cachedFishData = null;
   }
 
   /// Clear both the in-memory cache and the SharedPreferences persistent cache.
   ///
-  /// The next call to [loadFishData] will reload from Firestore or the local
-  /// asset.  Useful for testing and manual refresh scenarios.
+  /// The next call to [loadFishData] will contact Firestore directly.
+  /// Useful for testing and manual refresh scenarios.
   Future<void> clearPersistentCache() async {
     clearCache();
     final prefs = await SharedPreferences.getInstance();

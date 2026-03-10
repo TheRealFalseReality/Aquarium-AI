@@ -15,6 +15,7 @@ import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../providers/species_tags_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/fish_data_service.dart';
 import '../services/interstitial_ad_service.dart';
 import '../services/remote_config_service.dart';
 import '../widgets/ad_component.dart';
@@ -419,9 +420,26 @@ class FishCompatibilityScreenState
             error: (error, stackTrace) => Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  l10n.failedToLoadFishData(error.toString()),
-                  textAlign: TextAlign.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.cloud_off,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.failedToLoadFishData(error.toString()),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: () => ref.refresh(fishDataProvider),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.retry),
+                    ),
+                  ],
                 ),
               ),
             ),

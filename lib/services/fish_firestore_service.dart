@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 // ---------------------------------------------------------------------------
 // Firestore data structure for fish compatibility data
@@ -62,26 +59,6 @@ class FishFirestoreService {
   // ---------------------------------------------------------------------------
   // Upload
   // ---------------------------------------------------------------------------
-
-  /// Upload the bundled `assets/data/fishcompat.json` to Firestore.
-  ///
-  /// Each fish is written as an individual document inside
-  /// `fish_compat/{category}/fish/{uuid}`.
-  ///
-  /// Firestore batch writes are capped at 500 operations each, so this method
-  /// splits large datasets into multiple batches automatically.
-  ///
-  /// [onProgress] is called with the number of fish written so far and the
-  /// total count so the caller can show a progress indicator.
-  ///
-  /// Returns the total number of fish documents written.
-  static Future<int> uploadFromAsset({
-    void Function(int done, int total)? onProgress,
-  }) async {
-    final jsonString = await rootBundle.loadString('assets/data/fishcompat.json');
-    final jsonData = json.decode(jsonString) as Map<String, dynamic>;
-    return _uploadJsonData(jsonData, onProgress: onProgress);
-  }
 
   /// Upload fish data provided as a decoded JSON map to Firestore.
   ///

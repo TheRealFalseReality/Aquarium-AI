@@ -182,7 +182,31 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                       loading: () =>
                           const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Center(
-                        child: Text(l10n.fishDataNotAvailable),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.cloud_off,
+                                size: 48,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                l10n.fishDataNotAvailable,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              FilledButton.icon(
+                                onPressed: () =>
+                                    ref.refresh(fishDataProvider),
+                                icon: const Icon(Icons.refresh),
+                                label: Text(l10n.retry),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       data: (fishMap) {
                         final allFish = fishMap[cat] ?? [];
