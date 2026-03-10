@@ -39,6 +39,7 @@ import '../widgets/remove_ads_dialog.dart';
 import 'changelog_screen.dart';
 import 'community_post_screen.dart';
 import 'markdown_viewer_screen.dart';
+import 'onboarding_screen.dart';
 
 class ToolChipInfo {
   final String label;
@@ -202,11 +203,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     InAppReviewService.recordFirstLaunch();
     // Request an in-app review if conditions are met (≥3 days since first launch)
     InAppReviewService.maybeRequestReview();
+    // Show onboarding on first launch (before any dialogs)
+    _checkShowOnboarding();
     // Check if we should show the app promotion dialog on web
     if (kIsWeb) {
       _checkShowPromotionDialog();
     }
     // Check if we should show the AquaPi promotion dialog
+    // (after onboarding completion or on normal cooldown schedule)
     _checkShowAquaPiPromotionDialog();
     // Check if we should show the changelog dialog (once per version)
     _checkShowChangelogDialog();
@@ -409,6 +413,36 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     );
   }
 
+  Future<void> _checkShowOnboarding() async {
+    // In debug builds, skip onboarding entirely so developers aren't
+    // interrupted on every hot-restart.
+    if (kDebugMode) return;
+
+    // Already completed → never show again.
+    if (await OnboardingScreen.hasCompleted()) return;
+
+    // Existing user who updated the app → auto-complete silently so they are
+    // never shown onboarding on update.
+    if (await OnboardingScreen.isExistingUserData()) {
+      await OnboardingScreen.markCompleted();
+      return;
+    }
+
+    // Onboarding was already shown once (e.g. user exited mid-flow) → do not
+    // show again automatically; they can revisit via Settings.
+    if (await OnboardingScreen.hasBeenSeenOnce()) return;
+
+    // Fresh install first launch → show onboarding once.
+    await OnboardingScreen.markSeenOnce();
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushNamed(context, '/onboarding');
+        }
+      });
+    }
+  }
+
   Future<void> _checkShowPromotionDialog() async {
     try {
       // Check if user has chosen to never show the dialog again
@@ -479,8 +513,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
   Future<void> _checkShowAquaPiPromotionDialog() async {
     try {
-      // Check if user has chosen to never show the dialog again
+      final prefs = await SharedPreferences.getInstance();
+
+      // Only show the AquaPi dialog when the post-onboarding flag is set
+      // (i.e. user just completed or skipped onboarding). This prevents the
+      // dialog from firing on every normal app launch.
+      final showAfterOnboarding =
+          prefs.getBool('aquapi_show_after_onboarding') ?? false;
+      if (!showAfterOnboarding) return;
+
+      // Respect the "never show again" preference.
       final shouldShow = await AquaPiPromotionDialog.shouldShowDialog();
+      await prefs.remove('aquapi_show_after_onboarding');
       if (!shouldShow) {
         debugPrint(
           'AquaPi promotion dialog will not be shown (user selected never show again)',
@@ -488,35 +532,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         return;
       }
 
-      final prefs = await SharedPreferences.getInstance();
-      final lastShownTimestamp =
-          prefs.getInt(_aquapiPromotionDialogTimestampKey) ?? 0;
-      final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
-      final hoursSinceLastShown =
-          (currentTimestamp - lastShownTimestamp) / (1000 * 60 * 60);
-
-      debugPrint(
-        'AquaPi promotion dialog check: Last shown timestamp: $lastShownTimestamp, Hours since: ${hoursSinceLastShown.toStringAsFixed(1)}, Cooldown: $_aquapiPromotionDialogCooldownHours hours',
-      );
-
-      // Show the dialog if it has never been shown or if cooldown period has passed
-      if (hoursSinceLastShown >= _aquapiPromotionDialogCooldownHours &&
-          mounted) {
-        debugPrint(
-          'AquaPi promotion dialog will be shown (cooldown period elapsed)',
-        );
-        // Show the popup after a delay to allow the screen to load
-        // Use a longer delay to avoid showing both popups at once
-        Timer(const Duration(seconds: 3), () {
-          if (mounted) {
-            _showAquaPiPromotionDialog();
-          }
-        });
-      } else {
-        debugPrint(
-          'AquaPi promotion dialog will not be shown (cooldown period not elapsed)',
-        );
-      }
+      debugPrint('AquaPi promotion dialog will be shown (post-onboarding)');
+      // Show the popup after a short delay so the welcome screen can settle.
+      Timer(const Duration(seconds: 2), () {
+        if (mounted) _showAquaPiPromotionDialog();
+      });
     } catch (e) {
       // If there's an error with SharedPreferences, silently continue
       debugPrint('Error checking AquaPi promotion dialog preference: $e');

@@ -31,10 +31,49 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   bool _isSocialLoading = false;
   String? _errorMessage;
 
+  /// Route to push after successful sign-in. Defaults to '/profile'.
+  String _returnRoute = '/profile';
+  Object? _returnRouteArgs;
+
   @override
   void initState() {
     super.initState();
     AnalyticsService.logScreenView(screenName: 'auth_screen');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map) {
+      _returnRoute = (args['returnRoute'] as String?) ?? '/profile';
+      _returnRouteArgs = args['returnRouteArgs'];
+    }
+  }
+
+  void _navigateAfterSignIn() {
+    Navigator.of(context).pushReplacementNamed(
+      _returnRoute,
+      arguments: _returnRouteArgs,
+    );
+  }
+
+  /// Called when the user chooses to skip sign-in entirely.
+  /// If launched from the onboarding flow (returnRoute is '/onboarding'),
+  /// navigates directly to that onboarding step.
+  /// Otherwise, just pops back to the previous screen.
+  void _skipSignIn() {
+    final args = _returnRouteArgs;
+    // Check if we came from onboarding (return route goes back to onboarding).
+    if (_returnRoute == '/onboarding' && args is Map &&
+        args.containsKey('initialPage')) {
+      Navigator.of(context).pushReplacementNamed(
+        '/onboarding',
+        arguments: args,
+      );
+    } else {
+      Navigator.of(context).maybePop();
+    }
   }
 
   @override
@@ -77,7 +116,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         AnalyticsService.logFeatureUsed(
           featureName: _isSignUp ? 'auth_sign_up_email' : 'auth_sign_in_email',
         );
-        Navigator.of(context).pushReplacementNamed('/profile');
+        _navigateAfterSignIn();
       }
     } on FirebaseAuthException catch (e) {
       setState(() => _errorMessage = _friendlyError(e.code));
@@ -97,7 +136,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       final user = await AuthService.signInWithGoogle();
       if (user != null && mounted) {
         AnalyticsService.logFeatureUsed(featureName: 'auth_sign_in_google');
-        Navigator.of(context).pushReplacementNamed('/profile');
+        _navigateAfterSignIn();
       }
     } on FirebaseAuthException catch (e) {
       setState(() => _errorMessage = _friendlyError(e.code));
@@ -117,7 +156,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       final user = await AuthService.signInWithFacebook();
       if (user != null && mounted) {
         AnalyticsService.logFeatureUsed(featureName: 'auth_sign_in_facebook');
-        Navigator.of(context).pushReplacementNamed('/profile');
+        _navigateAfterSignIn();
       }
     } on FirebaseAuthException catch (e) {
       setState(() => _errorMessage = _friendlyError(e.code));
@@ -398,29 +437,57 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       ],
                     ),
 
-                    // Continue anonymously
+                    // Continue as Guest (creates anonymous account)
                     const Divider(height: 32),
-                    OutlinedButton.icon(
-                      icon: const Icon(Icons.no_accounts_outlined),
-                      label: Text(l10n.authContinueAnonymously),
-                      onPressed: _isLoading || _isSocialLoading
-                          ? null
-                          : () async {
-                              setState(() => _isLoading = true);
-                              // Fire a reCAPTCHA v3 token request on web before
-                              // anonymous sign-in.
-                              await AppCheckService.requestToken();
-                              await AuthService.signInAnonymously();
-                              if (mounted) {
-                                AnalyticsService.logFeatureUsed(
-                                  featureName: 'auth_sign_in_anonymous',
-                                );
-                                setState(() => _isLoading = false);
-                                Navigator.of(
-                                  context,
-                                ).pushReplacementNamed('/profile');
-                              }
-                            },
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.person_outline),
+                          label: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(l10n.authContinueAsGuest),
+                              Text(
+                                l10n.authContinueAsGuestDesc,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                          onPressed: _isLoading || _isSocialLoading
+                              ? null
+                              : () async {
+                                  setState(() => _isLoading = true);
+                                  // Fire a reCAPTCHA v3 token request on web before
+                                  // anonymous sign-in.
+                                  await AppCheckService.requestToken();
+                                  await AuthService.signInAnonymously();
+                                  if (mounted) {
+                                    AnalyticsService.logFeatureUsed(
+                                      featureName: 'auth_sign_in_anonymous',
+                                    );
+                                    setState(() => _isLoading = false);
+                                    _navigateAfterSignIn();
+                                  }
+                                },
+                        ),
+                        const SizedBox(height: 8),
+                        // Truly skip sign-in — no account created
+                        TextButton(
+                          onPressed: _isLoading || _isSocialLoading
+                              ? null
+                              : _skipSignIn,
+                          child: Text(
+                            l10n.authSkipSignIn,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

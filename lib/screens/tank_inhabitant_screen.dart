@@ -332,12 +332,12 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
                   ? CachedNetworkImage(
                       imageUrl: imageUrl,
                       fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => _placeholderIcon(cs),
+                      errorWidget: (_, _, _) => _placeholderIcon(cs),
                     )
                   : Image.file(
                       File(imageUrl),
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholderIcon(cs),
+                      errorBuilder: (_, _, _) => _placeholderIcon(cs),
                     )
             else
               _placeholderIcon(cs),

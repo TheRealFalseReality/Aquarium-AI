@@ -29,6 +29,7 @@ import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compat_browser_screen.dart';
 import './screens/fish_compatibility_screen.dart';
 import './screens/information_screen.dart';
+import './screens/onboarding_screen.dart';
 import './screens/photo_analysis_screen.dart';
 import './screens/profile_screen.dart';
 import './screens/species_tags_screen.dart';
@@ -601,7 +602,11 @@ class MyApp extends ConsumerWidget {
                 screenName = 'photo_analysis_screen';
                 break;
               case '/settings':
-                page = const SettingsScreen();
+                {
+                  final openAIProvider = (args is Map &&
+                          args['openAIProvider'] == true);
+                  page = SettingsScreen(openAIProvider: openAIProvider);
+                }
                 screenName = 'settings_screen';
                 break;
               case '/appearance':
@@ -636,6 +641,14 @@ class MyApp extends ConsumerWidget {
               case '/auth':
                 page = const AuthScreen();
                 screenName = 'auth_screen';
+                break;
+              case '/onboarding':
+                int initialPage = 0;
+                if (args is Map) {
+                  initialPage = (args['initialPage'] as int?) ?? 0;
+                }
+                page = OnboardingScreen(initialPage: initialPage);
+                screenName = 'onboarding_screen';
                 break;
               case '/profile':
                 String? uid;

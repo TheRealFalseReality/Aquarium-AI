@@ -9,7 +9,12 @@ import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 
 class TankVolumeCalculator extends StatefulWidget {
-  const TankVolumeCalculator({super.key});
+  const TankVolumeCalculator({super.key, this.onSizeSelected});
+
+  /// Optional callback invoked when the user taps "Use This Size" in the
+  /// results card. Receives the calculated gallons and litres values.
+  /// Used when this calculator is opened from the onboarding flow.
+  final void Function(double gallons, double liters)? onSizeSelected;
 
   @override
   TankVolumeCalculatorState createState() => TankVolumeCalculatorState();
@@ -590,28 +595,57 @@ class TankVolumeCalculatorState extends State<TankVolumeCalculator> {
 
   Widget _buildResultsCard() {
     final l10n = AppLocalizations.of(context)!;
-    return Card(
-      color: Theme.of(context).colorScheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 24.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildResultColumn(
-              l10n.volume,
-              '$_gallons gal',
-              '$_liters L',
-              Theme.of(context).colorScheme.primary,
+    final cs = Theme.of(context).colorScheme;
+    final gallonsVal = double.tryParse(_gallons) ?? 0;
+    final litersVal = double.tryParse(_liters) ?? 0;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Card(
+          color: cs.surface,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 24.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildResultColumn(
+                  l10n.volume,
+                  '$_gallons gal',
+                  '$_liters L',
+                  cs.primary,
+                ),
+                _buildResultColumn(
+                  l10n.weight,
+                  '$_pounds lbs',
+                  '$_kilograms kg',
+                  Colors.green,
+                ),
+              ],
             ),
-            _buildResultColumn(
-              l10n.weight,
-              '$_pounds lbs',
-              '$_kilograms kg',
-              Colors.green,
-            ),
-          ],
+          ),
         ),
-      ),
+        // "Use This Size" button — only shown when launched from onboarding
+        if (widget.onSizeSelected != null) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              icon: const Icon(Icons.check_circle_outline),
+              label: Text(l10n.calculatorUseThisSize),
+              onPressed: () {
+                widget.onSizeSelected!(gallonsVal, litersVal);
+                Navigator.of(context).pop();
+              },
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 

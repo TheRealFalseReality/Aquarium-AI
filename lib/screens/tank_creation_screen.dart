@@ -1508,7 +1508,7 @@ class InhabitantDialog extends ConsumerStatefulWidget {
   final Function(TankInhabitant) onAdd;
   final VoidCallback? onDelete;
 
-  const InhabitantDialog({
+  const InhabitantDialog({super.key,
     required this.availableFish,
     required this.onAdd,
     this.existingInhabitant,

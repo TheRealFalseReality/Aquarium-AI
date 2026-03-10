@@ -573,6 +573,7 @@
   "founderPerkIncreasedAILimits": "Limites d'utilisation d'IA gratuites augmentées",
   "founderPerkPostBorder": "Bordure de publication violet foncé exclusive",
   "founderPerkBadge": "Badge Fondateur exclusif sur le profil et les publications",
+  "founderPerkMoreCapableModels": "Accès à des modèles IA plus puissants",
   "founderUpsellBannerTitle": "Débloquez les avantages du Fondateur Aquariste",
   "founderUpsellBannerBody": "Supprimez les publicités définitivement et obtenez des limites d'utilisation de l'IA plus élevées avec un achat unique.",
   "becomeFounderAquarist": "Devenir Fondateur Aquariste",
@@ -1094,6 +1095,231 @@
     }
   },
 
+  "onboardingSkip": "Passer",
+  "@onboardingSkip": {
+    "description": "Button label to skip the onboarding flow"
+  },
+
+  "onboardingNext": "Suivant",
+  "@onboardingNext": {
+    "description": "Button label to advance to the next onboarding step"
+  },
+
+  "onboardingGetStarted": "Commencer",
+  "@onboardingGetStarted": {
+    "description": "Button label on the last onboarding step to finish and enter the app"
+  },
+
+  "onboardingAddInhabitants": "Ajouter des habitants",
+  "@onboardingAddInhabitants": {
+    "description": "Primary button label on the tank-creation step once the user has entered a tank name"
+  },
+  "@onboardingWelcomeTitle": {
+    "description": "Title on the first onboarding step (welcome / sign-in)"
+  },
+
+  "onboardingWelcomeSubtitle": "Configurez votre hub aquariophile en quelques étapes.",
+  "@onboardingWelcomeSubtitle": {
+    "description": "Subtitle on the first onboarding step"
+  },
+  "onboardingWelcomeThankYou": "Merci d'essayer Aquarium AI !",
+  "@onboardingWelcomeThankYou": {"description": "Thank-you line on the welcome/intro step of onboarding"},
+  "onboardingWelcomeBody": "Votre compagnon aquariophile tout-en-un : outils IA, gestion de bacs, calculateurs et une communauté d'aquariophiles.",
+  "@onboardingWelcomeBody": {"description": "Body paragraph on the welcome/intro step of onboarding"},
+  "onboardingWelcomeGetStarted": "Commençons !",
+  "@onboardingWelcomeGetStarted": {"description": "Primary CTA button on the welcome/intro step of onboarding"},
+
+
+  "onboardingSignInTitle": "Connectez-vous pour l'expérience complète",
+  "@onboardingSignInTitle": {
+    "description": "Heading for the sign-in upsell card on the first onboarding step"
+  },
+
+  "onboardingSignInBenefit1": "Synchronisez vos aquariums sur tous vos appareils",
+  "@onboardingSignInBenefit1": {
+    "description": "First benefit bullet in the sign-in upsell card"
+  },
+
+  "onboardingSignInBenefit2": "Connectez-vous avec d'autres passionnés d'aquariophilie",
+  "@onboardingSignInBenefit2": {
+    "description": "Second benefit bullet in the sign-in upsell card"
+  },
+
+  "onboardingSignInBenefit3": "Présentez vos aquariums et partagez des conseils dans la Communauté",
+  "@onboardingSignInBenefit3": {
+    "description": "Third benefit bullet in the sign-in upsell card"
+  },
+
+  "onboardingCreateTankTitle": "Configurez votre premier aquarium",
+  "@onboardingCreateTankTitle": {
+    "description": "Title on the second onboarding step (create tank)"
+  },
+
+  "onboardingCreateTankSubtitle": "Parlez-nous de votre aquarium. Vous pourrez toujours modifier les détails plus tard.",
+  "@onboardingCreateTankSubtitle": {
+    "description": "Subtitle on the second onboarding step"
+  },
+
+  "onboardingCreateTankTip": "Vous n'êtes pas sûr de la taille ? Utilisez la Calculatrice de volume.",
+  "@onboardingCreateTankTip": {
+    "description": "Tip shown below the size fields on the create-tank onboarding step"
+  },
+
+  "onboardingTankNameLabel": "Nom de l'aquarium",
+  "@onboardingTankNameLabel": {
+    "description": "Label for the tank name field on the onboarding create-tank step"
+  },
+
+  "onboardingTankNameHint": "ex. Mon paradis récifal",
+  "@onboardingTankNameHint": {
+    "description": "Hint text for the tank name field on the onboarding create-tank step"
+  },
+
+  "onboardingTankType": "Type d'aquarium",
+  "@onboardingTankType": {
+    "description": "Section heading for the tank type selector on the onboarding create-tank step"
+  },
+
+  "onboardingTankSize": "Taille de l'aquarium",
+  "@onboardingTankSize": {
+    "description": "Section heading for the tank size fields on the onboarding create-tank step"
+  },
+
+  "onboardingOptional": "(facultatif)",
+  "@onboardingOptional": {
+    "description": "Parenthetical label indicating an optional field in the onboarding flow"
+  },
+
+  "onboardingTankDateCreated": "Date de création",
+  "@onboardingTankDateCreated": {
+    "description": "Label for the date-created field on the onboarding tank setup step"
+  },
+
+  "onboardingTankAgeToday": "Créé aujourd'hui",
+  "@onboardingTankAgeToday": {
+    "description": "Tank age label when the tank was created today"
+  },
+
+  "onboardingTankAgeDays": "{days} jour(s) d'ancienneté",
+  "@onboardingTankAgeDays": {
+    "description": "Tank age label in days",
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+
+  "onboardingTankAgeWeeks": "{weeks} semaine(s) d'ancienneté",
+  "@onboardingTankAgeWeeks": {
+    "description": "Tank age label in weeks",
+    "placeholders": {
+      "weeks": {"type": "int"}
+    }
+  },
+
+  "onboardingTankAgeMonths": "{months} mois d'ancienneté",
+  "@onboardingTankAgeMonths": {
+    "description": "Tank age label in months",
+    "placeholders": {
+      "months": {"type": "int"}
+    }
+  },
+
+  "onboardingTankAgeYears": "{years} an(s) d'ancienneté",
+  "@onboardingTankAgeYears": {
+    "description": "Tank age label in years",
+    "placeholders": {
+      "years": {"type": "int"}
+    }
+  },
+
+  "onboardingTankNotes": "Notes",
+  "@onboardingTankNotes": {
+    "description": "Label for the notes field on the onboarding tank setup step"
+  },
+
+  "onboardingTankNotesHint": "Ajouter des notes sur votre aquarium…",
+  "@onboardingTankNotesHint": {
+    "description": "Hint text for the notes field on the onboarding tank setup step"
+  },
+  "@onboardingOpenCalculator": {
+    "description": "Short label for the button that opens the tank volume calculator from onboarding"
+  },
+
+  "onboardingInhabitantsTitle": "Ajoutez vos poissons et habitants",
+  "@onboardingInhabitantsTitle": {
+    "description": "Title on the third onboarding step (add inhabitants)"
+  },
+
+  "onboardingInhabitantsSubtitle": "Construisez votre communauté aquatique. Vous pouvez toujours en ajouter plus tard.",
+  "@onboardingInhabitantsSubtitle": {
+    "description": "Subtitle on the third onboarding step"
+  },
+
+  "onboardingInhabitantsTankRequired": "Entrez un nom d'aquarium à l'étape précédente pour sauvegarder les habitants.",
+  "@onboardingInhabitantsTankRequired": {
+    "description": "Info message shown when the user tries to add inhabitants without a tank name"
+  },
+
+  "onboardingNoInhabitantsYet": "Aucun habitant ajouté pour l'instant",
+  "@onboardingNoInhabitantsYet": {
+    "description": "Placeholder text when the inhabitants list is empty on the onboarding step"
+  },
+
+  "onboardingSkipInhabitants": "Passer pour l'instant",
+  "@onboardingSkipInhabitants": {
+    "description": "Link below the Next button on the inhabitants onboarding step to skip adding fish"
+  },
+
+  "onboardingDiscoverTitle": "Explorer les outils de l'app",
+  "@onboardingDiscoverTitle": {
+    "description": "Title on the fourth onboarding step (discover app tools)"
+  },
+
+  "onboardingDiscoverSubtitle": "Outils IA, calculatrices et gestion d'aquarium — tout pour un aquarium prospère.",
+  "@onboardingDiscoverSubtitle": {
+    "description": "Subtitle on the fourth onboarding step"
+  },
+
+  "onboardingDiscoverSectionAI": "Outils IA",
+  "@onboardingDiscoverSectionAI": {
+    "description": "Section header chip for AI tools in the discover step"
+  },
+
+  "onboardingDiscoverSectionTank": "Aquarium & Communauté",
+  "@onboardingDiscoverSectionTank": {
+    "description": "Section header chip for tank management tools in the discover step"
+  },
+
+  "onboardingDiscoverSectionCalc": "Calculatrices",
+  "@onboardingDiscoverSectionCalc": {
+    "description": "Section header chip for calculator tools in the discover step"
+  },
+
+  "onboardingDiscoverTankDesc": "Gérez vos aquariums, suivez les habitants, enregistrez les paramètres d'eau et tenez un journal de dosage.",
+  "@onboardingDiscoverTankDesc": {
+    "description": "Description for the My Tanks tool card in the discover step"
+  },
+
+  "onboardingThemeTitle": "Choisissez votre style",
+  "@onboardingThemeTitle": {
+    "description": "Title on the new first onboarding step (theme selection)"
+  },
+
+  "onboardingThemeSubtitle": "Choisissez une palette de couleurs. Vous pouvez la modifier à tout moment dans les paramètres d'apparence.",
+  "@onboardingThemeSubtitle": {
+    "description": "Subtitle on the theme-selection onboarding step"
+  },
+
+  "onboardingThemeModeLabel": "Luminosité",
+  "@onboardingThemeModeLabel": {
+    "description": "Label for the brightness / theme-mode toggle on the onboarding theme step"
+  },
+
+  "onboardingChangeTankTypeWarning": "Changer le type d'aquarium supprimera les habitants que vous avez ajoutés.",
+  "@onboardingChangeTankTypeWarning": {
+    "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
+  },
+
   "fishDescription": "Description",
   "@fishDescription": {
     "description": "Label for the fish description field in the fish compat browser and editor"
@@ -1112,5 +1338,138 @@
   "googleSearchFish": "Recherche Google",
   "@googleSearchFish": {
     "description": "Tooltip for the Google search action in the fish card speed-dial"
+  }
+,
+
+  "authContinueAsGuest": "Continuer en tant qu'invité",
+  "@authContinueAsGuest": {
+    "description": "Button to continue with an anonymous account (clearly labelled as guest)"
+  },
+
+  "authContinueAsGuestDesc": "Crée un compte anonyme temporaire que vous pourrez lier plus tard.",
+  "@authContinueAsGuestDesc": {
+    "description": "Subtitle explaining what guest/anonymous access means"
+  },
+
+  "authSkipSignIn": "Continuer sans se connecter",
+  "@authSkipSignIn": {
+    "description": "Button to skip sign-in entirely without creating any account"
+  },
+
+  "communitySignInRequired": "Connectez-vous pour accéder à la Communauté",
+  "@communitySignInRequired": {
+    "description": "Title of the sign-in required screen shown when accessing Community without being signed in"
+  },
+
+  "communitySignInRequiredDesc": "La Communauté est réservée aux utilisateurs connectés. Créez un compte pour partager vos aquariums et échanger avec d'autres aquariophiles.",
+  "@communitySignInRequiredDesc": {
+    "description": "Body text explaining why sign-in is required for the Community"
+  },
+
+  "communitySignInButton": "Se connecter pour continuer",
+  "@communitySignInButton": {
+    "description": "Button on the community sign-in required screen"
+  },
+
+  "onboardingSkipConfirmTitle": "Passer la configuration ?",
+  "@onboardingSkipConfirmTitle": {
+    "description": "Title of the confirmation dialog when tapping the top-bar Skip button in onboarding"
+  },
+
+  "onboardingSkipConfirmBody": "Vous pouvez revenir sur cette configuration à tout moment depuis les Paramètres.",
+  "@onboardingSkipConfirmBody": {
+    "description": "Body text of the skip confirmation dialog"
+  },
+
+  "onboardingSkipConfirm": "Oui, passer",
+  "@onboardingSkipConfirm": {
+    "description": "Confirm button in the skip onboarding dialog"
+  },
+
+  "onboardingSkipForNow": "Passer pour l'instant",
+  "@onboardingSkipForNow": {
+    "description": "Secondary button label on steps where no interaction has occurred yet"
+  },
+
+  "revisitOnboarding": "Revoir la configuration",
+  "@revisitOnboarding": {
+    "description": "Settings menu card title to re-launch the onboarding flow"
+  },
+
+  "revisitOnboardingDesc": "Parcourir à nouveau l'assistant de configuration de l'app",
+  "@revisitOnboardingDesc": {
+    "description": "Settings menu card subtitle for the revisit onboarding option"
+  },
+
+  "calculatorUseThisSize": "Utiliser cette taille",
+  "@calculatorUseThisSize": {
+    "description": "Button in the tank volume calculator results to autofill the result into the onboarding tank size fields"
+  }
+,
+
+  "onboardingContinueBanner": "Continuer la configuration",
+  "@onboardingContinueBanner": {
+    "description": "Label on the profile screen banner encouraging the user to continue onboarding"
+  },
+
+  "onboardingContinueBannerDesc": "Vous avez presque terminé ! Reprenez là où vous vous êtes arrêté.",
+  "@onboardingContinueBannerDesc": {
+    "description": "Body text on the onboarding continue banner shown on the profile screen"
+  },
+
+  "onboardingContinueBannerDismiss": "Ignorer",
+  "@onboardingContinueBannerDismiss": {
+    "description": "Dismiss action on the onboarding continue banner"
+  }
+,
+
+  "onboardingApiTitle": "Boostez votre IA",
+  "@onboardingApiTitle": {
+    "description": "Title for the API key/Founder upsell step in onboarding"
+  },
+
+  "onboardingFounderCtaButton": "Rejoindre les Fondateurs",
+  "@onboardingFounderCtaButton": {
+    "description": "CTA button label on the Founder Aquarist card in onboarding step 5"
+  },
+
+  "onboardingApiSubtitle": "Aquarium AI fonctionne avec un niveau gratuit partagé. Ajoutez votre propre clé API ou devenez Aquariste Fondateur pour la meilleure expérience.",
+  "@onboardingApiSubtitle": {
+    "description": "Subtitle for the API key/Founder upsell step in onboarding"
+  },
+
+  "onboardingApiFreeTierTitle": "Niveau Gratuit (Clé Partagée)",
+  "@onboardingApiFreeTierTitle": {
+    "description": "Title for the free tier section in the API key onboarding step"
+  },
+
+  "onboardingApiOwnKeyTitle": "Votre Propre Clé API",
+  "@onboardingApiOwnKeyTitle": {
+    "description": "Title for the own API key section in the API key onboarding step"
+  },
+
+  "onboardingApiOwnKeyDesc": "Ajoutez une clé Groq, Gemini ou OpenAI gratuite pour des limites dédiées et l'accès à des modèles plus puissants.",
+  "@onboardingApiOwnKeyDesc": {
+    "description": "Description of the own API key benefits in the API key onboarding step"
+  },
+
+  "onboardingApiFounderDesc": "Achat unique — supprime les publicités pour toujours et vous donne une meilleure clé partagée avec des limites plus élevées.",
+  "@onboardingApiFounderDesc": {
+    "description": "Description of the Founder Aquarist in the API key onboarding step"
+  },
+
+  "onboardingApiGoToSettings": "Configurer la Clé API",
+  "@onboardingApiGoToSettings": {
+    "description": "Button label to go to settings for API key setup"
+  },
+
+  "onboardingApiNotNow": "Pas maintenant",
+  "@onboardingApiNotNow": {
+    "description": "Button label to skip the API key setup"
+  },
+
+  "onboardingApiKeyNote": "La gestion des aquariums, les scores d'harmonie et toutes les calculatrices fonctionnent toujours sans clé API.",
+  "@onboardingApiKeyNote": {
+    "description": "Footnote in the API key onboarding step noting that calculators work without a key"
   }
 }

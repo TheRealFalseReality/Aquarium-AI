@@ -2,17 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.1.03] - 2026-3-7 - UUIDs, Mostly Authorization Checks, Facebook Login support
+## [3.1.03] - 2026-3-7 • UUIDs, Mostly Authorization Checks, Facebook Login support
 
 ### Changed
 
 ### ***Please Note:***
 - **You MAY need to reset your storage in order for new data set to load. I added UUIDs to the fish types to allow for better changes in the future.**
-- The rest if mostly backend updates.
+- The rest is mostly backend updates.
 
 **Full Changelog**: https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.1.00...v3.1.03
 
-## [3.1.01] - 2026-3-3 - Perks, Community and Profile Features  
+## [3.1.01] - 2026-3-3 • Perks, Community and Profile Features  
 
 ### Added
 
@@ -37,7 +37,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-## [3.0.10] - 2026-2-27 - Visual Updates, Stocking Tool Fixes
+## [3.0.10] - 2026-2-27 • Visual Updates, Stocking Tool Fixes
 
 ### Added
 
@@ -51,7 +51,7 @@ All notable changes to this project will be documented in this file.
 
 **Full Changelog**: <https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.0.03...v3.0.10>
 
-## [3.0.03] - 2026-2-24  - Major Updates
+## [3.0.03] - 2026-2-24 • Major Updates
 
 ### Added
 
@@ -100,7 +100,7 @@ All notable changes to this project will be documented in this file.
 - Add details for fish types and possibly species
 - Reef Safe indicator
 - User rearrange features
-- User edited Prompts in your langauge
+- User edited Prompts in your language
 - Let's Start a Community!
 - Allow tank info attachment for any post
 - [**Suggest more!**](https://github.com/TheRealFalseReality/Aquarium-AI/issues) Request a Feature or report a bug

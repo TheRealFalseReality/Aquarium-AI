@@ -21,9 +21,14 @@ import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/remove_ads_dialog.dart';
 import 'changelog_screen.dart';
+import 'onboarding_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  /// When `true`, the AI Provider dialog is opened automatically after the
+  /// first frame (e.g. when navigated from the onboarding API key step).
+  final bool openAIProvider;
+
+  const SettingsScreen({super.key, this.openAIProvider = false});
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -80,6 +85,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final args = ModalRoute.of(context)?.settings.arguments;
       if (args is Map && args['openRemoveAds'] == true && !kIsWeb) {
         _showRemoveAdsDialog();
+      }
+      // Auto-open the AI Provider dialog when requested (e.g. from onboarding).
+      if (widget.openAIProvider) {
+        _showAIProviderDialog();
       }
     });
   }
@@ -983,6 +992,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ],
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: l10n.revisitOnboarding,
+          subtitle: l10n.revisitOnboardingDesc,
+          icon: Icons.auto_awesome_outlined,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.35),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.primary,
+          onTap: () async {
+            await OnboardingScreen.reset();
+            if (mounted) {
+              Navigator.pushNamed(context, '/onboarding');
+            }
+          },
+        ),
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
