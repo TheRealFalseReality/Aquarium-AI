@@ -67,7 +67,6 @@ flutter:
   generate: true
 
   assets:
-    - assets/data/
     - assets/images/system/
     - assets/images/fish/
     - assets/docs/en/

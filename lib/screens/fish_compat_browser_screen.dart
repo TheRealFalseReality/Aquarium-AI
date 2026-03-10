@@ -931,13 +931,13 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                     child: Image.asset(
                       widget.fish.localImagePath,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) {
+                      errorBuilder: (_, _, _) {
                         if (widget.fish.imageURL.isNotEmpty) {
                           return CachedNetworkImage(
                             imageUrl: widget.fish.imageURL,
                             fit: BoxFit.contain,
-                            placeholder: (_, __) => const SizedBox.shrink(),
-                            errorWidget: (_, __, ___) => const Center(
+                            placeholder: (_, _) => const SizedBox.shrink(),
+                            errorWidget: (_, _, _) => const Center(
                               child: Icon(
                                 Icons.broken_image_outlined,
                                 size: 64,
@@ -1298,15 +1298,15 @@ class _CompatFishChip extends StatelessWidget {
                 child: Image.asset(
                   fish.localImagePath,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) {
+                  errorBuilder: (_, _, _) {
                     if (fish.imageURL.isNotEmpty) {
                       return CachedNetworkImage(
                         imageUrl: fish.imageURL,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Container(
+                        placeholder: (_, _) => Container(
                           color: cs.surfaceVariant,
                         ),
-                        errorWidget: (_, __, ___) => Container(
+                        errorWidget: (_, _, _) => Container(
                           color: cs.surfaceVariant,
                           child: Center(
                             child: Icon(
