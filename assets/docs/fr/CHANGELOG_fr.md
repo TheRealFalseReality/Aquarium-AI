@@ -7,7 +7,7 @@ Toutes les modifications notables apportées à ce projet sont documentées dans
 ### Ajouté
 
 - **Navigateur de compatibilité des poissons** - vérifiez la compatibilité des poissons en un coup d'œil. Je veux que la communauté aide à développer ce sujet.
-- **Ajouter un flux d'intégration en 6 étapes désactivable**
+- **Ajouter un flux d'intégration en 6 étapes désactivable** - vous pouvez revoir cela dans les paramètres
 
 ### Modifié
 

@@ -7,7 +7,7 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 ### Agregado
 
 - **Navegador de compatibilidad de peces**: comprueba la compatibilidad de los peces de un vistazo. Quiero que la comunidad ayude a ampliar esto.
-- **Agregar flujo de incorporación de 6 pasos que se puede omitir**
+- **Agregar flujo de incorporación de 6 pasos que se puede omitir** - puedes volver a visitar esto en la configuración
 
 ### Cambió
 

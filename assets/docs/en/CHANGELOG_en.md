@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - **Fish Compatibility Browser** - check out the compatibility of the fish at a glance. I want to make the community help expand on this.
-- **Add skippable 6-step onboarding flow**
+- **Add skippable 6-step onboarding flow** - you can revisit this in settings
 
 ### Changed
 
