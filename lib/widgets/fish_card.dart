@@ -466,13 +466,13 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
                     child: Image.asset(
                       widget.fish.localImagePath,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) {
+                      errorBuilder: (_, _, _) {
                         if (widget.fish.imageURL.isNotEmpty) {
                           return CachedNetworkImage(
                             imageUrl: widget.fish.imageURL,
                             fit: BoxFit.contain,
-                            placeholder: (_, __) => const SizedBox.shrink(),
-                            errorWidget: (_, __, ___) =>
+                            placeholder: (_, _) => const SizedBox.shrink(),
+                            errorWidget: (_, _, _) =>
                                 _brokenImagePlaceholder,
                           );
                         }

@@ -182,7 +182,31 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                       loading: () =>
                           const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Center(
-                        child: Text(l10n.fishDataNotAvailable),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.cloud_off,
+                                size: 48,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                l10n.fishDataNotAvailable,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              FilledButton.icon(
+                                onPressed: () =>
+                                    ref.refresh(fishDataProvider),
+                                icon: const Icon(Icons.refresh),
+                                label: Text(l10n.retry),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       data: (fishMap) {
                         final allFish = fishMap[cat] ?? [];
@@ -907,13 +931,13 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                     child: Image.asset(
                       widget.fish.localImagePath,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) {
+                      errorBuilder: (_, _, _) {
                         if (widget.fish.imageURL.isNotEmpty) {
                           return CachedNetworkImage(
                             imageUrl: widget.fish.imageURL,
                             fit: BoxFit.contain,
-                            placeholder: (_, __) => const SizedBox.shrink(),
-                            errorWidget: (_, __, ___) => const Center(
+                            placeholder: (_, _) => const SizedBox.shrink(),
+                            errorWidget: (_, _, _) => const Center(
                               child: Icon(
                                 Icons.broken_image_outlined,
                                 size: 64,
@@ -1274,15 +1298,15 @@ class _CompatFishChip extends StatelessWidget {
                 child: Image.asset(
                   fish.localImagePath,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) {
+                  errorBuilder: (_, _, _) {
                     if (fish.imageURL.isNotEmpty) {
                       return CachedNetworkImage(
                         imageUrl: fish.imageURL,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Container(
+                        placeholder: (_, _) => Container(
                           color: cs.surfaceVariant,
                         ),
-                        errorWidget: (_, __, ___) => Container(
+                        errorWidget: (_, _, _) => Container(
                           color: cs.surfaceVariant,
                           child: Center(
                             child: Icon(

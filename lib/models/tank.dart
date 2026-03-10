@@ -97,10 +97,11 @@ class TankPhoto {
 class TankInhabitant {
   final String id;
   final String customName;
-  final String fishUnit; // Matches fish name from fishcompat.json
-  /// Stable UUID from fishcompat.json. Null for inhabitants created before
-  /// UUID support was added. Use for fish lookups when present; fall back to
-  /// [fishUnit] name matching for backward compatibility.
+  final String fishUnit; // Matches fish name from the fish-compat database
+  /// Stable UUID from the fish-compat Firestore database.  Null for
+  /// inhabitants created before UUID support was added. Use for fish lookups
+  /// when present; fall back to [fishUnit] name matching for backward
+  /// compatibility.
   final String? fishUuid;
   final int quantity;
   final String? customImageUrl; // User-provided image URL
