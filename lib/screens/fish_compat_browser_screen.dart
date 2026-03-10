@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
@@ -485,9 +486,13 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           title: l10n.fishOriginHabitat,
                           icon: Icons.public,
                           initiallyExpanded: true,
-                          child: Text(
-                            selected.originHabitat!,
-                            style: Theme.of(context).textTheme.bodyMedium,
+                          child: MarkdownBody(
+                            data: selected.originHabitat!,
+                            styleSheet: MarkdownStyleSheet.fromTheme(
+                              Theme.of(context),
+                            ).copyWith(
+                              p: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
                         ),
                       if (selected.careFacts.isNotEmpty)
@@ -507,9 +512,13 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           title: l10n.fishGeneralInfo,
                           icon: Icons.info_outline,
                           initiallyExpanded: false,
-                          child: Text(
-                            selected.generalInfo!,
-                            style: Theme.of(context).textTheme.bodyMedium,
+                          child: MarkdownBody(
+                            data: selected.generalInfo!,
+                            styleSheet: MarkdownStyleSheet.fromTheme(
+                              Theme.of(context),
+                            ).copyWith(
+                              p: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
                         ),
                       if (selected.compatibilityHighlights.isNotEmpty)
@@ -531,9 +540,13 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                           title: l10n.fishFunFact,
                           icon: Icons.lightbulb_outline,
                           initiallyExpanded: false,
-                          child: Text(
-                            selected.funFact!,
-                            style: Theme.of(context).textTheme.bodyMedium,
+                          child: MarkdownBody(
+                            data: selected.funFact!,
+                            styleSheet: MarkdownStyleSheet.fromTheme(
+                              Theme.of(context),
+                            ).copyWith(
+                              p: Theme.of(context).textTheme.bodyMedium,
+                            ),
                           ),
                         ),
                       const SizedBox(height: 8),
@@ -1594,7 +1607,11 @@ class _BrowserBulletItem extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
+            child: MarkdownBody(
+              data: text,
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
+                  .copyWith(p: Theme.of(context).textTheme.bodyMedium),
+            ),
           ),
         ],
       ),

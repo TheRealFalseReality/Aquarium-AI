@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -826,9 +827,10 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
         title: l10n.fishOriginHabitat,
         icon: Icons.public,
         initiallyExpanded: true,
-        child: Text(
-          fish.originHabitat!,
-          style: Theme.of(context).textTheme.bodyMedium,
+        child: MarkdownBody(
+          data: fish.originHabitat!,
+          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
+              .copyWith(p: Theme.of(context).textTheme.bodyMedium),
         ),
       ));
     }
@@ -854,9 +856,10 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
         title: l10n.fishGeneralInfo,
         icon: Icons.info_outline,
         initiallyExpanded: false,
-        child: Text(
-          fish.generalInfo!,
-          style: Theme.of(context).textTheme.bodyMedium,
+        child: MarkdownBody(
+          data: fish.generalInfo!,
+          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
+              .copyWith(p: Theme.of(context).textTheme.bodyMedium),
         ),
       ));
     }
@@ -882,9 +885,10 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
         title: l10n.fishFunFact,
         icon: Icons.lightbulb_outline,
         initiallyExpanded: false,
-        child: Text(
-          fish.funFact!,
-          style: Theme.of(context).textTheme.bodyMedium,
+        child: MarkdownBody(
+          data: fish.funFact!,
+          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
+              .copyWith(p: Theme.of(context).textTheme.bodyMedium),
         ),
       ));
     }
@@ -1088,7 +1092,11 @@ class _BulletItem extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
+            child: MarkdownBody(
+              data: text,
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
+                  .copyWith(p: Theme.of(context).textTheme.bodyMedium),
+            ),
           ),
         ],
       ),
