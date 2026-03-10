@@ -14,6 +14,7 @@ import '../screens/fish_compat_browser_screen.dart';
 import '../services/fish_data_service.dart';
 import '../theme_provider.dart';
 import '../utils/markdown_style_utils.dart';
+import '../utils/storage_image_utils.dart';
 import 'fish_image.dart';
 
 class FishCard extends ConsumerStatefulWidget {
@@ -451,6 +452,55 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
   );
 
   void _openFullScreenImage(BuildContext context) {
+    // For Firebase Storage images, resolve the resized version before showing.
+    if (widget.fish.isStorageUrl) {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        barrierColor: Colors.black.withOpacity(0.92),
+        builder: (_) => GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  Center(
+                    child: FutureBuilder<String>(
+                      future: resolveResizedStorageUrl(widget.fish.imageURL),
+                      initialData: getCachedResizedUrl(widget.fish.imageURL) ??
+                          widget.fish.imageURL,
+                      builder: (context, snapshot) {
+                        final url = snapshot.data ?? widget.fish.imageURL;
+                        return InteractiveViewer(
+                          maxScale: 5,
+                          child: CachedNetworkImage(
+                            imageUrl: url,
+                            fit: BoxFit.contain,
+                            placeholder: (_, _) => const SizedBox.shrink(),
+                            errorWidget: (_, _, _) => _brokenImagePlaceholder,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
     showDialog<void>(
       context: context,
       barrierDismissible: true,

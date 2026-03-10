@@ -11,6 +11,7 @@ import '../models/fish.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
 import '../utils/markdown_style_utils.dart';
+import '../utils/storage_image_utils.dart';
 import '../widgets/fish_image.dart';
 
 /// Compatibility status between two fish types.
@@ -966,6 +967,65 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
       featureName: 'compat_browser_image_viewed',
       parameters: {'fish_name': widget.fish.name},
     );
+
+    const brokenImage = Center(
+      child: Icon(
+        Icons.broken_image_outlined,
+        size: 64,
+        color: Colors.white54,
+      ),
+    );
+
+    // For Firebase Storage images, resolve the resized version.
+    if (widget.fish.isStorageUrl) {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        barrierColor: Colors.black.withOpacity(0.92),
+        builder: (_) => GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  Center(
+                    child: FutureBuilder<String>(
+                      future: resolveResizedStorageUrl(widget.fish.imageURL),
+                      initialData:
+                          getCachedResizedUrl(widget.fish.imageURL) ??
+                          widget.fish.imageURL,
+                      builder: (context, snapshot) {
+                        final url = snapshot.data ?? widget.fish.imageURL;
+                        return InteractiveViewer(
+                          maxScale: 5,
+                          child: CachedNetworkImage(
+                            imageUrl: url,
+                            fit: BoxFit.contain,
+                            placeholder: (_, _) => const SizedBox.shrink(),
+                            errorWidget: (_, _, _) => brokenImage,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
     showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -989,22 +1049,10 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                             imageUrl: widget.fish.imageURL,
                             fit: BoxFit.contain,
                             placeholder: (_, _) => const SizedBox.shrink(),
-                            errorWidget: (_, _, _) => const Center(
-                              child: Icon(
-                                Icons.broken_image_outlined,
-                                size: 64,
-                                color: Colors.white54,
-                              ),
-                            ),
+                            errorWidget: (_, _, _) => brokenImage,
                           );
                         }
-                        return const Center(
-                          child: Icon(
-                            Icons.broken_image_outlined,
-                            size: 64,
-                            color: Colors.white54,
-                          ),
-                        );
+                        return brokenImage;
                       },
                     ),
                   ),

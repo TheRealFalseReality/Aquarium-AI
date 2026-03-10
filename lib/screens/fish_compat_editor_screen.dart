@@ -1,9 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -139,12 +142,10 @@ class _FishEntry {
 
   /// Local asset path derived from [imageURL].
   ///
-  /// [imageURL] follows the convention:
-  ///   `https://raw.githubusercontent.com/.../assets/images/fish/XXX.webp`
-  ///
-  /// The bundled asset lives at `assets/images/fish/XXX.webp`, so the local
-  /// path is the `assets/…` suffix of the URL.
+  /// Returns an empty string for Firebase Storage URLs since those images have
+  /// no corresponding local asset.
   String get localImagePath {
+    if (_isFirebaseStorageUrl(imageURL)) return '';
     const assetsMarker = 'assets/';
     final idx = imageURL.indexOf(assetsMarker);
     if (idx != -1) return imageURL.substring(idx);
@@ -222,6 +223,54 @@ List<String> _validateData(Map<String, List<_FishEntry>> data) {
   }
 
   return errors;
+}
+
+// ── storage helpers ───────────────────────────────────────────────────────────
+
+/// Firebase Storage path prefix for uploaded fish images.
+const _kFishImagesPath = 'fish_images';
+
+/// Returns `true` when [url] is a Firebase Storage download URL.
+bool _isFirebaseStorageUrl(String url) =>
+    url.contains('firebasestorage.googleapis.com');
+
+/// Uploads [bytes] to Firebase Storage under [_kFishImagesPath] and returns
+/// the public download URL, or `null` on failure.
+Future<String?> _uploadFishImage(Uint8List bytes, String fileName) async {
+  try {
+    final ext = fileName.contains('.')
+        ? fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase()
+        : 'jpg';
+    final uploadName =
+        '${DateTime.now().millisecondsSinceEpoch}_$fileName';
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('$_kFishImagesPath/$uploadName');
+    final metadata = SettableMetadata(
+      contentType: switch (ext) {
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'webp' => 'image/webp',
+        _ => 'image/jpeg',
+      },
+    );
+    final task = await ref.putData(bytes, metadata);
+    return await task.ref.getDownloadURL();
+  } catch (e) {
+    if (kDebugMode) debugPrint('_uploadFishImage error: $e');
+    return null;
+  }
+}
+
+/// Deletes a Firebase Storage object by its download [url].
+/// Does nothing if [url] is not a Firebase Storage URL.
+Future<void> _deleteStorageImageByUrl(String url) async {
+  if (!_isFirebaseStorageUrl(url)) return;
+  try {
+    await FirebaseStorage.instance.refFromURL(url).delete();
+  } catch (e) {
+    if (kDebugMode) debugPrint('_deleteStorageImageByUrl error: $e');
+  }
 }
 
 // ── screen ────────────────────────────────────────────────────────────────────
@@ -819,6 +868,85 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
 
   // ── compatibility edit helpers ────────────────────────────────────────────
 
+  /// Removes a fish entry from [category] at [index], also propagating the
+  /// removal from all compatibility lists and deleting any associated Firebase
+  /// Storage image.
+  Future<void> _deleteFish(String category, int index) async {
+    final fish = _data[category]![index];
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete Fish'),
+        content: Text(
+          'Remove "${fish.name}" from $category? This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    // Delete the Storage image (fire-and-forget; don't block the UI).
+    if (_isFirebaseStorageUrl(fish.imageURL)) {
+      _deleteStorageImageByUrl(fish.imageURL);
+    }
+
+    setState(() {
+      final categoryFish = _data[category]!;
+      categoryFish.removeAt(index);
+      // Remove this fish from every other fish's compatibility lists.
+      for (int i = 0; i < categoryFish.length; i++) {
+        final f = categoryFish[i];
+        final inCompatible = f.compatible.contains(fish.name);
+        final inNotRecommended = f.notRecommended.contains(fish.name);
+        final inNotCompatible = f.notCompatible.contains(fish.name);
+        final inWithCaution = f.withCaution.contains(fish.name);
+        if (!inCompatible &&
+            !inNotRecommended &&
+            !inNotCompatible &&
+            !inWithCaution) {
+          continue;
+        }
+        categoryFish[i] = _FishEntry(
+          uuid: f.uuid,
+          name: f.name,
+          imageURL: f.imageURL,
+          originHabitat: f.originHabitat,
+          careFacts: f.careFacts,
+          generalInfo: f.generalInfo,
+          compatibilityHighlights: f.compatibilityHighlights,
+          funFact: f.funFact,
+          commonNames: f.commonNames,
+          reefSafe: f.reefSafe,
+          compatible: inCompatible
+              ? f.compatible.where((n) => n != fish.name).toList()
+              : f.compatible,
+          notRecommended: inNotRecommended
+              ? f.notRecommended.where((n) => n != fish.name).toList()
+              : f.notRecommended,
+          notCompatible: inNotCompatible
+              ? f.notCompatible.where((n) => n != fish.name).toList()
+              : f.notCompatible,
+          withCaution: inWithCaution
+              ? f.withCaution.where((n) => n != fish.name).toList()
+              : f.withCaution,
+        );
+      }
+      _validationRun = false;
+    });
+  }
+
   Future<void> _editCompatibility(String category, int index) async {
     final fish = _data[category]![index];
     await showDialog<void>(
@@ -1322,6 +1450,35 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
         _validationRun &&
         _validationErrors.any((e) => e.startsWith('[$category] "${f.name}"'));
     final isModified = categoryModified.contains(dataIdx);
+    final placeholder = SizedBox(
+      width: 56,
+      height: 56,
+      child: Container(
+        color: colorScheme.surfaceVariant,
+        child: const Icon(Icons.image_not_supported),
+      ),
+    );
+
+    Widget leadingImage;
+    if (_isFirebaseStorageUrl(f.imageURL)) {
+      leadingImage = CachedNetworkImage(
+        imageUrl: f.imageURL,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => placeholder,
+        errorWidget: (_, __, ___) => placeholder,
+      );
+    } else {
+      leadingImage = Image.asset(
+        f.localImagePath,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => placeholder,
+      );
+    }
+
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -1333,18 +1490,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
         contentPadding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.asset(
-            f.localImagePath,
-            width: 56,
-            height: 56,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Container(
-              width: 56,
-              height: 56,
-              color: colorScheme.surfaceVariant,
-              child: const Icon(Icons.image_not_supported),
-            ),
-          ),
+          child: leadingImage,
         ),
         title: Row(
           children: [
@@ -1401,6 +1547,11 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
               tooltip: 'Edit',
               onPressed: () => _editFish(category, dataIdx),
             ),
+            IconButton(
+              icon: Icon(Icons.delete_outline, color: colorScheme.error),
+              tooltip: 'Delete',
+              onPressed: () => _deleteFish(category, dataIdx),
+            ),
           ],
         ),
       ),
@@ -1431,7 +1582,6 @@ class _FishEditDialog extends StatefulWidget {
 
 class _FishEditDialogState extends State<_FishEditDialog> {
   late TextEditingController _nameCtrl;
-  late TextEditingController _urlCtrl;
   late TextEditingController _originHabitatCtrl;
   late TextEditingController _generalInfoCtrl;
   late TextEditingController _funFactCtrl;
@@ -1443,11 +1593,15 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   final TextEditingController _newCompatHighlightCtrl = TextEditingController();
   late String? _reefSafe;
 
+  // Pending image upload (set when user picks a new file).
+  Uint8List? _pendingImageBytes;
+  String? _pendingImageFileName;
+  bool _isUploading = false;
+
   @override
   void initState() {
     super.initState();
     _nameCtrl = TextEditingController(text: widget.fish.name);
-    _urlCtrl = TextEditingController(text: widget.fish.imageURL);
     _originHabitatCtrl =
         TextEditingController(text: widget.fish.originHabitat ?? '');
     _generalInfoCtrl =
@@ -1468,7 +1622,6 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _urlCtrl.dispose();
     _originHabitatCtrl.dispose();
     _generalInfoCtrl.dispose();
     _funFactCtrl.dispose();
@@ -1485,6 +1638,20 @@ class _FishEditDialogState extends State<_FishEditDialog> {
       ctrl.dispose();
     }
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true, // ensures bytes are available on web too
+    );
+    if (result == null || result.files.isEmpty) return;
+    final file = result.files.single;
+    if (file.bytes == null) return;
+    setState(() {
+      _pendingImageBytes = file.bytes;
+      _pendingImageFileName = file.name;
+    });
   }
 
   void _addCommonName() {
@@ -1521,9 +1688,8 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     });
   }
 
-  void _save() {
+  Future<void> _save() async {
     final name = _nameCtrl.text.trim();
-    final imageURL = _urlCtrl.text.trim();
     final commonNames = _commonNameCtrls
         .map((c) => c.text.trim())
         .where((n) => n.isNotEmpty)
@@ -1536,10 +1702,12 @@ class _FishEditDialogState extends State<_FishEditDialog> {
       ).showSnackBar(const SnackBar(content: Text('Name is required.')));
       return;
     }
-    if (imageURL.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Image URL is required.')));
+    // An image must exist: either the original URL or a newly-picked file.
+    final hasExistingImage = widget.fish.imageURL.isNotEmpty;
+    if (!hasExistingImage && _pendingImageBytes == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An image file is required.')),
+      );
       return;
     }
     if (commonNames.isEmpty) {
@@ -1547,6 +1715,36 @@ class _FishEditDialogState extends State<_FishEditDialog> {
         const SnackBar(content: Text('At least one common name is required.')),
       );
       return;
+    }
+
+    String imageURL = widget.fish.imageURL;
+
+    // Upload the newly-picked file to Firebase Storage.
+    if (_pendingImageBytes != null) {
+      setState(() => _isUploading = true);
+      final uploadedUrl = await _uploadFishImage(
+        _pendingImageBytes!,
+        _pendingImageFileName ?? 'fish_image.jpg',
+      );
+      if (!mounted) return;
+      setState(() => _isUploading = false);
+
+      if (uploadedUrl == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Image upload failed. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Delete the old Storage image (if any) now that upload succeeded.
+      if (_isFirebaseStorageUrl(widget.fish.imageURL)) {
+        _deleteStorageImageByUrl(widget.fish.imageURL);
+      }
+
+      imageURL = uploadedUrl;
     }
 
     String? _trimOrNull(String s) => s.trim().isEmpty ? null : s.trim();
@@ -1648,6 +1846,59 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   @override
   Widget build(BuildContext context) {
     final isMarine = widget.category == 'marine';
+    final cs = Theme.of(context).colorScheme;
+    final hasExistingImage = widget.fish.imageURL.isNotEmpty;
+
+    // Determine what to show in the image preview area.
+    Widget imagePreview;
+    if (_pendingImageBytes != null) {
+      imagePreview = Image.memory(
+        _pendingImageBytes!,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+      );
+    } else if (_isFirebaseStorageUrl(widget.fish.imageURL)) {
+      imagePreview = CachedNetworkImage(
+        imageUrl: widget.fish.imageURL,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => Container(
+          width: 80,
+          height: 80,
+          color: cs.surfaceVariant,
+          child: const Icon(Icons.image),
+        ),
+        errorWidget: (_, __, ___) => Container(
+          width: 80,
+          height: 80,
+          color: cs.surfaceVariant,
+          child: const Icon(Icons.broken_image_outlined),
+        ),
+      );
+    } else if (hasExistingImage) {
+      imagePreview = Image.network(
+        widget.fish.imageURL,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          width: 80,
+          height: 80,
+          color: cs.surfaceVariant,
+          child: const Icon(Icons.broken_image_outlined),
+        ),
+      );
+    } else {
+      imagePreview = Container(
+        width: 80,
+        height: 80,
+        color: cs.surfaceVariant,
+        child: Icon(Icons.add_photo_alternate_outlined, color: cs.outline),
+      );
+    }
+
     return AlertDialog(
       title: Text(widget.dialogTitle ?? 'Edit: ${widget.fish.name}'),
       content: SizedBox(
@@ -1666,14 +1917,74 @@ class _FishEditDialogState extends State<_FishEditDialog> {
                 ),
               ),
               const SizedBox(height: 12),
-              // Image URL
-              TextField(
-                controller: _urlCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Image URL *',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.url,
+              // Image upload
+              Text('Image *', style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: imagePreview,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: _isUploading ? null : _pickImage,
+                          icon: const Icon(Icons.upload_file, size: 18),
+                          label: Text(
+                            hasExistingImage || _pendingImageBytes != null
+                                ? 'Replace Image'
+                                : 'Pick Image',
+                          ),
+                        ),
+                        if (_pendingImageBytes != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            _pendingImageFileName ?? 'Selected file',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: cs.primary),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ] else if (hasExistingImage) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            _isFirebaseStorageUrl(widget.fish.imageURL)
+                                ? '(Storage image)'
+                                : widget.fish.imageURL,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: cs.onSurfaceVariant),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                        if (_isUploading) ...[
+                          const SizedBox(height: 8),
+                          const Row(
+                            children: [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Text('Uploading…', style: TextStyle(fontSize: 12)),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               // Origin & Habitat
@@ -1828,10 +2139,13 @@ class _FishEditDialogState extends State<_FishEditDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: _isUploading ? null : () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        FilledButton(onPressed: _save, child: const Text('Save')),
+        FilledButton(
+          onPressed: _isUploading ? null : _save,
+          child: const Text('Save'),
+        ),
       ],
     );
   }

@@ -2,12 +2,19 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../models/fish.dart';
+import '../utils/storage_image_utils.dart';
 
-/// A widget that displays a fish image, trying the bundled local asset first
-/// and falling back to [Fish.imageURL] (cached via [CachedNetworkImage]) when
-/// the local asset is not present (e.g. for new fish types added to the
-/// Firebase database before the next app update).
-class FishImage extends StatelessWidget {
+/// A widget that displays a fish image.
+///
+/// For bundled assets (GitHub raw URLs) the local asset is tried first and
+/// falls back to [Fish.imageURL] via [CachedNetworkImage] when the asset is
+/// missing (e.g. for fish types added via Firebase before the next app
+/// update).
+///
+/// For Firebase Storage URLs the resized version produced by the "Resize
+/// Images" extension is resolved and displayed, falling back to the original
+/// upload URL while the extension is still processing.
+class FishImage extends StatefulWidget {
   final Fish fish;
   final BoxFit fit;
   final double? width;
@@ -22,21 +29,72 @@ class FishImage extends StatelessWidget {
   });
 
   @override
+  State<FishImage> createState() => _FishImageState();
+}
+
+class _FishImageState extends State<FishImage> {
+  Future<String>? _resolvedUrlFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _initResolvedUrl();
+  }
+
+  @override
+  void didUpdateWidget(FishImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.fish.imageURL != oldWidget.fish.imageURL) {
+      _initResolvedUrl();
+    }
+  }
+
+  void _initResolvedUrl() {
+    if (widget.fish.isStorageUrl) {
+      _resolvedUrlFuture = resolveResizedStorageUrl(widget.fish.imageURL);
+    } else {
+      _resolvedUrlFuture = null;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
+    // Firebase Storage image — resolve the resized version when available.
+    if (_resolvedUrlFuture != null) {
+      return FutureBuilder<String>(
+        future: _resolvedUrlFuture,
+        initialData:
+            getCachedResizedUrl(widget.fish.imageURL) ?? widget.fish.imageURL,
+        builder: (context, snapshot) {
+          final url = snapshot.data ?? widget.fish.imageURL;
+          return CachedNetworkImage(
+            imageUrl: url,
+            fit: widget.fit,
+            width: widget.width,
+            height: widget.height,
+            placeholder: (context, url) => _Placeholder(cs: cs),
+            errorWidget: (context, url, error) => _Placeholder(cs: cs),
+          );
+        },
+      );
+    }
+
+    // Bundled-asset path — try local first, fall back to network URL.
     return Image.asset(
-      fish.localImagePath,
-      fit: fit,
-      width: width,
-      height: height,
+      widget.fish.localImagePath,
+      fit: widget.fit,
+      width: widget.width,
+      height: widget.height,
       errorBuilder: (context, error, stackTrace) {
         // Local asset missing — fall back to the remote URL if available.
-        if (fish.imageURL.isNotEmpty) {
+        if (widget.fish.imageURL.isNotEmpty) {
           return CachedNetworkImage(
-            imageUrl: fish.imageURL,
-            fit: fit,
-            width: width,
-            height: height,
+            imageUrl: widget.fish.imageURL,
+            fit: widget.fit,
+            width: widget.width,
+            height: widget.height,
             placeholder: (context, url) => _Placeholder(cs: cs),
             errorWidget: (context, url, error) => _Placeholder(cs: cs),
           );
