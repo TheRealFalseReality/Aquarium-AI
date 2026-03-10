@@ -85,18 +85,38 @@ class InAppReviewService {
   }
 
   /// Bypasses all guards and immediately requests a review.
-  /// For use in debug mode only.
+  /// Falls back to [openStoreListing] when the in-app review dialog is
+  /// unavailable (e.g. unsupported platform, Play Store quota exhausted, or
+  /// no foreground activity context).
   static Future<void> forceRequestReview() async {
     try {
       final inAppReview = InAppReview.instance;
       if (!await inAppReview.isAvailable()) {
-        debugPrint('InAppReviewService: in-app review not available');
+        debugPrint(
+          'InAppReviewService: in-app review not available, opening store listing',
+        );
+        await openStoreListing();
         return;
       }
       await inAppReview.requestReview();
       debugPrint('InAppReviewService: review force-requested (debug)');
     } catch (e) {
       debugPrint('InAppReviewService.forceRequestReview error: $e');
+    }
+  }
+
+  /// Opens the app's store listing (Play Store / App Store / Microsoft Store).
+  ///
+  /// Use this for explicit, user-initiated "Leave a Review" actions.  Unlike
+  /// [forceRequestReview], this method is guaranteed to open something visible
+  /// and is not subject to Play Store in-app review quotas or activity-context
+  /// requirements.
+  static Future<void> openStoreListing() async {
+    try {
+      await InAppReview.instance.openStoreListing();
+      debugPrint('InAppReviewService: store listing opened');
+    } catch (e) {
+      debugPrint('InAppReviewService.openStoreListing error: $e');
     }
   }
 }

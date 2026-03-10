@@ -87,5 +87,14 @@ void main() {
       expect(prefs.containsKey('first_launch_timestamp'), isFalse);
       expect(prefs.containsKey('in_app_review_requested'), isFalse);
     });
+
+    test('openStoreListing completes without throwing', () async {
+      // Should complete without throwing even though the plugin isn't available
+      // in the test environment.
+      await expectLater(
+        InAppReviewService.openStoreListing(),
+        completes,
+      );
+    });
   });
 }

@@ -4960,7 +4960,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               subtitle: l10n.leaveAReviewDesc,
               onTap: () {
                 Navigator.of(ctx).pop();
-                InAppReviewService.forceRequestReview();
+                InAppReviewService.openStoreListing();
               },
             ),
             const SizedBox(height: 12),
