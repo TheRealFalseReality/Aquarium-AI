@@ -1943,7 +1943,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
         initialData:
             getCachedResizedUrl(widget.fish.imageURL) ?? widget.fish.imageURL,
         builder: (_, snap) => CachedNetworkImage(
-          imageUrl: snap.data!,
+          imageUrl: snap.data ?? widget.fish.imageURL,
           width: 80,
           height: 80,
           fit: BoxFit.cover,
