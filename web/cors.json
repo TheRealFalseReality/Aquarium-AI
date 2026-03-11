@@ -1,0 +1,14 @@
+[
+  {
+    "origin": [
+      "http://localhost:59559",
+      "http://localhost:50548",
+      "http://localhost:50907",
+      "https://ai.capitalcityaquatics.com",
+      "https://aquariumai.capitalcityaquatics.com"
+    ],
+    "method": ["GET", "HEAD"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin"]
+  }
+]
