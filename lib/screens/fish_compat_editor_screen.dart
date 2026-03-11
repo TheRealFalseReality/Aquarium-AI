@@ -1657,9 +1657,13 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   String? _pendingImageFileName;
   bool _isUploading = false;
 
+  // Resolved URL for the existing Storage image shown in the preview.
+  Future<String>? _resolvedImageUrlFuture;
+
   @override
   void initState() {
     super.initState();
+    _initResolvedImageUrl();
     _nameCtrl = TextEditingController(text: widget.fish.name);
     _originHabitatCtrl =
         TextEditingController(text: widget.fish.originHabitat ?? '');
@@ -1697,6 +1701,22 @@ class _FishEditDialogState extends State<_FishEditDialog> {
       ctrl.dispose();
     }
     super.dispose();
+  }
+
+  void _initResolvedImageUrl() {
+    if (_isFirebaseStorageUrl(widget.fish.imageURL)) {
+      _resolvedImageUrlFuture = resolveResizedStorageUrl(widget.fish.imageURL);
+    } else {
+      _resolvedImageUrlFuture = null;
+    }
+  }
+
+  @override
+  void didUpdateWidget(_FishEditDialog old) {
+    super.didUpdateWidget(old);
+    if (widget.fish.imageURL != old.fish.imageURL) {
+      _initResolvedImageUrl();
+    }
   }
 
   Future<void> _pickImage() async {
@@ -1918,22 +1938,27 @@ class _FishEditDialogState extends State<_FishEditDialog> {
         fit: BoxFit.cover,
       );
     } else if (_isFirebaseStorageUrl(widget.fish.imageURL)) {
-      imagePreview = CachedNetworkImage(
-        imageUrl: widget.fish.imageURL,
-        width: 80,
-        height: 80,
-        fit: BoxFit.cover,
-        placeholder: (_, __) => Container(
+      imagePreview = FutureBuilder<String>(
+        future: _resolvedImageUrlFuture,
+        initialData:
+            getCachedResizedUrl(widget.fish.imageURL) ?? widget.fish.imageURL,
+        builder: (_, snap) => CachedNetworkImage(
+          imageUrl: snap.data!,
           width: 80,
           height: 80,
-          color: cs.surfaceVariant,
-          child: const Icon(Icons.image),
-        ),
-        errorWidget: (_, __, ___) => Container(
-          width: 80,
-          height: 80,
-          color: cs.surfaceVariant,
-          child: const Icon(Icons.broken_image_outlined),
+          fit: BoxFit.cover,
+          placeholder: (_, __) => Container(
+            width: 80,
+            height: 80,
+            color: cs.surfaceVariant,
+            child: const Icon(Icons.image),
+          ),
+          errorWidget: (_, __, ___) => Container(
+            width: 80,
+            height: 80,
+            color: cs.surfaceVariant,
+            child: const Icon(Icons.broken_image_outlined),
+          ),
         ),
       );
     } else if (hasExistingImage) {
