@@ -400,5 +400,94 @@ void main() {
       expect(json['compatibilityHighlights'], equals(['Peaceful']));
       expect(json['funFact'], equals('Communicates via colour.'));
     });
+
+    group('isStorageUrl', () {
+      test('returns true for Firebase Storage download URLs', () {
+        final fish = Fish(
+          name: 'Clownfish',
+          commonNames: [],
+          imageURL:
+              'https://firebasestorage.googleapis.com/v0/b/my-app.appspot.com'
+              '/o/fish_images%2F1234_clownfish.jpg?alt=media&token=abc',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        );
+        expect(fish.isStorageUrl, isTrue);
+      });
+
+      test('returns false for non-Storage URLs', () {
+        final fish = Fish(
+          name: 'Clownfish',
+          commonNames: [],
+          imageURL:
+              'https://raw.githubusercontent.com/user/repo/main/assets/images/fish/clownfish.webp',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        );
+        expect(fish.isStorageUrl, isFalse);
+      });
+
+      test('returns false for empty URL', () {
+        final fish = Fish(
+          name: 'Clownfish',
+          commonNames: [],
+          imageURL: '',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        );
+        expect(fish.isStorageUrl, isFalse);
+      });
+    });
+
+    group('localImagePath', () {
+      test('returns empty string for Firebase Storage URLs', () {
+        final fish = Fish(
+          name: 'Clownfish',
+          commonNames: [],
+          imageURL:
+              'https://firebasestorage.googleapis.com/v0/b/my-app.appspot.com'
+              '/o/fish_images%2F1234_clownfish.jpg?alt=media&token=abc',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        );
+        expect(fish.localImagePath, equals(''));
+      });
+
+      test('extracts local asset path from GitHub raw URL', () {
+        final fish = Fish(
+          name: 'Clownfish',
+          commonNames: [],
+          imageURL:
+              'https://raw.githubusercontent.com/user/repo/main/'
+              'assets/images/fish/clownfish.webp',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        );
+        expect(fish.localImagePath, equals('assets/images/fish/clownfish.webp'));
+      });
+
+      test('constructs asset path from bare filename', () {
+        final fish = Fish(
+          name: 'Clownfish',
+          commonNames: [],
+          imageURL: 'clownfish.jpg',
+          compatible: [],
+          notRecommended: [],
+          notCompatible: [],
+          withCaution: [],
+        );
+        expect(fish.localImagePath, equals('assets/images/fish/clownfish.webp'));
+      });
+    });
   });
 }

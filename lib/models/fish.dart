@@ -31,6 +31,10 @@ class Fish {
     required this.withCaution,
   });
 
+  /// Whether [imageURL] is a Firebase Storage download URL.
+  bool get isStorageUrl =>
+      imageURL.contains('firebasestorage.googleapis.com');
+
   /// Local asset path for the fish image.
   ///
   /// [imageURL] follows the convention:
@@ -38,7 +42,13 @@ class Fish {
   ///
   /// The bundled asset lives at the same relative path `assets/images/fish/XXX.webp`,
   /// so we simply extract the `assets/…` suffix from the URL.
+  ///
+  /// Returns an empty string for Firebase Storage URLs — those images have no
+  /// corresponding local asset, so [FishImage] should fall back to the network
+  /// URL immediately.
   String get localImagePath {
+    // Firebase Storage images have no bundled local asset counterpart.
+    if (isStorageUrl) return '';
     const assetsMarker = 'assets/';
     final idx = imageURL.indexOf(assetsMarker);
     if (idx != -1) {

@@ -11,6 +11,7 @@ import '../models/fish.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
 import '../utils/markdown_style_utils.dart';
+import '../utils/storage_image_utils.dart';
 import '../widgets/fish_image.dart';
 
 /// Compatibility status between two fish types.
@@ -966,6 +967,21 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
       featureName: 'compat_browser_image_viewed',
       parameters: {'fish_name': widget.fish.name},
     );
+
+    // For Firebase Storage images, resolve the resized version.
+    if (widget.fish.isStorageUrl) {
+      showStorageImageFullScreen(context, widget.fish.imageURL);
+      return;
+    }
+
+    const brokenImage = Center(
+      child: Icon(
+        Icons.broken_image_outlined,
+        size: 64,
+        color: Colors.white54,
+      ),
+    );
+
     showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -989,22 +1005,10 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                             imageUrl: widget.fish.imageURL,
                             fit: BoxFit.contain,
                             placeholder: (_, _) => const SizedBox.shrink(),
-                            errorWidget: (_, _, _) => const Center(
-                              child: Icon(
-                                Icons.broken_image_outlined,
-                                size: 64,
-                                color: Colors.white54,
-                              ),
-                            ),
+                            errorWidget: (_, _, _) => brokenImage,
                           );
                         }
-                        return const Center(
-                          child: Icon(
-                            Icons.broken_image_outlined,
-                            size: 64,
-                            color: Colors.white54,
-                          ),
-                        );
+                        return brokenImage;
                       },
                     ),
                   ),
@@ -1347,41 +1351,7 @@ class _CompatFishChip extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: Image.asset(
-                  fish.localImagePath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) {
-                    if (fish.imageURL.isNotEmpty) {
-                      return CachedNetworkImage(
-                        imageUrl: fish.imageURL,
-                        fit: BoxFit.cover,
-                        placeholder: (_, _) => Container(
-                          color: cs.surfaceVariant,
-                        ),
-                        errorWidget: (_, _, _) => Container(
-                          color: cs.surfaceVariant,
-                          child: Center(
-                            child: Icon(
-                              Icons.set_meal,
-                              size: 28,
-                              color: fgColor.withOpacity(0.5),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return Container(
-                      color: cs.surfaceVariant,
-                      child: Center(
-                        child: Icon(
-                          Icons.set_meal,
-                          size: 28,
-                          color: fgColor.withOpacity(0.5),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                child: FishImage(fish: fish, fit: BoxFit.cover),
               ),
             ),
             // Name only (no redundant status icon)

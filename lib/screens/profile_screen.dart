@@ -506,15 +506,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     }
     if (profile.avatarUrl != null) {
-      final avatarWidget = FutureBuilder<String>(
-        future: resolveResizedStorageUrl(profile.avatarUrl!),
-        initialData:
-            getCachedResizedUrl(profile.avatarUrl!) ?? profile.avatarUrl!,
-        builder: (_, snap) => CircleAvatar(
-          radius: radius,
-          backgroundColor: colorScheme.primaryContainer,
-          backgroundImage: CachedNetworkImageProvider(snap.data!),
-        ),
+      final avatarWidget = _AvatarPhoto(
+        photoUrl: profile.avatarUrl!,
+        radius: radius,
+        colorScheme: colorScheme,
       );
       if (!isFounder) return avatarWidget;
       return Container(
@@ -1371,6 +1366,11 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
                 backgroundImage: _useProviderPhoto && providerPhotoUrl != null
                     ? CachedNetworkImageProvider(providerPhotoUrl)
                     : null,
+                onBackgroundImageError: _useProviderPhoto && providerPhotoUrl != null
+                    ? (_, __) {
+                        if (mounted) setState(() => _useProviderPhoto = false);
+                      }
+                    : null,
                 child: (!_useProviderPhoto)
                     ? Icon(
                         _selectedIconCodePoint != null
@@ -1485,6 +1485,75 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
       onChanged: onChanged,
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+    );
+  }
+}
+
+// ─── Avatar photo widget ──────────────────────────────────────────────────────
+
+/// Circular avatar that loads [photoUrl] with Storage-resize resolution and
+/// gracefully falls back to the person icon on image-decode failures (e.g. on
+/// Flutter Web where Google auth photos can fail with `EncodingError`).
+class _AvatarPhoto extends StatefulWidget {
+  final String photoUrl;
+  final double radius;
+  final ColorScheme colorScheme;
+
+  const _AvatarPhoto({
+    required this.photoUrl,
+    required this.radius,
+    required this.colorScheme,
+  });
+
+  @override
+  State<_AvatarPhoto> createState() => _AvatarPhotoState();
+}
+
+class _AvatarPhotoState extends State<_AvatarPhoto> {
+  late Future<String> _resolvedUrl;
+  bool _imageError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolvedUrl = resolveResizedStorageUrl(widget.photoUrl);
+  }
+
+  @override
+  void didUpdateWidget(_AvatarPhoto old) {
+    super.didUpdateWidget(old);
+    if (widget.photoUrl != old.photoUrl) {
+      setState(() {
+        _imageError = false;
+        _resolvedUrl = resolveResizedStorageUrl(widget.photoUrl);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_imageError) {
+      return CircleAvatar(
+        radius: widget.radius,
+        backgroundColor: widget.colorScheme.primaryContainer,
+        child: Icon(
+          Icons.person,
+          size: widget.radius,
+          color: widget.colorScheme.primary,
+        ),
+      );
+    }
+    return FutureBuilder<String>(
+      future: _resolvedUrl,
+      initialData: getCachedResizedUrl(widget.photoUrl) ?? widget.photoUrl,
+      builder: (_, snap) => CircleAvatar(
+        radius: widget.radius,
+        backgroundColor: widget.colorScheme.primaryContainer,
+        backgroundImage: CachedNetworkImageProvider(snap.data!),
+        onBackgroundImageError: (_, __) {
+          if (mounted) setState(() => _imageError = true);
+        },
+      ),
     );
   }
 }
