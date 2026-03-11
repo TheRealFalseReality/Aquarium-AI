@@ -265,12 +265,31 @@ Future<String?> _uploadFishImage(Uint8List bytes, String fileName) async {
 
 /// Deletes a Firebase Storage object by its download [url].
 /// Does nothing if [url] is not a Firebase Storage URL.
+///
+/// Also attempts to delete the resized variant produced by the Resize Images
+/// extension (e.g. `_1920x1080.webp`). The original file deletion may fail
+/// with `object-not-found` when the extension is configured to delete
+/// originals after resizing — this is expected and silently swallowed.
 Future<void> _deleteStorageImageByUrl(String url) async {
   if (!_isFirebaseStorageUrl(url)) return;
+
+  // Try the original file first. May already be gone if the Resize Images
+  // extension deletes originals after creating the resized copy.
   try {
     await FirebaseStorage.instance.refFromURL(url).delete();
   } catch (e) {
-    if (kDebugMode) debugPrint('_deleteStorageImageByUrl error: $e');
+    // object-not-found is expected when the extension deleted the original.
+    if (kDebugMode) debugPrint('_deleteStorageImageByUrl (original): $e');
+  }
+
+  // Also delete the resized variant so Storage doesn't accumulate orphaned files.
+  final resizedPath = deriveResizedStoragePath(url, 1920, 1080);
+  if (resizedPath != null) {
+    try {
+      await FirebaseStorage.instance.ref(resizedPath).delete();
+    } catch (e) {
+      if (kDebugMode) debugPrint('_deleteStorageImageByUrl (resized): $e');
+    }
   }
 }
 
