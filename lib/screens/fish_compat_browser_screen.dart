@@ -1395,41 +1395,7 @@ class _CompatFishChip extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: Image.asset(
-                  fish.localImagePath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) {
-                    if (fish.imageURL.isNotEmpty) {
-                      return CachedNetworkImage(
-                        imageUrl: fish.imageURL,
-                        fit: BoxFit.cover,
-                        placeholder: (_, _) => Container(
-                          color: cs.surfaceVariant,
-                        ),
-                        errorWidget: (_, _, _) => Container(
-                          color: cs.surfaceVariant,
-                          child: Center(
-                            child: Icon(
-                              Icons.set_meal,
-                              size: 28,
-                              color: fgColor.withOpacity(0.5),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return Container(
-                      color: cs.surfaceVariant,
-                      child: Center(
-                        child: Icon(
-                          Icons.set_meal,
-                          size: 28,
-                          color: fgColor.withOpacity(0.5),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                child: FishImage(fish: fish, fit: BoxFit.cover),
               ),
             ),
             // Name only (no redundant status icon)

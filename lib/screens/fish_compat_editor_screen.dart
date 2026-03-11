@@ -16,6 +16,7 @@ import '../providers/web_download_stub.dart'
     if (dart.library.html) '../providers/web_download_web.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_firestore_service.dart';
+import '../utils/storage_image_utils.dart';
 
 // ── authorised editor ─────────────────────────────────────────────────────────
 
@@ -1461,14 +1462,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
 
     Widget leadingImage;
     if (_isFirebaseStorageUrl(f.imageURL)) {
-      leadingImage = CachedNetworkImage(
-        imageUrl: f.imageURL,
-        width: 56,
-        height: 56,
-        fit: BoxFit.cover,
-        placeholder: (_, __) => placeholder,
-        errorWidget: (_, __, ___) => placeholder,
-      );
+      leadingImage = _FishCardImage(imageURL: f.imageURL);
     } else {
       leadingImage = Image.asset(
         f.localImagePath,
@@ -1555,6 +1549,71 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── storage image widget for editor card list ─────────────────────────────────
+
+/// A 56×56 image tile for the editor card list.
+///
+/// For Firebase Storage URLs the resized variant (from the Resize Images
+/// extension) is resolved asynchronously so the image shows correctly even
+/// when the extension has deleted the original file after resizing.
+class _FishCardImage extends StatefulWidget {
+  final String imageURL;
+
+  const _FishCardImage({required this.imageURL});
+
+  @override
+  State<_FishCardImage> createState() => _FishCardImageState();
+}
+
+class _FishCardImageState extends State<_FishCardImage> {
+  Future<String>? _resolvedUrlFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _initFuture();
+  }
+
+  @override
+  void didUpdateWidget(_FishCardImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.imageURL != oldWidget.imageURL) {
+      setState(_initFuture);
+    }
+  }
+
+  void _initFuture() {
+    _resolvedUrlFuture = resolveResizedStorageUrl(widget.imageURL);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final placeholder = Container(
+      width: 56,
+      height: 56,
+      color: cs.surfaceVariant,
+      child: const Icon(Icons.image_not_supported),
+    );
+
+    return FutureBuilder<String>(
+      future: _resolvedUrlFuture,
+      initialData: getCachedResizedUrl(widget.imageURL) ?? widget.imageURL,
+      builder: (context, snapshot) {
+        final url = snapshot.data ?? widget.imageURL;
+        return CachedNetworkImage(
+          imageUrl: url,
+          width: 56,
+          height: 56,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => placeholder,
+          errorWidget: (_, __, ___) => placeholder,
+        );
+      },
     );
   }
 }
