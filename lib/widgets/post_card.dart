@@ -305,6 +305,7 @@ class _PostCardState extends State<PostCard> {
     if (!isTankShowcase) {
       return FutureBuilder<String>(
         future: _resolvedPostImageUrl,
+        initialData: getCachedResizedUrl(widget.post.imageUrl!),
         builder: (_, snap) => CachedNetworkImage(
           imageUrl: snap.data ?? widget.post.imageUrl!,
           width: double.infinity,
@@ -332,6 +333,7 @@ class _PostCardState extends State<PostCard> {
           // Hero image
           FutureBuilder<String>(
             future: _resolvedPostImageUrl,
+            initialData: getCachedResizedUrl(widget.post.imageUrl!),
             builder: (_, snap) => CachedNetworkImage(
               imageUrl: snap.data ?? widget.post.imageUrl!,
               width: double.infinity,

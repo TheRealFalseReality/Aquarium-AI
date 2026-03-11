@@ -14,6 +14,7 @@ import '../screens/fish_compat_browser_screen.dart';
 import '../services/fish_data_service.dart';
 import '../theme_provider.dart';
 import '../utils/markdown_style_utils.dart';
+import '../utils/storage_image_utils.dart';
 import 'fish_image.dart';
 
 class FishCard extends ConsumerStatefulWidget {
@@ -451,6 +452,12 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
   );
 
   void _openFullScreenImage(BuildContext context) {
+    // For Firebase Storage images, resolve the resized version before showing.
+    if (widget.fish.isStorageUrl) {
+      showStorageImageFullScreen(context, widget.fish.imageURL);
+      return;
+    }
+
     showDialog<void>(
       context: context,
       barrierDismissible: true,
