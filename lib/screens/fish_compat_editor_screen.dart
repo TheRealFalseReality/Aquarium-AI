@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -919,7 +920,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
 
     // Delete the Storage image (fire-and-forget; don't block the UI).
     if (_isFirebaseStorageUrl(fish.imageURL)) {
-      _deleteStorageImageByUrl(fish.imageURL);
+      unawaited(_deleteStorageImageByUrl(fish.imageURL));
     }
 
     setState(() {
@@ -1839,7 +1840,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
 
       // Delete the old Storage image (if any) now that upload succeeded.
       if (_isFirebaseStorageUrl(widget.fish.imageURL)) {
-        _deleteStorageImageByUrl(widget.fish.imageURL);
+        unawaited(_deleteStorageImageByUrl(widget.fish.imageURL));
       }
 
       imageURL = uploadedUrl;

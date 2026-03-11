@@ -454,50 +454,7 @@ class _FishInfoSheetState extends State<_FishInfoSheet> {
   void _openFullScreenImage(BuildContext context) {
     // For Firebase Storage images, resolve the resized version before showing.
     if (widget.fish.isStorageUrl) {
-      showDialog<void>(
-        context: context,
-        barrierDismissible: true,
-        barrierColor: Colors.black.withOpacity(0.92),
-        builder: (_) => GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: SafeArea(
-              child: Stack(
-                children: [
-                  Center(
-                    child: FutureBuilder<String>(
-                      future: resolveResizedStorageUrl(widget.fish.imageURL),
-                      initialData: getCachedResizedUrl(widget.fish.imageURL) ??
-                          widget.fish.imageURL,
-                      builder: (context, snapshot) {
-                        final url = snapshot.data ?? widget.fish.imageURL;
-                        return InteractiveViewer(
-                          maxScale: 5,
-                          child: CachedNetworkImage(
-                            imageUrl: url,
-                            fit: BoxFit.contain,
-                            placeholder: (_, _) => const SizedBox.shrink(),
-                            errorWidget: (_, _, _) => _brokenImagePlaceholder,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
+      showStorageImageFullScreen(context, widget.fish.imageURL);
       return;
     }
 

@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 // In-memory cache: original Firebase Storage URL → resolved resized URL.
 // Note: this cache is unbounded for the lifetime of the app process. In
@@ -94,4 +96,62 @@ String? deriveResizedStoragePath(String url, int width, int height) {
   } catch (_) {
     return null;
   }
+}
+
+/// Opens a full-screen interactive viewer for a Firebase Storage image,
+/// resolving the resized variant produced by the Resize Images extension.
+///
+/// Use this instead of building the same dialog inline in multiple places.
+/// [imageUrl] must be a Firebase Storage download URL.
+void showStorageImageFullScreen(BuildContext context, String imageUrl) {
+  const errorWidget = Center(
+    child: Icon(
+      Icons.broken_image_outlined,
+      size: 64,
+      color: Colors.white54,
+    ),
+  );
+  showDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    barrierColor: Colors.black.withValues(alpha: 0.92),
+    builder: (_) => GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Center(
+                child: FutureBuilder<String>(
+                  future: resolveResizedStorageUrl(imageUrl),
+                  initialData: getCachedResizedUrl(imageUrl) ?? imageUrl,
+                  builder: (context, snapshot) {
+                    final url = snapshot.data ?? imageUrl;
+                    return InteractiveViewer(
+                      maxScale: 5,
+                      child: CachedNetworkImage(
+                        imageUrl: url,
+                        fit: BoxFit.contain,
+                        placeholder: (_, _) => const SizedBox.shrink(),
+                        errorWidget: (_, _, _) => errorWidget,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Positioned(
+                top: 12,
+                right: 12,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }

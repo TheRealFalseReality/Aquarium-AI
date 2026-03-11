@@ -968,6 +968,12 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
       parameters: {'fish_name': widget.fish.name},
     );
 
+    // For Firebase Storage images, resolve the resized version.
+    if (widget.fish.isStorageUrl) {
+      showStorageImageFullScreen(context, widget.fish.imageURL);
+      return;
+    }
+
     const brokenImage = Center(
       child: Icon(
         Icons.broken_image_outlined,
@@ -975,56 +981,6 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
         color: Colors.white54,
       ),
     );
-
-    // For Firebase Storage images, resolve the resized version.
-    if (widget.fish.isStorageUrl) {
-      showDialog<void>(
-        context: context,
-        barrierDismissible: true,
-        barrierColor: Colors.black.withOpacity(0.92),
-        builder: (_) => GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: SafeArea(
-              child: Stack(
-                children: [
-                  Center(
-                    child: FutureBuilder<String>(
-                      future: resolveResizedStorageUrl(widget.fish.imageURL),
-                      initialData:
-                          getCachedResizedUrl(widget.fish.imageURL) ??
-                          widget.fish.imageURL,
-                      builder: (context, snapshot) {
-                        final url = snapshot.data ?? widget.fish.imageURL;
-                        return InteractiveViewer(
-                          maxScale: 5,
-                          child: CachedNetworkImage(
-                            imageUrl: url,
-                            fit: BoxFit.contain,
-                            placeholder: (_, _) => const SizedBox.shrink(),
-                            errorWidget: (_, _, _) => brokenImage,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-      return;
-    }
 
     showDialog<void>(
       context: context,
