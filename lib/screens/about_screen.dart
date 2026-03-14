@@ -10,8 +10,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../constants.dart' show googlePlayStoreUrl;
 import '../services/analytics_service.dart';
 import '../services/in_app_update_service.dart';
+import '../services/remote_config_service.dart';
 import '../widgets/ad_component.dart';
 import 'changelog_screen.dart';
 
@@ -177,9 +179,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                     const SizedBox(height: 20),
                     Center(
                       child: GestureDetector(
-                        onTap: () => _launchURL(
-                          'https://play.google.com/store/apps/details?id=com.cca.fishai',
-                        ),
+                        onTap: () => _launchURL(googlePlayStoreUrl),
                         child: Image.asset(
                           'assets/images/system/google_play_badge.png',
                           height: 60,
@@ -300,7 +300,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                           alignment: PlaceholderAlignment.middle,
                           child: InkWell(
                             onTap: () => _launchURL(
-                              'https://www.capitalcityaquatics.com/',
+                              RemoteConfigService.ccaWebsiteUrl,
                             ),
                             child: Text(
                               'Capital City Aquatics',
@@ -323,9 +323,7 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                     leading: const Icon(Icons.bug_report),
                     title: Text(l10n.createIssueOnGitHub),
                     subtitle: Text(l10n.createIssueSubtitle),
-                    onTap: () => _launchURL(
-                      'https://github.com/TheRealFalseReality/aquarium-ai/issues',
-                    ),
+                    onTap: () => _launchURL(RemoteConfigService.gitHubIssuesUrl),
                   ),
                   ListTile(
                     leading: const Icon(Icons.email),
@@ -357,9 +355,8 @@ class AboutScreenState extends ConsumerState<AboutScreen> {
                   OutlinedButton.icon(
                     icon: const Icon(Icons.code),
                     label: const Text('TheRealFalseReality/Aquarium-AI'),
-                    onPressed: () => _launchURL(
-                      'https://github.com/TheRealFalseReality/aquarium-ai',
-                    ),
+                    onPressed: () =>
+                        _launchURL(RemoteConfigService.gitHubRepoUrl),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,

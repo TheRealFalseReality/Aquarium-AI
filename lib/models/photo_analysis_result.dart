@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import '../constants.dart' show rcDefaultAquapiStoreUrl;
+
 /// Represents a single identified fish in the photo.
 class IdentifiedFish {
   final String commonName;
@@ -106,7 +108,7 @@ class PhotoAnalysisResult {
       ),
       howAquaPiHelps:
           json['howAquaPiHelps'] ??
-          'AquaPi helps automate monitoring. [Shop AquaPi](https://www.capitalcityaquatics.com/store)',
+          'AquaPi helps automate monitoring. [Shop AquaPi]($rcDefaultAquapiStoreUrl)',
       raw: json,
     );
   }

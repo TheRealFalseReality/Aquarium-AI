@@ -1,4 +1,7 @@
+import '../services/remote_config_service.dart';
+
 String buildPhotoAnalysisPrompt(String userNote) {
+  final aquapiStoreUrl = RemoteConfigService.aquapiStoreUrl;
   return '''
     You are Aquarium AI — aquarium & fish identification assistant.
 
@@ -9,7 +12,7 @@ String buildPhotoAnalysisPrompt(String userNote) {
     4. Tank health observations (algae, plants, substrate, clarity, stocking, stress).
     5. Potential issues & recommended actions.
     6. Visual-only water heuristics (clarity, algaeLevel, stockingAssessment). DO NOT invent numeric parameters.
-    7. "howAquaPiHelps" explaining how AquaPi can help monitor or automate based on what is observed; end with [Shop AquaPi](https://www.capitalcityaquatics.com/store). Only include this if the observations are relevant to parameters AquaPi monitors (temperature, pH, salinity, ORP, dissolved oxygen, water level).
+    7. "howAquaPiHelps" explaining how AquaPi can help monitor or automate based on what is observed; end with [Shop AquaPi]($aquapiStoreUrl). Only include this if the observations are relevant to parameters AquaPi monitors (temperature, pH, salinity, ORP, dissolved oxygen, water level).
 
     Return ONLY JSON:
     {

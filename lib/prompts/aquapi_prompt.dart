@@ -1,8 +1,14 @@
+import '../services/remote_config_service.dart';
 import 'system_prompt.dart';
 
-/// Returns the AquaPi supplement that is appended to [systemPrompt] only when
+/// Builds the AquaPi supplement that is appended to [systemPrompt] only when
 /// the user's message is detected as AquaPi-related.
-const String aquapiSystemPromptSupplement = '''
+///
+/// URLs are sourced from [RemoteConfigService] so they can be updated remotely
+/// without shipping a new app version.
+String buildAquapiSystemPromptSupplement() {
+  final storeUrl = RemoteConfigService.aquapiStoreUrl;
+  return '''
 
 ## AquaPi Context
 
@@ -55,7 +61,7 @@ Pre-built HA automations for common aquarium tasks:
 `Substitutions` in the ESPHome YAML let you customize device name, WiFi credentials, sensor pins, I2C addresses, and more without editing the core config. See: https://github.com/TheRealFalseReality/aquapi/wiki/Substitutions
 
 ### Key Links
-- **Buy / Store**: [Shop AquaPi](https://www.capitalcityaquatics.com/store/p/aquapi)
+- **Buy / Store**: [Shop AquaPi]($storeUrl)
 - **Web Installer**: https://therealfalsereality.github.io/aquapi/
 - **Setup Guide**: https://github.com/TheRealFalseReality/aquapi/wiki/Setup-AquaPi
 - **Build It Yourself / Parts List**: https://www.capitalcityaquatics.com/aquapi-diy
@@ -70,6 +76,7 @@ Pre-built HA automations for common aquarium tasks:
 - For pricing or purchasing, always direct to the store link — never quote prices directly.
 - When helping with ESPHome YAML or HA automations, recommend the Automation Script tool in the app.
 ''';
+}
 
 /// List of lowercase keywords used to detect AquaPi-related messages.
 const List<String> aquapiKeywords = [
@@ -108,10 +115,6 @@ const List<String> aquapiKeywords = [
   'ezo-do',
 ];
 
-/// Cached combination of [systemPrompt] and [aquapiSystemPromptSupplement].
-/// Both are `const`, so the concatenation is computed once at program startup.
-const String _aquapiSystemPrompt = '$systemPrompt$aquapiSystemPromptSupplement';
-
 /// Returns `true` when [message] appears to be AquaPi-related.
 bool isAquapiRelated(String message) {
   final lower = message.toLowerCase();
@@ -121,5 +124,6 @@ bool isAquapiRelated(String message) {
 /// Returns the full system prompt, including the AquaPi supplement when
 /// [message] is AquaPi-related; otherwise returns the base [systemPrompt].
 String effectiveSystemPrompt(String message) {
-  return isAquapiRelated(message) ? _aquapiSystemPrompt : systemPrompt;
+  if (!isAquapiRelated(message)) return systemPrompt;
+  return '$systemPrompt${buildAquapiSystemPromptSupplement()}';
 }

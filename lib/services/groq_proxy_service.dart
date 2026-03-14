@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'remote_config_service.dart';
+
 /// Client for the Firebase `groqProxy` Cloud Function.
 ///
 /// When the app is using the developer Groq API key (free tier), all Groq
@@ -12,10 +14,6 @@ import 'package:http/http.dart' as http;
 /// Calls are made directly to the Firebase callable function HTTPS endpoint
 /// using the standard Firebase callable protocol (no additional SDK required).
 class GroqProxyService {
-  /// Firebase callable function endpoint for [groqProxy].
-  static const _endpoint =
-      'https://us-central1-fishai-31d40.cloudfunctions.net/groqProxy';
-
   /// Internal helper: POST [data] to the callable function endpoint.
   ///
   /// Wraps the Firebase callable protocol (body `{"data": ...}`,
@@ -26,9 +24,10 @@ class GroqProxyService {
     Map<String, dynamic> data, {
     Duration timeout = const Duration(seconds: 30),
   }) async {
+    final endpoint = RemoteConfigService.groqProxyUrl;
     final response = await http
         .post(
-          Uri.parse(_endpoint),
+          Uri.parse(endpoint),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'data': data}),
         )

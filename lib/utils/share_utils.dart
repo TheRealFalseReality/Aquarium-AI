@@ -1,15 +1,16 @@
 import 'package:share_plus/share_plus.dart';
 
+import '../constants.dart' show googlePlayStoreUrl;
 import '../models/analysis_result.dart';
 import '../models/compatibility_report.dart';
 import '../models/fish_info_result.dart';
 import '../models/photo_analysis_result.dart';
 import '../models/stocking_recommendation.dart';
 
-const _appFooter =
+String get _appFooter =>
     '\n─────────────────────\n'
     'Shared via Aquarium AI\n'
-    'Get the app: https://play.google.com/store/apps/details?id=com.cca.fishai';
+    'Get the app: $googlePlayStoreUrl';
 
 /// Converts a [WaterAnalysisResult] to a plain-text summary and shares it.
 Future<void> shareWaterAnalysisResult(WaterAnalysisResult result) async {

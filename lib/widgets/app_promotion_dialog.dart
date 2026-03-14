@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../constants.dart' show googlePlayStoreUrl;
 import '../services/analytics_service.dart';
 
 class AppPromotionDialog extends StatelessWidget {
@@ -20,8 +21,7 @@ class AppPromotionDialog extends StatelessWidget {
   }
 
   Future<void> _launchPlayStore() async {
-    const url = 'https://play.google.com/store/apps/details?id=com.cca.fishai';
-    final Uri uri = Uri.parse(url);
+    final Uri uri = Uri.parse(googlePlayStoreUrl);
 
     // Log app promotion click
     AnalyticsService.logAppPromotion(
@@ -30,7 +30,7 @@ class AppPromotionDialog extends StatelessWidget {
     );
 
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch $url';
+      throw 'Could not launch $googlePlayStoreUrl';
     }
   }
 
