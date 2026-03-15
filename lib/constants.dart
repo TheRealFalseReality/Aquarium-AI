@@ -131,6 +131,27 @@ const double rcDefaultEarlySupporterPrice = 0.99;
 const String rcDefaultBuyMeACoffeeUrl =
     'https://buymeacoffee.com/capitalcityaquatics';
 
+// AquaPi store / product page URL — the default points to the specific
+// product listing page. Can be overridden via Remote Config to point to a
+// different product variant, store category, or landing page.
+const String rcDefaultAquapiStoreUrl =
+    'https://www.capitalcityaquatics.com/store/p/aquapi-wmgdj';
+
+// Groq proxy Cloud Function endpoint URL
+const String rcDefaultGroqProxyUrl =
+    'https://us-central1-fishai-31d40.cloudfunctions.net/groqProxy';
+
+// Capital City Aquatics website URL
+const String rcDefaultCcaWebsiteUrl = 'https://www.capitalcityaquatics.com/';
+
+// GitHub repository URL
+const String rcDefaultGitHubRepoUrl =
+    'https://github.com/TheRealFalseReality/Aquarium-AI';
+
+// GitHub issues URL
+const String rcDefaultGitHubIssuesUrl =
+    'https://github.com/TheRealFalseReality/Aquarium-AI/issues';
+
 // Changelog (empty = use bundled assets/docs/en/CHANGELOG_en.md)
 const String rcDefaultChangelog = '';
 const String rcDefaultChangelogDe = '';
@@ -243,6 +264,28 @@ class RemoteConfigKeys {
 
   /// String — URL for the Buy Me a Coffee page.
   static const String buyMeACoffeeUrl = 'buy_me_a_coffee_url';
+
+  // ── App / store URLs ──────────────────────────────────────────────────────
+  /// String — URL for the AquaPi product/store page. Launched when the user
+  /// taps the AquaPi promotion dialog or the store card on the welcome screen.
+  /// Defaults to [rcDefaultAquapiStoreUrl].
+  static const String aquapiStoreUrl = 'aquapi_store_url';
+
+  /// String — Groq proxy Cloud Function endpoint URL.
+  /// Defaults to [rcDefaultGroqProxyUrl].
+  static const String groqProxyUrl = 'groq_proxy_url';
+
+  /// String — Capital City Aquatics website URL.
+  /// Defaults to [rcDefaultCcaWebsiteUrl].
+  static const String ccaWebsiteUrl = 'cca_website_url';
+
+  /// String — Aquarium AI GitHub repository URL.
+  /// Defaults to [rcDefaultGitHubRepoUrl].
+  static const String gitHubRepoUrl = 'github_repo_url';
+
+  /// String — Aquarium AI GitHub issues URL.
+  /// Defaults to [rcDefaultGitHubIssuesUrl].
+  static const String gitHubIssuesUrl = 'github_issues_url';
 
   // ── Changelog ───────────────────────────────────────────────────────────
   /// String — full markdown content of the changelog (English).

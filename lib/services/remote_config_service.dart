@@ -68,6 +68,11 @@ class RemoteConfigService {
             rcDefaultFounderChatHistoryLimit,
         RemoteConfigKeys.fishDataCooldownHours:
             rcDefaultFishDataCooldownHours,
+        RemoteConfigKeys.aquapiStoreUrl: rcDefaultAquapiStoreUrl,
+        RemoteConfigKeys.groqProxyUrl: rcDefaultGroqProxyUrl,
+        RemoteConfigKeys.ccaWebsiteUrl: rcDefaultCcaWebsiteUrl,
+        RemoteConfigKeys.gitHubRepoUrl: rcDefaultGitHubRepoUrl,
+        RemoteConfigKeys.gitHubIssuesUrl: rcDefaultGitHubIssuesUrl,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -355,4 +360,31 @@ class RemoteConfigService {
   static int get fishDataCooldownHours =>
       _instance?.getInt(RemoteConfigKeys.fishDataCooldownHours) ??
       rcDefaultFishDataCooldownHours;
+
+  // ── App / store URLs ─────────────────────────────────────────────────────
+
+  /// URL for the AquaPi store/product page.
+  /// Defaults to [rcDefaultAquapiStoreUrl].
+  static String get aquapiStoreUrl =>
+      _modelString(RemoteConfigKeys.aquapiStoreUrl, rcDefaultAquapiStoreUrl);
+
+  /// Groq proxy Cloud Function endpoint URL.
+  /// Defaults to [rcDefaultGroqProxyUrl].
+  static String get groqProxyUrl =>
+      _modelString(RemoteConfigKeys.groqProxyUrl, rcDefaultGroqProxyUrl);
+
+  /// Capital City Aquatics website URL.
+  /// Defaults to [rcDefaultCcaWebsiteUrl].
+  static String get ccaWebsiteUrl =>
+      _modelString(RemoteConfigKeys.ccaWebsiteUrl, rcDefaultCcaWebsiteUrl);
+
+  /// Aquarium AI GitHub repository URL.
+  /// Defaults to [rcDefaultGitHubRepoUrl].
+  static String get gitHubRepoUrl =>
+      _modelString(RemoteConfigKeys.gitHubRepoUrl, rcDefaultGitHubRepoUrl);
+
+  /// Aquarium AI GitHub issues URL.
+  /// Defaults to [rcDefaultGitHubIssuesUrl].
+  static String get gitHubIssuesUrl =>
+      _modelString(RemoteConfigKeys.gitHubIssuesUrl, rcDefaultGitHubIssuesUrl);
 }

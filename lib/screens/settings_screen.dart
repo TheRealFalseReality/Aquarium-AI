@@ -4974,9 +4974,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: () {
                 Navigator.of(ctx).pop();
                 launchUrl(
-                  Uri.parse(
-                    'https://github.com/TheRealFalseReality/Aquarium-AI/issues',
-                  ),
+                  Uri.parse(RemoteConfigService.gitHubIssuesUrl),
                   mode: LaunchMode.externalApplication,
                 ).catchError((e) {
                   debugPrint('Could not open GitHub issues: $e');

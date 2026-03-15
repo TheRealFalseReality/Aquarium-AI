@@ -1,3 +1,5 @@
+import '../services/remote_config_service.dart';
+
 String buildWaterAnalysisPrompt({
   required String tankType,
   required String ph,
@@ -7,6 +9,7 @@ String buildWaterAnalysisPrompt({
   required String tempUnit,
   required String salinityUnit,
 }) {
+  final aquapiStoreUrl = RemoteConfigService.aquapiStoreUrl;
   return '''
     Act as an aquarium expert. Analyze the following water parameters for a $tankType aquarium:
     ${ph.isNotEmpty ? '- pH: $ph' : ''}
@@ -20,7 +23,7 @@ String buildWaterAnalysisPrompt({
     - The overall summary status must reflect only the parameters that were actually provided.
     - For the 'value' field of the temperature parameter, use the original user-provided value '$temp°$tempUnit'. For all other numeric parameters, return the value as a string.
     - The status for each parameter and the overall summary MUST be one of "Good", "Needs Attention", or "Bad".
-    - The 'howAquaPiHelps' section should mention how AquaPi can monitor these specific parameters and conclude with: [Shop AquaPi](https://www.capitalcityaquatics.com/store).
+    - The 'howAquaPiHelps' section should mention how AquaPi can monitor these specific parameters and conclude with: [Shop AquaPi]($aquapiStoreUrl).
 
     Healthy parameter ranges for reference:
     - Temperature: 22–28°C (72–82°F) for most fish; 24–28°C tropical; 20–24°C coldwater; 24–26°C reef

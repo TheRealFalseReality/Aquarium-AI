@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/analytics_service.dart';
+import '../services/remote_config_service.dart';
 
 class AquaPiPromotionDialog extends StatelessWidget {
   const AquaPiPromotionDialog({super.key});
@@ -22,7 +23,7 @@ class AquaPiPromotionDialog extends StatelessWidget {
   }
 
   Future<void> _launchAquaPiStore() async {
-    const url = 'https://www.capitalcityaquatics.com/store/p/aquapi-wmgdj';
+    final url = RemoteConfigService.aquapiStoreUrl;
     final Uri uri = Uri.parse(url);
 
     // Log AquaPi promotion click
