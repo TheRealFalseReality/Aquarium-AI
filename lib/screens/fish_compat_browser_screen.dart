@@ -337,8 +337,8 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
           Expanded(
             child: _selectedFish != null
                 ? (_showMatrixView
-                    ? _buildMatrixView(context, l10n, all, _selectedFish!, category)
-                    : _buildDetailView(context, l10n, all, _selectedFish!, category))
+                    ? _buildDetailView(context, l10n, all, _selectedFish!, category)
+                    : _buildMatrixView(context, l10n, all, _selectedFish!, category))
                 : _buildSelectFishPlaceholder(context, l10n),
           ),
         ],
@@ -348,8 +348,8 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
     // On narrow screens, show either list or detail
     if (_selectedFish != null) {
       return _showMatrixView
-          ? _buildMatrixView(context, l10n, all, _selectedFish!, category)
-          : _buildDetailView(context, l10n, all, _selectedFish!, category);
+          ? _buildDetailView(context, l10n, all, _selectedFish!, category)
+          : _buildMatrixView(context, l10n, all, _selectedFish!, category);
     }
     return _buildFishList(context, l10n, filtered, category);
   }
@@ -483,6 +483,16 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (selected.funFact?.isNotEmpty == true)
+                        _BrowserInfoSection(
+                          title: l10n.fishFunFact,
+                          icon: Icons.lightbulb_outline,
+                          initiallyExpanded: true,
+                          child: MarkdownBody(
+                            data: selected.funFact!,
+                            styleSheet: fishInfoMarkdownStyle(context),
+                          ),
+                        ),
                       if (selected.originHabitat?.isNotEmpty == true)
                         _BrowserInfoSection(
                           title: l10n.fishOriginHabitat,
@@ -527,16 +537,6 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                                   (item) => _BrowserBulletItem(text: item),
                                 )
                                 .toList(),
-                          ),
-                        ),
-                      if (selected.funFact?.isNotEmpty == true)
-                        _BrowserInfoSection(
-                          title: l10n.fishFunFact,
-                          icon: Icons.lightbulb_outline,
-                          initiallyExpanded: false,
-                          child: MarkdownBody(
-                            data: selected.funFact!,
-                            styleSheet: fishInfoMarkdownStyle(context),
                           ),
                         ),
                       const SizedBox(height: 8),
@@ -960,7 +960,7 @@ class _FishHeaderCard extends StatefulWidget {
 }
 
 class _FishHeaderCardState extends State<_FishHeaderCard> {
-  bool _namesExpanded = false;
+  bool _namesExpanded = true;
 
   void _openFullScreenImage(BuildContext context) {
     AnalyticsService.logFeatureUsed(
@@ -1172,6 +1172,33 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
                           if (fish.reefSafe != null) ...[
                             const SizedBox(height: 6),
                             _ReefSafeBadge(status: fish.reefSafe!),
+                          ],
+                          // Lifespan badge
+                          if (fish.lifespan?.isNotEmpty == true) ...[
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.hourglass_bottom_rounded,
+                                  size: 13,
+                                  color: Colors.white70,
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    fish.lifespan!,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ],
                       ),
