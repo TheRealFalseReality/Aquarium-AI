@@ -356,7 +356,12 @@ class _CustomFishEditorScreenState
 
     AnalyticsService.logFeatureUsed(
       featureName: _isEditing ? 'custom_fish_updated' : 'custom_fish_created',
-      parameters: {'category': _category, 'has_image': (imageUrl.isNotEmpty || _localImagePath != null).toString()},
+      parameters: {
+        'category': _category,
+        'image_type': _localImagePath != null
+            ? 'local'
+            : (imageUrl.isNotEmpty ? 'url' : 'none'),
+      },
     );
 
     if (mounted) {
@@ -548,7 +553,7 @@ class _CustomFishEditorScreenState
             const Divider(),
             const SizedBox(height: 8),
             Text(
-              'Compatibility',
+              l10n.customFishCompatibilitySection,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),

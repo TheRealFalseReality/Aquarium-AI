@@ -278,31 +278,36 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                 onChanged: (v) => setState(() => _searchQuery = v),
               ),
             )
-          : Row(
+          : Stack(
               key: const ValueKey('fab_row'),
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                FloatingActionButton.extended(
-                  heroTag: 'compat_browser_search_fab',
-                  icon: const Icon(Icons.search),
-                  label: Text(l10n.search),
-                  onPressed: () {
-                    setState(() => _isSearchVisible = true);
-                    _searchFocus.requestFocus();
-                  },
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: FloatingActionButton.extended(
+                    heroTag: 'compat_browser_search_fab',
+                    icon: const Icon(Icons.search),
+                    label: Text(l10n.search),
+                    onPressed: () {
+                      setState(() => _isSearchVisible = true);
+                      _searchFocus.requestFocus();
+                    },
+                  ),
                 ),
-                FloatingActionButton(
-                  heroTag: 'compat_browser_add_custom_fab',
-                  tooltip: l10n.addCustomFish,
-                  onPressed: () async {
-                    final result = await Navigator.of(context).pushNamed(
-                      '/custom-fish-editor',
-                    );
-                    if (result == true) {
-                      ref.invalidate(fishDataProvider);
-                    }
-                  },
-                  child: const Icon(Icons.add),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: FloatingActionButton(
+                    heroTag: 'compat_browser_add_custom_fab',
+                    tooltip: l10n.addCustomFish,
+                    onPressed: () async {
+                      final result = await Navigator.of(context).pushNamed(
+                        '/custom-fish-editor',
+                      );
+                      if (result == true) {
+                        ref.invalidate(fishDataProvider);
+                      }
+                    },
+                    child: const Icon(Icons.add),
+                  ),
                 ),
               ],
             ),
@@ -1436,6 +1441,10 @@ class _FishTile extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+            // Name
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
               child: Text(
                 fish.name,
                 textAlign: TextAlign.center,

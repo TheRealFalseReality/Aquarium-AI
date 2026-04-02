@@ -548,33 +548,6 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 500),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.add_circle_outline,
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
-                      title: Text(l10n.customFishLibrary),
-                      onTap: () => navigate('/compat-browser'),
-                    ),
-                  ),
-                ),
                 // ── Community & Profile ───────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.symmetric(

@@ -1627,5 +1627,10 @@
   "noCustomFish": "Aún no hay peces personalizados.\nToca + para añadir el primero.",
   "@noCustomFish": {
     "description": "Placeholder text shown when the custom fish library is empty"
+  },
+
+  "customFishCompatibilitySection": "Compatibilidad",
+  "@customFishCompatibilitySection": {
+    "description": "Section heading for the compatibility lists in the custom fish editor"
   }
 }

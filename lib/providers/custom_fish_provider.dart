@@ -60,9 +60,11 @@ class CustomFishNotifier extends StateNotifier<CustomFishState> {
   /// Add a new custom fish.  A UUID is generated automatically if the fish
   /// does not already have one.
   Future<void> addFish(Fish fish) async {
-    final withUuid = fish.uuid == null
-        ? fish.copyWith(uuid: const Uuid().v4(), isCustom: true)
-        : fish.copyWith(isCustom: true);
+    // Ensure UUID and isCustom flag are always set.
+    final withUuid = fish.copyWith(
+      uuid: fish.uuid ?? const Uuid().v4(),
+      isCustom: true,
+    );
     await _service.saveOrUpdateFish(withUuid);
     final updated = [...state.fish, withUuid];
     state = state.copyWith(fish: updated);
