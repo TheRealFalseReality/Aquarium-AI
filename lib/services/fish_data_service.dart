@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/fish.dart';
+import '../providers/custom_fish_provider.dart';
 import 'fish_firestore_service.dart';
 import 'remote_config_service.dart';
 
@@ -251,9 +252,40 @@ final fishDataServiceProvider = Provider<FishDataService>((ref) {
   return FishDataService();
 });
 
-/// Provider that loads and provides fish data using AsyncValue
-/// This automatically handles loading, error, and data states
+/// Provider that loads and provides fish data using AsyncValue.
+/// Library fish (from Firestore / SP cache) are merged with the user's custom
+/// fish so that [FishCompatBrowserScreen] and other consumers see a single
+/// unified list per category.
 final fishDataProvider = FutureProvider<Map<String, List<Fish>>>((ref) async {
   final service = ref.watch(fishDataServiceProvider);
-  return service.loadFishData();
+  final libraryData = await service.loadFishData();
+
+  // Merge custom fish into a copy of the library data.
+  final customFishState = ref.watch(customFishProvider);
+  if (customFishState.fish.isEmpty) return libraryData;
+
+  final merged = {
+    'freshwater': List<Fish>.from(libraryData['freshwater'] ?? []),
+    'marine': List<Fish>.from(libraryData['marine'] ?? []),
+  };
+
+  for (final custom in customFishState.fish) {
+    final cat = custom.category ?? 'freshwater';
+    if (merged.containsKey(cat)) {
+      // Replace if already present (e.g. after an update), otherwise append.
+      final idx = merged[cat]!.indexWhere((f) => f.uuid == custom.uuid);
+      if (idx >= 0) {
+        merged[cat]![idx] = custom;
+      } else {
+        merged[cat]!.add(custom);
+      }
+    }
+  }
+
+  // Re-sort each category alphabetically.
+  for (final list in merged.values) {
+    list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+  }
+
+  return merged;
 });

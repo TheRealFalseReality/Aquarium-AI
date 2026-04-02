@@ -14,6 +14,7 @@ import 'package:uuid/uuid.dart';
 import '../models/tank.dart';
 import '../services/analytics_service.dart';
 import 'app_settings_provider.dart';
+import 'custom_fish_provider.dart';
 import 'species_tags_provider.dart';
 import 'tank_tags_provider.dart';
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
@@ -199,6 +200,10 @@ class TankNotifier extends StateNotifier<TankState> {
       final reschedulePreferences = await appSettingsNotifier
           .exportReschedulePreferences();
 
+      // Get custom fish for backup (local paths excluded)
+      final customFishNotifier = _ref.read(customFishProvider.notifier);
+      final customFish = customFishNotifier.exportForBackup();
+
       // Create backup data with metadata
       // Exclude local image paths to prevent restore errors on different devices
       final packageInfo = await PackageInfo.fromPlatform();
@@ -214,6 +219,7 @@ class TankNotifier extends StateNotifier<TankState> {
         'speciesTags': speciesTags,
         'tankTags': tankTags,
         'reschedulePreferences': reschedulePreferences,
+        'customFish': customFish,
       };
 
       // Convert to formatted JSON
@@ -397,6 +403,13 @@ class TankNotifier extends StateNotifier<TankState> {
         await appSettingsNotifier.importReschedulePreferences(
           reschedulePreferences,
         );
+      }
+
+      // Restore custom fish library if present in backup
+      if (backupData.containsKey('customFish')) {
+        final customFishList = backupData['customFish'] as List;
+        final customFishNotifier = _ref.read(customFishProvider.notifier);
+        await customFishNotifier.importFromBackup(customFishList);
       }
 
       final previousTankCount = state.tanks.length;

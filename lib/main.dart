@@ -29,6 +29,7 @@ import './screens/community_screen.dart';
 import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compat_browser_screen.dart';
 import './screens/fish_compatibility_screen.dart';
+import './screens/custom_fish_editor_screen.dart';
 import './screens/information_screen.dart';
 import './screens/onboarding_screen.dart';
 import './screens/photo_analysis_screen.dart';
@@ -609,6 +610,14 @@ class MyApp extends ConsumerWidget {
               case '/compat-browser':
                 page = const FishCompatBrowserScreen();
                 screenName = 'fish_compat_browser_screen';
+                break;
+              case '/custom-fish-editor':
+                Fish? editFish;
+                if (args is Map) {
+                  editFish = args['fish'] as Fish?;
+                }
+                page = CustomFishEditorScreen(fish: editFish);
+                screenName = 'custom_fish_editor_screen';
                 break;
               case '/photo-analyzer':
                 page = const PhotoAnalysisScreen();

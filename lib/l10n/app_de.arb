@@ -1479,5 +1479,143 @@
   "fishFunFact": "Wusstest du schon?",
   "@fishFunFact": {
     "description": "Section label for a short fun fact about the fish"
+  },
+
+  "customFishLibrary": "Benutzerdefinierte Fische",
+  "@customFishLibrary": {
+    "description": "Title for the custom fish library screen and drawer entry"
+  },
+
+  "addCustomFish": "Fisch hinzufügen",
+  "@addCustomFish": {
+    "description": "Label for the button that opens the custom fish editor to create a new fish"
+  },
+
+  "editCustomFish": "Fisch bearbeiten",
+  "@editCustomFish": {
+    "description": "Title for the custom fish editor screen when editing an existing fish"
+  },
+
+  "customFishBadge": "Benutzerdefiniert",
+  "@customFishBadge": {
+    "description": "Badge label shown on user-created fish in the fish browser"
+  },
+
+  "customFishSaved": "Fisch gespeichert",
+  "@customFishSaved": {
+    "description": "Snackbar message shown after a custom fish is successfully saved"
+  },
+
+  "customFishDeleted": "Fisch gelöscht",
+  "@customFishDeleted": {
+    "description": "Snackbar message shown after a custom fish is deleted"
+  },
+
+  "customFishDeleteConfirmTitle": "Fisch löschen",
+  "@customFishDeleteConfirmTitle": {
+    "description": "Title for the dialog confirming deletion of a custom fish"
+  },
+
+  "customFishDeleteConfirmMessage": "\"{name}\" aus deiner Fischliste löschen? Dies kann nicht rückgängig gemacht werden.",
+  "@customFishDeleteConfirmMessage": {
+    "description": "Body of the confirmation dialog when deleting a custom fish",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+
+  "customFishName": "Fischname",
+  "@customFishName": {
+    "description": "Label for the fish name input field in the custom fish editor"
+  },
+
+  "customFishNameRequired": "Fischname ist erforderlich",
+  "@customFishNameRequired": {
+    "description": "Validation error shown when the fish name field is empty"
+  },
+
+  "customFishCategory": "Kategorie",
+  "@customFishCategory": {
+    "description": "Label for the freshwater/marine category selector in the custom fish editor"
+  },
+
+  "customFishImageUrl": "Bild-URL (optional)",
+  "@customFishImageUrl": {
+    "description": "Label for the image URL text field in the custom fish editor"
+  },
+
+  "customFishUploadImage": "Bild hochladen",
+  "@customFishUploadImage": {
+    "description": "Button label for uploading a local image for a custom fish"
+  },
+
+  "customFishRemoveImage": "Bild entfernen",
+  "@customFishRemoveImage": {
+    "description": "Button label for removing the current custom fish image"
+  },
+
+  "customFishCommonNames": "Allgemeine Namen",
+  "@customFishCommonNames": {
+    "description": "Section label for the common names list in the custom fish editor"
+  },
+
+  "customFishOriginHabitat": "Herkunft & Lebensraum",
+  "@customFishOriginHabitat": {
+    "description": "Label for the origin/habitat text field in the custom fish editor"
+  },
+
+  "customFishGeneralInfo": "Allgemeine Infos",
+  "@customFishGeneralInfo": {
+    "description": "Label for the general aquarium info text field in the custom fish editor"
+  },
+
+  "customFishCareFacts": "Pflegehinweise",
+  "@customFishCareFacts": {
+    "description": "Section label for the care facts list in the custom fish editor"
+  },
+
+  "customFishCompatibilityHighlights": "Verträglichkeitshinweise",
+  "@customFishCompatibilityHighlights": {
+    "description": "Section label for compatibility highlights list in the custom fish editor"
+  },
+
+  "customFishFunFact": "Wissenswertes",
+  "@customFishFunFact": {
+    "description": "Label for the fun fact text field in the custom fish editor"
+  },
+
+  "customFishReefSafe": "Riffsicher",
+  "@customFishReefSafe": {
+    "description": "Label for the reef safe text field in the custom fish editor (marine fish only)"
+  },
+
+  "customFishCompatibleWith": "Kompatibel mit",
+  "@customFishCompatibleWith": {
+    "description": "Section label for the compatible fish list in the custom fish editor"
+  },
+
+  "customFishNotCompatibleWith": "Nicht kompatibel mit",
+  "@customFishNotCompatibleWith": {
+    "description": "Section label for not-compatible fish list in the custom fish editor"
+  },
+
+  "customFishWithCaution": "Mit Vorsicht",
+  "@customFishWithCaution": {
+    "description": "Section label for with-caution fish list in the custom fish editor"
+  },
+
+  "customFishNotRecommended": "Nicht empfohlen",
+  "@customFishNotRecommended": {
+    "description": "Section label for not-recommended fish list in the custom fish editor"
+  },
+
+  "customFishAddItem": "Eintrag hinzufügen…",
+  "@customFishAddItem": {
+    "description": "Hint text for adding a new item to a list in the custom fish editor"
+  },
+
+  "noCustomFish": "Noch keine eigenen Fische.\nTippe auf + um deinen ersten hinzuzufügen.",
+  "@noCustomFish": {
+    "description": "Placeholder text shown when the custom fish library is empty"
   }
 }

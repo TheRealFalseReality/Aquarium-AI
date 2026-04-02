@@ -13,6 +13,10 @@ class Fish {
   final List<String> notRecommended;
   final List<String> notCompatible;
   final List<String> withCaution;
+  // Custom fish fields (not present on library fish from Firestore)
+  final bool isCustom; // true for user-created fish stored locally
+  final String? category; // 'freshwater' or 'marine' (required for custom fish)
+  final String? customLocalImagePath; // local file path for uploaded image (excluded from backup)
 
   Fish({
     this.uuid,
@@ -29,11 +33,18 @@ class Fish {
     required this.notRecommended,
     required this.notCompatible,
     required this.withCaution,
+    this.isCustom = false,
+    this.category,
+    this.customLocalImagePath,
   });
+
+  /// Whether this fish uses a locally uploaded image file.
+  bool get hasLocalImage =>
+      customLocalImagePath != null && customLocalImagePath!.isNotEmpty;
 
   /// Whether [imageURL] is a Firebase Storage download URL.
   bool get isStorageUrl =>
-      imageURL.contains('firebasestorage.googleapis.com');
+      !hasLocalImage && imageURL.contains('firebasestorage.googleapis.com');
 
   /// Local asset path for the fish image.
   ///
@@ -43,10 +54,12 @@ class Fish {
   /// The bundled asset lives at the same relative path `assets/images/fish/XXX.webp`,
   /// so we simply extract the `assets/…` suffix from the URL.
   ///
-  /// Returns an empty string for Firebase Storage URLs — those images have no
-  /// corresponding local asset, so [FishImage] should fall back to the network
-  /// URL immediately.
+  /// Returns an empty string for Firebase Storage URLs or custom local-image fish
+  /// — those images have no corresponding local asset, so [FishImage] should fall
+  /// back to the network URL immediately.
   String get localImagePath {
+    // Custom fish with an uploaded local image — handled separately by FishImage.
+    if (hasLocalImage) return '';
     // Firebase Storage images have no bundled local asset counterpart.
     if (isStorageUrl) return '';
     const assetsMarker = 'assets/';
@@ -91,10 +104,13 @@ class Fish {
       notRecommended: parseStringList(json['notRecommended']),
       notCompatible: parseStringList(json['notCompatible']),
       withCaution: parseStringList(json['withCaution']),
+      isCustom: json['isCustom'] as bool? ?? false,
+      category: json['category'] as String?,
+      customLocalImagePath: json['customLocalImagePath'] as String?,
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson({bool includeLocalPaths = true}) => {
     if (uuid != null) 'uuid': uuid,
     'name': name,
     if (originHabitat != null) 'originHabitat': originHabitat,
@@ -110,5 +126,54 @@ class Fish {
     'notRecommended': notRecommended,
     'notCompatible': notCompatible,
     'withCaution': withCaution,
+    if (isCustom) 'isCustom': isCustom,
+    if (category != null) 'category': category,
+    // Exclude local image paths from backups to prevent restore errors on different devices
+    if (includeLocalPaths && customLocalImagePath != null)
+      'customLocalImagePath': customLocalImagePath,
   };
+
+  Fish copyWith({
+    String? uuid,
+    String? name,
+    String? originHabitat,
+    List<String>? careFacts,
+    String? generalInfo,
+    List<String>? compatibilityHighlights,
+    String? funFact,
+    List<String>? commonNames,
+    String? imageURL,
+    String? reefSafe,
+    List<String>? compatible,
+    List<String>? notRecommended,
+    List<String>? notCompatible,
+    List<String>? withCaution,
+    bool? isCustom,
+    String? category,
+    String? customLocalImagePath,
+    bool clearCustomLocalImagePath = false,
+  }) {
+    return Fish(
+      uuid: uuid ?? this.uuid,
+      name: name ?? this.name,
+      originHabitat: originHabitat ?? this.originHabitat,
+      careFacts: careFacts ?? this.careFacts,
+      generalInfo: generalInfo ?? this.generalInfo,
+      compatibilityHighlights:
+          compatibilityHighlights ?? this.compatibilityHighlights,
+      funFact: funFact ?? this.funFact,
+      commonNames: commonNames ?? this.commonNames,
+      imageURL: imageURL ?? this.imageURL,
+      reefSafe: reefSafe ?? this.reefSafe,
+      compatible: compatible ?? this.compatible,
+      notRecommended: notRecommended ?? this.notRecommended,
+      notCompatible: notCompatible ?? this.notCompatible,
+      withCaution: withCaution ?? this.withCaution,
+      isCustom: isCustom ?? this.isCustom,
+      category: category ?? this.category,
+      customLocalImagePath: clearCustomLocalImagePath
+          ? null
+          : (customLocalImagePath ?? this.customLocalImagePath),
+    );
+  }
 }

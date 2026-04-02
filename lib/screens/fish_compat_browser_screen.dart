@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/fish.dart';
+import '../providers/custom_fish_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
 import '../utils/markdown_style_utils.dart';
@@ -277,18 +278,33 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                 onChanged: (v) => setState(() => _searchQuery = v),
               ),
             )
-          : Align(
-              alignment: Alignment.bottomLeft,
-              child: FloatingActionButton.extended(
-                key: const ValueKey('search_fab'),
-                heroTag: 'compat_browser_search_fab',
-                icon: const Icon(Icons.search),
-                label: Text(l10n.search),
-                onPressed: () {
-                  setState(() => _isSearchVisible = true);
-                  _searchFocus.requestFocus();
-                },
-              ),
+          : Row(
+              key: const ValueKey('fab_row'),
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                FloatingActionButton.extended(
+                  heroTag: 'compat_browser_search_fab',
+                  icon: const Icon(Icons.search),
+                  label: Text(l10n.search),
+                  onPressed: () {
+                    setState(() => _isSearchVisible = true);
+                    _searchFocus.requestFocus();
+                  },
+                ),
+                FloatingActionButton(
+                  heroTag: 'compat_browser_add_custom_fab',
+                  tooltip: l10n.addCustomFish,
+                  onPressed: () async {
+                    final result = await Navigator.of(context).pushNamed(
+                      '/custom-fish-editor',
+                    );
+                    if (result == true) {
+                      ref.invalidate(fishDataProvider);
+                    }
+                  },
+                  child: const Icon(Icons.add),
+                ),
+              ],
             ),
     );
   }
@@ -387,9 +403,93 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
             }
             setState(() => _selectedFish = isSelected ? null : f);
           },
+          onLongPress: f.isCustom ? () => _showCustomFishOptions(context, l10n, f) : null,
         );
       },
     );
+  }
+
+  /// Shows a bottom sheet with edit / delete options for a custom fish.
+  Future<void> _showCustomFishOptions(
+    BuildContext context,
+    AppLocalizations l10n,
+    Fish fish,
+  ) async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_outlined),
+              title: Text(l10n.editCustomFish),
+              onTap: () => Navigator.pop(context, 'edit'),
+            ),
+            ListTile(
+              leading: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
+              title: Text(
+                l10n.customFishDeleteConfirmTitle,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+              onTap: () => Navigator.pop(context, 'delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (action == 'edit' && mounted) {
+      final result = await Navigator.of(context).pushNamed(
+        '/custom-fish-editor',
+        arguments: {'fish': fish},
+      );
+      if (result == true) {
+        ref.invalidate(fishDataProvider);
+        setState(() => _selectedFish = null);
+      }
+    } else if (action == 'delete' && mounted) {
+      await _confirmDeleteCustomFish(context, l10n, fish);
+    }
+  }
+
+  Future<void> _confirmDeleteCustomFish(
+    BuildContext context,
+    AppLocalizations l10n,
+    Fish fish,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.customFishDeleteConfirmTitle),
+        content: Text(l10n.customFishDeleteConfirmMessage(fish.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await ref.read(customFishProvider.notifier).deleteFish(fish.uuid!);
+      ref.invalidate(fishDataProvider);
+      setState(() {
+        if (_selectedFish?.uuid == fish.uuid) _selectedFish = null;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.customFishDeleted)),
+        );
+      }
+    }
   }
 
   Widget _buildSelectFishPlaceholder(BuildContext context, AppLocalizations l10n) {
@@ -1192,12 +1292,14 @@ class _FishTile extends StatelessWidget {
   final bool isSelected;
   final String category;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   const _FishTile({
     required this.fish,
     required this.isSelected,
     required this.category,
     required this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -1205,6 +1307,7 @@ class _FishTile extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         decoration: BoxDecoration(
@@ -1292,13 +1395,47 @@ class _FishTile extends StatelessWidget {
                           },
                         ),
                       ),
+                    // Custom fish badge — shown at bottom-left
+                    if (fish.isCustom)
+                      Positioned(
+                        bottom: 4,
+                        left: 4,
+                        child: Builder(
+                          builder: (ctx) {
+                            final l10n = AppLocalizations.of(ctx)!;
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(ctx)
+                                        .colorScheme
+                                        .tertiary
+                                        .withOpacity(0.85),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    l10n.customFishBadge,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                   ],
                 ),
               ),
-            ),
-            // Name
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
               child: Text(
                 fish.name,
                 textAlign: TextAlign.center,
