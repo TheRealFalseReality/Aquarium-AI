@@ -17,6 +17,9 @@ import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
 import '../utils/backup_restore_utils.dart';
+import '../models/notification_log.dart';
+import '../models/tank_notification.dart';
+import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_logger_screen.dart';
@@ -892,6 +895,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
 
         const SizedBox(height: 16),
 
+        // Health at a glance card
+        _buildHealthSummaryCard(context, tank),
+
+        const SizedBox(height: 16),
+
         // Inhabitants section
         if (tank.inhabitants.isNotEmpty && fishData != null) ...[
           _buildInhabitantsSection(context, tank, fishData),
@@ -908,6 +916,166 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
 
         // Timestamps
         _buildTimestampsCard(context, tank),
+      ],
+    );
+  }
+
+  /// Health summary card — "Health at a Glance"
+  Widget _buildHealthSummaryCard(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    // Last water change — single-pass search through notification logs
+    NotificationLog? latestWaterChangeLog;
+    for (final log in tank.notificationLogs) {
+      if (log.type == NotificationType.waterChange) {
+        if (latestWaterChangeLog == null ||
+            log.loggedAt.isAfter(latestWaterChangeLog.loggedAt)) {
+          latestWaterChangeLog = log;
+        }
+      }
+    }
+    final lastWaterChange = latestWaterChangeLog != null
+        ? DateFormat('MMM d, yyyy').format(latestWaterChangeLog.loggedAt)
+        : '-';
+
+    // Last parameter test — single-pass search through water parameters
+    WaterParameter? latestParam;
+    for (final p in tank.waterParameters) {
+      if (latestParam == null ||
+          p.dateRecorded.isAfter(latestParam.dateRecorded)) {
+        latestParam = p;
+      }
+    }
+    final lastParamTest = latestParam != null
+        ? DateFormat('MMM d, yyyy').format(latestParam.dateRecorded)
+        : '-';
+
+    // Harmony score
+    final harmonyScore = tank.harmonyScore;
+    final harmonyText = harmonyScore != null
+        ? '${TankHarmonyCalculator.getHarmonyLabel(harmonyScore)} (${(harmonyScore * 100).toStringAsFixed(0)}%)'
+        : '-';
+    final harmonyColor = harmonyScore != null
+        ? (harmonyScore >= 0.8
+              ? Colors.green
+              : harmonyScore >= 0.6
+              ? Colors.orange
+              : Colors.red)
+        : cs.onSurfaceVariant;
+
+    // Overdue notifications count
+    final overdueCount =
+        tank.notifications.where((n) => n.enabled && n.shouldTrigger()).length;
+    final overdueText = overdueCount > 0 ? overdueCount.toString() : '-';
+    final overdueColor =
+        overdueCount > 0 ? Colors.orange : cs.onSurfaceVariant;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.monitor_heart_outlined, color: cs.primary, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.healthAtAGlance,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildHealthStatItem(
+                    context,
+                    icon: Icons.water_drop_outlined,
+                    label: l10n.lastWaterChange,
+                    value: lastWaterChange,
+                  ),
+                ),
+                Expanded(
+                  child: _buildHealthStatItem(
+                    context,
+                    icon: Icons.science_outlined,
+                    label: l10n.lastParameterTest,
+                    value: lastParamTest,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildHealthStatItem(
+                    context,
+                    icon: Icons.balance_outlined,
+                    label: l10n.harmonyScoreLabel,
+                    value: harmonyText,
+                    valueColor: harmonyColor,
+                  ),
+                ),
+                Expanded(
+                  child: _buildHealthStatItem(
+                    context,
+                    icon: Icons.notifications_outlined,
+                    label: l10n.overdueNotifications,
+                    value: overdueText,
+                    valueColor: overdueColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHealthStatItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    Color? valueColor,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 14, color: cs.onSurfaceVariant),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: valueColor ?? cs.onSurface,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
   }

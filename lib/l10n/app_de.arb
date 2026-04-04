@@ -1479,5 +1479,45 @@
   "fishFunFact": "Wusstest du schon?",
   "@fishFunFact": {
     "description": "Section label for a short fun fact about the fish"
+  },
+
+  "switchToFishGridView": "Fisch-Rasteransicht",
+  "@switchToFishGridView": {
+    "description": "Toggle label to switch fish inhabitants to grid/tile view in tank cards"
+  },
+
+  "switchToFishListView": "Fisch-Listenansicht",
+  "@switchToFishListView": {
+    "description": "Toggle label to switch fish inhabitants to list view in tank cards"
+  },
+
+  "saltwaterSubtype": "Salzwasser-Subtyp:",
+  "@saltwaterSubtype": {
+    "description": "Label shown above the Reef chip indicating it is a subtype of saltwater"
+  },
+
+  "healthAtAGlance": "Gesundheit auf einen Blick",
+  "@healthAtAGlance": {
+    "description": "Title for the tank health summary card on the tank details overview tab"
+  },
+
+  "lastWaterChange": "Letzter Wasserwechsel",
+  "@lastWaterChange": {
+    "description": "Label for the last water change date in the tank health summary card"
+  },
+
+  "lastParameterTest": "Letzter Parametertest",
+  "@lastParameterTest": {
+    "description": "Label for the last water parameter test date in the tank health summary card"
+  },
+
+  "overdueNotifications": "Überfällig",
+  "@overdueNotifications": {
+    "description": "Label for the overdue notification count in the tank health summary card"
+  },
+
+  "harmonyScoreLabel": "Harmonie",
+  "@harmonyScoreLabel": {
+    "description": "Short label for the harmony score stat in the tank health summary card"
   }
 }

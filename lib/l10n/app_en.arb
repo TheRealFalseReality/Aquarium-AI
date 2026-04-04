@@ -5711,5 +5711,45 @@
   "onboardingApiKeyNote": "Tank management, harmony scores and all calculators always work without an API key.",
   "@onboardingApiKeyNote": {
     "description": "Footnote in the API key onboarding step noting that calculators work without a key"
+  },
+
+  "switchToFishGridView": "Fish grid view",
+  "@switchToFishGridView": {
+    "description": "Toggle label to switch fish inhabitants to grid/tile view in tank cards"
+  },
+
+  "switchToFishListView": "Fish list view",
+  "@switchToFishListView": {
+    "description": "Toggle label to switch fish inhabitants to list view in tank cards"
+  },
+
+  "saltwaterSubtype": "Saltwater subtype:",
+  "@saltwaterSubtype": {
+    "description": "Label shown above the Reef chip indicating it is a subtype of saltwater"
+  },
+
+  "healthAtAGlance": "Health at a Glance",
+  "@healthAtAGlance": {
+    "description": "Title for the tank health summary card on the tank details overview tab"
+  },
+
+  "lastWaterChange": "Last Water Change",
+  "@lastWaterChange": {
+    "description": "Label for the last water change date in the tank health summary card"
+  },
+
+  "lastParameterTest": "Last Parameter Test",
+  "@lastParameterTest": {
+    "description": "Label for the last water parameter test date in the tank health summary card"
+  },
+
+  "overdueNotifications": "Overdue",
+  "@overdueNotifications": {
+    "description": "Label for the overdue notification count in the tank health summary card"
+  },
+
+  "harmonyScoreLabel": "Harmony",
+  "@harmonyScoreLabel": {
+    "description": "Short label for the harmony score stat in the tank health summary card"
   }
 }

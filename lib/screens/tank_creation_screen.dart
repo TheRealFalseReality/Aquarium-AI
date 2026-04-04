@@ -878,24 +878,53 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
               ),
             ],
           ),
-          // Reef toggle – only visible for saltwater tanks
+          // Reef toggle – only visible for saltwater tanks, shown as a subtype
           AnimatedSize(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
             child: _selectedCategory == 'marine'
                 ? Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
+                    padding: const EdgeInsets.only(top: 8, left: 20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Container(
+                          width: 2,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(1),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
                         Builder(
                           builder: (context) {
                             final l10n = AppLocalizations.of(context)!;
-                            return ModernSelectableChip(
-                              label: l10n.markAsReef,
-                              emoji: '🪸',
-                              selected: _isReef,
-                              onTap: () => setState(() => _isReef = !_isReef),
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.saltwaterSubtype,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                ),
+                                const SizedBox(height: 6),
+                                ModernSelectableChip(
+                                  label: l10n.markAsReef,
+                                  emoji: '🪸',
+                                  selected: _isReef,
+                                  onTap: () =>
+                                      setState(() => _isReef = !_isReef),
+                                ),
+                              ],
                             );
                           },
                         ),

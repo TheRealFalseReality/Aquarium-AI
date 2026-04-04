@@ -4,13 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:uuid/uuid.dart';
 
 import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../models/tank.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/fish_data_service.dart';
@@ -1378,6 +1381,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     }
                   },
                 ),
+                const Divider(),
+                // Populate test tanks for all tank types, harmony scores, etc.
+                ListTile(
+                  leading: const Icon(Icons.science, color: Colors.teal),
+                  title: const Text('Populate Test Tanks'),
+                  subtitle: const Text(
+                    'Add test tanks for all types & harmony ranges',
+                  ),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _populateDebugTanks();
+                  },
+                ),
               ],
             ),
             actions: [
@@ -1392,6 +1408,233 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  Future<void> _populateDebugTanks() async {
+    final notifier = ref.read(tankProvider.notifier);
+
+    // 1. Freshwater Community — high harmony
+    notifier.addTank(Tank.create(
+      name: 'Community Tank (FW)',
+      type: 'freshwater',
+      sizeGallons: 55.0,
+      notes: 'Peaceful community tank — high harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Neon 1',
+          fishUnit: 'Neon Tetra',
+          quantity: 6,
+          speciesTags: const [],
+        ),
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Guppy 1',
+          fishUnit: 'Guppy',
+          quantity: 4,
+          speciesTags: const [],
+        ),
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Platy 1',
+          fishUnit: 'Platy',
+          quantity: 3,
+          speciesTags: const [],
+        ),
+      ],
+      harmonyScore: 0.92,
+      tags: [TankTag(name: 'Community', color: Colors.green.value)],
+    ));
+
+    // 2. Freshwater Betta Solo — perfect harmony
+    notifier.addTank(Tank.create(
+      name: 'Betta Solo (FW)',
+      type: 'freshwater',
+      sizeGallons: 10.0,
+      notes: 'Single betta — perfect harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'King Betta',
+          fishUnit: 'Betta',
+          quantity: 1,
+          speciesTags: const [],
+        ),
+      ],
+      harmonyScore: 1.0,
+      tags: [TankTag(name: 'Species Only', color: Colors.blue.value)],
+    ));
+
+    // 3. Freshwater Aggressive Mix — low harmony
+    notifier.addTank(Tank.create(
+      name: 'Aggressive Mix (FW)',
+      type: 'freshwater',
+      sizeGallons: 75.0,
+      notes: 'Aggressive fish mix — low harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Oscar 1',
+          fishUnit: 'Oscar',
+          quantity: 1,
+          speciesTags: const [],
+        ),
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Cichlid 1',
+          fishUnit: 'Green Terror',
+          quantity: 1,
+          speciesTags: const [],
+        ),
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Angelfish 1',
+          fishUnit: 'Angelfish',
+          quantity: 2,
+          speciesTags: const [],
+        ),
+      ],
+      harmonyScore: 0.18,
+      tags: [TankTag(name: 'Aggressive', color: Colors.red.value)],
+    ));
+
+    // 4. Freshwater Planted — medium harmony
+    notifier.addTank(Tank.create(
+      name: 'Planted Tank (FW)',
+      type: 'freshwater',
+      sizeGallons: 20.0,
+      notes: 'Planted nano tank',
+      inhabitants: [
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Corydoras 1',
+          fishUnit: 'Cory Catfish',
+          quantity: 4,
+          speciesTags: const [],
+        ),
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Rasbora 1',
+          fishUnit: 'Harlequin Rasbora',
+          quantity: 6,
+          speciesTags: const [],
+        ),
+      ],
+      harmonyScore: 0.78,
+      tags: [TankTag(name: 'Planted', color: Colors.teal.value)],
+    ));
+
+    // 5. Empty freshwater tank
+    notifier.addTank(Tank.create(
+      name: 'Empty Tank (FW)',
+      type: 'freshwater',
+      sizeGallons: 30.0,
+      notes: 'Newly set up, no fish yet',
+      tags: [TankTag(name: 'New', color: Colors.grey.value)],
+    ));
+
+    // 6. Marine Fish-Only (FOWLR)
+    notifier.addTank(Tank.create(
+      name: 'FOWLR Tank (SW)',
+      type: 'marine',
+      isReef: false,
+      sizeGallons: 90.0,
+      notes: 'Fish only with live rock — medium harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Clownfish 1',
+          fishUnit: 'Clownfish',
+          quantity: 2,
+          speciesTags: const [],
+        ),
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Damsel 1',
+          fishUnit: 'Blue Damsel',
+          quantity: 1,
+          speciesTags: const [],
+        ),
+      ],
+      harmonyScore: 0.65,
+      tags: [TankTag(name: 'Fish-Only', color: Colors.indigo.value)],
+    ));
+
+    // 7. Marine Reef — high harmony
+    notifier.addTank(Tank.create(
+      name: 'Reef Tank (SW)',
+      type: 'marine',
+      isReef: true,
+      sizeGallons: 120.0,
+      notes: 'SPS/LPS reef tank — high harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Clownfish 1',
+          fishUnit: 'Clownfish',
+          quantity: 2,
+          speciesTags: const [],
+        ),
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Tang 1',
+          fishUnit: 'Blue Tang',
+          quantity: 1,
+          speciesTags: const [],
+        ),
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Goby 1',
+          fishUnit: 'Watchman Goby',
+          quantity: 1,
+          speciesTags: const [],
+        ),
+      ],
+      harmonyScore: 0.88,
+      tags: [TankTag(name: 'Reef', color: Colors.purple.value)],
+    ));
+
+    // 8. Marine Aggressive Predator — low harmony
+    notifier.addTank(Tank.create(
+      name: 'Predator Tank (SW)',
+      type: 'marine',
+      isReef: false,
+      sizeGallons: 180.0,
+      notes: 'Large predator FOWLR — low harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Lionfish 1',
+          fishUnit: 'Volitans Lionfish',
+          quantity: 1,
+          speciesTags: const [],
+        ),
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Puffer 1',
+          fishUnit: 'Porcupine Puffer',
+          quantity: 1,
+          speciesTags: const [],
+        ),
+        TankInhabitant(
+          id: Uuid().v4(),
+          customName: 'Trigger 1',
+          fishUnit: 'Picasso Trigger',
+          quantity: 1,
+          speciesTags: const [],
+        ),
+      ],
+      harmonyScore: 0.22,
+      tags: [TankTag(name: 'Predator', color: Colors.deepOrange.value)],
+    ));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('8 test tanks added to tank management!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
 
   void _showBuyMeACoffeeDialog() {
     final l10n = AppLocalizations.of(context)!;

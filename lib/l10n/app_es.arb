@@ -1489,5 +1489,45 @@
   "onboardingApiKeyNote": "La gestión de tanques, las puntuaciones de armonía y todas las calculadoras siempre funcionan sin una clave API.",
   "@onboardingApiKeyNote": {
     "description": "Footnote in the API key onboarding step noting that calculators work without a key"
+  },
+
+  "switchToFishGridView": "Vista de cuadrícula de peces",
+  "@switchToFishGridView": {
+    "description": "Toggle label to switch fish inhabitants to grid/tile view in tank cards"
+  },
+
+  "switchToFishListView": "Vista de lista de peces",
+  "@switchToFishListView": {
+    "description": "Toggle label to switch fish inhabitants to list view in tank cards"
+  },
+
+  "saltwaterSubtype": "Subtipo de agua salada:",
+  "@saltwaterSubtype": {
+    "description": "Label shown above the Reef chip indicating it is a subtype of saltwater"
+  },
+
+  "healthAtAGlance": "Salud de un vistazo",
+  "@healthAtAGlance": {
+    "description": "Title for the tank health summary card on the tank details overview tab"
+  },
+
+  "lastWaterChange": "Último cambio de agua",
+  "@lastWaterChange": {
+    "description": "Label for the last water change date in the tank health summary card"
+  },
+
+  "lastParameterTest": "Última prueba de parámetros",
+  "@lastParameterTest": {
+    "description": "Label for the last water parameter test date in the tank health summary card"
+  },
+
+  "overdueNotifications": "Vencidas",
+  "@overdueNotifications": {
+    "description": "Label for the overdue notification count in the tank health summary card"
+  },
+
+  "harmonyScoreLabel": "Armonía",
+  "@harmonyScoreLabel": {
+    "description": "Short label for the harmony score stat in the tank health summary card"
   }
 }

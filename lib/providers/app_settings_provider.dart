@@ -40,6 +40,8 @@ class AppSettingsState {
   tankHideHarmonyDelta; // Hide the +/-% harmony delta chip on tank cards (default false = show)
   final bool
   tankHideCardTags; // Hide the tank tag chips on tank cards (default false = show)
+  final bool
+  tankInhabitantGridView; // Show fish inhabitants as a grid of tiles (default false = list)
 
   AppSettingsState({
     required this.showStockingButton,
@@ -60,6 +62,7 @@ class AppSettingsState {
     this.tankHidePhotos = false,
     this.tankHideHarmonyDelta = false, // Default to showing delta
     this.tankHideCardTags = false, // Default to showing tags
+    this.tankInhabitantGridView = false, // Default to list view for fish
   });
 }
 
@@ -108,6 +111,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
         prefs.getBool('tankHideHarmonyDelta') ?? false; // Default to showing
     final tankHideCardTags =
         prefs.getBool('tankHideCardTags') ?? false; // Default to showing
+    final tankInhabitantGridView =
+        prefs.getBool('tankInhabitantGridView') ?? false; // Default to list
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
@@ -128,6 +133,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: tankHidePhotos,
       tankHideHarmonyDelta: tankHideHarmonyDelta,
       tankHideCardTags: tankHideCardTags,
+      tankInhabitantGridView: tankInhabitantGridView,
     );
   }
 
@@ -162,6 +168,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -188,6 +195,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -218,6 +226,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -247,6 +256,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -272,6 +282,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -299,6 +310,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -325,6 +337,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -350,6 +363,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -375,6 +389,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -400,6 +415,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -425,6 +441,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -450,6 +467,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -475,6 +493,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -500,6 +519,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: value,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -525,6 +545,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: value,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -550,6 +571,33 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: value,
+      tankInhabitantGridView: state.tankInhabitantGridView,
+    );
+  }
+
+  Future<void> setTankInhabitantGridView(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tankInhabitantGridView', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
+      tankHidePhotos: state.tankHidePhotos,
+      tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: value,
     );
   }
 
@@ -583,6 +631,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -612,6 +661,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 
@@ -675,6 +725,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
     );
   }
 }
