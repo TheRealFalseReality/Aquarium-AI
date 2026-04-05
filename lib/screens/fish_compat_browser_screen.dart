@@ -390,6 +390,21 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
     final isWide = MediaQuery.of(context).size.width >= 720;
 
     if (isWide) {
+      // Compute a stable key for the right panel that changes when the
+      // selected fish or the active view type changes.
+      final rightKey = ValueKey(
+        '${_selectedFish?.uuid ?? _selectedFish?.name ?? 'none'}_$_showMatrixView',
+      );
+
+      Widget rightPanel;
+      if (_selectedFish != null) {
+        rightPanel = _showMatrixView
+            ? _buildDetailView(context, l10n, all, _selectedFish!, category)
+            : _buildMatrixView(context, l10n, all, _selectedFish!, category);
+      } else {
+        rightPanel = _buildSelectFishPlaceholder(context, l10n);
+      }
+
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -399,25 +414,65 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
             child: _buildFishList(context, l10n, filtered, category),
           ),
           const VerticalDivider(width: 1),
-          // Right: detail or placeholder
+          // Right: detail or placeholder — animated on fish change
           Expanded(
-            child: _selectedFish != null
-                ? (_showMatrixView
-                    ? _buildDetailView(context, l10n, all, _selectedFish!, category)
-                    : _buildMatrixView(context, l10n, all, _selectedFish!, category))
-                : _buildSelectFishPlaceholder(context, l10n),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 280),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.04, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
+              child: KeyedSubtree(
+                key: rightKey,
+                child: rightPanel,
+              ),
+            ),
           ),
         ],
       );
     }
 
-    // On narrow screens, show either list or detail
+    // On narrow screens, animate between list and detail.
+    final narrowKey = ValueKey(
+      '${_selectedFish?.uuid ?? _selectedFish?.name ?? 'list'}_$_showMatrixView',
+    );
+
+    Widget narrowContent;
     if (_selectedFish != null) {
-      return _showMatrixView
+      narrowContent = _showMatrixView
           ? _buildDetailView(context, l10n, all, _selectedFish!, category)
           : _buildMatrixView(context, l10n, all, _selectedFish!, category);
+    } else {
+      narrowContent = _buildFishList(context, l10n, filtered, category);
     }
-    return _buildFishList(context, l10n, filtered, category);
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 280),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.04),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        ),
+      ),
+      child: KeyedSubtree(
+        key: narrowKey,
+        child: narrowContent,
+      ),
+    );
   }
 
   Widget _buildFishList(
