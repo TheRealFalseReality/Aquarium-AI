@@ -539,7 +539,6 @@
   "changelogAllReleases": "Todas las versiones",
   "changelogGotIt": "Entendido",
   "addCustomSpecies": "Agregar especie personalizada",
-
   "speciesOptional": "Especie (Opcional)",
   "tagsOptional": "Etiquetas (Opcional)",
   "addTagHint": "Agregar etiqueta...",
@@ -559,7 +558,6 @@
   "colorSecondary": "Secundario",
   "colorTertiary": "Terciario",
   "colorCustom": "Personalizado",
-
   "submitIssue": "Enviar un problema",
   "submitIssueDesc": "Reportar un error o solicitar una nueva función en GitHub",
   "removeAds": "Eliminar anuncios",
@@ -823,7 +821,6 @@
   "learnMore": "Más Información",
   "neverShow": "No Mostrar",
   "neverShowAgain": "No Mostrar de Nuevo",
-
   "themeDefault": "Predeterminado",
   "themeMaterialYou": "Material You",
   "themeOceanBlue": "Azul Océano",
@@ -862,7 +859,6 @@
   "chatbotYou": "Tú",
   "chatbotAIError": "{appName} - Error",
   "moreThemeOptions": "Más opciones de tema",
-
   "analyzingFish": "Analizando peces...",
   "pleaseWaitAIReport": "Por favor espera mientras la IA genera tu informe de compatibilidad.",
   "aiCompatibilityCalculator": "Calculadora de Compatibilidad IA",
@@ -999,7 +995,6 @@
   "productNotFound": "Producto no encontrado. Por favor, inténtalo más tarde.",
   "unableToInitiatePurchase": "No se puede iniciar la compra. Por favor, inténtalo más tarde.",
   "purchaseError": "Error de compra: {error}",
-
   "aboutSubtitle": "Tu asistente inteligente para la compatibilidad acuática.",
   "getMobileApp": "Obtener la app móvil",
   "getMobileAppDescription": "Experimenta todo el poder de Aquarium AI con nuestra app móvil que incluye acceso sin conexión, cámara mejorada y notificaciones inteligentes.",
@@ -1028,7 +1023,6 @@
   "celsius": "Celsius",
   "kelvin": "Kelvin",
   "tempFieldLabel": "Temp (°{unit})",
-
   "shapeRectangle": "Rectángulo",
   "shapeCube": "Cubo",
   "shapeCylinder": "Cilindro",
@@ -1073,45 +1067,36 @@
   "tankAge": "Edad",
   "inhabitantAge": "Edad",
   "harmonyDelta": "Delta de armonía",
-
   "editInhabitant": "Editar habitante",
-
   "inhabitantFishTypeNoLongerAvailable": "El tipo de pez anterior \"{fishUnit}\" ya no está disponible. Por favor, selecciona un nuevo tipo de pez.",
-
   "addInhabitant": "Agregar habitante",
-
   "quickAddPhoto": "Agregar foto rápida",
-
   "cardTags": "Etiquetas",
-
   "deleteInhabitant": "Eliminar habitante",
   "@deleteInhabitant": {
     "description": "Label / tooltip for the delete inhabitant action"
   },
-
   "deleteInhabitantConfirm": "¿Estás seguro de que deseas eliminar \"{inhabitantName}\"? Esta acción no se puede deshacer.",
   "@deleteInhabitantConfirm": {
     "description": "Confirmation message shown before deleting an inhabitant",
     "placeholders": {
-      "inhabitantName": {"type": "String"}
+      "inhabitantName": {
+        "type": "String"
+      }
     }
   },
-
   "onboardingSkip": "Omitir",
   "@onboardingSkip": {
     "description": "Button label to skip the onboarding flow"
   },
-
   "onboardingNext": "Siguiente",
   "@onboardingNext": {
     "description": "Button label to advance to the next onboarding step"
   },
-
   "onboardingGetStarted": "Empezar",
   "@onboardingGetStarted": {
     "description": "Button label on the last onboarding step to finish and enter the app"
   },
-
   "onboardingAddInhabitants": "Agregar habitantes",
   "@onboardingAddInhabitants": {
     "description": "Primary button label on the tank-creation step once the user has entered a tank name"
@@ -1119,126 +1104,118 @@
   "@onboardingWelcomeTitle": {
     "description": "Title on the first onboarding step (welcome / sign-in)"
   },
-
   "onboardingWelcomeSubtitle": "Configura tu centro acuario en solo unos pasos.",
   "@onboardingWelcomeSubtitle": {
     "description": "Subtitle on the first onboarding step"
   },
   "onboardingWelcomeThankYou": "¡Gracias por probar Aquarium AI!",
-  "@onboardingWelcomeThankYou": {"description": "Thank-you line on the welcome/intro step of onboarding"},
+  "@onboardingWelcomeThankYou": {
+    "description": "Thank-you line on the welcome/intro step of onboarding"
+  },
   "onboardingWelcomeBody": "Tu compañero de acuario todo en uno: herramientas de IA, gestión de tanques, calculadoras y una comunidad de acuaristas.",
-  "@onboardingWelcomeBody": {"description": "Body paragraph on the welcome/intro step of onboarding"},
+  "@onboardingWelcomeBody": {
+    "description": "Body paragraph on the welcome/intro step of onboarding"
+  },
   "onboardingWelcomeGetStarted": "¡Empecemos!",
-  "@onboardingWelcomeGetStarted": {"description": "Primary CTA button on the welcome/intro step of onboarding"},
-
-
+  "@onboardingWelcomeGetStarted": {
+    "description": "Primary CTA button on the welcome/intro step of onboarding"
+  },
   "onboardingSignInTitle": "Inicia sesión para la experiencia completa",
   "@onboardingSignInTitle": {
     "description": "Heading for the sign-in upsell card on the first onboarding step"
   },
-
   "onboardingSignInBenefit1": "Sincroniza tus acuarios y datos en todos tus dispositivos",
   "@onboardingSignInBenefit1": {
     "description": "First benefit bullet in the sign-in upsell card"
   },
-
   "onboardingSignInBenefit2": "Conéctate con otros entusiastas del acuarismo",
   "@onboardingSignInBenefit2": {
     "description": "Second benefit bullet in the sign-in upsell card"
   },
-
   "onboardingSignInBenefit3": "Muestra tus acuarios y comparte consejos en la Comunidad",
   "@onboardingSignInBenefit3": {
     "description": "Third benefit bullet in the sign-in upsell card"
   },
-
   "onboardingCreateTankTitle": "Configura tu primer acuario",
   "@onboardingCreateTankTitle": {
     "description": "Title on the second onboarding step (create tank)"
   },
-
   "onboardingCreateTankSubtitle": "Cuéntanos sobre tu acuario. Siempre puedes editar los detalles después.",
   "@onboardingCreateTankSubtitle": {
     "description": "Subtitle on the second onboarding step"
   },
-
   "onboardingCreateTankTip": "¿No estás seguro del tamaño? Usa la Calculadora de Volumen para descubrirlo.",
   "@onboardingCreateTankTip": {
     "description": "Tip shown below the size fields on the create-tank onboarding step"
   },
-
   "onboardingTankNameLabel": "Nombre del acuario",
   "@onboardingTankNameLabel": {
     "description": "Label for the tank name field on the onboarding create-tank step"
   },
-
   "onboardingTankNameHint": "p. ej. Mi paraíso arrecife",
   "@onboardingTankNameHint": {
     "description": "Hint text for the tank name field on the onboarding create-tank step"
   },
-
   "onboardingTankType": "Tipo de acuario",
   "@onboardingTankType": {
     "description": "Section heading for the tank type selector on the onboarding create-tank step"
   },
-
   "onboardingTankSize": "Tamaño del acuario",
   "@onboardingTankSize": {
     "description": "Section heading for the tank size fields on the onboarding create-tank step"
   },
-
   "onboardingOptional": "(opcional)",
   "@onboardingOptional": {
     "description": "Parenthetical label indicating an optional field in the onboarding flow"
   },
-
   "onboardingTankDateCreated": "Fecha de creación",
   "@onboardingTankDateCreated": {
     "description": "Label for the date-created field on the onboarding tank setup step"
   },
-
   "onboardingTankAgeToday": "Creado hoy",
   "@onboardingTankAgeToday": {
     "description": "Tank age label when the tank was created today"
   },
-
   "onboardingTankAgeDays": "{days} día(s) de antigüedad",
   "@onboardingTankAgeDays": {
     "description": "Tank age label in days",
     "placeholders": {
-      "days": {"type": "int"}
+      "days": {
+        "type": "int"
+      }
     }
   },
-
   "onboardingTankAgeWeeks": "{weeks} semana(s) de antigüedad",
   "@onboardingTankAgeWeeks": {
     "description": "Tank age label in weeks",
     "placeholders": {
-      "weeks": {"type": "int"}
+      "weeks": {
+        "type": "int"
+      }
     }
   },
-
   "onboardingTankAgeMonths": "{months} mes(es) de antigüedad",
   "@onboardingTankAgeMonths": {
     "description": "Tank age label in months",
     "placeholders": {
-      "months": {"type": "int"}
+      "months": {
+        "type": "int"
+      }
     }
   },
-
   "onboardingTankAgeYears": "{years} año(s) de antigüedad",
   "@onboardingTankAgeYears": {
     "description": "Tank age label in years",
     "placeholders": {
-      "years": {"type": "int"}
+      "years": {
+        "type": "int"
+      }
     }
   },
-
   "onboardingTankNotes": "Notas",
   "@onboardingTankNotes": {
     "description": "Label for the notes field on the onboarding tank setup step"
   },
-
   "onboardingTankNotesHint": "Añadir notas sobre tu acuario…",
   "@onboardingTankNotesHint": {
     "description": "Hint text for the notes field on the onboarding tank setup step"
@@ -1247,370 +1224,296 @@
   "@onboardingOpenCalculator": {
     "description": "Short label for the button that opens the tank volume calculator from onboarding"
   },
-
   "onboardingInhabitantsTitle": "Añade tus peces e habitantes",
   "@onboardingInhabitantsTitle": {
     "description": "Title on the third onboarding step (add inhabitants)"
   },
-
   "onboardingInhabitantsSubtitle": "Construye tu comunidad acuática. Siempre puedes añadir más después.",
   "@onboardingInhabitantsSubtitle": {
     "description": "Subtitle on the third onboarding step"
   },
-
   "onboardingInhabitantsTankRequired": "Ingresa un nombre de acuario en el paso anterior para guardar habitantes.",
   "@onboardingInhabitantsTankRequired": {
     "description": "Info message shown when the user tries to add inhabitants without a tank name"
   },
-
   "onboardingNoInhabitantsYet": "Aún no se han añadido habitantes",
   "@onboardingNoInhabitantsYet": {
     "description": "Placeholder text when the inhabitants list is empty on the onboarding step"
   },
-
   "onboardingSkipInhabitants": "Omitir por ahora",
   "@onboardingSkipInhabitants": {
     "description": "Link below the Next button on the inhabitants onboarding step to skip adding fish"
   },
-
   "onboardingDiscoverTitle": "Explorar herramientas de la app",
   "@onboardingDiscoverTitle": {
     "description": "Title on the fourth onboarding step (discover app tools)"
   },
-
   "onboardingDiscoverSubtitle": "Herramientas de IA, calculadoras y gestión de acuarios — todo para un acuario próspero.",
   "@onboardingDiscoverSubtitle": {
     "description": "Subtitle on the fourth onboarding step"
   },
-
   "onboardingDiscoverSectionAI": "Herramientas de IA",
   "@onboardingDiscoverSectionAI": {
     "description": "Section header chip for AI tools in the discover step"
   },
-
   "onboardingDiscoverSectionTank": "Acuario y Comunidad",
   "@onboardingDiscoverSectionTank": {
     "description": "Section header chip for tank management tools in the discover step"
   },
-
   "onboardingDiscoverSectionCalc": "Calculadoras",
   "@onboardingDiscoverSectionCalc": {
     "description": "Section header chip for calculator tools in the discover step"
   },
-
   "onboardingDiscoverTankDesc": "Gestiona tus acuarios, rastrea habitantes, registra parámetros del agua y lleva un diario de dosificación.",
   "@onboardingDiscoverTankDesc": {
     "description": "Description for the My Tanks tool card in the discover step"
   },
-
   "onboardingThemeTitle": "Elige tu estilo",
   "@onboardingThemeTitle": {
     "description": "Title on the new first onboarding step (theme selection)"
   },
-
   "onboardingThemeSubtitle": "Elige una paleta de colores. Siempre puedes cambiarla más tarde en los ajustes de apariencia.",
   "@onboardingThemeSubtitle": {
     "description": "Subtitle on the theme-selection onboarding step"
   },
-
   "onboardingThemeModeLabel": "Brillo",
   "@onboardingThemeModeLabel": {
     "description": "Label for the brightness / theme-mode toggle on the onboarding theme step"
   },
-
   "onboardingChangeTankTypeWarning": "Cambiar el tipo de acuario eliminará los habitantes que hayas añadido.",
   "@onboardingChangeTankTypeWarning": {
     "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
   },
-
   "fishOriginHabitat": "Origen y Hábitat",
   "@fishOriginHabitat": {
     "description": "Section label for the fish origin and habitat information"
   },
-
   "fishCareFacts": "Datos de Cuidado",
   "@fishCareFacts": {
     "description": "Section label for fish care facts (bullet list)"
   },
-
   "fishGeneralInfo": "Información General del Acuario",
   "@fishGeneralInfo": {
     "description": "Section label for general aquarium information about the fish"
   },
-
   "fishCompatibilityHighlights": "Aspectos de Compatibilidad",
   "@fishCompatibilityHighlights": {
     "description": "Section label for fish compatibility highlights (bullet list)"
   },
-
   "fishFunFact": "Dato Curioso",
   "@fishFunFact": {
     "description": "Section label for a short fun fact about the fish"
   },
-
   "fishTypeInfo": "Info del pez",
   "@fishTypeInfo": {
     "description": "Title for the fish type information bottom sheet shown from the fish card speed-dial"
   },
-
   "googleSearchFish": "Buscar en Google",
   "@googleSearchFish": {
     "description": "Tooltip for the Google search action in the fish card speed-dial"
-  }
-,
-
+  },
   "authContinueAsGuest": "Continuar como invitado",
   "@authContinueAsGuest": {
     "description": "Button to continue with an anonymous account (clearly labelled as guest)"
   },
-
   "authContinueAsGuestDesc": "Crea una cuenta anónima temporal que puedes vincular después.",
   "@authContinueAsGuestDesc": {
     "description": "Subtitle explaining what guest/anonymous access means"
   },
-
   "authSkipSignIn": "Continuar sin iniciar sesión",
   "@authSkipSignIn": {
     "description": "Button to skip sign-in entirely without creating any account"
   },
-
   "communitySignInRequired": "Inicia sesión para acceder a la Comunidad",
   "@communitySignInRequired": {
     "description": "Title of the sign-in required screen shown when accessing Community without being signed in"
   },
-
   "communitySignInRequiredDesc": "La Comunidad solo está disponible para usuarios con sesión iniciada. Crea una cuenta para compartir acuarios y conectarte con otros acuaristas.",
   "@communitySignInRequiredDesc": {
     "description": "Body text explaining why sign-in is required for the Community"
   },
-
   "communitySignInButton": "Iniciar sesión para continuar",
   "@communitySignInButton": {
     "description": "Button on the community sign-in required screen"
   },
-
   "onboardingSkipConfirmTitle": "¿Omitir configuración?",
   "@onboardingSkipConfirmTitle": {
     "description": "Title of the confirmation dialog when tapping the top-bar Skip button in onboarding"
   },
-
   "onboardingSkipConfirmBody": "Puedes volver a este proceso de configuración en cualquier momento desde los Ajustes.",
   "@onboardingSkipConfirmBody": {
     "description": "Body text of the skip confirmation dialog"
   },
-
   "onboardingSkipConfirm": "Sí, omitir",
   "@onboardingSkipConfirm": {
     "description": "Confirm button in the skip onboarding dialog"
   },
-
   "onboardingSkipForNow": "Omitir por ahora",
   "@onboardingSkipForNow": {
     "description": "Secondary button label on steps where no interaction has occurred yet"
   },
-
   "revisitOnboarding": "Volver a la configuración",
   "@revisitOnboarding": {
     "description": "Settings menu card title to re-launch the onboarding flow"
   },
-
   "revisitOnboardingDesc": "Recorrer el asistente de configuración de la app de nuevo",
   "@revisitOnboardingDesc": {
     "description": "Settings menu card subtitle for the revisit onboarding option"
   },
-
   "calculatorUseThisSize": "Usar este tamaño",
   "@calculatorUseThisSize": {
     "description": "Button in the tank volume calculator results to autofill the result into the onboarding tank size fields"
-  }
-,
-
+  },
   "onboardingContinueBanner": "Continuar configuración",
   "@onboardingContinueBanner": {
     "description": "Label on the profile screen banner encouraging the user to continue onboarding"
   },
-
   "onboardingContinueBannerDesc": "¡Casi terminado! Retoma donde lo dejaste.",
   "@onboardingContinueBannerDesc": {
     "description": "Body text on the onboarding continue banner shown on the profile screen"
   },
-
   "onboardingContinueBannerDismiss": "Cerrar",
   "@onboardingContinueBannerDismiss": {
     "description": "Dismiss action on the onboarding continue banner"
-  }
-,
-
+  },
   "onboardingApiTitle": "Potencia tu IA",
   "@onboardingApiTitle": {
     "description": "Title for the API key/Founder upsell step in onboarding"
   },
-
   "onboardingFounderCtaButton": "Unirse a Fundadores",
   "@onboardingFounderCtaButton": {
     "description": "CTA button label on the Founder Aquarist card in onboarding step 5"
   },
-
   "onboardingApiSubtitle": "Aquarium AI funciona directamente con un nivel gratuito compartido. Agrega tu propia clave API o conviértete en Aquarista Fundador para la mejor experiencia.",
   "@onboardingApiSubtitle": {
     "description": "Subtitle for the API key/Founder upsell step in onboarding"
   },
-
   "onboardingApiFreeTierTitle": "Nivel Gratuito (Clave Compartida)",
   "@onboardingApiFreeTierTitle": {
     "description": "Title for the free tier section in the API key onboarding step"
   },
-
   "onboardingApiOwnKeyTitle": "Tu Propia Clave API",
   "@onboardingApiOwnKeyTitle": {
     "description": "Title for the own API key section in the API key onboarding step"
   },
-
   "onboardingApiOwnKeyDesc": "Agrega una clave Groq, Gemini u OpenAI gratuita para límites dedicados y acceso a modelos más potentes.",
   "@onboardingApiOwnKeyDesc": {
     "description": "Description of the own API key benefits in the API key onboarding step"
   },
-
   "onboardingApiFounderDesc": "Compra única — elimina los anuncios para siempre y te da una mejor clave compartida con límites más altos.",
   "@onboardingApiFounderDesc": {
     "description": "Description of the Founder Aquarist in the API key onboarding step"
   },
-
   "onboardingApiGoToSettings": "Configurar Clave API",
   "@onboardingApiGoToSettings": {
     "description": "Button label to go to settings for API key setup"
   },
-
   "onboardingApiNotNow": "Ahora no",
   "@onboardingApiNotNow": {
     "description": "Button label to skip the API key setup"
   },
-
   "onboardingApiKeyNote": "La gestión de tanques, las puntuaciones de armonía y todas las calculadoras siempre funcionan sin una clave API.",
   "@onboardingApiKeyNote": {
     "description": "Footnote in the API key onboarding step noting that calculators work without a key"
   },
-
   "switchToFishGridView": "Vista de cuadrícula de peces",
   "@switchToFishGridView": {
     "description": "Toggle label to switch fish inhabitants to grid/tile view in tank cards"
   },
-
   "switchToFishListView": "Vista de lista de peces",
   "@switchToFishListView": {
     "description": "Toggle label to switch fish inhabitants to list view in tank cards"
   },
-
   "saltwaterSubtype": "Subtipo de agua salada:",
   "@saltwaterSubtype": {
     "description": "Label shown above the Reef chip indicating it is a subtype of saltwater"
   },
-
   "healthAtAGlance": "Salud de un vistazo",
   "@healthAtAGlance": {
     "description": "Title for the tank health summary card on the tank details overview tab"
   },
-
   "lastWaterChange": "Último cambio de agua",
   "@lastWaterChange": {
     "description": "Label for the last water change date in the tank health summary card"
   },
-
   "lastParameterTest": "Última prueba de parámetros",
   "@lastParameterTest": {
     "description": "Label for the last water parameter test date in the tank health summary card"
   },
-
   "overdueNotifications": "Vencidas",
   "@overdueNotifications": {
     "description": "Label for the overdue notification count in the tank health summary card"
   },
-
   "harmonyScoreLabel": "Armonía",
   "@harmonyScoreLabel": {
     "description": "Short label for the harmony score stat in the tank health summary card"
   },
-  
   "more": "más",
   "@more": {
     "description": "Label shown below the overflow count tile in the fish inhabitants grid view"
   },
-
   "viewHistoryAndGraphs": "Ver historial y gráficos",
   "@viewHistoryAndGraphs": {
     "description": "Button label to open the full parameter history screen with charts"
   },
-
   "openDosingDiary": "Abrir diario de dosificación",
   "@openDosingDiary": {
     "description": "Button label to open the full dosing diary screen"
   },
-
   "openActivityLog": "Abrir registro de actividad",
   "@openActivityLog": {
     "description": "Button label to open the full activity log screen"
   },
-
   "openNotesLog": "Abrir registro de notas",
   "@openNotesLog": {
     "description": "Button label to open the full notes log screen"
   },
-
   "latestReadings": "Lecturas más recientes",
   "@latestReadings": {
-    "description": "Section header showing the latest water parameter readings per type"
-  "askAI": "Preguntar a IA",
-  "@askAI": {
-    "description": "Label for the Ask AI floating action button shown when a fish is selected in the browser"
-  },
-
-  "askAIAboutFish": "Preguntar a la IA sobre un pez",
-  "@askAIAboutFish": {
-    "description": "Title of the species picker sheet before an AI fish info request"
-  },
-
-  "selectFishSpecies": "Selecciona o escribe una especie de pez",
-  "@selectFishSpecies": {
-    "description": "Subtitle in the species picker sheet prompting the user to select or type a fish"
-  },
-
-  "askAIFollowUpHint": "Haz una pregunta de seguimiento...",
-  "@askAIFollowUpHint": {
-    "description": "Hint text in the follow-up chat input field of the fish AI chat sheet"
-  },
-
-  "keyFacts": "Datos clave",
-  "@keyFacts": {
-    "description": "Section header for key facts in a fish AI info card"
-  },
-
-  "funFacts": "Curiosidades",
-  "@funFacts": {
-    "description": "Section header for fun facts in a fish AI info card"
-  },
-
-  "compatibleWith": "Compatible con",
-  "@compatibleWith": {
-    "description": "Section header listing compatible tank mates"
-  },
-
-  "incompatibleWith": "Incompatible con",
-  "@incompatibleWith": {
-    "description": "Section header listing incompatible species"
-  },
-
-  "fishSpeciesHint": "p. ej. Pez payaso, Betta...",
-  "@fishSpeciesHint": {
-    "description": "Placeholder hint in the species input field of the Ask AI sheet"
-  },
-
-  "selectSpecificVariety": "Selecciona una variedad específica",
-  "@selectSpecificVariety": {
-    "description": "Label above the common-name chips in the Ask AI species picker"
-  },
-
-  "customSpeciesLabel": "O ingresa tu propia especie",
-  "@customSpeciesLabel": {
-    "description": "Label above the custom species text field in the Ask AI species picker"
+    "description": "Section header showing the latest water parameter readings per type",
+    "askAI": "Preguntar a IA",
+    "@askAI": {
+      "description": "Label for the Ask AI floating action button shown when a fish is selected in the browser"
+    },
+    "askAIAboutFish": "Preguntar a la IA sobre un pez",
+    "@askAIAboutFish": {
+      "description": "Title of the species picker sheet before an AI fish info request"
+    },
+    "selectFishSpecies": "Selecciona o escribe una especie de pez",
+    "@selectFishSpecies": {
+      "description": "Subtitle in the species picker sheet prompting the user to select or type a fish"
+    },
+    "askAIFollowUpHint": "Haz una pregunta de seguimiento...",
+    "@askAIFollowUpHint": {
+      "description": "Hint text in the follow-up chat input field of the fish AI chat sheet"
+    },
+    "keyFacts": "Datos clave",
+    "@keyFacts": {
+      "description": "Section header for key facts in a fish AI info card"
+    },
+    "funFacts": "Curiosidades",
+    "@funFacts": {
+      "description": "Section header for fun facts in a fish AI info card"
+    },
+    "compatibleWith": "Compatible con",
+    "@compatibleWith": {
+      "description": "Section header listing compatible tank mates"
+    },
+    "incompatibleWith": "Incompatible con",
+    "@incompatibleWith": {
+      "description": "Section header listing incompatible species"
+    },
+    "fishSpeciesHint": "p. ej. Pez payaso, Betta...",
+    "@fishSpeciesHint": {
+      "description": "Placeholder hint in the species input field of the Ask AI sheet"
+    },
+    "selectSpecificVariety": "Selecciona una variedad específica",
+    "@selectSpecificVariety": {
+      "description": "Label above the common-name chips in the Ask AI species picker"
+    },
+    "customSpeciesLabel": "O ingresa tu propia especie",
+    "@customSpeciesLabel": {
+      "description": "Label above the custom species text field in the Ask AI species picker"
+    }
   }
 }
