@@ -1101,6 +1101,7 @@
   "@onboardingAddInhabitants": {
     "description": "Primary button label on the tank-creation step once the user has entered a tank name"
   },
+  "onboardingWelcomeTitle": "Bienvenue dans Aquarium AI",
   "@onboardingWelcomeTitle": {
     "description": "Title on the first onboarding step (welcome / sign-in)"
   },

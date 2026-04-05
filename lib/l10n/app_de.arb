@@ -1101,6 +1101,7 @@
   "@onboardingAddInhabitants": {
     "description": "Primary button label on the tank-creation step once the user has entered a tank name"
   },
+  "onboardingWelcomeTitle": "Willkommen bei Aquarium AI",
   "@onboardingWelcomeTitle": {
     "description": "Title on the first onboarding step (welcome / sign-in)"
   },
@@ -1283,6 +1284,14 @@
   "onboardingChangeTankTypeWarning": "Durch das Ändern des Beckentyps werden die hinzugefügten Bewohner entfernt.",
   "@onboardingChangeTankTypeWarning": {
     "description": "Warning shown in the change-tank-type confirmation dialog during onboarding"
+  },
+  "fishTypeInfo": "Fischinformationen",
+  "@fishTypeInfo": {
+    "description": "Title for the fish type information bottom sheet shown from the fish card speed-dial"
+  },
+  "googleSearchFish": "Google-Suche",
+  "@googleSearchFish": {
+    "description": "Tooltip for the Google search action in the fish card speed-dial"
   },
   "authContinueAsGuest": "Als Gast fortfahren",
   "@authContinueAsGuest": {
