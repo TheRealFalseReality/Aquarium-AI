@@ -1464,14 +1464,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             contentPadding: EdgeInsets.zero,
                             title: Text(
                               appSettings.tankInhabitantGridView
-                                  ? l10n.switchToFishListView
-                                  : l10n.switchToFishGridView,
+                                  ? l10n.switchToFishGridView
+                                  : l10n.switchToFishListView,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             secondary: Icon(
                               appSettings.tankInhabitantGridView
-                                  ? Icons.view_list
-                                  : Icons.grid_view,
+                                  ? Icons.grid_view
+                                  : Icons.view_list,
                               size: 20,
                             ),
                             value: appSettings.tankInhabitantGridView,
