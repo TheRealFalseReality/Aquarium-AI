@@ -106,20 +106,17 @@ class _AdBannerState extends ConsumerState<AdBanner> {
                 Positioned(
                   top: 0,
                   right: 0,
-                  child: GestureDetector(
-                    onTap: () => setState(() => _isDismissed = true),
-                    child: Tooltip(
-                      message: AppLocalizations.of(context)!.close,
-                      child: Container(
-                        width: 20,
-                        height: 20,
-                        color: Colors.black54,
-                        child: const Icon(
-                          Icons.close,
-                          size: 14,
-                          color: Colors.white,
-                        ),
-                      ),
+                  child: IconButton(
+                    onPressed: () => setState(() => _isDismissed = true),
+                    icon: const Icon(Icons.close, size: 14),
+                    tooltip: AppLocalizations.of(context)!.close,
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black54,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(24, 24),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                   ),
                 ),
