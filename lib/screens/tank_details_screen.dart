@@ -1304,85 +1304,255 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       );
     }
 
-    // Sort parameters by date and group by type
-    final sortedParams = List<WaterParameter>.from(tank.waterParameters)
-      ..sort((a, b) => b.dateRecorded.compareTo(a.dateRecorded));
+    // Group by type and find the latest reading per type (sorted by date desc)
+    final Map<String, WaterParameter> latestPerType = {};
+    for (final p in tank.waterParameters) {
+      final existing = latestPerType[p.parameterType];
+      if (existing == null ||
+          p.dateRecorded.isAfter(existing.dateRecorded)) {
+        latestPerType[p.parameterType] = p;
+      }
+    }
+    final latestParams = latestPerType.values.toList()
+      ..sort((a, b) => a.parameterType.compareTo(b.parameterType));
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text(
-          l10n.latestWaterParameters,
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        // Navigation banner → full history screen with graphs
+        OutlinedButton.icon(
+          icon: const Icon(Icons.show_chart),
+          label: Text(l10n.viewHistoryAndGraphs),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ParameterLoggerScreen(tank: tank),
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+          ),
         ),
         const SizedBox(height: 16),
 
-        // Show all parameters as cards
-        ...sortedParams.map((param) {
-          return Card(
-            child: ListTile(
-              leading: Container(
-                width: 40,
-                height: 40,
-                padding: const EdgeInsets.all(8),
-                child: Icon(Icons.science_outlined, color: cs.primary),
-              ),
-              title: Text(param.parameterType.toUpperCase()),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${param.value} ${param.unit ?? ''}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    DateFormat.yMMMd().add_jm().format(param.dateRecorded),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: cs.onSurface.withOpacity(0.6),
-                    ),
-                  ),
-                  if (param.notes != null && param.notes!.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      param.notes!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                        color: cs.onSurface.withOpacity(0.7),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              trailing: _buildEditDeleteMenu(
-                context: context,
-                onEdit: () =>
-                    showParameterSheet(context, tank, existingParameter: param),
-                onDelete: () => _confirmDelete(
-                  context,
-                  onConfirm: () {
-                    final updatedTank = tank.copyWith(
-                      waterParameters: tank.waterParameters
-                          .where((p) => p.id != param.id)
-                          .toList(),
-                      updatedAt: DateTime.now(),
-                    );
-                    ref.read(tankProvider.notifier).updateTank(updatedTank);
-                  },
-                ),
-              ),
-            ),
-          );
-        }),
+        Text(
+          l10n.latestReadings,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // 2-column mosaic grid of latest readings per parameter type
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 1.6,
+          ),
+          itemCount: latestParams.length,
+          itemBuilder: (context, index) {
+            final param = latestParams[index];
+            final color = _getParameterColor(param.parameterType);
+            return _buildParameterMosaicTile(context, param, color, tank);
+          },
+        ),
       ],
     );
+  }
+
+  /// Compact mosaic tile for a single latest water parameter reading.
+  Widget _buildParameterMosaicTile(
+    BuildContext context,
+    WaterParameter param,
+    Color color,
+    Tank tank,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ParameterLoggerScreen(tank: tank),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    _getParameterIcon(param.parameterType),
+                    size: 16,
+                    color: color,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      _getParameterLabel(param.parameterType, context),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                '${param.value}${param.unit != null && param.unit!.isNotEmpty ? ' ${param.unit}' : ''}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                DateFormat('MMM d, y').format(param.dateRecorded),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurface.withOpacity(0.5),
+                  fontSize: 10,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Returns the display label for a water parameter type.
+  String _getParameterLabel(String parameterType, BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (parameterType) {
+      case 'ammonia':
+        return l10n.ammonia;
+      case 'nitrite':
+        return l10n.nitrite;
+      case 'nitrate':
+        return l10n.nitrate;
+      case 'phosphate':
+        return l10n.phosphate;
+      case 'salinity':
+        return l10n.salinity;
+      case 'calcium':
+        return l10n.calcium;
+      case 'magnesium':
+        return l10n.magnesium;
+      case 'kh':
+        return l10n.kh;
+      case 'gh':
+        return l10n.gh;
+      case 'alkalinity':
+        return l10n.alkalinity;
+      case 'orp':
+        return l10n.orp;
+      case 'ph':
+        return l10n.ph;
+      case 'potassium':
+        return l10n.potassium;
+      case 'tds':
+        return l10n.tds;
+      case 'iodine':
+        return l10n.iodine;
+      case 'temperature':
+        return l10n.temperature;
+      default:
+        if (parameterType.isEmpty) return l10n.custom;
+        return parameterType[0].toUpperCase() +
+            (parameterType.length > 1 ? parameterType.substring(1) : '');
+    }
+  }
+
+  /// Returns the icon for a water parameter type.
+  IconData _getParameterIcon(String parameterType) {
+    switch (parameterType) {
+      case 'ammonia':
+        return Icons.warning;
+      case 'nitrite':
+        return Icons.science;
+      case 'nitrate':
+        return Icons.analytics;
+      case 'phosphate':
+        return Icons.bubble_chart;
+      case 'salinity':
+        return Icons.water;
+      case 'calcium':
+        return Icons.diamond;
+      case 'magnesium':
+        return Icons.bolt;
+      case 'kh':
+        return Icons.shield;
+      case 'gh':
+        return Icons.hardware;
+      case 'alkalinity':
+        return Icons.balance;
+      case 'orp':
+        return Icons.battery_charging_full;
+      case 'ph':
+        return Icons.science_outlined;
+      case 'potassium':
+        return Icons.spa;
+      case 'tds':
+        return Icons.grain;
+      case 'iodine':
+        return Icons.ac_unit;
+      case 'temperature':
+        return Icons.thermostat;
+      default:
+        return Icons.science;
+    }
+  }
+
+  /// Returns the accent color for a water parameter type.
+  Color _getParameterColor(String parameterType) {
+    switch (parameterType) {
+      case 'ammonia':
+        return Colors.amber;
+      case 'nitrite':
+        return Colors.orange;
+      case 'nitrate':
+        return Colors.red;
+      case 'phosphate':
+        return Colors.purple;
+      case 'salinity':
+        return Colors.blue;
+      case 'calcium':
+        return Colors.teal;
+      case 'magnesium':
+        return Colors.cyan;
+      case 'kh':
+        return Colors.indigo;
+      case 'gh':
+        return Colors.brown;
+      case 'alkalinity':
+        return Colors.lightBlue;
+      case 'orp':
+        return Colors.green;
+      case 'ph':
+        return Colors.lime;
+      case 'potassium':
+        return Colors.deepPurple;
+      case 'tds':
+        return Colors.blueGrey;
+      case 'iodine':
+        return Colors.deepOrange;
+      case 'temperature':
+        return Colors.redAccent;
+      default:
+        return Colors.teal;
+    }
   }
 
   /// Dosing tab - Dosing diary entries
@@ -1412,20 +1582,35 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       );
     }
 
-    // Get latest 10 dosing entries
-    final recentEntries = tank.dosingEntries.reversed.take(10).toList();
+    // All dosing entries, newest first
+    final allEntries = tank.dosingEntries.reversed.toList();
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        // Navigation banner → full DosingLoggerScreen
+        OutlinedButton.icon(
+          icon: const Icon(Icons.medication_outlined),
+          label: Text(l10n.openDosingDiary),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => DosingLoggerScreen(tank: tank),
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+          ),
+        ),
+        const SizedBox(height: 12),
+
         Text(
-          '${l10n.recentDosing} (${recentEntries.length}/${tank.dosingEntries.length})',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          '${l10n.recentDosing} (${allEntries.length})',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
-        ...recentEntries.map((entry) {
+        ...allEntries.map((entry) {
           return Card(
             child: ListTile(
               leading: Container(
@@ -1446,6 +1631,15 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                       color: cs.onSurface.withOpacity(0.6),
                     ),
                   ),
+                  if (entry.notes != null && entry.notes!.isNotEmpty)
+                    Text(
+                      entry.notes!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: cs.onSurface.withOpacity(0.7),
+                      ),
+                    ),
                 ],
               ),
               trailing: _buildEditDeleteMenu(
@@ -1495,20 +1689,38 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       );
     }
 
-    // Get latest 10 activity logs
-    final recentLogs = tank.notificationLogs.reversed.take(10).toList();
+    // All activity logs, newest first
+    final allLogs = tank.notificationLogs.reversed.toList();
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        // Navigation banner → full NotificationLoggerScreen (activity tab)
+        OutlinedButton.icon(
+          icon: const Icon(Icons.history),
+          label: Text(l10n.openActivityLog),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => NotificationLoggerScreen(
+                tank: tank,
+                initialTabIndex: 1,
+              ),
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+          ),
+        ),
+        const SizedBox(height: 12),
+
         Text(
-          '${l10n.recentActivity} (${recentLogs.length}/${tank.notificationLogs.length})',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          '${l10n.recentActivity} (${allLogs.length})',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
-        ...recentLogs.map((log) {
+        ...allLogs.map((log) {
           return Card(
             child: ListTile(
               leading: Container(
@@ -1517,15 +1729,27 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 padding: const EdgeInsets.all(8),
                 child: Icon(_getActivityIcon(log.type), color: cs.primary),
               ),
-              title: Text(
-                log.customCategory ?? log.type.toString().split('.').last,
-              ),
-              subtitle: Text(
-                DateFormat.yMMMd().add_jm().format(log.loggedAt),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: cs.onSurface.withOpacity(0.6),
-                ),
+              title: Text(log.getDisplayName()),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    DateFormat.yMMMd().add_jm().format(log.loggedAt),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: cs.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                  if (log.notes != null && log.notes!.isNotEmpty)
+                    Text(
+                      log.notes!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: cs.onSurface.withOpacity(0.7),
+                      ),
+                    ),
+                ],
               ),
               trailing: _buildEditDeleteMenu(
                 context: context,
@@ -1581,6 +1805,24 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        // Navigation banner → full NotificationLoggerScreen (notes tab)
+        OutlinedButton.icon(
+          icon: const Icon(Icons.note_outlined),
+          label: Text(l10n.openNotesLog),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => NotificationLoggerScreen(
+                tank: tank,
+                initialTabIndex: 0,
+              ),
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+          ),
+        ),
+        const SizedBox(height: 12),
+
         // Legacy notes field
         if (tank.notes != null && tank.notes!.isNotEmpty) ...[
           Card(

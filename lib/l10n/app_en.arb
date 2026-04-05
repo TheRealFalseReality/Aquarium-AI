@@ -5756,5 +5756,30 @@
   "more": "more",
   "@more": {
     "description": "Label shown below the overflow count tile in the fish inhabitants grid view"
+  },
+
+  "viewHistoryAndGraphs": "View History & Graphs",
+  "@viewHistoryAndGraphs": {
+    "description": "Button label to open the full parameter history screen with charts"
+  },
+
+  "openDosingDiary": "Open Dosing Diary",
+  "@openDosingDiary": {
+    "description": "Button label to open the full dosing diary screen"
+  },
+
+  "openActivityLog": "Open Activity Log",
+  "@openActivityLog": {
+    "description": "Button label to open the full activity log screen"
+  },
+
+  "openNotesLog": "Open Notes Log",
+  "@openNotesLog": {
+    "description": "Button label to open the full notes log screen"
+  },
+
+  "latestReadings": "Latest Readings",
+  "@latestReadings": {
+    "description": "Section header showing the latest water parameter readings per type"
   }
 }
