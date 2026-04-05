@@ -101,6 +101,11 @@ class FishCompatBrowserScreen extends ConsumerStatefulWidget {
   FishCompatBrowserScreenState createState() => FishCompatBrowserScreenState();
 }
 
+// Animation constants for fish-selection transitions.
+const Duration _kFishSwitchDuration = Duration(milliseconds: 280);
+const Curve _kFishSwitchInCurve = Curves.easeOut;
+const Curve _kFishSwitchOutCurve = Curves.easeIn;
+
 class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
@@ -391,9 +396,10 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
 
     if (isWide) {
       // Compute a stable key for the right panel that changes when the
-      // selected fish or the active view type changes.
+      // selected fish or the active view type changes. Include both uuid and
+      // name to handle fish that may have no uuid set.
       final rightKey = ValueKey(
-        '${_selectedFish?.uuid ?? _selectedFish?.name ?? 'none'}_$_showMatrixView',
+        '${_selectedFish?.uuid}_${_selectedFish?.name ?? 'none'}_$_showMatrixView',
       );
 
       Widget rightPanel;
@@ -417,9 +423,9 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
           // Right: detail or placeholder — animated on fish change
           Expanded(
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 280),
-              switchInCurve: Curves.easeOut,
-              switchOutCurve: Curves.easeIn,
+              duration: _kFishSwitchDuration,
+              switchInCurve: _kFishSwitchInCurve,
+              switchOutCurve: _kFishSwitchOutCurve,
               transitionBuilder: (child, animation) => FadeTransition(
                 opacity: animation,
                 child: SlideTransition(
@@ -442,7 +448,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
 
     // On narrow screens, animate between list and detail.
     final narrowKey = ValueKey(
-      '${_selectedFish?.uuid ?? _selectedFish?.name ?? 'list'}_$_showMatrixView',
+      '${_selectedFish?.uuid}_${_selectedFish?.name ?? 'list'}_$_showMatrixView',
     );
 
     Widget narrowContent;
@@ -455,9 +461,9 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
     }
 
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 280),
-      switchInCurve: Curves.easeOut,
-      switchOutCurve: Curves.easeIn,
+      duration: _kFishSwitchDuration,
+      switchInCurve: _kFishSwitchInCurve,
+      switchOutCurve: _kFishSwitchOutCurve,
       transitionBuilder: (child, animation) => FadeTransition(
         opacity: animation,
         child: SlideTransition(
