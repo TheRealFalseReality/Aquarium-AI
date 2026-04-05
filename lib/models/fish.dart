@@ -6,6 +6,7 @@ class Fish {
   final String? generalInfo; // General aquarium information (short paragraph)
   final List<String> compatibilityHighlights; // Compatibility highlight bullets
   final String? funFact; // Short fun fact about the species
+  final String? lifespan; // Expected lifespan (e.g. "5–10 years")
   final List<String> commonNames;
   final String imageURL;
   final String? reefSafe;
@@ -22,6 +23,7 @@ class Fish {
     this.generalInfo,
     this.compatibilityHighlights = const [],
     this.funFact,
+    this.lifespan,
     required this.commonNames,
     required this.imageURL,
     this.reefSafe,
@@ -83,6 +85,7 @@ class Fish {
         json['compatibilityHighlights'] ?? [],
       ),
       funFact: json['funFact'] as String?,
+      lifespan: json['lifespan'] as String?,
       commonNames: List<String>.from(json['commonNames'] ?? []),
       imageURL: json['imageURL'] as String,
       reefSafe: json['reefSafe'] as String?,
@@ -103,6 +106,7 @@ class Fish {
     if (compatibilityHighlights.isNotEmpty)
       'compatibilityHighlights': compatibilityHighlights,
     if (funFact != null) 'funFact': funFact,
+    if (lifespan != null) 'lifespan': lifespan,
     'commonNames': commonNames,
     'imageURL': imageURL,
     if (reefSafe != null) 'reefSafe': reefSafe,

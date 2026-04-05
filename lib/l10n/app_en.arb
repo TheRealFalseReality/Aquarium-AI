@@ -5781,5 +5781,58 @@
   "latestReadings": "Latest Readings",
   "@latestReadings": {
     "description": "Section header showing the latest water parameter readings per type"
+  "askAI": "Ask AI",
+  "@askAI": {
+    "description": "Label for the Ask AI floating action button shown when a fish is selected in the browser"
+  },
+
+  "askAIAboutFish": "Ask AI About a Fish",
+  "@askAIAboutFish": {
+    "description": "Title of the species picker sheet before an AI fish info request"
+  },
+
+  "selectFishSpecies": "Select or enter a fish species",
+  "@selectFishSpecies": {
+    "description": "Subtitle in the species picker sheet prompting the user to select or type a fish"
+  },
+
+  "askAIFollowUpHint": "Ask a follow-up question...",
+  "@askAIFollowUpHint": {
+    "description": "Hint text in the follow-up chat input field of the fish AI chat sheet"
+  },
+
+  "keyFacts": "Key Facts",
+  "@keyFacts": {
+    "description": "Section header for key facts in a fish AI info card"
+  },
+
+  "funFacts": "Fun Facts",
+  "@funFacts": {
+    "description": "Section header for fun facts in a fish AI info card"
+  },
+
+  "compatibleWith": "Compatible With",
+  "@compatibleWith": {
+    "description": "Section header listing compatible tank mates"
+  },
+
+  "incompatibleWith": "Incompatible With",
+  "@incompatibleWith": {
+    "description": "Section header listing incompatible species"
+  },
+
+  "fishSpeciesHint": "e.g. Clownfish, Betta...",
+  "@fishSpeciesHint": {
+    "description": "Placeholder hint in the species input field of the Ask AI sheet"
+  },
+
+  "selectSpecificVariety": "Select a specific variety",
+  "@selectSpecificVariety": {
+    "description": "Label above the common-name chips in the Ask AI species picker"
+  },
+
+  "customSpeciesLabel": "Or enter your own species",
+  "@customSpeciesLabel": {
+    "description": "Label above the custom species text field in the Ask AI species picker"
   }
 }

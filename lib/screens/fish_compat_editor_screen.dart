@@ -39,6 +39,7 @@ class _FishEntry {
   String? generalInfo; // General aquarium information (short paragraph)
   List<String> compatibilityHighlights; // Compatibility highlight bullets
   String? funFact; // Short fun fact about the species
+  String? lifespan; // Expected lifespan (e.g. "5–10 years")
   List<String> commonNames;
   String? reefSafe;
   List<String> compatible;
@@ -55,6 +56,7 @@ class _FishEntry {
     this.generalInfo,
     List<String>? compatibilityHighlights,
     this.funFact,
+    this.lifespan,
     required this.commonNames,
     this.reefSafe,
     required this.compatible,
@@ -76,6 +78,7 @@ class _FishEntry {
       j['compatibilityHighlights'] ?? [],
     ),
     funFact: j['funFact'] as String?,
+    lifespan: j['lifespan'] as String?,
     commonNames: List<String>.from(j['commonNames'] ?? []),
     reefSafe: j['reefSafe'] as String?,
     compatible: List<String>.from(j['compatible'] ?? []),
@@ -97,6 +100,7 @@ class _FishEntry {
     if (compatibilityHighlights.isNotEmpty)
       'compatibilityHighlights': compatibilityHighlights,
     if (funFact != null && funFact!.isNotEmpty) 'funFact': funFact,
+    if (lifespan != null && lifespan!.isNotEmpty) 'lifespan': lifespan,
     if (reefSafe != null) 'reefSafe': reefSafe,
     'compatible': compatible,
     'notRecommended': notRecommended,
@@ -115,6 +119,7 @@ class _FishEntry {
     Object? generalInfo = _sentinel,
     List<String>? compatibilityHighlights,
     Object? funFact = _sentinel,
+    Object? lifespan = _sentinel,
     List<String>? commonNames,
     Object? reefSafe = _sentinel,
     List<String>? compatible,
@@ -134,6 +139,7 @@ class _FishEntry {
     compatibilityHighlights: compatibilityHighlights ??
         List<String>.from(this.compatibilityHighlights),
     funFact: funFact == _sentinel ? this.funFact : funFact as String?,
+    lifespan: lifespan == _sentinel ? this.lifespan : lifespan as String?,
     commonNames: commonNames ?? List<String>.from(this.commonNames),
     reefSafe: reefSafe == _sentinel ? this.reefSafe : reefSafe as String?,
     compatible: compatible ?? List<String>.from(this.compatible),
@@ -1664,6 +1670,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   late TextEditingController _originHabitatCtrl;
   late TextEditingController _generalInfoCtrl;
   late TextEditingController _funFactCtrl;
+  late TextEditingController _lifespanCtrl;
   late List<TextEditingController> _commonNameCtrls;
   late List<TextEditingController> _careFactCtrls;
   late List<TextEditingController> _compatHighlightCtrls;
@@ -1690,6 +1697,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     _generalInfoCtrl =
         TextEditingController(text: widget.fish.generalInfo ?? '');
     _funFactCtrl = TextEditingController(text: widget.fish.funFact ?? '');
+    _lifespanCtrl = TextEditingController(text: widget.fish.lifespan ?? '');
     _commonNameCtrls = widget.fish.commonNames
         .map((n) => TextEditingController(text: n))
         .toList();
@@ -1708,6 +1716,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
     _originHabitatCtrl.dispose();
     _generalInfoCtrl.dispose();
     _funFactCtrl.dispose();
+    _lifespanCtrl.dispose();
     _newCommonNameCtrl.dispose();
     _newCareFactCtrl.dispose();
     _newCompatHighlightCtrl.dispose();
@@ -1863,6 +1872,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
           .where((s) => s.isNotEmpty)
           .toList(),
       funFact: _trimOrNull(_funFactCtrl.text),
+      lifespan: _trimOrNull(_lifespanCtrl.text),
       commonNames: commonNames,
       reefSafe: _reefSafe,
       compatible: widget.fish.compatible,
@@ -2149,6 +2159,16 @@ class _FishEditDialogState extends State<_FishEditDialog> {
                 maxLines: 2,
                 minLines: 1,
                 keyboardType: TextInputType.multiline,
+              ),
+              const SizedBox(height: 12),
+              // Lifespan
+              TextField(
+                controller: _lifespanCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Lifespan',
+                  border: OutlineInputBorder(),
+                  hintText: 'e.g. 5–10 years',
+                ),
               ),
               const SizedBox(height: 12),
               // Reef Safe (marine only)

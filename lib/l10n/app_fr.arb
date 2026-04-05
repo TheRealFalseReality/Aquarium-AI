@@ -1529,8 +1529,8 @@
   "harmonyScoreLabel": "Harmonie",
   "@harmonyScoreLabel": {
     "description": "Short label for the harmony score stat in the tank health summary card"
-  }
-,
+  },
+  
   "more": "plus",
   "@more": {
     "description": "Label shown below the overflow count tile in the fish inhabitants grid view"
@@ -1559,5 +1559,58 @@
   "latestReadings": "Dernières mesures",
   "@latestReadings": {
     "description": "Section header showing the latest water parameter readings per type"
+  "askAI": "Demander à l'IA",
+  "@askAI": {
+    "description": "Label for the Ask AI floating action button shown when a fish is selected in the browser"
+  },
+
+  "askAIAboutFish": "Demander à l'IA sur un poisson",
+  "@askAIAboutFish": {
+    "description": "Title of the species picker sheet before an AI fish info request"
+  },
+
+  "selectFishSpecies": "Sélectionner ou saisir une espèce de poisson",
+  "@selectFishSpecies": {
+    "description": "Subtitle in the species picker sheet prompting the user to select or type a fish"
+  },
+
+  "askAIFollowUpHint": "Posez une question de suivi...",
+  "@askAIFollowUpHint": {
+    "description": "Hint text in the follow-up chat input field of the fish AI chat sheet"
+  },
+
+  "keyFacts": "Faits clés",
+  "@keyFacts": {
+    "description": "Section header for key facts in a fish AI info card"
+  },
+
+  "funFacts": "Le saviez-vous ?",
+  "@funFacts": {
+    "description": "Section header for fun facts in a fish AI info card"
+  },
+
+  "compatibleWith": "Compatible avec",
+  "@compatibleWith": {
+    "description": "Section header listing compatible tank mates"
+  },
+
+  "incompatibleWith": "Incompatible avec",
+  "@incompatibleWith": {
+    "description": "Section header listing incompatible species"
+  },
+
+  "fishSpeciesHint": "ex. Poisson clown, Betta...",
+  "@fishSpeciesHint": {
+    "description": "Placeholder hint in the species input field of the Ask AI sheet"
+  },
+
+  "selectSpecificVariety": "Sélectionner une variété spécifique",
+  "@selectSpecificVariety": {
+    "description": "Label above the common-name chips in the Ask AI species picker"
+  },
+
+  "customSpeciesLabel": "Ou entrez votre propre espèce",
+  "@customSpeciesLabel": {
+    "description": "Label above the custom species text field in the Ask AI species picker"
   }
 }
