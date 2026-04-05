@@ -4145,10 +4145,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     const maxGroups = 3; // Limit to 3 fish types to keep card compact
 
     if (isGridView) {
-      // Grid/tile mode: compact circular avatar tiles in a Wrap
+      // Grid/tile mode: compact circular avatar tiles in a Wrap — show ALL fish groups
       final fishGridTiles = <Widget>[];
       for (final entry in groupedFish.entries) {
-        if (fishGridTiles.length >= maxGroups) break;
         final fishType = entry.key;
         final inhabitants = entry.value;
         final fishImageUrl = _getFishImageUrl(
@@ -4232,42 +4231,6 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   ).textTheme.bodySmall?.copyWith(fontSize: 10),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-      // "More" indicator
-      if (groupedFish.length > maxGroups) {
-        fishGridTiles.add(
-          SizedBox(
-            width: 72,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHighest,
-                  child: Text(
-                    '+${groupedFish.length - maxGroups}',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  AppLocalizations.of(context)!.more,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 10,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontStyle: FontStyle.italic,
-                  ),
                   textAlign: TextAlign.center,
                 ),
               ],

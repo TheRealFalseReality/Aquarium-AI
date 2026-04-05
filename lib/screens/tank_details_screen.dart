@@ -19,7 +19,6 @@ import '../services/fish_data_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
-import '../utils/tank_harmony_calculator.dart';
 import '../widgets/accessible_feedback.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_logger_screen.dart';
@@ -951,18 +950,14 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         ? DateFormat('MMM d, yyyy').format(latestParam.dateRecorded)
         : '-';
 
-    // Harmony score
-    final harmonyScore = tank.harmonyScore;
-    final harmonyText = harmonyScore != null
-        ? '${TankHarmonyCalculator.getHarmonyLabel(harmonyScore)} (${(harmonyScore * 100).toStringAsFixed(0)}%)'
-        : '-';
-    final harmonyColor = harmonyScore != null
-        ? (harmonyScore >= 0.8
-              ? Colors.green
-              : harmonyScore >= 0.6
-              ? Colors.orange
-              : Colors.red)
-        : cs.onSurfaceVariant;
+    // Total inhabitants count
+    final totalInhabitants = tank.inhabitants.fold<int>(
+      0,
+      (sum, i) => sum + i.quantity,
+    );
+    final totalInhabitantsText = tank.inhabitants.isEmpty
+        ? '-'
+        : '$totalInhabitants';
 
     // Overdue notifications count
     final overdueCount =
@@ -1016,10 +1011,9 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 Expanded(
                   child: _buildHealthStatItem(
                     context,
-                    icon: Icons.balance_outlined,
-                    label: l10n.harmonyScoreLabel,
-                    value: harmonyText,
-                    valueColor: harmonyColor,
+                    icon: Icons.pets_outlined,
+                    label: l10n.inhabitantsLabel,
+                    value: totalInhabitantsText,
                   ),
                 ),
                 Expanded(

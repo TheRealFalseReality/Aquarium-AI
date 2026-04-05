@@ -1241,18 +1241,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           return AlertDialog(
             icon: Icon(Icons.bug_report, color: Colors.red.shade700, size: 36),
             title: Text(l10n.debugMenu),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  l10n.debugMenuDescription,
-                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l10n.debugMenuDescription,
+                      style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
                 // Hide Ads toggle
                 SwitchListTile(
                   secondary: Icon(Icons.block, color: Colors.red.shade700),
@@ -1396,6 +1399,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ],
             ),
+          ),
+        ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
