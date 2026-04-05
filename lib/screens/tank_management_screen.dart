@@ -301,7 +301,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return MainLayout(
       title: l10n.myTanks,
       bottomNavigationBar: const AdBanner(),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: _isSortMenuExpanded
+          ? null
+          : FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const TankCreationScreen()),
@@ -1160,6 +1162,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       top: 100, // Position below the header
       left: 16,
       right: 16,
+      bottom: 16, // Constrain height so content stays on screen and scrolls
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 200),
         opacity: _isSortMenuExpanded ? 1.0 : 0.0,
