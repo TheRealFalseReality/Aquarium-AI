@@ -1471,7 +1471,9 @@
   },
   "latestReadings": "Neueste Messwerte",
   "@latestReadings": {
-    "description": "Section header showing the latest water parameter readings per type",
+    "description": "Section header showing the latest water parameter readings per type"
+  },
+
     "askAI": "KI fragen",
     "@askAI": {
       "description": "Label for the Ask AI floating action button shown when a fish is selected in the browser"
@@ -1517,4 +1519,3 @@
       "description": "Label above the custom species text field in the Ask AI species picker"
     }
   }
-}
