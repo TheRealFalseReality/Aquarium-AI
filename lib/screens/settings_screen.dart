@@ -1419,21 +1419,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       notes: 'Peaceful community tank — high harmony',
       inhabitants: [
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Neon 1',
           fishUnit: 'Neon Tetra',
           quantity: 6,
           speciesTags: const [],
         ),
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Guppy 1',
           fishUnit: 'Guppy',
           quantity: 4,
           speciesTags: const [],
         ),
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Platy 1',
           fishUnit: 'Platy',
           quantity: 3,
@@ -1452,7 +1452,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       notes: 'Single betta — perfect harmony',
       inhabitants: [
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'King Betta',
           fishUnit: 'Betta',
           quantity: 1,
@@ -1471,21 +1471,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       notes: 'Aggressive fish mix — low harmony',
       inhabitants: [
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Oscar 1',
           fishUnit: 'Oscar',
           quantity: 1,
           speciesTags: const [],
         ),
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Cichlid 1',
           fishUnit: 'Green Terror',
           quantity: 1,
           speciesTags: const [],
         ),
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Angelfish 1',
           fishUnit: 'Angelfish',
           quantity: 2,
@@ -1504,14 +1504,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       notes: 'Planted nano tank',
       inhabitants: [
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Corydoras 1',
           fishUnit: 'Cory Catfish',
           quantity: 4,
           speciesTags: const [],
         ),
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Rasbora 1',
           fishUnit: 'Harlequin Rasbora',
           quantity: 6,
@@ -1540,14 +1540,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       notes: 'Fish only with live rock — medium harmony',
       inhabitants: [
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Clownfish 1',
           fishUnit: 'Clownfish',
           quantity: 2,
           speciesTags: const [],
         ),
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Damsel 1',
           fishUnit: 'Blue Damsel',
           quantity: 1,
@@ -1567,21 +1567,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       notes: 'SPS/LPS reef tank — high harmony',
       inhabitants: [
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Clownfish 1',
           fishUnit: 'Clownfish',
           quantity: 2,
           speciesTags: const [],
         ),
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Tang 1',
           fishUnit: 'Blue Tang',
           quantity: 1,
           speciesTags: const [],
         ),
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Goby 1',
           fishUnit: 'Watchman Goby',
           quantity: 1,
@@ -1601,21 +1601,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       notes: 'Large predator FOWLR — low harmony',
       inhabitants: [
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Lionfish 1',
           fishUnit: 'Volitans Lionfish',
           quantity: 1,
           speciesTags: const [],
         ),
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Puffer 1',
           fishUnit: 'Porcupine Puffer',
           quantity: 1,
           speciesTags: const [],
         ),
         TankInhabitant(
-          id: Uuid().v4(),
+          id: const Uuid().v4(),
           customName: 'Trigger 1',
           fishUnit: 'Picasso Trigger',
           quantity: 1,

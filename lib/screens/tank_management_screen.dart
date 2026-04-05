@@ -4262,7 +4262,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'more',
+                  AppLocalizations.of(context)!.more,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontSize: 10,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,

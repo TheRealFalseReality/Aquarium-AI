@@ -1520,4 +1520,9 @@
   "@harmonyScoreLabel": {
     "description": "Short label for the harmony score stat in the tank health summary card"
   }
+,
+  "more": "mehr",
+  "@more": {
+    "description": "Label shown below the overflow count tile in the fish inhabitants grid view"
+  }
 }
