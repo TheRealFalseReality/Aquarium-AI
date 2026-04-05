@@ -5751,5 +5751,10 @@
   "incompatibleWith": "Incompatible With",
   "@incompatibleWith": {
     "description": "Section header listing incompatible species"
+  },
+
+  "fishSpeciesHint": "e.g. Clownfish, Betta...",
+  "@fishSpeciesHint": {
+    "description": "Placeholder hint in the species input field of the Ask AI sheet"
   }
 }

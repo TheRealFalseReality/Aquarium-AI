@@ -1889,7 +1889,7 @@ class _FishSpeciesPickerSheetState extends State<_FishSpeciesPickerSheet> {
                   children: [
                     const Icon(Icons.auto_awesome),
                     const SizedBox(width: 8),
-                    Expanded(
+                    Flexible(
                       child: Text(
                         l10n.askAIAboutFish,
                         style: Theme.of(context).textTheme.titleLarge,
@@ -1914,7 +1914,7 @@ class _FishSpeciesPickerSheetState extends State<_FishSpeciesPickerSheet> {
                   autofocus: widget.initialSpecies.isEmpty,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search),
-                    hintText: 'e.g. Clownfish, Betta...',
+                    hintText: l10n.fishSpeciesHint,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -2096,7 +2096,7 @@ class _FishAiChatSheetState extends ConsumerState<_FishAiChatSheet> {
               children: [
                 const Icon(Icons.auto_awesome),
                 const SizedBox(width: 8),
-                Expanded(
+                Flexible(
                   child: Text(
                     widget.fishName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(

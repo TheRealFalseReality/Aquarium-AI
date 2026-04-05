@@ -1519,5 +1519,10 @@
   "incompatibleWith": "Nicht verträglich mit",
   "@incompatibleWith": {
     "description": "Section header listing incompatible species"
+  },
+
+  "fishSpeciesHint": "z. B. Anemonenfisch, Betta...",
+  "@fishSpeciesHint": {
+    "description": "Placeholder hint in the species input field of the Ask AI sheet"
   }
 }
