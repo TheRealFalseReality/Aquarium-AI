@@ -318,7 +318,8 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
   /// Shows the species-picker bottom sheet so the user can confirm/change
   /// which fish variety to ask the AI about, then opens the chat sheet.
   void _showSpeciesPicker(BuildContext context, AppLocalizations l10n) {
-    final fish = _selectedFish!;
+    final fish = _selectedFish;
+    if (fish == null) return;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -1931,14 +1932,12 @@ class _FishSpeciesPickerSheetState extends State<_FishSpeciesPickerSheet> {
                     spacing: 8,
                     runSpacing: 6,
                     children: commonNames.map((name) {
-                      final isSelected = _selectedCommonName == name &&
-                          _customController.text.trim().isEmpty;
+                      final isSelected = _selectedCommonName == name;
                       return ChoiceChip(
                         label: Text(name),
                         selected: isSelected,
-                        onSelected: (_) => setState(() {
-                          _selectedCommonName =
-                              isSelected ? null : name;
+                        onSelected: (selected) => setState(() {
+                          _selectedCommonName = selected ? name : null;
                           // Clear custom input when a chip is tapped
                           _customController.clear();
                         }),
@@ -1971,7 +1970,7 @@ class _FishSpeciesPickerSheetState extends State<_FishSpeciesPickerSheet> {
                     ),
                   ),
                   // Deselect any chip when user starts typing a custom name
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (_) => setState(() => _selectedCommonName = null),
                 ),
               ],
             ),
