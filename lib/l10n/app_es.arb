@@ -1489,5 +1489,45 @@
   "onboardingApiKeyNote": "La gestión de tanques, las puntuaciones de armonía y todas las calculadoras siempre funcionan sin una clave API.",
   "@onboardingApiKeyNote": {
     "description": "Footnote in the API key onboarding step noting that calculators work without a key"
+  },
+
+  "askAI": "Preguntar a IA",
+  "@askAI": {
+    "description": "Label for the Ask AI floating action button shown when a fish is selected in the browser"
+  },
+
+  "askAIAboutFish": "Preguntar a la IA sobre un pez",
+  "@askAIAboutFish": {
+    "description": "Title of the species picker sheet before an AI fish info request"
+  },
+
+  "selectFishSpecies": "Selecciona o escribe una especie de pez",
+  "@selectFishSpecies": {
+    "description": "Subtitle in the species picker sheet prompting the user to select or type a fish"
+  },
+
+  "askAIFollowUpHint": "Haz una pregunta de seguimiento...",
+  "@askAIFollowUpHint": {
+    "description": "Hint text in the follow-up chat input field of the fish AI chat sheet"
+  },
+
+  "keyFacts": "Datos clave",
+  "@keyFacts": {
+    "description": "Section header for key facts in a fish AI info card"
+  },
+
+  "funFacts": "Curiosidades",
+  "@funFacts": {
+    "description": "Section header for fun facts in a fish AI info card"
+  },
+
+  "compatibleWith": "Compatible con",
+  "@compatibleWith": {
+    "description": "Section header listing compatible tank mates"
+  },
+
+  "incompatibleWith": "Incompatible con",
+  "@incompatibleWith": {
+    "description": "Section header listing incompatible species"
   }
 }
