@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
@@ -102,7 +103,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
   late TabController _tabController;
   Fish? _selectedFish;
   String _searchQuery = '';
-  bool _showMatrixView = false;
+  bool _showMatrixView = true;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocus = FocusNode();
   bool _isSearchVisible = false;
@@ -127,7 +128,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
       _selectedFish = null;
       _searchQuery = '';
       _searchController.clear();
-      _showMatrixView = false;
+      _showMatrixView = true;
       _collapsedSections.clear();
       _isSearchVisible = false;
     });
@@ -450,7 +451,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
               onPressed: () => setState(() {
                 _selectedFish = null;
                 _collapsedSections.clear();
-                _showMatrixView = false;
+                _showMatrixView = true;
               }),
               icon: const Icon(Icons.arrow_back),
               label: Text(l10n.backToList),
@@ -483,16 +484,6 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (selected.funFact?.isNotEmpty == true)
-                        _BrowserInfoSection(
-                          title: l10n.fishFunFact,
-                          icon: Icons.lightbulb_outline,
-                          initiallyExpanded: true,
-                          child: MarkdownBody(
-                            data: selected.funFact!,
-                            styleSheet: fishInfoMarkdownStyle(context),
-                          ),
-                        ),
                       if (selected.originHabitat?.isNotEmpty == true)
                         _BrowserInfoSection(
                           title: l10n.fishOriginHabitat,
@@ -539,6 +530,16 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                                 .toList(),
                           ),
                         ),
+                      if (selected.funFact?.isNotEmpty == true)
+                        _BrowserInfoSection(
+                          title: l10n.fishFunFact,
+                          icon: Icons.lightbulb_outline,
+                          initiallyExpanded: false,
+                          child: MarkdownBody(
+                            data: selected.funFact!,
+                            styleSheet: fishInfoMarkdownStyle(context),
+                          ),
+                        ),
                       const SizedBox(height: 8),
                     ],
                   ),
@@ -554,17 +555,17 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
               mainAxisSize: MainAxisSize.min,
               children: [
                 _ViewToggleChip(
-                  label: l10n.listView,
-                  icon: Icons.view_list,
-                  isSelected: !_showMatrixView,
-                  onTap: () => setState(() => _showMatrixView = false),
-                ),
-                const SizedBox(width: 8),
-                _ViewToggleChip(
                   label: l10n.matrixView,
                   icon: Icons.grid_view,
                   isSelected: _showMatrixView,
                   onTap: () => setState(() => _showMatrixView = true),
+                ),
+                const SizedBox(width: 8),
+                _ViewToggleChip(
+                  label: l10n.listView,
+                  icon: Icons.view_list,
+                  isSelected: !_showMatrixView,
+                  onTap: () => setState(() => _showMatrixView = false),
                 ),
               ],
             ),
@@ -808,7 +809,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
               onPressed: () => setState(() {
                 _selectedFish = null;
                 _collapsedSections.clear();
-                _showMatrixView = false;
+                _showMatrixView = true;
               }),
               icon: const Icon(Icons.arrow_back),
               label: Text(l10n.backToList),
@@ -818,7 +819,90 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
         SliverToBoxAdapter(
           child: _FishHeaderCard(fish: selected, category: category),
         ),
-        // Detail / Matrix view toggle chips
+        // Info sections card (same as detail view)
+        if (selected.originHabitat?.isNotEmpty == true ||
+            selected.careFacts.isNotEmpty ||
+            selected.generalInfo?.isNotEmpty == true ||
+            selected.compatibilityHighlights.isNotEmpty ||
+            selected.funFact?.isNotEmpty == true)
+          SliverToBoxAdapter(
+            child: Padding(
+              key: ValueKey('info_card_list_${selected.uuid ?? selected.name}'),
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+              child: Card(
+                margin: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 4, 14, 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (selected.originHabitat?.isNotEmpty == true)
+                        _BrowserInfoSection(
+                          title: l10n.fishOriginHabitat,
+                          icon: Icons.public,
+                          initiallyExpanded: true,
+                          child: MarkdownBody(
+                            data: selected.originHabitat!,
+                            styleSheet: fishInfoMarkdownStyle(context),
+                          ),
+                        ),
+                      if (selected.careFacts.isNotEmpty)
+                        _BrowserInfoSection(
+                          title: l10n.fishCareFacts,
+                          icon: Icons.health_and_safety_outlined,
+                          initiallyExpanded: false,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: selected.careFacts
+                                .map((fact) => _BrowserBulletItem(text: fact))
+                                .toList(),
+                          ),
+                        ),
+                      if (selected.generalInfo?.isNotEmpty == true)
+                        _BrowserInfoSection(
+                          title: l10n.fishGeneralInfo,
+                          icon: Icons.info_outline,
+                          initiallyExpanded: false,
+                          child: MarkdownBody(
+                            data: selected.generalInfo!,
+                            styleSheet: fishInfoMarkdownStyle(context),
+                          ),
+                        ),
+                      if (selected.compatibilityHighlights.isNotEmpty)
+                        _BrowserInfoSection(
+                          title: l10n.fishCompatibilityHighlights,
+                          icon: Icons.people_outline,
+                          initiallyExpanded: false,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: selected.compatibilityHighlights
+                                .map(
+                                  (item) => _BrowserBulletItem(text: item),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      if (selected.funFact?.isNotEmpty == true)
+                        _BrowserInfoSection(
+                          title: l10n.fishFunFact,
+                          icon: Icons.lightbulb_outline,
+                          initiallyExpanded: false,
+                          child: MarkdownBody(
+                            data: selected.funFact!,
+                            styleSheet: fishInfoMarkdownStyle(context),
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        // List / Matrix view toggle chips
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -826,17 +910,17 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
               mainAxisSize: MainAxisSize.min,
               children: [
                 _ViewToggleChip(
-                  label: l10n.listView,
-                  icon: Icons.view_list,
-                  isSelected: !_showMatrixView,
-                  onTap: () => setState(() => _showMatrixView = false),
-                ),
-                const SizedBox(width: 8),
-                _ViewToggleChip(
                   label: l10n.matrixView,
                   icon: Icons.grid_view,
                   isSelected: _showMatrixView,
                   onTap: () => setState(() => _showMatrixView = true),
+                ),
+                const SizedBox(width: 8),
+                _ViewToggleChip(
+                  label: l10n.listView,
+                  icon: Icons.view_list,
+                  isSelected: !_showMatrixView,
+                  onTap: () => setState(() => _showMatrixView = false),
                 ),
               ],
             ),
@@ -962,6 +1046,21 @@ class _FishHeaderCard extends StatefulWidget {
 class _FishHeaderCardState extends State<_FishHeaderCard> {
   bool _namesExpanded = true;
 
+  Future<void> _launchGoogleSearch(BuildContext context) async {
+    final categoryLabel =
+        widget.category == 'marine' ? 'saltwater' : widget.category;
+    final query =
+        Uri.encodeComponent('${widget.fish.name} $categoryLabel fish');
+    final uri = Uri.parse('https://www.google.com/search?q=$query');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open browser')),
+        );
+      }
+    }
+  }
+
   void _openFullScreenImage(BuildContext context) {
     AnalyticsService.logFeatureUsed(
       featureName: 'compat_browser_image_viewed',
@@ -1063,26 +1162,55 @@ class _FishHeaderCardState extends State<_FishHeaderCard> {
             Positioned(
               top: 8,
               right: 8,
-              child: GestureDetector(
-                onTap: () => _openFullScreenImage(context),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Icon(
-                        Icons.fullscreen,
-                        color: Colors.white,
-                        size: 18,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Google search button
+                  GestureDetector(
+                    onTap: () => _launchGoogleSearch(context),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            Icons.search,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 6),
+                  // Fullscreen button
+                  GestureDetector(
+                    onTap: () => _openFullScreenImage(context),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            Icons.fullscreen,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             // Gradient overlay at the bottom (tapping expands common names)
