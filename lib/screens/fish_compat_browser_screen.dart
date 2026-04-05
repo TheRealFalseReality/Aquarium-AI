@@ -245,11 +245,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                 label: Text(l10n.askAI),
                 onPressed: () {
                   if (!checkApiKey(context, ref)) return;
-                  final category = _categories[_tabController.index];
-                  final fishMap =
-                      ref.read(fishDataProvider).asData?.value ?? {};
-                  final allFish = fishMap[category] ?? [];
-                  _showSpeciesPicker(context, l10n, allFish, category);
+                  _showSpeciesPicker(context, l10n);
                 },
               ),
             ),
@@ -320,14 +316,9 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
   }
 
   /// Shows the species-picker bottom sheet so the user can confirm/change
-  /// which fish to ask the AI about, then opens the chat sheet.
-  void _showSpeciesPicker(
-    BuildContext context,
-    AppLocalizations l10n,
-    List<Fish> allFish,
-    String category,
-  ) {
-    final initialName = _selectedFish?.name ?? '';
+  /// which fish variety to ask the AI about, then opens the chat sheet.
+  void _showSpeciesPicker(BuildContext context, AppLocalizations l10n) {
+    final fish = _selectedFish!;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -336,8 +327,7 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) => _FishSpeciesPickerSheet(
-        initialSpecies: initialName,
-        allFish: allFish,
+        fish: fish,
         l10n: l10n,
         onConfirm: (speciesName) =>
             _showFishAiChat(context, l10n, speciesName),
@@ -1810,17 +1800,19 @@ class _BrowserBulletItem extends StatelessWidget {
 // Ask AI — Species Picker Sheet
 // ---------------------------------------------------------------------------
 
-/// A modal bottom sheet that lets the user confirm or change the fish species
-/// before triggering the AI fish-info request.
+/// A modal bottom sheet that lets the user pick a specific common-name variety
+/// of the selected fish type, or type in their own species name, before
+/// triggering the AI fish-info request.
+///
+/// When nothing is selected the query falls back to the fish type's [fish.name]
+/// so the AI returns general information about the fish group.
 class _FishSpeciesPickerSheet extends StatefulWidget {
-  final String initialSpecies;
-  final List<Fish> allFish;
+  final Fish fish;
   final AppLocalizations l10n;
   final void Function(String speciesName) onConfirm;
 
   const _FishSpeciesPickerSheet({
-    required this.initialSpecies,
-    required this.allFish,
+    required this.fish,
     required this.l10n,
     required this.onConfirm,
   });
@@ -1831,89 +1823,144 @@ class _FishSpeciesPickerSheet extends StatefulWidget {
 }
 
 class _FishSpeciesPickerSheetState extends State<_FishSpeciesPickerSheet> {
-  late TextEditingController _controller;
-  String _filter = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.initialSpecies);
-    _filter = widget.initialSpecies;
-  }
+  /// The common name chip the user has tapped, or null = general fish-type info.
+  String? _selectedCommonName;
+  final TextEditingController _customController = TextEditingController();
 
   @override
   void dispose() {
-    _controller.dispose();
+    _customController.dispose();
     super.dispose();
+  }
+
+  /// The species name that will be sent to the AI:
+  /// custom text → selected chip → fish type name (general fallback).
+  String get _queryName {
+    final custom = _customController.text.trim();
+    if (custom.isNotEmpty) return custom;
+    if (_selectedCommonName != null) return _selectedCommonName!;
+    return widget.fish.name;
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = widget.l10n;
     final cs = Theme.of(context).colorScheme;
-    final q = _filter.toLowerCase();
-    final filtered = widget.allFish
-        .where(
-          (f) =>
-              f.name.toLowerCase().contains(q) ||
-              f.commonNames.any((n) => n.toLowerCase().contains(q)),
-        )
-        .toList();
+    final commonNames = widget.fish.commonNames;
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.65,
-      minChildSize: 0.4,
+      initialChildSize: commonNames.isEmpty ? 0.45 : 0.6,
+      minChildSize: 0.35,
       maxChildSize: 0.92,
       expand: false,
       builder: (ctx, scrollController) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Drag handle
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: cs.onSurfaceVariant.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(2),
+            child: Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: cs.onSurfaceVariant.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
           ),
-          // Title + search field
+          // Header: thumbnail + fish type name + close
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.fromLTRB(16, 0, 8, 12),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.auto_awesome),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        l10n.askAIAboutFish,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
+                SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: FishImage(fish: widget.fish, fit: BoxFit.cover),
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.fish.name,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                      Text(
+                        l10n.askAIAboutFish,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          // Scrollable content
+          Expanded(
+            child: ListView(
+              controller: scrollController,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              children: [
+                // Common-name chips section (only if the fish has common names)
+                if (commonNames.isNotEmpty) ...[
+                  Text(
+                    l10n.selectSpecificVariety,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: commonNames.map((name) {
+                      final isSelected = _selectedCommonName == name &&
+                          _customController.text.trim().isEmpty;
+                      return ChoiceChip(
+                        label: Text(name),
+                        selected: isSelected,
+                        onSelected: (_) => setState(() {
+                          _selectedCommonName =
+                              isSelected ? null : name;
+                          // Clear custom input when a chip is tapped
+                          _customController.clear();
+                        }),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  const Divider(height: 1),
+                  const SizedBox(height: 16),
+                ],
+                // Custom species text field
                 Text(
-                  l10n.selectFishSpecies,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  l10n.customSpeciesLabel,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 TextField(
-                  controller: _controller,
-                  autofocus: widget.initialSpecies.isEmpty,
+                  controller: _customController,
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.edit_outlined),
                     hintText: l10n.fishSpeciesHint,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1923,60 +1970,21 @@ class _FishSpeciesPickerSheetState extends State<_FishSpeciesPickerSheet> {
                       vertical: 12,
                     ),
                   ),
-                  onChanged: (v) => setState(() => _filter = v),
+                  // Deselect any chip when user starts typing a custom name
+                  onChanged: (_) => setState(() {}),
                 ),
               ],
-            ),
-          ),
-          const Divider(height: 1),
-          // Scrollable fish list
-          Expanded(
-            child: ListView.builder(
-              controller: scrollController,
-              itemCount: filtered.length,
-              itemBuilder: (ctx, i) {
-                final fish = filtered[i];
-                final isSelected = fish.name == _controller.text;
-                return ListTile(
-                  leading: SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: FishImage(fish: fish, fit: BoxFit.cover),
-                    ),
-                  ),
-                  title: Text(fish.name),
-                  subtitle: fish.commonNames.isNotEmpty
-                      ? Text(
-                          fish.commonNames.join(', '),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : null,
-                  trailing: isSelected
-                      ? Icon(Icons.check_circle, color: cs.primary)
-                      : null,
-                  selected: isSelected,
-                  onTap: () => setState(() {
-                    _controller.text = fish.name;
-                    _filter = fish.name;
-                  }),
-                );
-              },
             ),
           ),
           // Confirm button
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: FilledButton.icon(
-              onPressed: _controller.text.trim().isEmpty
-                  ? null
-                  : () {
-                      final species = _controller.text.trim();
-                      Navigator.pop(context);
-                      widget.onConfirm(species);
-                    },
+              onPressed: () {
+                final species = _queryName;
+                Navigator.pop(context);
+                widget.onConfirm(species);
+              },
               icon: const Icon(Icons.auto_awesome),
               label: Text(l10n.askAI),
               style: FilledButton.styleFrom(

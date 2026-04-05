@@ -5756,5 +5756,15 @@
   "fishSpeciesHint": "e.g. Clownfish, Betta...",
   "@fishSpeciesHint": {
     "description": "Placeholder hint in the species input field of the Ask AI sheet"
+  },
+
+  "selectSpecificVariety": "Select a specific variety",
+  "@selectSpecificVariety": {
+    "description": "Label above the common-name chips in the Ask AI species picker"
+  },
+
+  "customSpeciesLabel": "Or enter your own species",
+  "@customSpeciesLabel": {
+    "description": "Label above the custom species text field in the Ask AI species picker"
   }
 }

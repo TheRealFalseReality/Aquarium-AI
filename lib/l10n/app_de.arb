@@ -1524,5 +1524,15 @@
   "fishSpeciesHint": "z. B. Anemonenfisch, Betta...",
   "@fishSpeciesHint": {
     "description": "Placeholder hint in the species input field of the Ask AI sheet"
+  },
+
+  "selectSpecificVariety": "Bestimmte Varietät auswählen",
+  "@selectSpecificVariety": {
+    "description": "Label above the common-name chips in the Ask AI species picker"
+  },
+
+  "customSpeciesLabel": "Oder eigene Art eingeben",
+  "@customSpeciesLabel": {
+    "description": "Label above the custom species text field in the Ask AI species picker"
   }
 }

@@ -1534,5 +1534,15 @@
   "fishSpeciesHint": "p. ej. Pez payaso, Betta...",
   "@fishSpeciesHint": {
     "description": "Placeholder hint in the species input field of the Ask AI sheet"
+  },
+
+  "selectSpecificVariety": "Selecciona una variedad específica",
+  "@selectSpecificVariety": {
+    "description": "Label above the common-name chips in the Ask AI species picker"
+  },
+
+  "customSpeciesLabel": "O ingresa tu propia especie",
+  "@customSpeciesLabel": {
+    "description": "Label above the custom species text field in the Ask AI species picker"
   }
 }
