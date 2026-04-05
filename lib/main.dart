@@ -30,6 +30,7 @@ import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compat_browser_screen.dart';
 import './screens/fish_compatibility_screen.dart';
 import './screens/custom_fish_editor_screen.dart';
+import './models/fish.dart';
 import './screens/information_screen.dart';
 import './screens/onboarding_screen.dart';
 import './screens/photo_analysis_screen.dart';
