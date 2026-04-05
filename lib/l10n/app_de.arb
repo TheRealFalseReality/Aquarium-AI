@@ -1572,7 +1572,7 @@
   "@templateSaltwaterStarter": {
     "description": "Name of the Saltwater Starter notification template pack"
   },
-  "templateSaltwaterStarterDesc": "Tägliche Fütterung · Zweiwöchiger Wasserwechsel · Wöchentliche Wasserprüfung · Wöchentliche Dosierung",
+  "templateSaltwaterStarterDesc": "Tägliche Fütterung · Wasserwechsel zweimal pro Woche · Wöchentliche Wasserprüfung · Wöchentliche Dosierung",
   "@templateSaltwaterStarterDesc": {
     "description": "Short description of the Saltwater Starter pack"
   },

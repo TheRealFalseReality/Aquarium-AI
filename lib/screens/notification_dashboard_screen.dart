@@ -226,9 +226,7 @@ class _NotificationDashboardScreenState
 
   Widget _buildPermissionBanner(AppLocalizations l10n) {
     return MaterialBanner(
-      content: Flexible(
-        child: Text(l10n.notificationsPermissionBanner),
-      ),
+      content: Text(l10n.notificationsPermissionBanner),
       actions: [
         TextButton(
           onPressed: _requestPermissions,

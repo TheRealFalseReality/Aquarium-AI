@@ -238,12 +238,13 @@ class _NotificationTemplatePickerDialogState
     }
   }
 
-  String _repeatText(_TemplateEntry entry) {
+  String _repeatText(_TemplateEntry entry, AppLocalizations l10n) {
     if (entry.interval == 1) {
       return entry.frequency.displayName;
     }
+    // Reuse the existing everyXDays l10n string (e.g. "Every 3 daily")
     final unit = entry.frequency.name;
-    return 'Every ${entry.interval} $unit';
+    return l10n.everyXDays(entry.interval, unit);
   }
 
   Future<void> _applyPack(AppLocalizations l10n) async {
@@ -431,7 +432,7 @@ class _NotificationTemplatePickerDialogState
                                             const SizedBox(width: 6),
                                             Flexible(
                                               child: Text(
-                                                '${entry.type.displayName} — ${_repeatText(entry)}'
+                                                '${entry.type.displayName} — ${_repeatText(entry, l10n)}'
                                                 ' at ${DateFormat.jm().format(DateTime(0, 0, 0, entry.time.hour, entry.time.minute))}',
                                                 style: theme.textTheme.bodySmall,
                                               ),
