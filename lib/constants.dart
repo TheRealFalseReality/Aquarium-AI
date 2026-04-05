@@ -171,6 +171,12 @@ const bool rcDefaultHideFacebookLogin = false;
 // Fish compatibility data cooldown (hours between Firestore fetches)
 const int rcDefaultFishDataCooldownHours = 12;
 
+// Banner ad dismiss delay: seconds after which the user may dismiss the bottom
+// banner. This is the in-app fallback default; the actual value is controlled
+// via Firebase Remote Config (RemoteConfigKeys.bannerAdDismissSeconds).
+// Set to 0 to make the banner immediately dismissible.
+const int rcDefaultBannerAdDismissSeconds = 60;
+
 // Founder Aquarist tier limits (increased vs standard free tier)
 const int rcDefaultFounderMaxRequestsPerMinute = 10;
 const int rcDefaultFounderMaxRequestsPerDay = 150;
@@ -324,6 +330,13 @@ class RemoteConfigKeys {
   /// free-tier users.  Defaults to [rcDefaultInterstitialCooldownHours] (6).
   static const String interstitialCooldownHours =
       'admob_interstitial_cooldown_hours';
+
+  /// Integer — seconds after the banner ad loads before the user is allowed
+  /// to dismiss it.  Defaults to [rcDefaultBannerAdDismissSeconds] (60).
+  /// Set to `0` in Firebase Remote Config to make the banner immediately
+  /// dismissible.
+  static const String bannerAdDismissSeconds =
+      'admob_banner_ad_dismiss_seconds';
 
   // ── Feature visibility ─────────────────────────────────────────────────────
   /// Boolean — when `true` the Facebook Login button is hidden on the auth

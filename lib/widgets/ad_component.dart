@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,7 @@ import '../l10n/app_localizations.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../services/ad_helper.dart';
+import '../services/remote_config_service.dart';
 import 'remove_ads_dialog.dart';
 
 class AdBanner extends ConsumerStatefulWidget {
@@ -19,6 +22,9 @@ class AdBanner extends ConsumerStatefulWidget {
 class _AdBannerState extends ConsumerState<AdBanner> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+  bool _isDismissed = false;
+  bool _canDismiss = false;
+  Timer? _dismissTimer;
 
   @override
   void initState() {
@@ -41,6 +47,7 @@ class _AdBannerState extends ConsumerState<AdBanner> {
             _bannerAd = ad as BannerAd;
             _isAdLoaded = true;
           });
+          _startDismissTimer();
         },
         onAdFailedToLoad: (ad, err) {
           ad.dispose();
@@ -50,8 +57,22 @@ class _AdBannerState extends ConsumerState<AdBanner> {
     bannerAd.load();
   }
 
+  void _startDismissTimer() {
+    final seconds = RemoteConfigService.bannerAdDismissSeconds;
+    if (seconds <= 0) {
+      setState(() => _canDismiss = true);
+      return;
+    }
+    _dismissTimer = Timer(Duration(seconds: seconds), () {
+      if (mounted) {
+        setState(() => _canDismiss = true);
+      }
+    });
+  }
+
   @override
   void dispose() {
+    _dismissTimer?.cancel();
     _bannerAd?.dispose();
     super.dispose();
   }
@@ -65,16 +86,46 @@ class _AdBannerState extends ConsumerState<AdBanner> {
         adsRemoved ||
         debugHideAds ||
         !_isAdLoaded ||
-        _bannerAd == null) {
+        _bannerAd == null ||
+        _isDismissed) {
       return const SafeArea(child: SizedBox(height: 0));
     }
 
+    final adWidget = SizedBox(
+      width: _bannerAd!.size.width.toDouble(),
+      height: _bannerAd!.size.height.toDouble(),
+      child: AdWidget(ad: _bannerAd!),
+    );
+
     return SafeArea(
-      child: SizedBox(
-        width: _bannerAd!.size.width.toDouble(),
-        height: _bannerAd!.size.height.toDouble(),
-        child: AdWidget(ad: _bannerAd!),
-      ),
+      child: _canDismiss
+          ? Stack(
+              clipBehavior: Clip.none,
+              children: [
+                adWidget,
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: () => setState(() => _isDismissed = true),
+                    child: Tooltip(
+                      message: AppLocalizations.of(context)!.close,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        color: Colors.black54,
+                        child: const Icon(
+                          Icons.close,
+                          size: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : adWidget,
     );
   }
 }

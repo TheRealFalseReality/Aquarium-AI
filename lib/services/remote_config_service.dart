@@ -58,6 +58,8 @@ class RemoteConfigService {
         RemoteConfigKeys.hideFacebookLogin: rcDefaultHideFacebookLogin,
         RemoteConfigKeys.interstitialCooldownHours:
             rcDefaultInterstitialCooldownHours,
+        RemoteConfigKeys.bannerAdDismissSeconds:
+            rcDefaultBannerAdDismissSeconds,
         RemoteConfigKeys.founderMaxRequestsPerMinute:
             rcDefaultFounderMaxRequestsPerMinute,
         RemoteConfigKeys.founderMaxRequestsPerDay:
@@ -330,6 +332,14 @@ class RemoteConfigService {
   static int get interstitialCooldownHours =>
       _instance?.getInt(RemoteConfigKeys.interstitialCooldownHours) ??
       rcDefaultInterstitialCooldownHours;
+
+  /// Seconds after the banner ad loads before the user may dismiss it.
+  /// Defaults to [rcDefaultBannerAdDismissSeconds] (60).
+  /// Set to `0` in Firebase Remote Config to make the banner immediately
+  /// dismissible.
+  static int get bannerAdDismissSeconds =>
+      _instance?.getInt(RemoteConfigKeys.bannerAdDismissSeconds) ??
+      rcDefaultBannerAdDismissSeconds;
 
   // ── Founder Aquarist AI limits ──────────────────────────────────────────────
 
