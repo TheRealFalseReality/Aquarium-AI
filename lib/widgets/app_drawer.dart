@@ -465,6 +465,34 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   Theme.of(context).colorScheme.secondary,
                 ),
                 AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 390),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.notifications_active,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      title: Text(l10n.notificationDashboard),
+                      subtitle: Text(l10n.notificationDashboardDrawerDescription),
+                      onTap: () => navigate('/notification-dashboard'),
+                    ),
+                  ),
+                ),
+                AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 400),
                   child: Container(
                     margin: const EdgeInsets.symmetric(

@@ -1,10 +1,166 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../models/notification_log.dart';
+import '../models/tank.dart';
 import '../models/tank_notification.dart';
+import '../providers/tank_provider.dart';
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Background / action handler (must be a top-level function)
+// ──────────────────────────────────────────────────────────────────────────────
+
+/// Top-level background handler for notification actions (snooze / done).
+///
+/// Runs in a separate isolate on Android when the user taps an action button
+/// while the app is in the background.  Only SharedPreferences and a minimal
+/// FlutterLocalNotificationsPlugin instance are available here.
+@pragma('vm:entry-point')
+void notificationBackgroundHandler(NotificationResponse response) {
+  _handleNotificationAction(response);
+}
+
+/// Shared handler for both foreground (tap) and background (action) responses.
+Future<void> _handleNotificationAction(NotificationResponse response) async {
+  final actionId = response.actionId;
+  final payload = response.payload ?? '';
+
+  if (actionId == NotificationService.actionSnooze1Day ||
+      actionId == NotificationService.actionSnooze1Week) {
+    final delay = actionId == NotificationService.actionSnooze1Day
+        ? const Duration(days: 1)
+        : const Duration(days: 7);
+    await _snoozeNotification(
+      payload: payload,
+      delay: delay,
+      originalId: response.id ?? 0,
+    );
+  } else if (actionId == NotificationService.actionDone) {
+    await _enqueuePendingDone(payload: payload);
+  }
+}
+
+/// Re-schedule a snoozed notification using a minimal plugin instance.
+Future<void> _snoozeNotification({
+  required String payload,
+  required Duration delay,
+  required int originalId,
+}) async {
+  try {
+    tz.initializeTimeZones();
+    final plugin = FlutterLocalNotificationsPlugin();
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosSettings = DarwinInitializationSettings();
+    await plugin.initialize(
+      const InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      ),
+    );
+
+    // Load cached metadata so we can restore title/body.
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, dynamic>? meta;
+    if (payload.isNotEmpty) {
+      final parts = payload.split('_');
+      if (parts.length >= 2) {
+        final notifId = parts.sublist(1).join('_');
+        final metaJson =
+            prefs.getString('${NotificationService.metaKeyPrefix}$notifId');
+        if (metaJson != null) {
+          meta = jsonDecode(metaJson) as Map<String, dynamic>;
+        }
+      }
+    }
+
+    final title = (meta?['title'] as String?) ?? 'Tank Reminder';
+    final body = (meta?['body'] as String?) ?? 'You have a tank reminder.';
+
+    final scheduledDate = tz.TZDateTime.from(
+      DateTime.now().add(delay),
+      tz.local,
+    );
+
+    final snoozeId = '${originalId}_snooze'.hashCode;
+
+    const androidDetails = AndroidNotificationDetails(
+      'tank_notifications',
+      'Tank Maintenance',
+      channelDescription: 'Notifications for tank maintenance tasks',
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+      actions: [
+        AndroidNotificationAction(
+          NotificationService.actionDone,
+          '✓ Done',
+          showsUserInterface: false,
+          cancelNotification: true,
+        ),
+        AndroidNotificationAction(
+          NotificationService.actionSnooze1Day,
+          '⏸ Snooze 1 Day',
+          showsUserInterface: false,
+        ),
+        AndroidNotificationAction(
+          NotificationService.actionSnooze1Week,
+          '⏸ Snooze 1 Week',
+          showsUserInterface: false,
+        ),
+      ],
+    );
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    await plugin.cancel(id: originalId);
+
+    await plugin.zonedSchedule(
+      id: snoozeId,
+      title: title,
+      body: body,
+      scheduledDate: scheduledDate,
+      notificationDetails:
+          const NotificationDetails(android: androidDetails, iOS: iosDetails),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      payload: payload,
+    );
+  } catch (e) {
+    debugPrint('NotificationService: snooze failed: $e');
+  }
+}
+
+/// Add a "done" payload to the pending queue for processing when app opens.
+Future<void> _enqueuePendingDone({required String payload}) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final existing =
+        prefs.getStringList(NotificationService.pendingDoneQueueKey) ?? [];
+    existing.add(payload);
+    await prefs.setStringList(
+      NotificationService.pendingDoneQueueKey,
+      existing,
+    );
+  } catch (e) {
+    debugPrint('NotificationService: enqueuePendingDone failed: $e');
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// NotificationService
+// ──────────────────────────────────────────────────────────────────────────────
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -12,6 +168,15 @@ class NotificationService {
   factory NotificationService() => _instance;
 
   NotificationService._internal();
+
+  // ── Action IDs ────────────────────────────────────────────────────────────
+  static const String actionDone = 'done';
+  static const String actionSnooze1Day = 'snooze_1d';
+  static const String actionSnooze1Week = 'snooze_1w';
+
+  // ── SharedPreferences keys ────────────────────────────────────────────────
+  static const String metaKeyPrefix = 'notif_meta_';
+  static const String pendingDoneQueueKey = 'pending_notification_done_queue';
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
@@ -21,25 +186,23 @@ class NotificationService {
   /// Navigator key for app-wide navigation from notification taps
   GlobalKey<NavigatorState>? _navigatorKey;
 
-  /// Initialize the notification service
-  /// [navigatorKey] is optional and used for navigating when notifications are tapped.
-  /// Note: The navigatorKey should be passed on the first call (typically from main.dart).
-  /// Subsequent calls (e.g., from requestPermissions()) will return early due to _initialized check,
-  /// preserving the originally set navigatorKey.
+  // ── Initialization ────────────────────────────────────────────────────────
+
+  /// Initialize the notification service.
+  ///
+  /// [navigatorKey] is optional and used for navigating when notifications are
+  /// tapped.  Should only be passed on the first call (from main.dart).
   Future<void> initialize({GlobalKey<NavigatorState>? navigatorKey}) async {
     if (_initialized) return;
 
     _navigatorKey = navigatorKey;
 
-    // Initialize timezone data
     tz.initializeTimeZones();
 
-    // Android initialization settings
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
 
-    // iOS initialization settings
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -54,21 +217,29 @@ class NotificationService {
     await _notifications.initialize(
       settings: initSettings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
+      onDidReceiveBackgroundNotificationResponse: notificationBackgroundHandler,
     );
 
     _initialized = true;
   }
 
-  /// Handle notification tap - navigates to tank management screen
+  // ── Tap / action handler (foreground) ────────────────────────────────────
+
   void _onNotificationTapped(NotificationResponse response) {
-    // Navigate to tank management screen when notification is tapped
+    if (response.actionId != null) {
+      // Delegate action handling (snooze / done) to the shared handler.
+      _handleNotificationAction(response);
+      return;
+    }
+    // Plain tap → navigate to the notification dashboard.
     try {
-      _navigatorKey?.currentState?.pushNamed('/tank-management');
+      _navigatorKey?.currentState?.pushNamed('/notification-dashboard');
     } catch (e) {
-      // Navigation failed - log but don't crash the app
-      debugPrint('Failed to navigate from notification tap: $e');
+      debugPrint('NotificationService: navigation failed: $e');
     }
   }
+
+  // ── Permissions ──────────────────────────────────────────────────────────
 
   /// Request notification permissions (especially important for iOS)
   Future<bool> requestPermissions() async {
@@ -76,7 +247,6 @@ class NotificationService {
       await initialize();
     }
 
-    // Request permissions for iOS
     final iosPlugin = _notifications
         .resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin
@@ -87,35 +257,93 @@ class NotificationService {
       sound: true,
     );
 
-    // Request permissions for Android 13+
     final androidPlugin = _notifications
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >();
-    final androidGranted = await androidPlugin
-        ?.requestNotificationsPermission();
+    final androidGranted =
+        await androidPlugin?.requestNotificationsPermission();
 
     return granted ?? androidGranted ?? true;
   }
 
-  /// Schedule a notification from a TankNotification
+  /// Check if notifications are enabled
+  Future<bool> areNotificationsEnabled() async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    final androidPlugin = _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    return await androidPlugin?.areNotificationsEnabled() ?? false;
+  }
+
+  // ── Metadata helpers ──────────────────────────────────────────────────────
+
+  /// Persist lightweight notification metadata to SharedPreferences so the
+  /// background isolate can reconstruct title/body without the provider.
+  Future<void> _saveNotificationMeta({
+    required String notificationId,
+    required String title,
+    required String body,
+    required String tankId,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final meta = jsonEncode({
+        'title': title,
+        'body': body,
+        'tankId': tankId,
+        'notificationId': notificationId,
+      });
+      await prefs.setString('$metaKeyPrefix$notificationId', meta);
+    } catch (e) {
+      debugPrint('NotificationService: saveNotificationMeta failed: $e');
+    }
+  }
+
+  /// Remove cached metadata when a notification is deleted.
+  Future<void> clearNotificationMeta(String notificationId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('$metaKeyPrefix$notificationId');
+    } catch (e) {
+      debugPrint('NotificationService: clearNotificationMeta failed: $e');
+    }
+  }
+
+  /// Remove metadata entries whose notification IDs are no longer active.
+  Future<void> clearOrphanedMeta(List<String> activeNotificationIds) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keysToRemove = prefs
+          .getKeys()
+          .where(
+            (k) =>
+                k.startsWith(metaKeyPrefix) &&
+                !activeNotificationIds.any((id) => k == '$metaKeyPrefix$id'),
+          )
+          .toList();
+      for (final key in keysToRemove) {
+        await prefs.remove(key);
+      }
+    } catch (e) {
+      debugPrint('NotificationService: clearOrphanedMeta failed: $e');
+    }
+  }
+
+  // ── Schedule / cancel ─────────────────────────────────────────────────────
+
+  /// Schedule a notification from a [TankNotification].
   ///
-  /// If [activityLogs] is provided, the next notification date will be
-  /// calculated based on the last matching activity log, making the
-  /// notification schedule relative to when the user actually completed
-  /// the task.
-  ///
-  /// If [useExactDateTime] is true, the notification will be scheduled for
-  /// exactly [notification.notificationDateTime], ignoring any activity logs
-  /// or repeat frequency calculations. This is useful when the user explicitly
-  /// wants to schedule for a specific date/time.
-  ///
-  /// If [useCurrentTime] is true and [activityLogs] is provided, the notification
-  /// will use the time from the activity log instead of the original notification
-  /// time. This is used for "Reschedule from Now" to schedule at the current time.
+  /// If [activityLogs] is provided, the next date is calculated from the last
+  /// matching activity log.  If [useExactDateTime] is true, [notification.notificationDateTime]
+  /// is used directly.
   ///
   /// Returns the calculated next notification date, or null if the notification
-  /// is disabled. This can be used to update the notification model's scheduledNextDate field.
+  /// is disabled.
   Future<DateTime?> scheduleNotification({
     required String tankId,
     required String tankName,
@@ -128,10 +356,27 @@ class NotificationService {
       await initialize();
     }
 
-    // Generate unique ID from notification ID hash
     final int notificationId = notification.id.hashCode;
 
-    // Create notification details
+    const androidActions = [
+      AndroidNotificationAction(
+        actionDone,
+        '✓ Done',
+        showsUserInterface: false,
+        cancelNotification: true,
+      ),
+      AndroidNotificationAction(
+        actionSnooze1Day,
+        '⏸ Snooze 1 Day',
+        showsUserInterface: false,
+      ),
+      AndroidNotificationAction(
+        actionSnooze1Week,
+        '⏸ Snooze 1 Week',
+        showsUserInterface: false,
+      ),
+    ];
+
     final androidDetails = AndroidNotificationDetails(
       'tank_notifications',
       'Tank Maintenance',
@@ -139,6 +384,7 @@ class NotificationService {
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
+      actions: androidActions,
     );
 
     const iosDetails = DarwinNotificationDetails(
@@ -152,28 +398,21 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    // Get notification title and body
     final title =
         notification.customTitle ??
         _getNotificationTitle(notification.type, tankName);
     final body = notification.notes ?? _getDefaultBody(notification.type);
 
-    // Determine the next notification date
     DateTime? nextDate;
     if (useExactDateTime ||
         notification.repeatFrequency == RepeatFrequency.none) {
-      // Use the exact date/time specified in the notification for:
-      // - useExactDateTime flag (user explicitly chose the specified time)
-      // - Non-repeating notifications (getNextNotificationDate returns null for these)
       nextDate = notification.notificationDateTime;
     } else if (activityLogs != null) {
-      // Calculate based on activity logs, optionally using current time
       nextDate = notification.getNextNotificationDateWithActivity(
         activityLogs,
         useCurrentTime: useCurrentTime,
       );
     } else {
-      // Fall back to standard calculation
       nextDate = notification.getNextNotificationDate();
     }
 
@@ -186,19 +425,27 @@ class NotificationService {
         body: body,
         scheduledDate: scheduledDate,
         notificationDetails: details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: '${tankId}_${notification.id}',
+      );
+
+      // Cache metadata for background isolate use.
+      await _saveNotificationMeta(
+        notificationId: notification.id,
+        title: title,
+        body: body,
+        tankId: tankId,
       );
     }
 
-    // Return the calculated next date so callers can update the model
     return nextDate;
   }
 
-  /// Cancel a scheduled notification
+  /// Cancel a scheduled notification and clear its cached metadata.
   Future<void> cancelNotification(TankNotification notification) async {
     final int notificationId = notification.id.hashCode;
     await _notifications.cancel(id: notificationId);
+    await clearNotificationMeta(notification.id);
   }
 
   /// Cancel all notifications for a tank
@@ -217,19 +464,14 @@ class NotificationService {
   }
 
   /// Reschedule all tank notifications (useful after a notification fires)
-  ///
-  /// If [activityLogs] is provided, notifications will be scheduled based on
-  /// the last matching activity log for each notification type.
   Future<void> rescheduleTankNotifications({
     required String tankId,
     required String tankName,
     required List<TankNotification> notifications,
     List<NotificationLog>? activityLogs,
   }) async {
-    // Cancel existing notifications first
     await cancelTankNotifications(tankId, notifications);
 
-    // Schedule active notifications
     for (final notification in notifications) {
       if (notification.enabled) {
         await scheduleNotification(
@@ -244,14 +486,7 @@ class NotificationService {
 
   /// Reschedule notifications that match a specific activity type.
   ///
-  /// This is called when an activity is logged to update the schedule
-  /// of matching notifications based on the new activity.
-  ///
-  /// If [useCurrentTime] is true, the notification will use the time from the
-  /// activity log instead of the original notification time.
-  ///
   /// Returns a list of updated notifications with their scheduledNextDate set.
-  /// Callers should persist these updated notifications to the tank.
   Future<List<TankNotification>> rescheduleMatchingNotifications({
     required String tankId,
     required String tankName,
@@ -261,7 +496,6 @@ class NotificationService {
     String? activityCustomCategory,
     bool useCurrentTime = false,
   }) async {
-    // Filter to only enabled, repeating notifications that match the activity type
     final matchingNotifications = notifications
         .where(
           (notification) =>
@@ -274,14 +508,12 @@ class NotificationService {
         )
         .toList();
 
-    // Early return if no notifications match
     if (matchingNotifications.isEmpty) {
       return [];
     }
 
     final updatedNotifications = <TankNotification>[];
 
-    // Cancel and reschedule each matching notification
     for (final notification in matchingNotifications) {
       await cancelNotification(notification);
       final nextDate = await scheduleNotification(
@@ -292,7 +524,6 @@ class NotificationService {
         useCurrentTime: useCurrentTime,
       );
 
-      // Create updated notification with the new scheduledNextDate
       if (nextDate != null) {
         updatedNotifications.add(
           notification.copyWith(
@@ -305,6 +536,157 @@ class NotificationService {
 
     return updatedNotifications;
   }
+
+  // ── Pending done-action processing ────────────────────────────────────────
+
+  /// Process any "done" actions that were queued by the background handler.
+  ///
+  /// Called from [main.dart] once the app is fully initialized so that the
+  /// Riverpod container and tank provider are available.
+  Future<void> processPendingActions(WidgetRef ref) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final queue = prefs.getStringList(pendingDoneQueueKey);
+      if (queue == null || queue.isEmpty) return;
+
+      // Clear the queue immediately to avoid duplicate processing.
+      await prefs.remove(pendingDoneQueueKey);
+
+      final tankState = ref.read(tankProvider);
+
+      for (final payload in queue) {
+        // Payload format: "${tankId}_${notificationId}"
+        final underscoreIdx = payload.indexOf('_');
+        if (underscoreIdx < 0) continue;
+
+        final tankId = payload.substring(0, underscoreIdx);
+        final notifId = payload.substring(underscoreIdx + 1);
+
+        Tank? tank;
+        try {
+          tank = tankState.tanks.firstWhere((t) => t.id == tankId);
+        } catch (_) {
+          continue; // Tank not found
+        }
+
+        TankNotification? notification;
+        try {
+          notification = tank.notifications.firstWhere((n) => n.id == notifId);
+        } catch (_) {
+          continue; // Notification not found
+        }
+
+        final log = NotificationLog.create(
+          type: notification.type,
+          customCategory: notification.type == NotificationType.other
+              ? (notification.customCategory ?? 'Other')
+              : null,
+          notificationId: notification.id,
+        );
+
+        final updatedLogs = [...tank.notificationLogs, log];
+
+        final updatedNotifications = await rescheduleMatchingNotifications(
+          tankId: tank.id,
+          tankName: tank.name,
+          notifications: tank.notifications,
+          activityLogs: updatedLogs,
+          activityType: log.type,
+          activityCustomCategory: log.customCategory,
+        );
+
+        var updatedTank = tank.copyWith(
+          notificationLogs: updatedLogs,
+          updatedAt: DateTime.now(),
+        );
+
+        if (updatedNotifications.isNotEmpty) {
+          final notifList = updatedTank.notifications.map((n) {
+            return updatedNotifications.firstWhere(
+              (u) => u.id == n.id,
+              orElse: () => n,
+            );
+          }).toList();
+          updatedTank = updatedTank.copyWith(notifications: notifList);
+        }
+
+        await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      }
+    } catch (e) {
+      debugPrint('NotificationService: processPendingActions failed: $e');
+    }
+  }
+
+  // ── Resync ────────────────────────────────────────────────────────────────
+
+  /// Re-schedule all enabled notifications across every provided tank.
+  ///
+  /// Called on app resume to ensure past-due notifications are refreshed.
+  Future<void> resyncAllTankNotifications({
+    required List<Tank> tanks,
+  }) async {
+    if (!_initialized) await initialize();
+
+    for (final tank in tanks) {
+      if (tank.notifications.isEmpty) continue;
+      await rescheduleTankNotifications(
+        tankId: tank.id,
+        tankName: tank.name,
+        notifications: tank.notifications,
+        activityLogs: tank.notificationLogs,
+      );
+    }
+  }
+
+  // ── Test notification ─────────────────────────────────────────────────────
+
+  /// Send a test notification immediately (for debugging)
+  Future<void> sendTestNotification({
+    required String tankName,
+    NotificationType type = NotificationType.feeding,
+    String? customTitle,
+    String? customBody,
+  }) async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    const androidDetails = AndroidNotificationDetails(
+      'tank_notifications',
+      'Tank Maintenance',
+      channelDescription: 'Notifications for tank maintenance tasks',
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    final title = customTitle ?? _getNotificationTitle(type, tankName);
+    final defaultBody = customBody ?? _getDefaultBody(type);
+    final body = '$defaultBody (Test notification)';
+
+    const int testNotificationId = 999999;
+
+    await _notifications.show(
+      id: testNotificationId,
+      title: title,
+      body: body,
+      notificationDetails: details,
+      payload: 'test_notification',
+    );
+  }
+
+  // ── Title / body helpers ──────────────────────────────────────────────────
 
   /// Get notification title based on type
   String _getNotificationTitle(NotificationType type, String tankName) {
@@ -340,71 +722,5 @@ class NotificationService {
       case NotificationType.other:
         return 'You have a tank reminder.';
     }
-  }
-
-  /// Check if notifications are enabled
-  Future<bool> areNotificationsEnabled() async {
-    if (!_initialized) {
-      await initialize();
-    }
-
-    final androidPlugin = _notifications
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    final androidEnabled =
-        await androidPlugin?.areNotificationsEnabled() ?? false;
-
-    return androidEnabled;
-  }
-
-  /// Send a test notification immediately (for debugging)
-  Future<void> sendTestNotification({
-    required String tankName,
-    NotificationType type = NotificationType.feeding,
-    String? customTitle,
-    String? customBody,
-  }) async {
-    if (!_initialized) {
-      await initialize();
-    }
-
-    // Create notification details
-    const androidDetails = AndroidNotificationDetails(
-      'tank_notifications',
-      'Tank Maintenance',
-      channelDescription: 'Notifications for tank maintenance tasks',
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    // Get notification title and body - use custom values if provided
-    final title = customTitle ?? _getNotificationTitle(type, tankName);
-    final defaultBody = customBody ?? _getDefaultBody(type);
-    final body = '$defaultBody (Test notification)';
-
-    // Use a unique ID for test notifications
-    const int testNotificationId = 999999;
-
-    // Show notification immediately
-    await _notifications.show(
-      id: testNotificationId,
-      title: title,
-      body: body,
-      notificationDetails: details,
-      payload: 'test_notification',
-    );
   }
 }

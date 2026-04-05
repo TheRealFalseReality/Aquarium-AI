@@ -30,6 +30,7 @@ import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compat_browser_screen.dart';
 import './screens/fish_compatibility_screen.dart';
 import './screens/information_screen.dart';
+import './screens/notification_dashboard_screen.dart';
 import './screens/onboarding_screen.dart';
 import './screens/photo_analysis_screen.dart';
 import './screens/profile_screen.dart';
@@ -503,6 +504,16 @@ class MyApp extends ConsumerWidget {
     final themeProvider = ref.watch(themeProviderNotifierProvider);
     final appSettings = ref.watch(appSettingsProvider);
 
+    // Process any "done" actions that were queued while the app was backgrounded.
+    // Schedule after the first frame so the provider state is ready.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService().processPendingActions(ref).catchError((e) {
+        if (kDebugMode) {
+          debugPrint('processPendingActions error: $e');
+        }
+      });
+    });
+
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
         final colorTheme = themeProvider.colorTheme;
@@ -646,6 +657,10 @@ class MyApp extends ConsumerWidget {
                 }
                 page = const WelcomeScreen();
                 screenName = 'welcome_screen';
+                break;
+              case '/notification-dashboard':
+                page = const NotificationDashboardScreen();
+                screenName = 'notification_dashboard_screen';
                 break;
               case '/community':
                 page = const CommunityScreen();

@@ -11,6 +11,7 @@ import '../services/analytics_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/notification_schedule_option_dialog.dart';
+import '../widgets/notification_template_picker_dialog.dart';
 
 class NotificationManagementScreen extends ConsumerStatefulWidget {
   final Tank tank;
@@ -115,6 +116,13 @@ class _NotificationManagementScreenState
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.auto_awesome),
+            tooltip: AppLocalizations.of(context)!.notificationTemplates,
+            onPressed: () => _showTemplatePicker(notifications),
+          ),
+        ],
       ),
       body: notifications.isEmpty
           ? _buildEmptyState(context)
@@ -130,6 +138,121 @@ class _NotificationManagementScreenState
         onPressed: () => _showAddNotificationDialog(),
         icon: const Icon(Icons.add_alert),
         label: Text(AppLocalizations.of(context)!.addNotification),
+      ),
+    );
+  }
+
+  // ── Template picker ────────────────────────────────────────────────────────
+
+  Future<void> _showTemplatePicker(
+    List<TankNotification> currentNotifications,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final result = await NotificationTemplatePickerDialog.show(
+      context,
+      hasExistingNotifications: currentNotifications.isNotEmpty,
+    );
+
+    if (result == null || !mounted) return;
+
+    final currentTank = _getCurrentTank();
+
+    final List<TankNotification> baseList = result.replaceExisting
+        ? []
+        : currentTank.notifications;
+
+    // Cancel notifications being replaced.
+    if (result.replaceExisting) {
+      for (final n in currentTank.notifications) {
+        await _notificationService.cancelNotification(n);
+      }
+    }
+
+    final newNotifications = [...baseList, ...result.notifications];
+    final updatedTank = currentTank.copyWith(
+      notifications: newNotifications,
+      updatedAt: DateTime.now(),
+    );
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
+
+    // Schedule each new notification.
+    for (final notif in result.notifications) {
+      await _notificationService.scheduleNotification(
+        tankId: currentTank.id,
+        tankName: currentTank.name,
+        notification: notif,
+        activityLogs: updatedTank.notificationLogs,
+      );
+    }
+
+    if (mounted) {
+      context.showAccessibleMessage(l10n.templateApplied);
+    }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'apply_notification_template',
+      parameters: {'replace': result.replaceExisting.toString()},
+    );
+  }
+
+  // ── Smart insight row ──────────────────────────────────────────────────────
+
+  Widget _buildSmartInsightRow(TankNotification notification) {
+    final l10n = AppLocalizations.of(context)!;
+    final currentTank = ref.watch(tankProvider).tanks.firstWhere(
+      (t) => t.id == widget.tank.id,
+      orElse: () => widget.tank,
+    );
+    final logs = currentTank.notificationLogs;
+
+    final matchingLogs = logs
+        .where(
+          (log) => notification.matchesActivityLog(log.type, log.customCategory),
+        )
+        .toList();
+
+    if (matchingLogs.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 2),
+        child: Text(
+          l10n.noActivityLoggedYet,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context)
+                .colorScheme
+                .onSurface
+                .withOpacity(0.4),
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      );
+    }
+
+    matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+    final lastLog = matchingLogs.first;
+    final dateFormat = DateFormat('MMM d');
+    final lastDateStr = dateFormat.format(lastLog.loggedAt);
+    final typeName = notification.getDisplayName().toLowerCase();
+    final nextSuggested = notification.getNextNotificationDateWithActivity(logs);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.lastActivityOn(typeName, lastDateStr),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.green.shade700,
+            ),
+          ),
+          if (nextSuggested != null)
+            Text(
+              l10n.nextSuggested(dateFormat.format(nextSuggested)),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -160,6 +283,12 @@ class _NotificationManagementScreenState
                 color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () => _showTemplatePicker([]),
+              icon: const Icon(Icons.auto_awesome, size: 18),
+              label: Text(AppLocalizations.of(context)!.useStarterPack),
             ),
           ],
         ),
@@ -214,6 +343,7 @@ class _NotificationManagementScreenState
                             color: colorScheme.onSurface.withOpacity(0.6),
                           ),
                         ),
+                        _buildSmartInsightRow(notification),
                       ],
                     ),
                   ),

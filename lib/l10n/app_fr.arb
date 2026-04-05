@@ -1489,5 +1489,161 @@
   "onboardingApiKeyNote": "La gestion des aquariums, les scores d'harmonie et toutes les calculatrices fonctionnent toujours sans clé API.",
   "@onboardingApiKeyNote": {
     "description": "Footnote in the API key onboarding step noting that calculators work without a key"
+  },
+
+  "notificationDashboard": "Rappels",
+  "@notificationDashboard": {
+    "description": "Title for the global notification dashboard screen"
+  },
+  "notificationDashboardDrawerDescription": "Voir tous les rappels de vos aquariums en un seul endroit.",
+  "@notificationDashboardDrawerDescription": {
+    "description": "Short description of the notification dashboard (app drawer)"
+  },
+  "noNotificationsAcrossTanks": "Aucun rappel",
+  "@noNotificationsAcrossTanks": {
+    "description": "Empty state title when no notifications exist across all tanks"
+  },
+  "noNotificationsAcrossTanksDesc": "Ajoutez des rappels à vos aquariums pour les voir ici.",
+  "@noNotificationsAcrossTanksDesc": {
+    "description": "Empty state description when no notifications exist across all tanks"
+  },
+  "overdueGroup": "En retard",
+  "@overdueGroup": {
+    "description": "Dashboard group header for overdue notifications"
+  },
+  "dueTodayGroup": "Aujourd'hui",
+  "@dueTodayGroup": {
+    "description": "Dashboard group header for notifications due today"
+  },
+  "thisWeekGroup": "Cette semaine",
+  "@thisWeekGroup": {
+    "description": "Dashboard group header for notifications due within the next 7 days"
+  },
+  "upcomingGroup": "À venir",
+  "@upcomingGroup": {
+    "description": "Dashboard group header for notifications due after this week"
+  },
+  "logDone": "Terminé ✓",
+  "@logDone": {
+    "description": "Button to log an activity as done from the dashboard"
+  },
+  "resyncReminders": "Resynchroniser les rappels",
+  "@resyncReminders": {
+    "description": "Tooltip for FAB on notification dashboard to re-sync all notifications"
+  },
+  "notificationsPermissionBanner": "Les notifications sont désactivées. Appuyez pour les activer.",
+  "@notificationsPermissionBanner": {
+    "description": "Banner shown on notification dashboard when notifications are disabled"
+  },
+  "lastActivityOn": "Dernier {type} le {date}",
+  "@lastActivityOn": {
+    "description": "Smart schedule insight showing when an activity was last logged",
+    "placeholders": {
+      "type": {"type": "String"},
+      "date": {"type": "String"}
+    }
+  },
+  "nextSuggested": "Prochain suggéré : {date}",
+  "@nextSuggested": {
+    "description": "Smart schedule insight showing the next suggested date based on activity logs",
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "noActivityLoggedYet": "Aucune activité enregistrée",
+  "@noActivityLoggedYet": {
+    "description": "Smart schedule hint when no matching activity log exists for a notification"
+  },
+  "notificationTemplates": "Packs de démarrage",
+  "@notificationTemplates": {
+    "description": "Title for the notification template picker dialog"
+  },
+  "notificationTemplatesDesc": "Choisissez un ensemble de rappels prédéfini pour démarrer rapidement.",
+  "@notificationTemplatesDesc": {
+    "description": "Description shown at the top of the template picker dialog"
+  },
+  "applyTemplate": "Appliquer le pack",
+  "@applyTemplate": {
+    "description": "Button to apply a selected notification template pack"
+  },
+  "useStarterPack": "Utiliser un pack de démarrage",
+  "@useStarterPack": {
+    "description": "Button to open the template picker from the empty state"
+  },
+  "templateFreshwaterBeginner": "🐟 Débutant eau douce",
+  "@templateFreshwaterBeginner": {
+    "description": "Name of the Freshwater Beginner notification template pack"
+  },
+  "templateFreshwaterBeginnerDesc": "Alimentation quotidienne · Changement d'eau hebdomadaire · Test d'eau hebdomadaire",
+  "@templateFreshwaterBeginnerDesc": {
+    "description": "Short description of the Freshwater Beginner pack"
+  },
+  "templateSaltwaterStarter": "🌊 Débutant eau salée",
+  "@templateSaltwaterStarter": {
+    "description": "Name of the Saltwater Starter notification template pack"
+  },
+  "templateSaltwaterStarterDesc": "Alimentation quotidienne · Changement d'eau deux fois par semaine · Test hebdomadaire · Dosage hebdomadaire",
+  "@templateSaltwaterStarterDesc": {
+    "description": "Short description of the Saltwater Starter pack"
+  },
+  "templatePlantedTank": "🌿 Aquarium planté",
+  "@templatePlantedTank": {
+    "description": "Name of the Planted Tank notification template pack"
+  },
+  "templatePlantedTankDesc": "Alimentation quotidienne · Dosage quotidien · Changement d'eau hebdomadaire · Maintenance mensuelle",
+  "@templatePlantedTankDesc": {
+    "description": "Short description of the Planted Tank pack"
+  },
+  "templateBasicCare": "⏰ Soins de base",
+  "@templateBasicCare": {
+    "description": "Name of the Basic Care notification template pack"
+  },
+  "templateBasicCareDesc": "Alimentation quotidienne · Maintenance mensuelle",
+  "@templateBasicCareDesc": {
+    "description": "Short description of the Basic Care pack"
+  },
+  "templateApplied": "Pack de démarrage appliqué !",
+  "@templateApplied": {
+    "description": "Confirmation message after applying a notification template pack"
+  },
+  "templateAddOrReplace": "Ajouter ou remplacer ?",
+  "@templateAddOrReplace": {
+    "description": "Dialog title asking whether to add or replace when applying a template with existing notifications"
+  },
+  "templateAddOrReplaceDesc": "Vous avez déjà des rappels configurés. Comment souhaitez-vous appliquer ce pack ?",
+  "@templateAddOrReplaceDesc": {
+    "description": "Dialog body asking whether to add or replace when applying a template"
+  },
+  "templateAddToExisting": "Ajouter aux existants",
+  "@templateAddToExisting": {
+    "description": "Option to add template notifications alongside existing ones"
+  },
+  "templateReplaceAll": "Tout remplacer",
+  "@templateReplaceAll": {
+    "description": "Option to replace all existing notifications with the template"
+  },
+  "templatePreviewLabel": "Comprend :",
+  "@templatePreviewLabel": {
+    "description": "Label before the list of notifications included in a template pack"
+  },
+  "notificationActionDone": "✓ Terminé",
+  "@notificationActionDone": {
+    "description": "Action button label on notification to mark it as done"
+  },
+  "notificationActionSnooze1Day": "⏸ Reporter 1 jour",
+  "@notificationActionSnooze1Day": {
+    "description": "Action button label on notification to snooze for 1 day"
+  },
+  "notificationActionSnooze1Week": "⏸ Reporter 1 semaine",
+  "@notificationActionSnooze1Week": {
+    "description": "Action button label on notification to snooze for 1 week"
+  },
+  "snoozedFor1Day": "Rappel reporté de 1 jour",
+  "@snoozedFor1Day": {
+    "description": "Confirmation message when a notification is snoozed for 1 day"
+  },
+  "snoozedFor1Week": "Rappel reporté de 1 semaine",
+  "@snoozedFor1Week": {
+    "description": "Confirmation message when a notification is snoozed for 1 week"
   }
 }
