@@ -910,14 +910,40 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             curve: Curves.easeInOut,
             child: _selectedTankType == 'marine'
                 ? Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Wrap(
+                    padding: const EdgeInsets.only(top: 8, left: 20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ModernSelectableChip(
-                          label: l10n.markAsReef,
-                          emoji: '🪸',
-                          selected: _isReef,
-                          onTap: () => setState(() => _isReef = !_isReef),
+                        Container(
+                          width: 2,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: cs.primary.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(1),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.saltwaterSubtype,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                            ),
+                            const SizedBox(height: 6),
+                            ModernSelectableChip(
+                              label: l10n.markAsReef,
+                              emoji: '🪸',
+                              selected: _isReef,
+                              onTap: () {
+                                setState(() => _isReef = !_isReef);
+                                _markInteracted(2);
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),

@@ -301,7 +301,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     return MainLayout(
       title: l10n.myTanks,
       bottomNavigationBar: const AdBanner(),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: _isSortMenuExpanded
+          ? null
+          : FloatingActionButton.extended(
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const TankCreationScreen()),
@@ -1160,6 +1162,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       top: 100, // Position below the header
       left: 16,
       right: 16,
+      bottom: 16, // Constrain height so content stays on screen and scrolls
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 200),
         opacity: _isSortMenuExpanded ? 1.0 : 0.0,
@@ -1454,6 +1457,28 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ref
                                   .read(appSettingsProvider.notifier)
                                   .setTankGridLayout(val);
+                            },
+                          ),
+                          SwitchListTile.adaptive(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              appSettings.tankInhabitantGridView
+                                  ? l10n.switchToFishGridView
+                                  : l10n.switchToFishListView,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            secondary: Icon(
+                              appSettings.tankInhabitantGridView
+                                  ? Icons.grid_view
+                                  : Icons.view_list,
+                              size: 20,
+                            ),
+                            value: appSettings.tankInhabitantGridView,
+                            onChanged: (val) {
+                              ref
+                                  .read(appSettingsProvider.notifier)
+                                  .setTankInhabitantGridView(val);
                             },
                           ),
                           const SizedBox(height: 8),
@@ -2288,7 +2313,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                               ),
                             ),
                             const SizedBox(height: 10),
-                            ..._buildFishGroupDisplay(tank, fishData),
+                            ..._buildFishGroupDisplay(tank, fishData, isGridView: appSettings.tankInhabitantGridView),
                           ],
                         ),
                     ],
@@ -4114,13 +4139,115 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
 
   List<Widget> _buildFishGroupDisplay(
     Tank tank,
-    Map<String, List<Fish>>? fishData,
-  ) {
+    Map<String, List<Fish>>? fishData, {
+    bool isGridView = false,
+  }) {
     final groupedFish = _groupInhabitantsByFishType(tank.inhabitants);
-    final widgets = <Widget>[];
 
     int displayedGroups = 0;
     const maxGroups = 3; // Limit to 3 fish types to keep card compact
+
+    if (isGridView) {
+      // Grid/tile mode: compact circular avatar tiles in a Wrap — show ALL fish groups
+      final fishGridTiles = <Widget>[];
+      for (final entry in groupedFish.entries) {
+        final fishType = entry.key;
+        final inhabitants = entry.value;
+        final fishImageUrl = _getFishImageUrl(
+          tank.type,
+          fishType,
+          fishData,
+          inhabitant: inhabitants.first,
+        );
+        final totalQuantity = inhabitants.fold<int>(
+          0,
+          (sum, inhabitant) => sum + inhabitant.quantity,
+        );
+        fishGridTiles.add(
+          SizedBox(
+            width: 72,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundImage: fishImageUrl != null
+                          ? (fishImageUrl.startsWith('http')
+                                ? CachedNetworkImageProvider(fishImageUrl)
+                                : FileImage(File(fishImageUrl)) as ImageProvider)
+                          : null,
+                      backgroundColor: fishImageUrl == null
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : null,
+                      child: fishImageUrl == null
+                          ? Icon(
+                              Icons.pets,
+                              color:
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
+                              size: 16,
+                            )
+                          : null,
+                    ),
+                    Positioned(
+                      right: -4,
+                      bottom: -4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 3,
+                          vertical: 1,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.surface,
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          '$totalQuantity',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  fishType,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontSize: 10),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+      return [
+        Wrap(spacing: 8, runSpacing: 8, children: fishGridTiles),
+      ];
+    }
+
+    // List mode (default)
+    final widgets = <Widget>[];
 
     for (final entry in groupedFish.entries) {
       if (displayedGroups >= maxGroups) break;

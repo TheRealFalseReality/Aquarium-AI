@@ -4,13 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:uuid/uuid.dart';
 
 import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../models/dosing_entry.dart';
+import '../models/notification_log.dart';
+import '../models/tank.dart';
+import '../models/tank_note.dart';
+import '../models/tank_notification.dart';
+import '../models/water_parameter.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
+import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/fish_data_service.dart';
@@ -1238,18 +1246,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           return AlertDialog(
             icon: Icon(Icons.bug_report, color: Colors.red.shade700, size: 36),
             title: Text(l10n.debugMenu),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  l10n.debugMenuDescription,
-                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      l10n.debugMenuDescription,
+                      style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
                 // Hide Ads toggle
                 SwitchListTile(
                   secondary: Icon(Icons.block, color: Colors.red.shade700),
@@ -1378,8 +1389,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     }
                   },
                 ),
+                const Divider(),
+                // Populate test tanks for all tank types, harmony scores, etc.
+                ListTile(
+                  leading: const Icon(Icons.science, color: Colors.teal),
+                  title: const Text('Populate Test Tanks'),
+                  subtitle: const Text(
+                    'Add test tanks for all types & harmony ranges',
+                  ),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _populateDebugTanks();
+                  },
+                ),
               ],
             ),
+          ),
+        ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
@@ -1392,6 +1418,627 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  Future<void> _populateDebugTanks() async {
+    final notifier = ref.read(tankProvider.notifier);
+    final now = DateTime.now();
+    const debugTag = TankTag(name: 'Debug', color: 0xFFE53935); // red
+
+    // ── helper shortcuts ──────────────────────────────────────────────────────
+    WaterParameter fw(String type, double value, String unit, int daysAgo) =>
+        WaterParameter.create(
+          parameterType: type,
+          value: value,
+          unit: unit,
+          dateRecorded: now.subtract(Duration(days: daysAgo)),
+        );
+    WaterParameter sw(String type, double value, String unit, int daysAgo) =>
+        WaterParameter.create(
+          parameterType: type,
+          value: value,
+          unit: unit,
+          dateRecorded: now.subtract(Duration(days: daysAgo)),
+        );
+    DosingEntry dose(
+      String name,
+      double amount,
+      String unit,
+      int daysAgo, {
+      String? notes,
+    }) => DosingEntry.create(
+      treatmentName: name,
+      amount: amount,
+      unit: unit,
+      dateDosed: now.subtract(Duration(days: daysAgo)),
+      notes: notes,
+    );
+    NotificationLog log(NotificationType type, int daysAgo, {String? notes}) =>
+        NotificationLog(
+          id: const Uuid().v4(),
+          type: type,
+          loggedAt: now.subtract(Duration(days: daysAgo)),
+          notes: notes,
+        );
+    TankNotification notif(
+      NotificationType type,
+      int daysFromNow,
+      RepeatFrequency freq, {
+      String? title,
+    }) => TankNotification.create(
+      type: type,
+      notificationDateTime: now.add(Duration(days: daysFromNow)),
+      repeatFrequency: freq,
+      customTitle: title,
+    );
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // 1. Freshwater Community — high harmony
+    notifier.addTank(Tank.create(
+      name: 'Community Tank (FW)',
+      type: 'freshwater',
+      sizeGallons: 55.0,
+      notes: 'Peaceful community tank — high harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Tetras',
+          fishUnit: 'Tetras',
+          quantity: 6,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 60)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Guppies',
+          fishUnit: 'Guppies',
+          quantity: 4,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 45)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Cory Cats',
+          fishUnit: 'Cory Cats',
+          quantity: 4,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 30)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Rasboras',
+          fishUnit: 'Rasboras',
+          quantity: 5,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 20)),
+        ),
+      ],
+      harmonyScore: 0.92,
+      tags: [debugTag, const TankTag(name: 'Community', color: 0xFF43A047)],
+      waterParameters: [
+        fw('ammonia', 0.0, 'ppm', 7),
+        fw('nitrite', 0.0, 'ppm', 7),
+        fw('nitrate', 10.0, 'ppm', 7),
+        fw('ph', 7.2, '', 7),
+        fw('temperature', 76.0, '°F', 7),
+        fw('ammonia', 0.0, 'ppm', 14),
+        fw('nitrite', 0.0, 'ppm', 14),
+        fw('nitrate', 15.0, 'ppm', 14),
+      ],
+      dosingEntries: [
+        dose('Seachem Prime', 5.0, 'mL', 7, notes: 'Weekly water change'),
+        dose('Seachem Stability', 10.0, 'mL', 7),
+        dose('API Stress Coat', 3.0, 'mL', 14),
+      ],
+      notificationLogs: [
+        log(NotificationType.waterChange, 7, notes: '20% water change'),
+        log(NotificationType.waterChange, 14, notes: '20% water change'),
+        log(NotificationType.testing, 7),
+        log(NotificationType.testing, 14),
+        log(NotificationType.feeding, 1),
+        log(NotificationType.feeding, 2),
+        log(NotificationType.feeding, 3),
+      ],
+      notifications: [
+        notif(NotificationType.waterChange, 7, RepeatFrequency.weekly,
+            title: 'Weekly Water Change'),
+        notif(NotificationType.feeding, 1, RepeatFrequency.daily),
+        notif(NotificationType.testing, 7, RepeatFrequency.weekly),
+      ],
+      tankNotes: [
+        TankNote.create(
+          content: 'Debug tank — Community FW. Fish are healthy.',
+          createdAt: now.subtract(const Duration(days: 30)),
+        ),
+      ],
+    ));
+
+    // 2. Freshwater Betta Solo — perfect harmony
+    notifier.addTank(Tank.create(
+      name: 'Betta Solo (FW)',
+      type: 'freshwater',
+      sizeGallons: 10.0,
+      notes: 'Single betta — perfect harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'King Betta',
+          fishUnit: 'Betta Male',
+          quantity: 1,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 90)),
+        ),
+      ],
+      harmonyScore: 1.0,
+      tags: [debugTag, const TankTag(name: 'Species Only', color: 0xFF1E88E5)],
+      waterParameters: [
+        fw('ammonia', 0.0, 'ppm', 3),
+        fw('nitrite', 0.0, 'ppm', 3),
+        fw('nitrate', 5.0, 'ppm', 3),
+        fw('ph', 7.0, '', 3),
+        fw('temperature', 78.0, '°F', 3),
+      ],
+      dosingEntries: [
+        dose('Seachem Prime', 1.0, 'mL', 3, notes: 'Small water change'),
+        dose('Indian Almond Leaf Extract', 2.0, 'mL', 10),
+      ],
+      notificationLogs: [
+        log(NotificationType.waterChange, 3, notes: '30% water change'),
+        log(NotificationType.waterChange, 10),
+        log(NotificationType.feeding, 1),
+        log(NotificationType.feeding, 2),
+      ],
+      notifications: [
+        notif(NotificationType.waterChange, 3, RepeatFrequency.weekly,
+            title: 'Betta Water Change'),
+        notif(NotificationType.feeding, 1, RepeatFrequency.daily),
+      ],
+      tankNotes: [
+        TankNote.create(
+          content: 'Debug tank — Betta solo. Very active and healthy.',
+          createdAt: now.subtract(const Duration(days: 90)),
+        ),
+      ],
+    ));
+
+    // 3. Freshwater Aggressive Mix — low harmony
+    notifier.addTank(Tank.create(
+      name: 'Aggressive Mix (FW)',
+      type: 'freshwater',
+      sizeGallons: 75.0,
+      notes: 'Aggressive cichlid mix — low harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Big Cichlid',
+          fishUnit: 'American Cichlids (Large)',
+          quantity: 1,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 120)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Malawi Mix',
+          fishUnit: 'African Cichlids (Malawi)',
+          quantity: 3,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 60)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Angelfish',
+          fishUnit: 'Angelfish',
+          quantity: 2,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 30)),
+        ),
+      ],
+      harmonyScore: 0.18,
+      tags: [debugTag, const TankTag(name: 'Aggressive', color: 0xFFE53935)],
+      waterParameters: [
+        fw('ammonia', 0.25, 'ppm', 5),
+        fw('nitrite', 0.0, 'ppm', 5),
+        fw('nitrate', 40.0, 'ppm', 5),
+        fw('ph', 7.8, '', 5),
+        fw('temperature', 77.0, '°F', 5),
+        fw('ammonia', 0.5, 'ppm', 12),
+        fw('nitrate', 55.0, 'ppm', 12),
+      ],
+      dosingEntries: [
+        dose('API Ammo Lock', 5.0, 'mL', 5, notes: 'Ammonia spike treatment'),
+        dose('Seachem Prime', 7.5, 'mL', 5),
+        dose('Seachem Prime', 7.5, 'mL', 12),
+      ],
+      notificationLogs: [
+        log(NotificationType.waterChange, 5, notes: '30% — ammonia spike'),
+        log(NotificationType.waterChange, 12),
+        log(NotificationType.testing, 5),
+        log(NotificationType.testing, 12),
+        log(NotificationType.maintenance, 10, notes: 'Cleaned filter'),
+      ],
+      notifications: [
+        notif(NotificationType.waterChange, 2, RepeatFrequency.weekly,
+            title: 'Aggressive Tank Water Change'),
+        notif(NotificationType.testing, 3, RepeatFrequency.weekly,
+            title: 'Ammonia Check'),
+      ],
+      tankNotes: [
+        TankNote.create(
+          content: 'Debug tank — aggressive mix, low harmony. Monitor ammonia closely.',
+          createdAt: now.subtract(const Duration(days: 30)),
+        ),
+      ],
+    ));
+
+    // 4. Freshwater Planted — medium harmony
+    notifier.addTank(Tank.create(
+      name: 'Planted Tank (FW)',
+      type: 'freshwater',
+      sizeGallons: 20.0,
+      notes: 'Planted nano tank',
+      inhabitants: [
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Cory Cats',
+          fishUnit: 'Cory Cats',
+          quantity: 4,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 45)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Rasboras',
+          fishUnit: 'Rasboras',
+          quantity: 6,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 45)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Gourami',
+          fishUnit: 'Gourami',
+          quantity: 1,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 20)),
+        ),
+      ],
+      harmonyScore: 0.78,
+      tags: [debugTag, const TankTag(name: 'Planted', color: 0xFF00897B)],
+      waterParameters: [
+        fw('ammonia', 0.0, 'ppm', 6),
+        fw('nitrite', 0.0, 'ppm', 6),
+        fw('nitrate', 8.0, 'ppm', 6),
+        fw('ph', 6.8, '', 6),
+        fw('temperature', 75.0, '°F', 6),
+      ],
+      dosingEntries: [
+        dose('Flourish Excel', 1.0, 'mL', 1, notes: 'Daily plant supplement'),
+        dose('Flourish Excel', 1.0, 'mL', 2),
+        dose('Flourish Excel', 1.0, 'mL', 3),
+        dose('Seachem Flourish', 2.0, 'mL', 6, notes: 'Weekly comprehensive'),
+        dose('Seachem Prime', 2.0, 'mL', 6),
+      ],
+      notificationLogs: [
+        log(NotificationType.waterChange, 6, notes: '20% water change'),
+        log(NotificationType.dosing, 1, notes: 'Daily Excel dosing'),
+        log(NotificationType.dosing, 2),
+        log(NotificationType.dosing, 3),
+        log(NotificationType.feeding, 1),
+        log(NotificationType.feeding, 2),
+      ],
+      notifications: [
+        notif(NotificationType.waterChange, 7, RepeatFrequency.weekly),
+        notif(NotificationType.dosing, 1, RepeatFrequency.daily,
+            title: 'Flourish Excel'),
+        notif(NotificationType.feeding, 1, RepeatFrequency.daily),
+      ],
+      tankNotes: [
+        TankNote.create(
+          content: 'Debug tank — planted nano. CO2 injection via Excel.',
+          createdAt: now.subtract(const Duration(days: 45)),
+        ),
+      ],
+    ));
+
+    // 5. Empty freshwater tank
+    notifier.addTank(Tank.create(
+      name: 'Empty Tank (FW)',
+      type: 'freshwater',
+      sizeGallons: 30.0,
+      notes: 'Newly set up, cycling in progress',
+      tags: [debugTag, const TankTag(name: 'Cycling', color: 0xFF757575)],
+      waterParameters: [
+        fw('ammonia', 2.0, 'ppm', 2),
+        fw('nitrite', 0.5, 'ppm', 2),
+        fw('nitrate', 0.0, 'ppm', 2),
+        fw('ph', 7.4, '', 2),
+        fw('ammonia', 4.0, 'ppm', 7),
+      ],
+      dosingEntries: [
+        dose('API Quick Start', 10.0, 'mL', 7, notes: 'Tank cycle startup'),
+        dose('Seachem Stability', 10.0, 'mL', 2),
+      ],
+      notificationLogs: [
+        log(NotificationType.testing, 2, notes: 'Ammonia still high'),
+        log(NotificationType.testing, 7, notes: 'Day 1 — started cycle'),
+      ],
+      notifications: [
+        notif(NotificationType.testing, 2, RepeatFrequency.daily,
+            title: 'Cycle Test'),
+      ],
+      tankNotes: [
+        TankNote.create(
+          content: 'Debug tank — empty, fishless cycling. Do NOT add fish yet.',
+          createdAt: now.subtract(const Duration(days: 7)),
+        ),
+      ],
+    ));
+
+    // 6. Marine Fish-Only (FOWLR)
+    notifier.addTank(Tank.create(
+      name: 'FOWLR Tank (SW)',
+      type: 'marine',
+      isReef: false,
+      sizeGallons: 90.0,
+      notes: 'Fish only with live rock — medium harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Clownfish',
+          fishUnit: 'Clownfish',
+          quantity: 2,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 90)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Damselfish',
+          fishUnit: 'Damselfish',
+          quantity: 2,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 60)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Chromis',
+          fishUnit: 'Chromis',
+          quantity: 3,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 30)),
+        ),
+      ],
+      harmonyScore: 0.65,
+      tags: [debugTag, const TankTag(name: 'Fish-Only', color: 0xFF3949AB)],
+      waterParameters: [
+        sw('ammonia', 0.0, 'ppm', 7),
+        sw('nitrite', 0.0, 'ppm', 7),
+        sw('nitrate', 20.0, 'ppm', 7),
+        sw('salinity', 1.025, 'SG', 7),
+        sw('ph', 8.2, '', 7),
+        sw('temperature', 78.0, '°F', 7),
+        sw('nitrate', 30.0, 'ppm', 14),
+        sw('salinity', 1.024, 'SG', 14),
+      ],
+      dosingEntries: [
+        dose('Seachem Prime', 9.0, 'mL', 7, notes: 'Weekly water change'),
+        dose('Two Little Fishies ReVive', 5.0, 'mL', 7),
+        dose('Kent Marine Tech CB Part A', 10.0, 'mL', 3),
+        dose('Kent Marine Tech CB Part B', 10.0, 'mL', 3),
+      ],
+      notificationLogs: [
+        log(NotificationType.waterChange, 7, notes: '15% water change'),
+        log(NotificationType.waterChange, 14),
+        log(NotificationType.testing, 7),
+        log(NotificationType.testing, 14),
+        log(NotificationType.maintenance, 14, notes: 'Cleaned skimmer cup'),
+        log(NotificationType.feeding, 1),
+        log(NotificationType.feeding, 2),
+      ],
+      notifications: [
+        notif(NotificationType.waterChange, 7, RepeatFrequency.weekly),
+        notif(NotificationType.maintenance, 14, RepeatFrequency.weekly,
+            title: 'Clean Skimmer'),
+        notif(NotificationType.feeding, 1, RepeatFrequency.daily),
+      ],
+      tankNotes: [
+        TankNote.create(
+          content: 'Debug tank — FOWLR. Salinity target 1.025.',
+          createdAt: now.subtract(const Duration(days: 60)),
+        ),
+      ],
+    ));
+
+    // 7. Marine Reef — high harmony
+    notifier.addTank(Tank.create(
+      name: 'Reef Tank (SW)',
+      type: 'marine',
+      isReef: true,
+      sizeGallons: 120.0,
+      notes: 'SPS/LPS reef tank — high harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Clownfish',
+          fishUnit: 'Clownfish',
+          quantity: 2,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 180)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Tangs',
+          fishUnit: 'Tangs',
+          quantity: 1,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 120)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Gobies',
+          fishUnit: 'Gobies',
+          quantity: 2,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 60)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Wrasse',
+          fishUnit: 'Wrasse',
+          quantity: 1,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 30)),
+        ),
+      ],
+      harmonyScore: 0.88,
+      tags: [debugTag, const TankTag(name: 'Reef', color: 0xFF8E24AA)],
+      waterParameters: [
+        sw('ammonia', 0.0, 'ppm', 3),
+        sw('nitrite', 0.0, 'ppm', 3),
+        sw('nitrate', 2.0, 'ppm', 3),
+        sw('phosphate', 0.03, 'ppm', 3),
+        sw('salinity', 1.026, 'SG', 3),
+        sw('ph', 8.3, '', 3),
+        sw('temperature', 78.0, '°F', 3),
+        sw('calcium', 425.0, 'ppm', 3),
+        sw('alkalinity', 9.0, 'dKH', 3),
+        sw('magnesium', 1350.0, 'ppm', 3),
+        sw('nitrate', 3.0, 'ppm', 10),
+        sw('salinity', 1.025, 'SG', 10),
+      ],
+      dosingEntries: [
+        dose('Two Part - Alk', 10.0, 'mL', 1, notes: 'Daily 2-part dosing'),
+        dose('Two Part - Ca', 10.0, 'mL', 1),
+        dose('Two Part - Alk', 10.0, 'mL', 2),
+        dose('Two Part - Ca', 10.0, 'mL', 2),
+        dose('Seachem Reef Fusion 1', 15.0, 'mL', 3),
+        dose('Seachem Reef Fusion 2', 15.0, 'mL', 3),
+        dose('Brightwell CoralAmino', 2.0, 'mL', 7),
+      ],
+      notificationLogs: [
+        log(NotificationType.waterChange, 3, notes: '10% water change'),
+        log(NotificationType.waterChange, 10),
+        log(NotificationType.dosing, 1, notes: '2-part dosing'),
+        log(NotificationType.dosing, 2),
+        log(NotificationType.testing, 3),
+        log(NotificationType.testing, 10),
+        log(NotificationType.maintenance, 7, notes: 'Cleaned glass, checked coral'),
+        log(NotificationType.feeding, 1),
+        log(NotificationType.feeding, 2),
+        log(NotificationType.feeding, 3),
+      ],
+      notifications: [
+        notif(NotificationType.waterChange, 7, RepeatFrequency.weekly,
+            title: 'Reef Water Change'),
+        notif(NotificationType.dosing, 1, RepeatFrequency.daily,
+            title: '2-Part Dosing'),
+        notif(NotificationType.testing, 3, RepeatFrequency.weekly,
+            title: 'Reef Parameter Test'),
+        notif(NotificationType.maintenance, 7, RepeatFrequency.weekly,
+            title: 'Coral Check'),
+        notif(NotificationType.feeding, 1, RepeatFrequency.daily),
+      ],
+      tankNotes: [
+        TankNote.create(
+          content: 'Debug tank — SPS/LPS reef. Calcium 425, Alk 9 dKH, Mg 1350.',
+          createdAt: now.subtract(const Duration(days: 90)),
+        ),
+        TankNote.create(
+          content: 'Added Wrasse — watch for aggression with Gobies.',
+          createdAt: now.subtract(const Duration(days: 30)),
+        ),
+      ],
+    ));
+
+    // 8. Marine Aggressive Predator — low harmony
+    notifier.addTank(Tank.create(
+      name: 'Predator Tank (SW)',
+      type: 'marine',
+      isReef: false,
+      sizeGallons: 180.0,
+      notes: 'Large predator FOWLR — low harmony',
+      inhabitants: [
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Lionfish',
+          fishUnit: 'Lionfish',
+          quantity: 1,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 150)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Pufferfish',
+          fishUnit: 'Pufferfish',
+          quantity: 1,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 90)),
+        ),
+        TankInhabitant(
+          id: const Uuid().v4(),
+          customName: 'Triggerfish',
+          fishUnit: 'Triggerfish',
+          quantity: 1,
+          speciesTags: const [],
+          dateAdded: now.subtract(const Duration(days: 45)),
+        ),
+      ],
+      harmonyScore: 0.22,
+      tags: [debugTag, const TankTag(name: 'Predator', color: 0xFFEF6C00)],
+      waterParameters: [
+        sw('ammonia', 0.0, 'ppm', 5),
+        sw('nitrite', 0.0, 'ppm', 5),
+        sw('nitrate', 40.0, 'ppm', 5),
+        sw('salinity', 1.023, 'SG', 5),
+        sw('ph', 8.1, '', 5),
+        sw('temperature', 79.0, '°F', 5),
+        sw('nitrate', 50.0, 'ppm', 12),
+        sw('salinity', 1.022, 'SG', 12),
+      ],
+      dosingEntries: [
+        dose('Seachem Prime', 18.0, 'mL', 5, notes: 'Weekly water change'),
+        dose('API Melafix', 5.0, 'mL', 8, notes: 'Fin nip treatment'),
+        dose('API Melafix', 5.0, 'mL', 9),
+        dose('API Melafix', 5.0, 'mL', 10),
+      ],
+      notificationLogs: [
+        log(NotificationType.waterChange, 5, notes: '20% water change'),
+        log(NotificationType.waterChange, 12),
+        log(NotificationType.testing, 5),
+        log(NotificationType.testing, 12),
+        log(NotificationType.maintenance, 5, notes: 'Cleaned skimmer, checked fish'),
+        log(NotificationType.dosing, 8, notes: 'Melafix — fin nip from Trigger'),
+        log(NotificationType.feeding, 1, notes: 'Silversides + shrimp'),
+        log(NotificationType.feeding, 2),
+        log(NotificationType.feeding, 3),
+      ],
+      notifications: [
+        notif(NotificationType.waterChange, 7, RepeatFrequency.weekly,
+            title: 'Predator Water Change'),
+        notif(NotificationType.testing, 5, RepeatFrequency.weekly,
+            title: 'Nitrate Check'),
+        notif(NotificationType.feeding, 1, RepeatFrequency.daily),
+        notif(NotificationType.maintenance, 14, RepeatFrequency.weekly,
+            title: 'Skimmer Clean'),
+      ],
+      tankNotes: [
+        TankNote.create(
+          content: 'Debug tank — predator FOWLR. Heavy bioload — frequent changes needed.',
+          createdAt: now.subtract(const Duration(days: 90)),
+        ),
+        TankNote.create(
+          content: 'Triggerfish nipped Puffer fins on day 8. Added Melafix.',
+          createdAt: now.subtract(const Duration(days: 8)),
+        ),
+      ],
+    ));
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('8 debug tanks added with parameters, dosing & activity logs!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
 
   void _showBuyMeACoffeeDialog() {
     final l10n = AppLocalizations.of(context)!;
