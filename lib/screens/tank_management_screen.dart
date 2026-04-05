@@ -4062,6 +4062,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           const SizedBox(width: 4),
           Text(
             '$label ($percentage%)',
+            overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: textColor,
               fontWeight: FontWeight.w600,
@@ -4072,9 +4073,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
 
     if (deltaChip == null) return chip;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [chip, const SizedBox(width: 6), deltaChip],
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [chip, deltaChip],
     );
   }
 
