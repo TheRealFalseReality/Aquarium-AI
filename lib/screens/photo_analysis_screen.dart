@@ -30,6 +30,7 @@ class PhotoAnalysisScreen extends ConsumerStatefulWidget {
 class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   Uint8List? _imageBytes;
   bool _isSubmitting = false;
+  bool _showSuggestedPrompts = false;
   final _noteController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   String? _error;
@@ -395,38 +396,58 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
               ],
             ),
             const SizedBox(height: 24),
-            Text(
-              l10n.photoAnalysisSuggestedPrompts,
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                l10n.photoPromptIdentifyFish,
-                l10n.photoPromptHealthCheck,
-                l10n.photoPromptWaterQuality,
-                l10n.photoPromptAlgae,
-                l10n.photoPromptPlant,
-                l10n.photoPromptDisease,
-                l10n.photoPromptEquipment,
-              ]
-                  .map(
-                    (prompt) => ActionChip(
-                      label: Text(prompt),
-                      onPressed: () {
-                        _noteController.value = TextEditingValue(
-                          text: prompt,
-                          selection: TextSelection.collapsed(
-                            offset: prompt.length,
-                          ),
-                        );
-                      },
+            GestureDetector(
+              onTap: () => setState(
+                () => _showSuggestedPrompts = !_showSuggestedPrompts,
+              ),
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      l10n.photoAnalysisSuggestedPrompts,
+                      style: Theme.of(context).textTheme.labelMedium,
                     ),
-                  )
-                  .toList(),
+                  ),
+                  Icon(
+                    _showSuggestedPrompts
+                        ? Icons.expand_less
+                        : Icons.expand_more,
+                    size: 18,
+                  ),
+                ],
+              ),
             ),
+            if (_showSuggestedPrompts) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  l10n.photoPromptIdentifyFish,
+                  l10n.photoPromptHealthCheck,
+                  l10n.photoPromptWaterQuality,
+                  l10n.photoPromptAlgae,
+                  l10n.photoPromptPlant,
+                  l10n.photoPromptDisease,
+                  l10n.photoPromptEquipment,
+                ]
+                    .map(
+                      (prompt) => ActionChip(
+                        label: Text(prompt),
+                        onPressed: () {
+                          _noteController.value = TextEditingValue(
+                            text: prompt,
+                            selection: TextSelection.collapsed(
+                              offset: prompt.length,
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
             const SizedBox(height: 12),
             TextField(
               controller: _noteController,
