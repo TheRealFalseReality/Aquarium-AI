@@ -34,6 +34,8 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
         return const AlkalinityConverter();
       case 'Temperature':
         return const TemperatureConverter();
+      case 'Dosing':
+        return const DosingCalculator();
       default:
         return const SizedBox.shrink();
     }
@@ -61,12 +63,14 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
       'CO2',
       'Alkalinity',
       'Temperature',
+      'Dosing',
     ];
     final Map<String, String> calcTypeLabels = {
       'Salinity': l10n.salinity,
       'CO2': l10n.co2Label,
       'Alkalinity': l10n.alkalinity,
       'Temperature': l10n.temperature,
+      'Dosing': l10n.dosingCalculator,
     };
 
     return MainLayout(
@@ -852,6 +856,421 @@ class TemperatureConverterState extends State<TemperatureConverter> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/* ===================== Dosing Calculator ====================== */
+
+/// Data class for pre-filled aquarium chemical dosing presets.
+class DosingPreset {
+  final String name;
+  final double doseAmount;
+  final String doseUnit;
+
+  /// Reference volume in gallons this dose applies to.
+  final double perGallons;
+
+  const DosingPreset({
+    required this.name,
+    required this.doseAmount,
+    required this.doseUnit,
+    required this.perGallons,
+  });
+}
+
+/// Popular aquarium chemicals with typical maintenance dosing rates.
+/// Users should always verify against the product label.
+const List<DosingPreset> kDosingPresets = [
+  DosingPreset(
+    name: 'Prime (Seachem)',
+    doseAmount: 1,
+    doseUnit: 'mL',
+    perGallons: 10,
+  ),
+  DosingPreset(
+    name: 'Stability (Seachem)',
+    doseAmount: 5,
+    doseUnit: 'mL',
+    perGallons: 10,
+  ),
+  DosingPreset(
+    name: 'Flourish (Seachem)',
+    doseAmount: 5,
+    doseUnit: 'mL',
+    perGallons: 60,
+  ),
+  DosingPreset(
+    name: 'Excel (Seachem)',
+    doseAmount: 5,
+    doseUnit: 'mL',
+    perGallons: 50,
+  ),
+  DosingPreset(
+    name: 'Stress Coat (API)',
+    doseAmount: 5,
+    doseUnit: 'mL',
+    perGallons: 10,
+  ),
+  DosingPreset(
+    name: 'Quick Start (API)',
+    doseAmount: 10,
+    doseUnit: 'mL',
+    perGallons: 10,
+  ),
+  DosingPreset(
+    name: 'Stress Zyme (API)',
+    doseAmount: 10,
+    doseUnit: 'mL',
+    perGallons: 10,
+  ),
+  DosingPreset(
+    name: 'Ich-X',
+    doseAmount: 5,
+    doseUnit: 'mL',
+    perGallons: 10,
+  ),
+  DosingPreset(
+    name: 'Paraguard (Seachem)',
+    doseAmount: 5,
+    doseUnit: 'mL',
+    perGallons: 10,
+  ),
+  DosingPreset(
+    name: 'AmGuard (Seachem)',
+    doseAmount: 1,
+    doseUnit: 'mL',
+    perGallons: 20,
+  ),
+  DosingPreset(
+    name: 'Fritz Complete',
+    doseAmount: 1,
+    doseUnit: 'mL',
+    perGallons: 10,
+  ),
+];
+
+const List<String> _kDoseUnits = [
+  'mL',
+  'L',
+  'oz',
+  'tsp',
+  'tbsp',
+  'drops',
+  'gal',
+  'cups',
+];
+
+class DosingCalculator extends StatefulWidget {
+  /// Optional pre-filled tank volume in gallons (e.g. from a saved tank).
+  final double? initialTankGallons;
+
+  const DosingCalculator({super.key, this.initialTankGallons});
+
+  @override
+  DosingCalculatorState createState() => DosingCalculatorState();
+}
+
+class DosingCalculatorState extends State<DosingCalculator> {
+  final _doseAmountController = TextEditingController();
+  final _perVolumeController = TextEditingController();
+  final _tankSizeController = TextEditingController();
+
+  String _selectedChemical = kDosingPresets.first.name;
+  String _selectedDoseUnit = kDosingPresets.first.doseUnit;
+  String _tankUnit = 'Gallons';
+  String? _result;
+
+  @override
+  void initState() {
+    super.initState();
+    _applyPreset(kDosingPresets.first);
+    if (widget.initialTankGallons != null) {
+      final gallons = widget.initialTankGallons!;
+      _tankSizeController.text = gallons.toStringAsFixed(
+        gallons == gallons.roundToDouble() ? 0 : 1,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _doseAmountController.dispose();
+    _perVolumeController.dispose();
+    _tankSizeController.dispose();
+    super.dispose();
+  }
+
+  void _applyPreset(DosingPreset preset) {
+    _doseAmountController.text = preset.doseAmount.toString();
+    _selectedDoseUnit = preset.doseUnit;
+    _perVolumeController.text = preset.perGallons.toString();
+  }
+
+  void _onChemicalSelected(String? name) {
+    if (name == null) return;
+    final preset = kDosingPresets.firstWhere(
+      (p) => p.name == name,
+      orElse: () => kDosingPresets.first,
+    );
+    setState(() {
+      _selectedChemical = name;
+      _applyPreset(preset);
+      _result = null;
+    });
+  }
+
+  void _calculate() {
+    final doseAmount = double.tryParse(_doseAmountController.text) ?? 0;
+    final perVolume = double.tryParse(_perVolumeController.text) ?? 0;
+    final tankSize = double.tryParse(_tankSizeController.text) ?? 0;
+
+    if (doseAmount <= 0 || perVolume <= 0 || tankSize <= 0) {
+      setState(() => _result = null);
+      return;
+    }
+
+    // Convert tank size to gallons for unified calculation
+    final tankGallons =
+        _tankUnit == 'Gallons' ? tankSize : tankSize * 0.264172;
+
+    final totalDose = (tankGallons / perVolume) * doseAmount;
+    setState(
+      () => _result =
+          '${totalDose.toStringAsFixed(2)} $_selectedDoseUnit',
+    );
+
+    AnalyticsService.logCalculatorUsed(
+      calculatorType: 'dosing',
+      inputData: {
+        'chemical': _selectedChemical,
+        'dose_unit': _selectedDoseUnit,
+        'tank_unit': _tankUnit,
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Chemical selector
+        _buildSubSectionTitle(context, l10n.selectChemical),
+        DropdownButtonFormField<String>(
+          value: _selectedChemical,
+          isExpanded: true,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+          ),
+          items: kDosingPresets.map((preset) {
+            return DropdownMenuItem(
+              value: preset.name,
+              child: Text(preset.name, overflow: TextOverflow.ellipsis),
+            );
+          }).toList(),
+          onChanged: _onChemicalSelected,
+        ),
+        const SizedBox(height: 24),
+
+        // Dose rate inputs
+        _buildSubSectionTitle(context, l10n.doseRate),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 14.0,
+          runSpacing: 14.0,
+          children: [
+            SizedBox(
+              width: 130,
+              child: TextField(
+                controller: _doseAmountController,
+                decoration: InputDecoration(
+                  labelText: l10n.amountLabel,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                onChanged: (_) => setState(() => _result = null),
+              ),
+            ),
+            SizedBox(
+              width: 120,
+              child: DropdownButtonFormField<String>(
+                value: _selectedDoseUnit,
+                decoration: InputDecoration(
+                  labelText: l10n.units,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
+                  ),
+                ),
+                items: _kDoseUnits.map((u) {
+                  return DropdownMenuItem(value: u, child: Text(u));
+                }).toList(),
+                onChanged: (v) {
+                  if (v != null) {
+                    setState(() {
+                      _selectedDoseUnit = v;
+                      _result = null;
+                    });
+                  }
+                },
+              ),
+            ),
+            SizedBox(
+              width: 140,
+              child: TextField(
+                controller: _perVolumeController,
+                decoration: InputDecoration(
+                  labelText: '${l10n.perVolumeLabel} (gal)',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                onChanged: (_) => setState(() => _result = null),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+
+        // Tank size input
+        _buildSubSectionTitle(context, l10n.tankSizeLabel),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 14.0,
+          runSpacing: 14.0,
+          children: [
+            SizedBox(
+              width: 170,
+              child: TextField(
+                controller: _tankSizeController,
+                decoration: InputDecoration(
+                  labelText: l10n.tankSizeLabel,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                onChanged: (_) => setState(() => _result = null),
+              ),
+            ),
+            SizedBox(
+              width: 130,
+              child: DropdownButtonFormField<String>(
+                value: _tankUnit,
+                decoration: InputDecoration(
+                  labelText: l10n.units,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
+                  ),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'Gallons',
+                    child: Text(l10n.gallons),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Liters',
+                    child: Text(l10n.liters),
+                  ),
+                ],
+                onChanged: (v) {
+                  if (v != null) {
+                    setState(() {
+                      _tankUnit = v;
+                      _result = null;
+                    });
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 22),
+
+        ElevatedButton.icon(
+          onPressed: _calculate,
+          icon: const Icon(Icons.calculate_outlined),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          label: Text(l10n.calculateDose),
+        ),
+
+        if (_result != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 22.0),
+            child: Card(
+              color: cs.surface,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22.0,
+                  vertical: 26.0,
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      l10n.requiredDose,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      _result!,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineMedium?.copyWith(
+                        color: cs.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: Text(
+            l10n.dosingCalculatorNote,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: cs.onSurface.withValues(alpha: 0.6),
+              fontStyle: FontStyle.italic,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
     );
   }
 }

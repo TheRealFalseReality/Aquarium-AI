@@ -8,6 +8,7 @@ import '../models/dosing_entry.dart';
 import '../models/tank.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import 'calculators_screen.dart';
 
 class DosingLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
@@ -52,6 +53,85 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
       context: context,
       isScrollControlled: true,
       builder: (context) => _AddDosingEntrySheet(tank: currentTank),
+    );
+  }
+
+  void _openDosingCalculator(BuildContext context) {
+    final currentTank = _getCurrentTank();
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 8,
+          ),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calculate_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        l10n.openDosingCalculator,
+                        style: Theme.of(context).textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.dosingCalculatorDescription,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                DosingCalculator(
+                  initialTankGallons: currentTank.sizeGallons,
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'dosing_calculator_opened',
+      parameters: {'source': 'dosing_diary'},
     );
   }
 
@@ -128,6 +208,11 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
         appBar: AppBar(
           title: Text(tank.name),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.calculate_outlined),
+              onPressed: () => _openDosingCalculator(context),
+              tooltip: l10n.openDosingCalculator,
+            ),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () => _addDosingEntry(context),

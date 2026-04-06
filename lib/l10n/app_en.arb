@@ -3743,6 +3743,54 @@
   "@calculatorType": {
     "description": "Section title for the calculator type selector"
   },
+  "dosingCalculator": "Dosing Calculator",
+  "@dosingCalculator": {
+    "description": "Name of the dosing calculator in the calculators screen"
+  },
+  "dosingCalculatorDescription": "Calculate the exact dose of aquarium treatments based on your tank volume.",
+  "@dosingCalculatorDescription": {
+    "description": "Description shown in the dosing calculator header"
+  },
+  "selectChemical": "Select Chemical",
+  "@selectChemical": {
+    "description": "Label for the chemical selector in the dosing calculator"
+  },
+  "customChemical": "Custom",
+  "@customChemical": {
+    "description": "Option label for entering a custom chemical in the dosing calculator"
+  },
+  "doseRate": "Dose Rate",
+  "@doseRate": {
+    "description": "Section heading for dose rate inputs in the dosing calculator"
+  },
+  "amountLabel": "Amount",
+  "@amountLabel": {
+    "description": "Field label for the dose amount in the dosing calculator"
+  },
+  "perVolumeLabel": "Per Volume",
+  "@perVolumeLabel": {
+    "description": "Field label for the reference volume in the dosing calculator"
+  },
+  "tankSizeLabel": "Tank Size",
+  "@tankSizeLabel": {
+    "description": "Field label for the tank size in the dosing calculator"
+  },
+  "calculateDose": "Calculate Dose",
+  "@calculateDose": {
+    "description": "Button label to trigger the dosing calculation"
+  },
+  "requiredDose": "Required Dose",
+  "@requiredDose": {
+    "description": "Result label for the calculated required dose"
+  },
+  "dosingCalculatorNote": "Always verify doses on product labels. Rates shown are typical maintenance doses.",
+  "@dosingCalculatorNote": {
+    "description": "Disclaimer note in the dosing calculator"
+  },
+  "openDosingCalculator": "Dosing Calculator",
+  "@openDosingCalculator": {
+    "description": "Tooltip/label for the button that opens the dosing calculator popup in the dosing diary"
+  },
   "convertFrom": "Convert From",
   "@convertFrom": {
     "description": "Section title for the convert-from unit selector in calculators"
