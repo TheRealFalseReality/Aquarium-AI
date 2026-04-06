@@ -59,6 +59,12 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
   void _openDosingCalculator(BuildContext context) {
     final currentTank = _getCurrentTank();
     final l10n = AppLocalizations.of(context)!;
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'dosing_calculator_opened',
+      parameters: {'source': 'dosing_diary'},
+    );
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -127,11 +133,6 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
           ),
         ),
       ),
-    );
-
-    AnalyticsService.logFeatureUsed(
-      featureName: 'dosing_calculator_opened',
-      parameters: {'source': 'dosing_diary'},
     );
   }
 

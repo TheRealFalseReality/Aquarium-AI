@@ -894,7 +894,7 @@
   "calculatorType": "Rechnertyp",
   "dosingCalculator": "Dosierrechner",
   "dosingCalculatorDescription": "Berechne die genaue Dosis für Aquarienbehandlungen basierend auf deinem Tankvolumen.",
-  "selectChemical": "Chemikalie auswählen",
+  "selectChemical": "Produkt auswählen",
   "customChemical": "Benutzerdefiniert",
   "doseRate": "Dosierrate",
   "amountLabel": "Menge",
