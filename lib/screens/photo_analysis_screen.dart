@@ -395,12 +395,41 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
               ],
             ),
             const SizedBox(height: 24),
+            Text(
+              l10n.photoAnalysisSuggestedPrompts,
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                l10n.photoPromptIdentifyFish,
+                l10n.photoPromptHealthCheck,
+                l10n.photoPromptWaterQuality,
+                l10n.photoPromptAlgae,
+                l10n.photoPromptPlant,
+                l10n.photoPromptDisease,
+                l10n.photoPromptEquipment,
+              ]
+                  .map(
+                    (prompt) => ActionChip(
+                      label: Text(prompt),
+                      onPressed: () {
+                        _noteController.text = prompt;
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 12),
             TextField(
               controller: _noteController,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Optional Note (e.g., "Concerned about algae")',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.photoAnalysisNoteLabel,
+                hintText: l10n.photoAnalysisNoteHint,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 24),
@@ -440,7 +469,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Disclaimer: Visual analysis can be imperfect. Always confirm species and health concerns with reliable sources.',
+              l10n.photoAnalysisDisclaimer,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontStyle: FontStyle.italic,
                 color: cs.onSurface.withOpacity(0.7),

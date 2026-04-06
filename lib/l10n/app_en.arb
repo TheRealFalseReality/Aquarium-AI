@@ -1989,6 +1989,50 @@
   "@analyzePhoto": {
     "description": "Analyze photo button label"
   },
+  "photoAnalysisNoteLabel": "Optional Note",
+  "@photoAnalysisNoteLabel": {
+    "description": "Label for the optional note field on the photo analysis screen"
+  },
+  "photoAnalysisNoteHint": "e.g., \"Concerned about algae\"",
+  "@photoAnalysisNoteHint": {
+    "description": "Hint text for the optional note field on the photo analysis screen"
+  },
+  "photoAnalysisSuggestedPrompts": "Suggested prompts:",
+  "@photoAnalysisSuggestedPrompts": {
+    "description": "Label above the row of suggested prompt chips on the photo analysis screen"
+  },
+  "photoAnalysisDisclaimer": "Disclaimer: Visual analysis can be imperfect. Always confirm species and health concerns with reliable sources.",
+  "@photoAnalysisDisclaimer": {
+    "description": "Disclaimer shown below the analyze button on the photo analysis screen"
+  },
+  "photoPromptIdentifyFish": "Identify this fish",
+  "@photoPromptIdentifyFish": {
+    "description": "Suggested prompt chip: asks the AI to identify the fish in the photo"
+  },
+  "photoPromptHealthCheck": "Check for health issues",
+  "@photoPromptHealthCheck": {
+    "description": "Suggested prompt chip: asks the AI to check the fish for health issues"
+  },
+  "photoPromptWaterQuality": "Assess water clarity",
+  "@photoPromptWaterQuality": {
+    "description": "Suggested prompt chip: asks the AI to assess water clarity in the photo"
+  },
+  "photoPromptAlgae": "What type of algae is this?",
+  "@photoPromptAlgae": {
+    "description": "Suggested prompt chip: asks the AI to identify algae in the photo"
+  },
+  "photoPromptPlant": "Identify this plant",
+  "@photoPromptPlant": {
+    "description": "Suggested prompt chip: asks the AI to identify an aquatic plant in the photo"
+  },
+  "photoPromptDisease": "Does this fish look sick?",
+  "@photoPromptDisease": {
+    "description": "Suggested prompt chip: asks the AI whether the fish appears sick"
+  },
+  "photoPromptEquipment": "Identify this equipment",
+  "@photoPromptEquipment": {
+    "description": "Suggested prompt chip: asks the AI to identify aquarium equipment in the photo"
+  },
   "doses": "doses",
   "@doses": {
     "description": "Doses plural label"
