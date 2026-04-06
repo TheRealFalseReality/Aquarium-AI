@@ -30,6 +30,7 @@ class PhotoAnalysisScreen extends ConsumerStatefulWidget {
 class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
   Uint8List? _imageBytes;
   bool _isSubmitting = false;
+  bool _showSuggestedPrompts = false;
   final _noteController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   String? _error;
@@ -395,12 +396,66 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
               ],
             ),
             const SizedBox(height: 24),
+            GestureDetector(
+              onTap: () => setState(
+                () => _showSuggestedPrompts = !_showSuggestedPrompts,
+              ),
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      l10n.photoAnalysisSuggestedPrompts,
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                  ),
+                  Icon(
+                    _showSuggestedPrompts
+                        ? Icons.expand_less
+                        : Icons.expand_more,
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+            if (_showSuggestedPrompts) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  l10n.photoPromptIdentifyFish,
+                  l10n.photoPromptHealthCheck,
+                  l10n.photoPromptWaterQuality,
+                  l10n.photoPromptAlgae,
+                  l10n.photoPromptPlant,
+                  l10n.photoPromptDisease,
+                  l10n.photoPromptEquipment,
+                ]
+                    .map(
+                      (prompt) => ActionChip(
+                        label: Text(prompt),
+                        onPressed: () {
+                          _noteController.value = TextEditingValue(
+                            text: prompt,
+                            selection: TextSelection.collapsed(
+                              offset: prompt.length,
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+            const SizedBox(height: 12),
             TextField(
               controller: _noteController,
               maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Optional Note (e.g., "Concerned about algae")',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.photoAnalysisNoteLabel,
+                hintText: l10n.photoAnalysisNoteHint,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 24),
@@ -440,7 +495,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Disclaimer: Visual analysis can be imperfect. Always confirm species and health concerns with reliable sources.',
+              l10n.photoAnalysisDisclaimer,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontStyle: FontStyle.italic,
                 color: cs.onSurface.withOpacity(0.7),
