@@ -10,10 +10,10 @@ class SubstrateCalculator extends StatefulWidget {
   const SubstrateCalculator({super.key});
 
   @override
-  SubstrateCalculatorState createState() => SubstrateCalculatorState();
+  _SubstrateCalculatorState createState() => _SubstrateCalculatorState();
 }
 
-class SubstrateCalculatorState extends State<SubstrateCalculator> {
+class _SubstrateCalculatorState extends State<SubstrateCalculator> {
   // ── Options ──────────────────────────────────────────────────────────────
   /// Bed depth profile: 'Standard', 'Planted', 'DeepBed', 'BareBottom'
   String _bedType = 'Standard';
@@ -32,7 +32,6 @@ class SubstrateCalculatorState extends State<SubstrateCalculator> {
   double? _maxKg;
   double? _minLiters;
   double? _maxLiters;
-  double? _depthInInches;
 
   // ── Bed type depth ranges (inches) ────────────────────────────────────────
   static const Map<String, (double, double)> _depthRange = {
@@ -68,7 +67,6 @@ class SubstrateCalculatorState extends State<SubstrateCalculator> {
         _maxKg = null;
         _minLiters = null;
         _maxLiters = null;
-        _depthInInches = null;
       });
       return;
     }
@@ -96,7 +94,6 @@ class SubstrateCalculatorState extends State<SubstrateCalculator> {
         _maxKg = 0;
         _minLiters = 0;
         _maxLiters = 0;
-        _depthInInches = 0;
       });
       return;
     }
@@ -126,7 +123,6 @@ class SubstrateCalculatorState extends State<SubstrateCalculator> {
       _maxKg = maxKg;
       _minLiters = minLiters;
       _maxLiters = maxLiters;
-      _depthInInches = (minDepth + maxDepth) / 2;
     });
   }
 

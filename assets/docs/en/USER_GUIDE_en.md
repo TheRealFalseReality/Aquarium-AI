@@ -295,7 +295,7 @@ The calculator returns a **minimum–maximum range** based on the depth band for
 - **Weight** – displayed in pounds (lbs) and kilograms (kg).
 - **Volume** – displayed in litres (L), useful for comparing with bag sizes.
 
-> **Note:** Results assume a typical dry bulk density of ≈ 100 lbs/ft³.
+> **Note:** Results assume a typical dry bulk density of ~100 lbs/ft³.
 > Actual weight varies by substrate type (gravel, sand, aqua-soil, etc.).
 > Always verify against the bag weight before purchasing.
 

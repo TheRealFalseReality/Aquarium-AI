@@ -885,7 +885,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         description: l10n.substrateDescription,
         shortDescription: l10n.substrateDrawerDescription,
         routeName: '/substrate',
-        delay: const Duration(milliseconds: 905),
+        delay: const Duration(milliseconds: 910),
       ),
       FeatureInfo(
         icon: '🔍',
