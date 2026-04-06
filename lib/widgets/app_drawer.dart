@@ -521,6 +521,34 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   ),
                 ),
                 AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 465),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.grass_outlined,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      title: Text(l10n.substrateCalculator),
+                      subtitle: Text(l10n.substrateDrawerDescription),
+                      onTap: () => navigate('/substrate'),
+                    ),
+                  ),
+                ),
+                AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 480),
                   child: Container(
                     margin: const EdgeInsets.symmetric(

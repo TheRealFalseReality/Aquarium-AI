@@ -80,6 +80,125 @@
   "@tankVolumeDrawerDescription": {
     "description": "Short description of the tank volume calculator (app drawer)"
   },
+  "substrateCalculator": "Substrate Calculator",
+  "@substrateCalculator": {
+    "description": "Name of the substrate calculator feature"
+  },
+  "substrateCalculatorSubtitle": "Estimate how much substrate you need based on your tank footprint and desired bed depth.",
+  "@substrateCalculatorSubtitle": {
+    "description": "Subtitle shown below the substrate calculator title"
+  },
+  "substrateDescription": "Estimate substrate quantity by tank footprint and bed-depth profile. Supports standard, planted, deep-bed, and bare-bottom setups with weight and volume results.",
+  "@substrateDescription": {
+    "description": "Description of the substrate calculator (welcome screen)"
+  },
+  "substrateDrawerDescription": "Calculate substrate weight and volume for any tank footprint and bed-depth profile.",
+  "@substrateDrawerDescription": {
+    "description": "Short description of the substrate calculator (app drawer)"
+  },
+  "substrateBedType": "Bed Type",
+  "@substrateBedType": {
+    "description": "Section heading for the bed-type selector in the substrate calculator"
+  },
+  "substrateBedStandard": "Standard",
+  "@substrateBedStandard": {
+    "description": "Standard bed type option (1–2 inch depth)"
+  },
+  "substrateBedPlanted": "Planted",
+  "@substrateBedPlanted": {
+    "description": "Planted bed type option (2–3 inch depth)"
+  },
+  "substrateBedDeep": "Deep Bed",
+  "@substrateBedDeep": {
+    "description": "Deep bed type option (3–4 inch depth)"
+  },
+  "substrateBedBare": "Bare Bottom",
+  "@substrateBedBare": {
+    "description": "Bare bottom option (no substrate)"
+  },
+  "substrateLength": "Tank Length",
+  "@substrateLength": {
+    "description": "Input label for tank length in the substrate calculator"
+  },
+  "substrateWidth": "Tank Width",
+  "@substrateWidth": {
+    "description": "Input label for tank width in the substrate calculator"
+  },
+  "substrateBareBottomResult": "No substrate needed for a bare-bottom setup.",
+  "@substrateBareBottomResult": {
+    "description": "Result message shown when bare bottom is selected"
+  },
+  "substrateResultTitle": "Estimated Substrate",
+  "@substrateResultTitle": {
+    "description": "Title of the results card in the substrate calculator"
+  },
+  "substrateResultDepthLabel": "Recommended depth: {depth}",
+  "@substrateResultDepthLabel": {
+    "description": "Label showing the recommended depth range",
+    "placeholders": {
+      "depth": {"type": "String"}
+    }
+  },
+  "substrateResultWeight": "Weight",
+  "@substrateResultWeight": {
+    "description": "Label for the weight result column in the substrate calculator"
+  },
+  "substrateResultVolume": "Volume",
+  "@substrateResultVolume": {
+    "description": "Label for the volume result column in the substrate calculator"
+  },
+  "substrateInfoTitle": "Substrate Guide",
+  "@substrateInfoTitle": {
+    "description": "Heading of the info section in the substrate calculator"
+  },
+  "substrateInfoStandardTitle": "Standard (1–2 in / 2.5–5 cm)",
+  "@substrateInfoStandardTitle": {
+    "description": "Title for the standard bed info tile"
+  },
+  "substrateInfoStandardBody": "Suitable for most community fish tanks. Provides a natural look and supports beneficial bacteria without requiring root-feeding plants.",
+  "@substrateInfoStandardBody": {
+    "description": "Body text for the standard bed info tile"
+  },
+  "substrateInfoPlantedTitle": "Planted (2–3 in / 5–7.5 cm)",
+  "@substrateInfoPlantedTitle": {
+    "description": "Title for the planted bed info tile"
+  },
+  "substrateInfoPlantedBody": "Ideal for live plants. A deeper layer gives roots room to anchor and access nutrients, especially when combined with a nutrient-rich substrate.",
+  "@substrateInfoPlantedBody": {
+    "description": "Body text for the planted bed info tile"
+  },
+  "substrateInfoDeepTitle": "Deep Bed (3–4 in / 7.5–10 cm)",
+  "@substrateInfoDeepTitle": {
+    "description": "Title for the deep bed info tile"
+  },
+  "substrateInfoDeepBody": "Used for advanced planted tanks, deep-rooting species, or intentional anaerobic zones that recycle nutrients. Monitor water parameters closely.",
+  "@substrateInfoDeepBody": {
+    "description": "Body text for the deep bed info tile"
+  },
+  "substrateInfoBareTitle": "Bare Bottom",
+  "@substrateInfoBareTitle": {
+    "description": "Title for the bare bottom info tile"
+  },
+  "substrateInfoBareBody": "Preferred for quarantine tanks, goldfish setups, or high-waste fish. Easy to clean; less biological filtration surface area.",
+  "@substrateInfoBareBody": {
+    "description": "Body text for the bare bottom info tile"
+  },
+  "substrateInfoDensityTitle": "About the Estimate",
+  "@substrateInfoDensityTitle": {
+    "description": "Title for the density / estimate info tile"
+  },
+  "substrateInfoDensityBody": "Results assume a typical dry bulk density of ~100 lbs/ft³. Actual weight varies by substrate type (gravel, sand, soil). Always check the bag weight.",
+  "@substrateInfoDensityBody": {
+    "description": "Body text for the density / estimate info tile"
+  },
+  "substrateInfoTipTitle": "Pro Tip",
+  "@substrateInfoTipTitle": {
+    "description": "Title for the pro tip info tile"
+  },
+  "substrateInfoTipBody": "Buy 10–15% extra to account for settling, displacement by decorations, and uneven depth. Rinse thoroughly before adding to the tank.",
+  "@substrateInfoTipBody": {
+    "description": "Body text for the pro tip info tile"
+  },
   "aquaPiStore": "AquaPi Store",
   "@aquaPiStore": {
     "description": "Name of the AquaPi store"

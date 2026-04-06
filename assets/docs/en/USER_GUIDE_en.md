@@ -16,11 +16,13 @@ Welcome to **Aquarium AI**! This guide explains every tool in the app and how to
 8. [Automation Script Generator](#automation-script-generator)
 9. [AI Stocking Assistant](#ai-stocking-assistant)
 10. [Aquarium Calculators](#aquarium-calculators)
-11. [Parameter Logger](#parameter-logger)
-12. [Dosing Logger](#dosing-logger)
-13. [Analysis History](#analysis-history)
-14. [Community](#community)
-15. [Settings & Appearance](#settings--appearance)
+11. [Tank Volume Calculator](#tank-volume-calculator)
+12. [Substrate Calculator](#substrate-calculator)
+13. [Parameter Logger](#parameter-logger)
+14. [Dosing Logger](#dosing-logger)
+15. [Analysis History](#analysis-history)
+16. [Community](#community)
+17. [Settings & Appearance](#settings--appearance)
 
 ---
 
@@ -261,6 +263,47 @@ A set of offline, instant calculators — no API key needed.
 **Route:** Main menu → *Tank Volume Calculator*
 
 Calculate the water volume of rectangular, cylinder, or hexagonal tanks using internal dimensions.
+
+---
+
+## Substrate Calculator
+
+**Route:** Main menu → *Substrate Calculator*
+
+Estimate how much substrate you need based on your tank footprint (length × width) and your preferred bed-depth profile.
+
+### Bed Type Options
+
+| Bed Type | Depth | Best For |
+| -------- | ----- | -------- |
+| Standard | 1–2 in (2.5–5 cm) | Community fish, general freshwater and saltwater |
+| Planted | 2–3 in (5–7.5 cm) | Live plant tanks; gives roots room to anchor |
+| Deep Bed | 3–4 in (7.5–10 cm) | Advanced planted tanks, deep-rooting species, anaerobic zones |
+| Bare Bottom | 0 in | Quarantine tanks, goldfish, high-waste fish |
+
+### Inputs
+
+- **Tank Length** – interior length in inches or centimetres.
+- **Tank Width** – interior width (front-to-back) in the same unit.
+- **Bed Type** – selects the recommended depth range for the calculation.
+- **Units** – choose *Inches* or *cm*.
+
+### Results
+
+The calculator returns a **minimum–maximum range** based on the depth band for the chosen bed type:
+
+- **Weight** – displayed in pounds (lbs) and kilograms (kg).
+- **Volume** – displayed in litres (L), useful for comparing with bag sizes.
+
+> **Note:** Results assume a typical dry bulk density of ≈ 100 lbs/ft³.
+> Actual weight varies by substrate type (gravel, sand, aqua-soil, etc.).
+> Always verify against the bag weight before purchasing.
+
+### Tips
+
+- Buy **10–15 % extra** to account for settling, decoration displacement, and uneven depth.
+- Rinse substrate thoroughly before adding it to the tank to prevent cloudy water.
+- For planted tanks, consider a nutrient-rich capping substrate below regular gravel or sand.
 
 ---
 
