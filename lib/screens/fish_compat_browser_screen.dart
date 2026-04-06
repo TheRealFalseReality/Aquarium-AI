@@ -299,12 +299,9 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
                     heroTag: 'compat_browser_add_custom_fab',
                     tooltip: l10n.addCustomFish,
                     onPressed: () async {
-                      final result = await Navigator.of(context).pushNamed(
+                      await Navigator.of(context).pushNamed(
                         '/custom-fish-editor',
                       );
-                      if (result == true) {
-                        ref.invalidate(fishDataProvider);
-                      }
                     },
                     child: const Icon(Icons.add),
                   ),
@@ -445,12 +442,11 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
     );
 
     if (action == 'edit' && mounted) {
-      final result = await Navigator.of(context).pushNamed(
+      await Navigator.of(context).pushNamed(
         '/custom-fish-editor',
         arguments: {'fish': fish},
       );
-      if (result == true) {
-        ref.invalidate(fishDataProvider);
+      if (mounted) {
         setState(() => _selectedFish = null);
       }
     } else if (action == 'delete' && mounted) {
@@ -485,7 +481,6 @@ class FishCompatBrowserScreenState extends ConsumerState<FishCompatBrowserScreen
     );
     if (confirmed == true && mounted) {
       await ref.read(customFishProvider.notifier).deleteFish(fish.uuid!);
-      ref.invalidate(fishDataProvider);
       setState(() {
         if (_selectedFish?.uuid == fish.uuid) _selectedFish = null;
       });
