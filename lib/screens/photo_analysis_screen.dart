@@ -416,7 +416,12 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                     (prompt) => ActionChip(
                       label: Text(prompt),
                       onPressed: () {
-                        _noteController.text = prompt;
+                        _noteController.value = TextEditingValue(
+                          text: prompt,
+                          selection: TextSelection.collapsed(
+                            offset: prompt.length,
+                          ),
+                        );
                       },
                     ),
                   )
