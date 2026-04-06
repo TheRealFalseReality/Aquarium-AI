@@ -174,7 +174,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -201,7 +202,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -232,7 +234,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -262,7 +265,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -288,7 +292,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -316,7 +321,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -343,7 +349,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -369,7 +376,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -395,7 +403,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -421,7 +430,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -447,7 +457,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -473,7 +484,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -499,7 +511,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: value,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -525,7 +538,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: value,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -551,7 +565,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: value,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -637,7 +652,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -667,7 +683,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -731,7 +748,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: state.tankHideCardTags,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: state.tankHideCardTags,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
