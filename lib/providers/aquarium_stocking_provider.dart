@@ -178,7 +178,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       }
     }
     final processedTankSize = _processTankSize(tankSize);
-    final prompt = appendLanguageInstruction(
+    final prompt = appendAiContextInstructions(
       buildStockingRecommendationPrompt(
         processedTankSize,
         tankType,
@@ -189,6 +189,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       ),
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
+      experienceLevel: settings.userExperienceLevel,
     );
 
     // Trigger reCAPTCHA v3 App Check verification on web before the AI call.
@@ -476,7 +477,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       existingFish,
     );
 
-    final prompt = appendLanguageInstruction(
+    final prompt = appendAiContextInstructions(
       buildTankStockingRecommendationPrompt(
         tank,
         allFish,
@@ -486,6 +487,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
       ),
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
+      experienceLevel: settings.userExperienceLevel,
     );
 
     // Trigger reCAPTCHA v3 App Check verification on web before the AI call.

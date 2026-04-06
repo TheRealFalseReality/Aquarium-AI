@@ -322,6 +322,42 @@
   "@aiResponseLanguageNameArabic": {
     "description": "Language name: Arabic"
   },
+  "aiExperienceLevel": "AI Experience Level",
+  "@aiExperienceLevel": {
+    "description": "Settings label for AI experience level"
+  },
+  "aiExperienceLevelDesc": "Tailors AI responses to your aquarium experience",
+  "@aiExperienceLevelDesc": {
+    "description": "Settings subtitle for AI experience level"
+  },
+  "onboardingExperienceLevelTitle": "Your Experience Level",
+  "@onboardingExperienceLevelTitle": {
+    "description": "Onboarding page title for experience level selection"
+  },
+  "onboardingExperienceLevelSubtitle": "Tell us how much aquarium experience you have so the AI can tailor its advice to you.",
+  "@onboardingExperienceLevelSubtitle": {
+    "description": "Onboarding page subtitle for experience level selection"
+  },
+  "aiExperienceLevelBeginnerDesc": "New to aquariums, still learning the basics",
+  "@aiExperienceLevelBeginnerDesc": {
+    "description": "Description for beginner experience level"
+  },
+  "aiExperienceLevelIntermediateDesc": "Comfortable with basic care, exploring new species",
+  "@aiExperienceLevelIntermediateDesc": {
+    "description": "Description for intermediate experience level"
+  },
+  "aiExperienceLevelAdvancedDesc": "Experienced keeper with complex tank setups",
+  "@aiExperienceLevelAdvancedDesc": {
+    "description": "Description for advanced experience level"
+  },
+  "aiExperienceLevelExpertDesc": "Deep expertise, breeding programs, specialized setups",
+  "@aiExperienceLevelExpertDesc": {
+    "description": "Description for expert experience level"
+  },
+  "experienceLevelSyncedFromProfile": "Synced from your community profile",
+  "@experienceLevelSyncedFromProfile": {
+    "description": "Note shown when experience level is synced from community profile"
+  },
   "translationCommunityTitle": "Help Translate",
   "@translationCommunityTitle": {
     "description": "Title for translation community section"

@@ -3052,6 +3052,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 const Divider(height: 24),
 
+                // AI Experience Level
+                ListTile(
+                  leading: Icon(
+                    Icons.school_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(l10n.aiExperienceLevel),
+                  subtitle: Text(
+                    _getExperienceLevelDisplayName(
+                      appSettings.userExperienceLevel,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () =>
+                      _showExperienceLevelDialog(setDialogState),
+                ),
+                const Divider(height: 24),
+
                 // Appearance shortcut
                 ListTile(
                   leading: Icon(
@@ -5400,6 +5418,81 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (aiResponseLanguage == null) return l10n.aiResponseLanguageFollowApp;
     if (aiResponseLanguage.isEmpty) return l10n.aiResponseLanguageNone;
     return _localizedLanguageName(aiResponseLanguage, l10n);
+  }
+
+  String _getExperienceLevelDisplayName(String level) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (level) {
+      case 'intermediate':
+        return l10n.profileLevelIntermediate;
+      case 'advanced':
+        return l10n.profileLevelAdvanced;
+      case 'expert':
+        return l10n.profileLevelExpert;
+      default:
+        return l10n.profileLevelBeginner;
+    }
+  }
+
+  void _showExperienceLevelDialog([StateSetter? parentSetDialogState]) {
+    final l10n = AppLocalizations.of(context)!;
+    final appSettings = ref.read(appSettingsProvider);
+    final levels = ['beginner', 'intermediate', 'advanced', 'expert'];
+    final descriptions = [
+      l10n.aiExperienceLevelBeginnerDesc,
+      l10n.aiExperienceLevelIntermediateDesc,
+      l10n.aiExperienceLevelAdvancedDesc,
+      l10n.aiExperienceLevelExpertDesc,
+    ];
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          String selected = appSettings.userExperienceLevel;
+          return AlertDialog(
+            title: Text(l10n.aiExperienceLevel),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(levels.length, (i) {
+                  final level = levels[i];
+                  final isSelected = selected == level;
+                  return RadioListTile<String>(
+                    value: level,
+                    groupValue: selected,
+                    title: Text(_getExperienceLevelDisplayName(level)),
+                    subtitle: Text(descriptions[i]),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setDialogState(() => selected = value);
+                      ref
+                          .read(appSettingsProvider.notifier)
+                          .setUserExperienceLevel(value);
+                      AnalyticsService.logSettingsChange(
+                        settingName: 'user_experience_level',
+                        newValue: value,
+                        oldValue: appSettings.userExperienceLevel,
+                      );
+                      if (parentSetDialogState != null) {
+                        parentSetDialogState(() {});
+                      }
+                    },
+                    selected: isSelected,
+                  );
+                }),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(l10n.close),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   /// Returns the localized display name for a preset AI response language.
