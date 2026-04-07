@@ -84,15 +84,15 @@
   "@substrateCalculator": {
     "description": "Name of the substrate calculator feature"
   },
-  "substrateCalculatorSubtitle": "Estimate how much substrate you need based on your tank footprint and desired bed depth.",
+  "substrateCalculatorSubtitle": "Estimate how much substrate you need based on your tank volume and bed type.",
   "@substrateCalculatorSubtitle": {
     "description": "Subtitle shown below the substrate calculator title"
   },
-  "substrateDescription": "Estimate substrate quantity by tank footprint and bed-depth profile. Supports standard, planted, deep-bed, and bare-bottom setups with weight and volume results.",
+  "substrateDescription": "Estimate substrate quantity by tank volume and bed-depth profile. Enter your tank volume in gallons or liters and get a weight and volume recommendation instantly.",
   "@substrateDescription": {
     "description": "Description of the substrate calculator (welcome screen)"
   },
-  "substrateDrawerDescription": "Calculate substrate weight and volume for any tank footprint and bed-depth profile.",
+  "substrateDrawerDescription": "Calculate substrate weight and volume from tank volume in gallons or liters.",
   "@substrateDrawerDescription": {
     "description": "Short description of the substrate calculator (app drawer)"
   },
@@ -102,15 +102,15 @@
   },
   "substrateBedStandard": "Standard",
   "@substrateBedStandard": {
-    "description": "Standard bed type option (1–2 inch depth)"
+    "description": "Standard bed type option (1–2 lbs/gal)"
   },
   "substrateBedPlanted": "Planted",
   "@substrateBedPlanted": {
-    "description": "Planted bed type option (2–3 inch depth)"
+    "description": "Planted bed type option (2–3 lbs/gal)"
   },
   "substrateBedDeep": "Deep Bed",
   "@substrateBedDeep": {
-    "description": "Deep bed type option (3–4 inch depth)"
+    "description": "Deep bed type option (3–4 lbs/gal)"
   },
   "substrateBedBare": "Bare Bottom",
   "@substrateBedBare": {
@@ -124,6 +124,18 @@
   "@substrateWidth": {
     "description": "Input label for tank width in the substrate calculator"
   },
+  "substrateTankVolume": "Tank Volume",
+  "@substrateTankVolume": {
+    "description": "Input label for tank volume in the substrate calculator"
+  },
+  "substrateUnitGallons": "Gallons",
+  "@substrateUnitGallons": {
+    "description": "Unit label for gallons in the substrate calculator"
+  },
+  "substrateUnitLiters": "Liters",
+  "@substrateUnitLiters": {
+    "description": "Unit label for liters in the substrate calculator"
+  },
   "substrateBareBottomResult": "No substrate needed for a bare-bottom setup.",
   "@substrateBareBottomResult": {
     "description": "Result message shown when bare bottom is selected"
@@ -131,6 +143,14 @@
   "substrateResultTitle": "Estimated Substrate",
   "@substrateResultTitle": {
     "description": "Title of the results card in the substrate calculator"
+  },
+  "substrateResultRecommended": "Recommended Amount",
+  "@substrateResultRecommended": {
+    "description": "Title of the recommended amount card in the substrate calculator"
+  },
+  "substrateResultRange": "Estimated Range",
+  "@substrateResultRange": {
+    "description": "Title of the estimated range card in the substrate calculator"
   },
   "substrateResultDepthLabel": "Recommended depth: {depth}",
   "@substrateResultDepthLabel": {
@@ -151,7 +171,7 @@
   "@substrateInfoTitle": {
     "description": "Heading of the info section in the substrate calculator"
   },
-  "substrateInfoStandardTitle": "Standard (1–2 in / 2.5–5 cm)",
+  "substrateInfoStandardTitle": "Standard (1–2 lbs/gal · 1–2 in depth)",
   "@substrateInfoStandardTitle": {
     "description": "Title for the standard bed info tile"
   },
@@ -159,7 +179,7 @@
   "@substrateInfoStandardBody": {
     "description": "Body text for the standard bed info tile"
   },
-  "substrateInfoPlantedTitle": "Planted (2–3 in / 5–7.5 cm)",
+  "substrateInfoPlantedTitle": "Planted (2–3 lbs/gal · 2–3 in depth)",
   "@substrateInfoPlantedTitle": {
     "description": "Title for the planted bed info tile"
   },
@@ -167,7 +187,7 @@
   "@substrateInfoPlantedBody": {
     "description": "Body text for the planted bed info tile"
   },
-  "substrateInfoDeepTitle": "Deep Bed (3–4 in / 7.5–10 cm)",
+  "substrateInfoDeepTitle": "Deep Bed (3–4 lbs/gal · 3–4 in depth)",
   "@substrateInfoDeepTitle": {
     "description": "Title for the deep bed info tile"
   },
@@ -187,7 +207,7 @@
   "@substrateInfoDensityTitle": {
     "description": "Title for the density / estimate info tile"
   },
-  "substrateInfoDensityBody": "Results assume a typical dry bulk density of ~100 lbs/ft³. Actual weight varies by substrate type (gravel, sand, soil). Always check the bag weight.",
+  "substrateInfoDensityBody": "Results use the standard 1–2 lbs per gallon rule, scaled by bed type. Actual amount varies by substrate type (gravel, sand, soil). Always check the bag weight.",
   "@substrateInfoDensityBody": {
     "description": "Body text for the density / estimate info tile"
   },

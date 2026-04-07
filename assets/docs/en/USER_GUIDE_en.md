@@ -283,21 +283,22 @@ Estimate how much substrate you need based on your tank footprint (length × wid
 
 ### Inputs
 
-- **Tank Length** – interior length in inches or centimetres.
-- **Tank Width** – interior width (front-to-back) in the same unit.
-- **Bed Type** – selects the recommended depth range for the calculation.
-- **Units** – choose *Inches* or *cm*.
+- **Tank Volume** – the total water volume of your tank.
+- **Units** – choose *Gallons* or *Liters*.
+- **Bed Type** – selects the lbs-per-gallon multiplier for the calculation.
 
 ### Results
 
-The calculator returns a **minimum–maximum range** based on the depth band for the chosen bed type:
+The calculator uses the standard **1–2 lbs per gallon** rule, scaled by bed type.
+Two cards are shown:
 
-- **Weight** – displayed in pounds (lbs) and kilograms (kg).
-- **Volume** – displayed in litres (L), useful for comparing with bag sizes.
+- **Recommended Amount** – the midpoint of the estimated range (the number to aim for).
+  Shows weight in lbs / kg and substrate volume in litres.
+- **Estimated Range** – the full minimum–maximum spread for weight and volume.
 
-> **Note:** Results assume a typical dry bulk density of ~100 lbs/ft³.
-> Actual weight varies by substrate type (gravel, sand, aqua-soil, etc.).
-> Always verify against the bag weight before purchasing.
+> **Note:** Results use the standard lbs/gal rule. Actual amount varies by substrate
+> type (gravel, sand, aqua-soil, etc.). Always verify against the bag weight before
+> purchasing.
 
 ### Tips
 

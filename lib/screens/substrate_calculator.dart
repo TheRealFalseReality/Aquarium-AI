@@ -18,28 +18,42 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
   /// Bed depth profile: 'Standard', 'Planted', 'DeepBed', 'BareBottom'
   String _bedType = 'Standard';
 
-  /// Tank footprint units: 'Inches' or 'cm'
-  String _units = 'Inches';
+  /// Volume unit: 'Gallons' or 'Liters'
+  String _volumeUnit = 'Gallons';
 
-  // ── Inputs ────────────────────────────────────────────────────────────────
-  final _lengthController = TextEditingController();
-  final _widthController = TextEditingController();
+  // ── Input ─────────────────────────────────────────────────────────────────
+  final _volumeController = TextEditingController();
 
   // ── Results ───────────────────────────────────────────────────────────────
-  double? _minPounds;
-  double? _maxPounds;
-  double? _minKg;
-  double? _maxKg;
-  double? _minLiters;
-  double? _maxLiters;
+  int? _minPounds;
+  int? _maxPounds;
+  int? _minKg;
+  int? _maxKg;
+  int? _minSubLiters;
+  int? _maxSubLiters;
+  int? _recPounds;
+  int? _recKg;
+  int? _recSubLiters;
 
-  // ── Bed type depth ranges (inches) ────────────────────────────────────────
+  // ── Lbs-per-gallon ranges by bed type ─────────────────────────────────────
+  // Based on the standard 1–2 lbs/gal rule, scaled for each bed depth profile.
+  static const Map<String, (double, double)> _lbsPerGallon = {
+    'Standard': (1.0, 2.0),
+    'Planted': (2.0, 3.0),
+    'DeepBed': (3.0, 4.0),
+    'BareBottom': (0.0, 0.0),
+  };
+
+  // ── Approximate depth ranges for display (inches) ─────────────────────────
   static const Map<String, (double, double)> _depthRange = {
     'Standard': (1.0, 2.0),
     'Planted': (2.0, 3.0),
     'DeepBed': (3.0, 4.0),
     'BareBottom': (0.0, 0.0),
   };
+
+  // Substrate bulk density: ~100 lbs/ft³ ≈ 3.532 lbs/L
+  static const double _lbsPerLiterSubstrate = 100.0 / 28.3168;
 
   @override
   void initState() {
@@ -49,24 +63,25 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
 
   @override
   void dispose() {
-    _lengthController.dispose();
-    _widthController.dispose();
+    _volumeController.dispose();
     super.dispose();
   }
 
   // ── Calculation ───────────────────────────────────────────────────────────
   void _calculate() {
-    final length = double.tryParse(_lengthController.text);
-    final width = double.tryParse(_widthController.text);
+    final volume = double.tryParse(_volumeController.text);
 
-    if (length == null || width == null || length <= 0 || width <= 0) {
+    if (volume == null || volume <= 0) {
       setState(() {
         _minPounds = null;
         _maxPounds = null;
         _minKg = null;
         _maxKg = null;
-        _minLiters = null;
-        _maxLiters = null;
+        _minSubLiters = null;
+        _maxSubLiters = null;
+        _recPounds = null;
+        _recKg = null;
+        _recSubLiters = null;
       });
       return;
     }
@@ -75,16 +90,9 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
       calculatorType: 'substrate',
       inputData: {
         'bed_type': _bedType,
-        'units': _units,
+        'volume_unit': _volumeUnit,
       },
     );
-
-    // Convert inputs to inches
-    final double lengthIn =
-        _units == 'cm' ? length / 2.54 : length;
-    final double widthIn = _units == 'cm' ? width / 2.54 : width;
-
-    final (double minDepth, double maxDepth) = _depthRange[_bedType]!;
 
     if (_bedType == 'BareBottom') {
       setState(() {
@@ -92,43 +100,46 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
         _maxPounds = 0;
         _minKg = 0;
         _maxKg = 0;
-        _minLiters = 0;
-        _maxLiters = 0;
+        _minSubLiters = 0;
+        _maxSubLiters = 0;
+        _recPounds = 0;
+        _recKg = 0;
+        _recSubLiters = 0;
       });
       return;
     }
 
-    // Volume in cubic inches = L × W × depth
-    final double minVolIn3 = lengthIn * widthIn * minDepth;
-    final double maxVolIn3 = lengthIn * widthIn * maxDepth;
+    // Convert to gallons
+    final double gallons =
+        _volumeUnit == 'Liters' ? volume / 3.78541 : volume;
 
-    // Substrate density: ~100 lbs/ft³ ≈ 0.0579 lbs/in³ (dry bulk density)
-    // 1 ft³ = 1728 in³, 100 lbs / 1728 in³ ≈ 0.0579 lbs/in³
-    const double lbsPerIn3 = 100.0 / 1728.0;
+    final (double minLbsPerGal, double maxLbsPerGal) =
+        _lbsPerGallon[_bedType]!;
 
-    final double minLbs = minVolIn3 * lbsPerIn3;
-    final double maxLbs = maxVolIn3 * lbsPerIn3;
+    final double minLbs = gallons * minLbsPerGal;
+    final double maxLbs = gallons * maxLbsPerGal;
+    final double recLbs = gallons * (minLbsPerGal + maxLbsPerGal) / 2.0;
+
     final double minKg = minLbs * 0.453592;
     final double maxKg = maxLbs * 0.453592;
+    final double recKg = recLbs * 0.453592;
 
-    // Volume in liters (1 in³ = 0.016387 L)
-    const double litersPerIn3 = 0.016387;
-    final double minLiters = minVolIn3 * litersPerIn3;
-    final double maxLiters = maxVolIn3 * litersPerIn3;
+    final double minSubLiters = minLbs / _lbsPerLiterSubstrate;
+    final double maxSubLiters = maxLbs / _lbsPerLiterSubstrate;
+    final double recSubLiters = recLbs / _lbsPerLiterSubstrate;
 
     setState(() {
-      _minPounds = minLbs;
-      _maxPounds = maxLbs;
-      _minKg = minKg;
-      _maxKg = maxKg;
-      _minLiters = minLiters;
-      _maxLiters = maxLiters;
+      _minPounds = minLbs.round();
+      _maxPounds = maxLbs.round();
+      _minKg = minKg.round();
+      _maxKg = maxKg.round();
+      _minSubLiters = minSubLiters.round();
+      _maxSubLiters = maxSubLiters.round();
+      _recPounds = recLbs.round();
+      _recKg = recKg.round();
+      _recSubLiters = recSubLiters.round();
     });
   }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  String _fmt(double? v) =>
-      v == null ? '' : v.toStringAsFixed(1);
 
   // ── Build ─────────────────────────────────────────────────────────────────
   @override
@@ -195,7 +206,7 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
             ],
           ),
 
-          // ── Units ─────────────────────────────────────────────────────────
+          // ── Volume unit ───────────────────────────────────────────────────
           _buildSectionTitle(context, l10n.units),
           Wrap(
             alignment: WrapAlignment.center,
@@ -203,25 +214,25 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
             runSpacing: 10,
             children: [
               ModernSelectableChip(
-                label: l10n.unitInches,
-                selected: _units == 'Inches',
+                label: l10n.substrateUnitGallons,
+                selected: _volumeUnit == 'Gallons',
                 dense: true,
                 selectedColor: cs.secondary,
                 selectedTextColor: cs.onSecondary,
-                onTap: () => setState(() => _units = 'Inches'),
+                onTap: () => setState(() => _volumeUnit = 'Gallons'),
               ),
               ModernSelectableChip(
-                label: l10n.unitCm,
-                selected: _units == 'cm',
+                label: l10n.substrateUnitLiters,
+                selected: _volumeUnit == 'Liters',
                 dense: true,
                 selectedColor: cs.secondary,
                 selectedTextColor: cs.onSecondary,
-                onTap: () => setState(() => _units = 'cm'),
+                onTap: () => setState(() => _volumeUnit = 'Liters'),
               ),
             ],
           ),
 
-          // ── Inputs ───────────────────────────────────────────────────────
+          // ── Volume input ─────────────────────────────────────────────────
           const SizedBox(height: 16),
           const BannerAdWidget(),
           const SizedBox(height: 16),
@@ -232,40 +243,20 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
                 horizontal: 16,
                 vertical: 22,
               ),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: _lengthController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: l10n.substrateLength,
-                      hintText: _units == 'Inches' ? 'e.g. 48' : 'e.g. 120',
-                      suffixText: _units == 'Inches'
-                          ? l10n.unitInches
-                          : l10n.unitCm,
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.straighten_outlined),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _widthController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: l10n.substrateWidth,
-                      hintText: _units == 'Inches' ? 'e.g. 18' : 'e.g. 45',
-                      suffixText: _units == 'Inches'
-                          ? l10n.unitInches
-                          : l10n.unitCm,
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.swap_horiz_outlined),
-                    ),
-                  ),
-                ],
+              child: TextField(
+                controller: _volumeController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: l10n.substrateTankVolume,
+                  hintText: _volumeUnit == 'Gallons' ? 'e.g. 55' : 'e.g. 200',
+                  suffixText: _volumeUnit == 'Gallons'
+                      ? l10n.substrateUnitGallons
+                      : l10n.substrateUnitLiters,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.water_outlined),
+                ),
               ),
             ),
           ),
@@ -296,7 +287,7 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
           // ── Results ──────────────────────────────────────────────────────
           if (hasResults) ...[
             const SizedBox(height: 22),
-            _buildResultsCard(context, l10n),
+            _buildResultsSection(context, l10n),
           ],
 
           // ── Info section ─────────────────────────────────────────────────
@@ -336,74 +327,169 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
     );
   }
 
-  Widget _buildResultsCard(BuildContext context, AppLocalizations l10n) {
+  Widget _buildResultsSection(BuildContext context, AppLocalizations l10n) {
     final cs = Theme.of(context).colorScheme;
     final isBareBottom = _bedType == 'BareBottom';
 
     if (isBareBottom) {
-      return Card(
-        color: cs.surface,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
-          child: Text(
-            l10n.substrateBareBottomResult,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: cs.primary,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
+      return _buildColoredCard(
+        context,
+        backgroundColor: cs.primaryContainer,
+        borderColor: cs.primary,
+        child: Text(
+          l10n.substrateBareBottomResult,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: cs.onPrimaryContainer,
+            fontWeight: FontWeight.w600,
           ),
+          textAlign: TextAlign.center,
         ),
       );
     }
 
     final (double minDepth, double maxDepth) = _depthRange[_bedType]!;
-    final depthLabel = _units == 'Inches'
-        ? '${minDepth.toStringAsFixed(0)}–${maxDepth.toStringAsFixed(0)} ${l10n.unitInches}'
-        : '${(minDepth * 2.54).toStringAsFixed(1)}–${(maxDepth * 2.54).toStringAsFixed(1)} ${l10n.unitCm}';
+    final depthLabel =
+        '${minDepth.toStringAsFixed(0)}–${maxDepth.toStringAsFixed(0)} in'
+        ' / ${(minDepth * 2.54).toStringAsFixed(1)}–${(maxDepth * 2.54).toStringAsFixed(1)} cm';
 
-    return Card(
-      color: cs.surface,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
-        child: Column(
-          children: [
-            Text(
-              l10n.substrateResultTitle,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+    return Column(
+      children: [
+        // ── Recommended card ─────────────────────────────────────────────
+        _buildColoredCard(
+          context,
+          backgroundColor: cs.primaryContainer,
+          borderColor: cs.primary,
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.star_rounded, color: cs.primary, size: 20),
+                  const SizedBox(width: 6),
+                  Text(
+                    l10n.substrateResultRecommended,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: cs.onPrimaryContainer,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.substrateResultDepthLabel(depthLabel),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: cs.onSurface.withOpacity(0.6),
+              const SizedBox(height: 4),
+              Text(
+                l10n.substrateResultDepthLabel(depthLabel),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onPrimaryContainer.withOpacity(0.7),
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildResultColumn(
-                  context,
-                  l10n.substrateResultWeight,
-                  '${_fmt(_minPounds)}–${_fmt(_maxPounds)} lbs',
-                  '${_fmt(_minKg)}–${_fmt(_maxKg)} kg',
-                  cs.primary,
-                ),
-                _buildResultColumn(
-                  context,
-                  l10n.substrateResultVolume,
-                  '${_fmt(_minLiters)}–${_fmt(_maxLiters)} L',
-                  '',
-                  Colors.green,
-                ),
-              ],
-            ),
-          ],
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildValueChip(
+                    context,
+                    '$_recPounds lbs',
+                    '$_recKg kg',
+                    cs.onPrimaryContainer,
+                  ),
+                  _buildValueChip(
+                    context,
+                    '$_recSubLiters L',
+                    l10n.substrateResultVolume,
+                    cs.onPrimaryContainer,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
+        const SizedBox(height: 12),
+        // ── Estimated range card ──────────────────────────────────────────
+        _buildColoredCard(
+          context,
+          backgroundColor: cs.secondaryContainer,
+          borderColor: cs.secondary,
+          child: Column(
+            children: [
+              Text(
+                l10n.substrateResultRange,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSecondaryContainer,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildResultColumn(
+                    context,
+                    l10n.substrateResultWeight,
+                    '$_minPounds–$_maxPounds lbs',
+                    '$_minKg–$_maxKg kg',
+                    cs.onSecondaryContainer,
+                  ),
+                  _buildResultColumn(
+                    context,
+                    l10n.substrateResultVolume,
+                    '$_minSubLiters–$_maxSubLiters L',
+                    '',
+                    cs.onSecondaryContainer,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildColoredCard(
+    BuildContext context, {
+    required Color backgroundColor,
+    required Color borderColor,
+    required Widget child,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildValueChip(
+    BuildContext context,
+    String primary,
+    String secondary,
+    Color textColor,
+  ) {
+    return Flexible(
+      child: Column(
+        children: [
+          Text(
+            primary,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            secondary,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: textColor.withOpacity(0.75),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -413,34 +499,35 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
     String label,
     String value1,
     String value2,
-    Color color,
+    Color textColor,
   ) {
     return Flexible(
       child: Column(
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
+              color: textColor.withOpacity(0.85),
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             value1,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: color,
+              color: textColor,
               fontWeight: FontWeight.bold,
             ),
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),
           if (value2.isNotEmpty) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               value2,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: color,
+                color: textColor,
                 fontWeight: FontWeight.bold,
               ),
               overflow: TextOverflow.ellipsis,
