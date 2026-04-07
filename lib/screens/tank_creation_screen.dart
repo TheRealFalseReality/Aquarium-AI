@@ -179,6 +179,12 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
     _loadFishData();
   }
 
+  void _toggleFreshwaterSubtype(String subtype) {
+    setState(() {
+      _freshwaterSubtype = _freshwaterSubtype == subtype ? null : subtype;
+    });
+  }
+
   void _addInhabitant() {
     showDialog(
       context: context,
@@ -988,24 +994,16 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
                                       emoji: '🌿',
                                       selected:
                                           _freshwaterSubtype == 'planted',
-                                      onTap: () => setState(
-                                        () => _freshwaterSubtype =
-                                            _freshwaterSubtype == 'planted'
-                                                ? null
-                                                : 'planted',
-                                      ),
+                                      onTap: () =>
+                                          _toggleFreshwaterSubtype('planted'),
                                     ),
                                     ModernSelectableChip(
                                       label: l10n.brackishTank,
                                       emoji: '🦀',
                                       selected:
                                           _freshwaterSubtype == 'brackish',
-                                      onTap: () => setState(
-                                        () => _freshwaterSubtype =
-                                            _freshwaterSubtype == 'brackish'
-                                                ? null
-                                                : 'brackish',
-                                      ),
+                                      onTap: () =>
+                                          _toggleFreshwaterSubtype('brackish'),
                                     ),
                                   ],
                                 ),

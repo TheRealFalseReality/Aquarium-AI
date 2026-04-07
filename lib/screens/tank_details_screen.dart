@@ -2092,7 +2092,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         l10n.substrateRecommendedLbs(recLbs),
       );
     } else if (tank.sizeLiters != null) {
-      // Substrate bulk density ≈ 100 lbs/ft³ → 3.532 lbs/L
+      // Substrate bulk density: 100 lbs/ft³ (standard gravel); 1 ft³ = 28.3168 L
       const double lbsPerLiterSubstrate = 100.0 / 28.3168;
       final gallons = tank.sizeLiters! / 3.78541;
       final recLbs = gallons * lbsPerGal;
