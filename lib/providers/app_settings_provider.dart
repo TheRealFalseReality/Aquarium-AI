@@ -753,7 +753,6 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       userExperienceLevel: state.userExperienceLevel,
     );
   }
-}
 
   Future<void> setUserExperienceLevel(String value) async {
     final prefs = await SharedPreferences.getInstance();
