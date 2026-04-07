@@ -34,6 +34,7 @@ import './screens/onboarding_screen.dart';
 import './screens/photo_analysis_screen.dart';
 import './screens/profile_screen.dart';
 import './screens/species_tags_screen.dart';
+import './screens/substrate_calculator.dart';
 import './screens/tank_management_screen.dart';
 import './screens/tank_volume_calculator.dart';
 import './screens/welcome_screen.dart';
@@ -575,6 +576,10 @@ class MyApp extends ConsumerWidget {
               case '/tank-volume':
                 page = const TankVolumeCalculator();
                 screenName = 'tank_volume_calculator';
+                break;
+              case '/substrate':
+                page = const SubstrateCalculator();
+                screenName = 'substrate_calculator';
                 break;
               case '/calculators':
                 page = const CalculatorsScreen();
