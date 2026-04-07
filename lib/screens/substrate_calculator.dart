@@ -31,9 +31,12 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
   int? _maxKg;
   int? _minSubLiters;
   int? _maxSubLiters;
+  int? _minSubGallons;
+  int? _maxSubGallons;
   int? _recPounds;
   int? _recKg;
   int? _recSubLiters;
+  int? _recSubGallons;
 
   // ── Lbs-per-gallon ranges by bed type ─────────────────────────────────────
   // Based on the standard 1–2 lbs/gal rule, scaled for each bed depth profile.
@@ -79,9 +82,12 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
         _maxKg = null;
         _minSubLiters = null;
         _maxSubLiters = null;
+        _minSubGallons = null;
+        _maxSubGallons = null;
         _recPounds = null;
         _recKg = null;
         _recSubLiters = null;
+        _recSubGallons = null;
       });
       return;
     }
@@ -102,9 +108,12 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
         _maxKg = 0;
         _minSubLiters = 0;
         _maxSubLiters = 0;
+        _minSubGallons = 0;
+        _maxSubGallons = 0;
         _recPounds = 0;
         _recKg = 0;
         _recSubLiters = 0;
+        _recSubGallons = 0;
       });
       return;
     }
@@ -128,6 +137,12 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
     final double maxSubLiters = maxLbs / _lbsPerLiterSubstrate;
     final double recSubLiters = recLbs / _lbsPerLiterSubstrate;
 
+    // 1 US gallon = 3.78541 L
+    const double litersPerGallon = 3.78541;
+    final double minSubGallons = minSubLiters / litersPerGallon;
+    final double maxSubGallons = maxSubLiters / litersPerGallon;
+    final double recSubGallons = recSubLiters / litersPerGallon;
+
     setState(() {
       _minPounds = minLbs.round();
       _maxPounds = maxLbs.round();
@@ -135,9 +150,12 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
       _maxKg = maxKg.round();
       _minSubLiters = minSubLiters.round();
       _maxSubLiters = maxSubLiters.round();
+      _minSubGallons = minSubGallons.round();
+      _maxSubGallons = maxSubGallons.round();
       _recPounds = recLbs.round();
       _recKg = recKg.round();
       _recSubLiters = recSubLiters.round();
+      _recSubGallons = recSubGallons.round();
     });
   }
 
@@ -389,13 +407,17 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
                 children: [
                   _buildValueChip(
                     context,
-                    '$_recPounds lbs',
-                    '$_recKg kg',
+                    _volumeUnit == 'Gallons'
+                        ? '$_recPounds lbs'
+                        : '$_recKg kg',
+                    l10n.substrateResultWeight,
                     cs.onPrimaryContainer,
                   ),
                   _buildValueChip(
                     context,
-                    '$_recSubLiters L',
+                    _volumeUnit == 'Gallons'
+                        ? '$_recSubGallons gal'
+                        : '$_recSubLiters L',
                     l10n.substrateResultVolume,
                     cs.onPrimaryContainer,
                   ),
@@ -426,14 +448,18 @@ class _SubstrateCalculatorState extends State<SubstrateCalculator> {
                   _buildResultColumn(
                     context,
                     l10n.substrateResultWeight,
-                    '$_minPounds–$_maxPounds lbs',
-                    '$_minKg–$_maxKg kg',
+                    _volumeUnit == 'Gallons'
+                        ? '$_minPounds–$_maxPounds lbs'
+                        : '$_minKg–$_maxKg kg',
+                    '',
                     cs.onSecondaryContainer,
                   ),
                   _buildResultColumn(
                     context,
                     l10n.substrateResultVolume,
-                    '$_minSubLiters–$_maxSubLiters L',
+                    _volumeUnit == 'Gallons'
+                        ? '$_minSubGallons–$_maxSubGallons gal'
+                        : '$_minSubLiters–$_maxSubLiters L',
                     '',
                     cs.onSecondaryContainer,
                   ),
