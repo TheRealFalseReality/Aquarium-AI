@@ -654,6 +654,40 @@
   "@freshwaterTank": {
     "description": "Freshwater tank label"
   },
+  "plantedFreshwaterTank": "Planted Tank",
+  "@plantedFreshwaterTank": {
+    "description": "Planted freshwater tank label shown in tank details"
+  },
+  "plantedTank": "Planted",
+  "@plantedTank": {
+    "description": "Planted freshwater subtype chip label"
+  },
+  "brackishTank": "Brackish",
+  "@brackishTank": {
+    "description": "Brackish freshwater subtype chip label"
+  },
+  "freshwaterSubtype": "Freshwater subtype:",
+  "@freshwaterSubtype": {
+    "description": "Label shown above freshwater subtype chips (Planted, Brackish) in tank creation"
+  },
+  "substrateRecommendedLbs": "~{amount} lbs substrate",
+  "@substrateRecommendedLbs": {
+    "description": "Substrate recommendation chip label in tank details (imperial)",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "substrateRecommendedLiters": "~{amount} L substrate",
+  "@substrateRecommendedLiters": {
+    "description": "Substrate recommendation chip label in tank details (metric)",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
   "saltwaterTank": "Saltwater Tank",
   "@saltwaterTank": {
     "description": "Saltwater tank label"

@@ -38,6 +38,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
 
   String _selectedCategory = 'freshwater';
   bool _isReef = false;
+  String? _freshwaterSubtype; // 'planted' or 'brackish'; null = standard
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
   DateTime _creationDate = DateTime.now();
@@ -64,6 +65,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
       _tankNameController.text = widget.existingTank!.name;
       _selectedCategory = widget.existingTank!.type;
       _isReef = widget.existingTank!.isReef;
+      _freshwaterSubtype = widget.existingTank!.freshwaterSubtype;
       _inhabitants = List.from(widget.existingTank!.inhabitants);
       _creationDate = widget.existingTank!.createdAt;
       _tankPhotos = List.from(widget.existingTank!.photos);
@@ -172,6 +174,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
       _selectedCategory = category;
       _inhabitants.clear(); // Clear inhabitants when changing category
       if (category != 'marine') _isReef = false;
+      if (category != 'freshwater') _freshwaterSubtype = null;
     });
     _loadFishData();
   }
@@ -477,11 +480,15 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
         }
 
         final isReef = _selectedCategory == 'marine' ? _isReef : false;
+        final freshwaterSubtype =
+            _selectedCategory == 'freshwater' ? _freshwaterSubtype : null;
         final tank = widget.existingTank != null
             ? widget.existingTank!.copyWith(
                 name: _tankNameController.text.trim(),
                 type: _selectedCategory,
                 isReef: isReef,
+                freshwaterSubtype: freshwaterSubtype,
+                clearFreshwaterSubtype: freshwaterSubtype == null,
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
@@ -500,6 +507,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
                 name: _tankNameController.text.trim(),
                 type: _selectedCategory,
                 isReef: isReef,
+                freshwaterSubtype: freshwaterSubtype,
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
@@ -923,6 +931,83 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
                                   selected: _isReef,
                                   onTap: () =>
                                       setState(() => _isReef = !_isReef),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          // Freshwater subtype – only visible for freshwater tanks
+          AnimatedSize(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+            child: _selectedCategory == 'freshwater'
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 8, left: 20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 2,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(1),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Builder(
+                          builder: (context) {
+                            final l10n = AppLocalizations.of(context)!;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.freshwaterSubtype,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                ),
+                                const SizedBox(height: 6),
+                                Wrap(
+                                  spacing: 8,
+                                  children: [
+                                    ModernSelectableChip(
+                                      label: l10n.plantedTank,
+                                      emoji: '🌿',
+                                      selected:
+                                          _freshwaterSubtype == 'planted',
+                                      onTap: () => setState(
+                                        () => _freshwaterSubtype =
+                                            _freshwaterSubtype == 'planted'
+                                                ? null
+                                                : 'planted',
+                                      ),
+                                    ),
+                                    ModernSelectableChip(
+                                      label: l10n.brackishTank,
+                                      emoji: '🦀',
+                                      selected:
+                                          _freshwaterSubtype == 'brackish',
+                                      onTap: () => setState(
+                                        () => _freshwaterSubtype =
+                                            _freshwaterSubtype == 'brackish'
+                                                ? null
+                                                : 'brackish',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             );

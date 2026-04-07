@@ -849,7 +849,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                           ),
                           Text(
                             tank.type == 'freshwater'
-                                ? l10n.freshwaterTank
+                                ? (tank.freshwaterSubtype == 'planted'
+                                      ? l10n.plantedFreshwaterTank
+                                      : tank.freshwaterSubtype == 'brackish'
+                                      ? l10n.brackishTank
+                                      : l10n.freshwaterTank)
                                 : (tank.isReef
                                       ? l10n.reefTank
                                       : l10n.saltwaterTank),
@@ -882,6 +886,8 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                         Icons.line_weight,
                         _formatWaterWeight(tank),
                       ),
+                    if (tank.sizeGallons != null || tank.sizeLiters != null)
+                      _buildSubstrateChip(context, tank),
                     _buildTankAgeChip(context, tank),
                     if (tank.inhabitants.isNotEmpty && fishData != null)
                       _buildHarmonyScoreChip(tank),
@@ -2063,6 +2069,41 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       return '${weightKg.toStringAsFixed(1)} kg';
     }
     return 'N/A';
+  }
+
+  /// Returns the substrate lbs-per-gallon midpoint for the given tank's type.
+  /// Planted freshwater uses 2–3 lbs/gal (mid: 2.5); all others use 1–2 (mid: 1.5).
+  double _substrateRecLbsPerGallon(Tank tank) {
+    if (tank.type == 'freshwater' && tank.freshwaterSubtype == 'planted') {
+      return 2.5; // mid of Planted range (2–3 lbs/gal)
+    }
+    return 1.5; // mid of Standard range (1–2 lbs/gal)
+  }
+
+  Widget _buildSubstrateChip(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final lbsPerGal = _substrateRecLbsPerGallon(tank);
+
+    if (tank.sizeGallons != null) {
+      final recLbs = (tank.sizeGallons! * lbsPerGal).round();
+      return _buildStatChip(
+        context,
+        Icons.layers,
+        l10n.substrateRecommendedLbs(recLbs),
+      );
+    } else if (tank.sizeLiters != null) {
+      // Substrate bulk density ≈ 100 lbs/ft³ → 3.532 lbs/L
+      const double lbsPerLiterSubstrate = 100.0 / 28.3168;
+      final gallons = tank.sizeLiters! / 3.78541;
+      final recLbs = gallons * lbsPerGal;
+      final recSubLiters = (recLbs / lbsPerLiterSubstrate).round();
+      return _buildStatChip(
+        context,
+        Icons.layers,
+        l10n.substrateRecommendedLiters(recSubLiters),
+      );
+    }
+    return const SizedBox.shrink();
   }
 
   Widget _buildInhabitantsSection(
