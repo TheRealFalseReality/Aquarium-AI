@@ -116,14 +116,6 @@
   "@substrateBedBare": {
     "description": "Bare bottom option (no substrate)"
   },
-  "substrateLength": "Tank Length",
-  "@substrateLength": {
-    "description": "Input label for tank length in the substrate calculator"
-  },
-  "substrateWidth": "Tank Width",
-  "@substrateWidth": {
-    "description": "Input label for tank width in the substrate calculator"
-  },
   "substrateTankVolume": "Tank Volume",
   "@substrateTankVolume": {
     "description": "Input label for tank volume in the substrate calculator"
