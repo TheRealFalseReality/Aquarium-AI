@@ -11,7 +11,6 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/user_profile.dart';
 import '../providers/community_provider.dart';
-import '../providers/app_settings_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart' show isFounderProvider;
 import '../providers/tank_provider.dart';
@@ -1042,12 +1041,6 @@ class _EditProfileScreenState extends ConsumerState<_EditProfileScreen> {
 
     final ok = await ref.read(saveProfileProvider.notifier).save(updated);
     await AuthService.updateDisplayName(updated.displayName);
-    // Sync experience level to local app settings so the AI uses it.
-    if (ok) {
-      await ref
-          .read(appSettingsProvider.notifier)
-          .setUserExperienceLevel(updated.experienceLevel.value);
-    }
 
     if (mounted) {
       if (ok) {

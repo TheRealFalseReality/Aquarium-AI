@@ -5445,11 +5445,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       l10n.aiExperienceLevelExpertDesc,
     ];
 
+    String selected = appSettings.userExperienceLevel;
     showDialog<void>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) {
-          String selected = appSettings.userExperienceLevel;
           return AlertDialog(
             title: Text(l10n.aiExperienceLevel),
             content: SingleChildScrollView(
