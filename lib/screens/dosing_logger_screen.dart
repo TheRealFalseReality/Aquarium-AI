@@ -241,7 +241,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
             duration: const Duration(milliseconds: 200),
             child: const Icon(Icons.add),
           ),
-          label: Text(_fabOpen ? 'Close' : l10n.addDose),
+          label: Text(_fabOpen ? l10n.close : l10n.addDose),
         ),
       ],
     );

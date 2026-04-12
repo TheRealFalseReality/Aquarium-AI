@@ -1316,7 +1316,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (widget.onLogDose != null) ...[
+                    if (widget.onLogDose != null && _resultValue != null) ...[
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
