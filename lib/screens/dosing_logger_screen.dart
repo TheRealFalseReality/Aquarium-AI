@@ -938,8 +938,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
         : (chemicals.isNotEmpty ? chemicals.first.name : null);
 
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+      padding: const EdgeInsets.only(
         left: 16,
         right: 16,
         top: 16,
@@ -947,6 +946,9 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

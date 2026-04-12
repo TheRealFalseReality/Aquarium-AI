@@ -1001,7 +1001,7 @@ class DosingCalculatorState extends ConsumerState<DosingCalculator> {
     AnalyticsService.logCalculatorUsed(
       calculatorType: 'dosing',
       inputData: {
-        'chemical': _selectedChemical,
+        'chemical': _selectedChemical ?? '',
         'dose_unit': _selectedDoseUnit,
         'tank_unit': _tankUnit,
       },
@@ -1253,13 +1253,15 @@ class DosingCalculatorState extends ConsumerState<DosingCalculator> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (widget.onLogDose != null && _resultValue != null) ...[
+                    if (widget.onLogDose != null &&
+                        _resultValue != null &&
+                        _selectedChemical != null) ...[
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton.icon(
                           onPressed: () => widget.onLogDose!(
-                            _selectedChemical,
+                            _selectedChemical!,
                             _resultValue!,
                             _selectedDoseUnit,
                           ),
