@@ -866,19 +866,8 @@ class TemperatureConverterState extends State<TemperatureConverter> {
 
 /* ===================== Dosing Calculator ====================== */
 
-// DosingPreset data class and kDefaultDosingPresets are in
-// lib/models/dosing_preset.dart, imported above.
-
-const List<String> _kDoseUnits = [
-  'mL',
-  'L',
-  'oz',
-  'tsp',
-  'tbsp',
-  'drops',
-  'gal',
-  'cups',
-];
+// DosingPreset, kDoseUnits, kDefaultDosingPresets, and kAddChemicalSentinel
+// are in lib/models/dosing_preset.dart, imported above.
 
 // kAddChemicalSentinel is defined in lib/models/dosing_preset.dart.
 
@@ -1027,17 +1016,20 @@ class DosingCalculatorState extends ConsumerState<DosingCalculator> {
     final chemicals = chemicalsState.chemicals;
 
     // Ensure _selectedChemical is still in the current chemicals list.
-    final validSelection = chemicals.any((c) => c.name == _selectedChemical)
-        ? _selectedChemical
-        : (chemicals.isNotEmpty ? chemicals.first.name : null);
+    // Cache the matching chemical to avoid a second linear search later.
+    final matchedChemical = chemicals.isEmpty
+        ? null
+        : chemicals.firstWhere(
+            (c) => c.name == _selectedChemical,
+            orElse: () => chemicals.first,
+          );
+    final validSelection = matchedChemical?.name;
     if (validSelection != _selectedChemical) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         setState(() {
           _selectedChemical = validSelection;
-          if (validSelection != null) {
-            _applyPreset(chemicals.firstWhere((c) => c.name == validSelection));
-          }
+          if (matchedChemical != null) _applyPreset(matchedChemical);
         });
       });
     }
@@ -1128,7 +1120,7 @@ class DosingCalculatorState extends ConsumerState<DosingCalculator> {
                     vertical: 14,
                   ),
                 ),
-                items: _kDoseUnits.map((u) {
+                items: kDoseUnits.map((u) {
                   return DropdownMenuItem(value: u, child: Text(u));
                 }).toList(),
                 onChanged: (v) {

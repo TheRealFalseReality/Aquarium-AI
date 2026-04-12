@@ -6,17 +6,6 @@ import '../models/dosing_preset.dart';
 import '../providers/custom_chemicals_provider.dart';
 import '../services/analytics_service.dart';
 
-const List<String> _kDoseUnits = [
-  'mL',
-  'L',
-  'oz',
-  'tsp',
-  'tbsp',
-  'drops',
-  'gal',
-  'cups',
-];
-
 /// Screen for managing the user's list of aquarium chemicals.
 /// Accessible from Settings → Manage Chemicals.
 class ChemicalManagementScreen extends ConsumerStatefulWidget {
@@ -414,7 +403,7 @@ class _ChemicalEditDialogState extends State<_ChemicalEditDialog> {
                           alpha: 0.4,
                         ),
                       ),
-                      items: _kDoseUnits
+                      items: kDoseUnits
                           .map(
                             (u) => DropdownMenuItem(value: u, child: Text(u)),
                           )

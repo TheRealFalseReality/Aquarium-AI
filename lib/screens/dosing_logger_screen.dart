@@ -731,17 +731,9 @@ class _AddDosingEntrySheet extends ConsumerStatefulWidget {
       _AddDosingEntrySheetState();
 }
 
-// Volume units for dosing entries — shared with calculators_screen
-const List<String> kVolumeUnits = [
-  'mL',
-  'L',
-  'oz',
-  'tsp',
-  'tbsp',
-  'drops',
-  'gal',
-  'cups',
-];
+// Volume units for dosing entries — defined in lib/models/dosing_preset.dart as kDoseUnits.
+// Kept as an alias for backward compatibility with existing references in this file.
+const List<String> kVolumeUnits = kDoseUnits;
 
 class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   final _formKey = GlobalKey<FormState>();
@@ -894,6 +886,27 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
     }
   }
 
+  /// Resolves the initial treatment selection once chemicals are loaded.
+  /// Extracts logic from the build method to avoid duplication.
+  String? _resolveInitialTreatment(
+    List<String> chemicalNames,
+    List<DosingPreset> chemicals,
+  ) {
+    if (widget.existingEntry != null) {
+      final name = widget.existingEntry!.treatmentName;
+      return chemicalNames.contains(name)
+          ? name
+          : (chemicals.isNotEmpty ? chemicals.first.name : null);
+    } else if (widget.prefilledTreatment != null) {
+      final name = widget.prefilledTreatment!;
+      return chemicalNames.contains(name)
+          ? name
+          : (chemicals.isNotEmpty ? chemicals.first.name : null);
+    } else {
+      return chemicals.isNotEmpty ? chemicals.first.name : null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -907,26 +920,15 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
     if (_selectedTreatment == null && !chemicalsState.isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        setState(() {
-          if (widget.existingEntry != null) {
-            final name = widget.existingEntry!.treatmentName;
-            _selectedTreatment = chemicalNames.contains(name)
-                ? name
-                : (chemicals.isNotEmpty ? chemicals.first.name : null);
-            if (!chemicalNames.contains(name)) {
-              _treatmentNameController.text = name;
-            }
-          } else if (widget.prefilledTreatment != null) {
-            final name = widget.prefilledTreatment!;
-            _selectedTreatment = chemicalNames.contains(name)
-                ? name
-                : (chemicals.isNotEmpty ? chemicals.first.name : null);
-          } else {
-            _selectedTreatment = chemicals.isNotEmpty
-                ? chemicals.first.name
-                : null;
+        final resolved = _resolveInitialTreatment(chemicalNames, chemicals);
+        // If an existing entry has a name not in the list, preserve it as text.
+        if (widget.existingEntry != null) {
+          final name = widget.existingEntry!.treatmentName;
+          if (!chemicalNames.contains(name)) {
+            _treatmentNameController.text = name;
           }
-        });
+        }
+        setState(() => _selectedTreatment = resolved);
       });
     }
 

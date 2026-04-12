@@ -1,3 +1,15 @@
+/// Standard volume units available for dosing entries and the calculator.
+const List<String> kDoseUnits = [
+  'mL',
+  'L',
+  'oz',
+  'tsp',
+  'tbsp',
+  'drops',
+  'gal',
+  'cups',
+];
+
 /// Sentinel value used by chemical dropdowns to represent "Add New Chemical".
 /// Selecting this navigates to [ChemicalManagementScreen].
 const String kAddChemicalSentinel = '__add_new_chemical__';
@@ -23,17 +35,26 @@ class DosingPreset {
     this.perGallons,
   });
 
+  /// Use [_kUnset] for nullable parameters to explicitly pass `null`.
+  static const Object _kUnset = Object();
+
   DosingPreset copyWith({
     String? name,
-    double? doseAmount,
-    String? doseUnit,
-    double? perGallons,
+    Object? doseAmount = _kUnset,
+    Object? doseUnit = _kUnset,
+    Object? perGallons = _kUnset,
   }) {
     return DosingPreset(
       name: name ?? this.name,
-      doseAmount: doseAmount ?? this.doseAmount,
-      doseUnit: doseUnit ?? this.doseUnit,
-      perGallons: perGallons ?? this.perGallons,
+      doseAmount: identical(doseAmount, _kUnset)
+          ? this.doseAmount
+          : doseAmount as double?,
+      doseUnit: identical(doseUnit, _kUnset)
+          ? this.doseUnit
+          : doseUnit as String?,
+      perGallons: identical(perGallons, _kUnset)
+          ? this.perGallons
+          : perGallons as double?,
     );
   }
 
