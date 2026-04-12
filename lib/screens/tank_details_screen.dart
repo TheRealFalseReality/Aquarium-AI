@@ -35,7 +35,14 @@ import 'tank_inhabitant_screen.dart';
 class TankDetailsScreen extends ConsumerStatefulWidget {
   final Tank tank;
 
-  const TankDetailsScreen({super.key, required this.tank});
+  /// Optionally pre-select a tab by index (0 = Overview, 3 = Dosing, etc.).
+  final int initialTabIndex;
+
+  const TankDetailsScreen({
+    super.key,
+    required this.tank,
+    this.initialTabIndex = 0,
+  });
 
   @override
   TankDetailsScreenState createState() => TankDetailsScreenState();
@@ -46,16 +53,25 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   late TabController _tabController;
   bool _showCalculationBreakdown = false;
   bool _fabOpen = false;
+  bool _dosingFabOpen = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(
+      length: 6,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
 
     // Add listener to rebuild when tab changes
     _tabController.addListener(() {
       if (mounted) {
-        setState(() {});
+        setState(() {
+          // Close any open speed-dials when the user switches tabs.
+          _fabOpen = false;
+          _dosingFabOpen = false;
+        });
       }
     });
 
@@ -539,18 +555,8 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           icon: const Icon(Icons.add),
           label: Text(l10n.addParameter),
         );
-      case 3: // Dosing
-        return FloatingActionButton.extended(
-          heroTag: 'fab_dosing',
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>
-                  DosingLoggerScreen(tank: tank, openAddDialog: true),
-            ),
-          ),
-          icon: const Icon(Icons.add),
-          label: Text(l10n.addDose),
-        );
+      case 3: // Dosing – speed-dial: Log Manually or Calculate & Log
+        return _buildDosingFab(context, tank, l10n);
       case 4: // Activity
         return FloatingActionButton.extended(
           heroTag: 'fab_activity',
@@ -680,12 +686,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     cs: cs,
                     onPressed: () {
                       setState(() => _fabOpen = false);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              DosingLoggerScreen(tank: tank, openAddDialog: true),
-                        ),
-                      );
+                      showDosingSheet(context, tank);
                     },
                   ),
                   const SizedBox(height: 10),
@@ -781,6 +782,71 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           heroTag: heroTag,
           onPressed: onPressed,
           child: Icon(icon),
+        ),
+      ],
+    );
+  }
+
+  /// Speed-dial FAB for the Dosing tab – "Log Manually" or "Calculate & Log".
+  Widget _buildDosingFab(
+      BuildContext context, Tank tank, AppLocalizations l10n) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        AnimatedOpacity(
+          opacity: _dosingFabOpen ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          child: AnimatedSlide(
+            offset:
+                _dosingFabOpen ? Offset.zero : const Offset(0, 0.5),
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            child: IgnorePointer(
+              ignoring: !_dosingFabOpen,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _buildFabAction(
+                    heroTag: 'fab_dosing_manual',
+                    icon: Icons.edit_note,
+                    label: l10n.logManually,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _dosingFabOpen = false);
+                      showDosingSheet(context, tank);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_dosing_calc',
+                    icon: Icons.calculate_outlined,
+                    label: l10n.calculateAndLog,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _dosingFabOpen = false);
+                      _openDosingCalculatorSheet(context, tank);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                ],
+              ),
+            ),
+          ),
+        ),
+        FloatingActionButton.extended(
+          heroTag: 'fab_dosing_main',
+          onPressed: () =>
+              setState(() => _dosingFabOpen = !_dosingFabOpen),
+          icon: AnimatedRotation(
+            turns: _dosingFabOpen ? 0.125 : 0,
+            duration: const Duration(milliseconds: 200),
+            child: const Icon(Icons.add),
+          ),
+          label: Text(_dosingFabOpen ? l10n.close : l10n.addDose),
         ),
       ],
     );

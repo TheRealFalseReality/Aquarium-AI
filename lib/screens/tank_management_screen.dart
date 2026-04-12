@@ -33,7 +33,6 @@ import '../widgets/notification_reschedule_dialog.dart';
 import '../widgets/stocking_recommendation_options_dialog.dart';
 import '../widgets/tag_picker_dialog.dart';
 import 'compatibility_report.dart';
-import 'dosing_logger_screen.dart';
 import 'notification_logger_screen.dart';
 import 'notification_management_screen.dart';
 import 'photo_analysis_screen.dart';
@@ -1786,7 +1785,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) =>
-                    DosingLoggerScreen(tank: tank, openAddDialog: true),
+                    TankDetailsScreen(tank: tank, initialTabIndex: 3),
               ),
             );
             break;
