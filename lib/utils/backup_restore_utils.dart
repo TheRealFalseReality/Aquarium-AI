@@ -94,6 +94,14 @@ class BackupRestoreUtils {
                 Text(l10n.reschedulePreferences),
               ],
             ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Text(l10n.manageChemicals),
+              ],
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.exportDateLabel(DateTime.now().toString().split('.')[0]),

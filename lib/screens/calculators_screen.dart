@@ -1,12 +1,16 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../models/dosing_preset.dart';
+import '../providers/custom_chemicals_provider.dart';
 import '../services/analytics_service.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
+import 'chemical_management_screen.dart';
 
 class CalculatorsScreen extends StatefulWidget {
   const CalculatorsScreen({super.key});
@@ -862,144 +866,8 @@ class TemperatureConverterState extends State<TemperatureConverter> {
 
 /* ===================== Dosing Calculator ====================== */
 
-/// Data class for pre-filled aquarium chemical dosing presets.
-class DosingPreset {
-  final String name;
-
-  /// Typical dose amount. Null means no standard rate is available.
-  final double? doseAmount;
-
-  /// Unit for the dose (e.g. 'mL'). Null means no standard rate is available.
-  final String? doseUnit;
-
-  /// Reference volume in gallons this dose applies to.
-  /// Null means no standard rate is available.
-  final double? perGallons;
-
-  const DosingPreset({
-    required this.name,
-    this.doseAmount,
-    this.doseUnit,
-    this.perGallons,
-  });
-}
-
-/// Popular aquarium chemicals with typical maintenance dosing rates.
-/// Entries with null rates have no universally agreed standard dose —
-/// users should consult the product label.
-/// This is the single source of truth for treatment names used in both
-/// the dosing calculator and the dosing diary.
-const List<DosingPreset> kDosingPresets = [
-  DosingPreset(
-    name: 'Prime (Seachem)',
-    doseAmount: 1,
-    doseUnit: 'mL',
-    perGallons: 10,
-  ),
-  DosingPreset(
-    name: 'Stability (Seachem)',
-    doseAmount: 5,
-    doseUnit: 'mL',
-    perGallons: 10,
-  ),
-  DosingPreset(
-    name: 'Flourish (Seachem)',
-    doseAmount: 5,
-    doseUnit: 'mL',
-    perGallons: 60,
-  ),
-  DosingPreset(
-    name: 'Excel (Seachem)',
-    doseAmount: 5,
-    doseUnit: 'mL',
-    perGallons: 50,
-  ),
-  DosingPreset(
-    name: 'Stress Coat (API)',
-    doseAmount: 5,
-    doseUnit: 'mL',
-    perGallons: 10,
-  ),
-  DosingPreset(
-    name: 'Quick Start (API)',
-    doseAmount: 10,
-    doseUnit: 'mL',
-    perGallons: 10,
-  ),
-  DosingPreset(
-    name: 'Stress Zyme (API)',
-    doseAmount: 10,
-    doseUnit: 'mL',
-    perGallons: 10,
-  ),
-  DosingPreset(name: 'Ich-X', doseAmount: 5, doseUnit: 'mL', perGallons: 10),
-  DosingPreset(
-    name: 'Paraguard (Seachem)',
-    doseAmount: 5,
-    doseUnit: 'mL',
-    perGallons: 10,
-  ),
-  DosingPreset(
-    name: 'Kanaplex (Seachem)',
-    doseAmount: null,
-    doseUnit: null,
-    perGallons: null,
-  ),
-  DosingPreset(
-    name: 'MetroPlex (Seachem)',
-    doseAmount: null,
-    doseUnit: null,
-    perGallons: null,
-  ),
-  DosingPreset(
-    name: 'Focus (Seachem)',
-    doseAmount: null,
-    doseUnit: null,
-    perGallons: null,
-  ),
-  DosingPreset(
-    name: 'AmGuard (Seachem)',
-    doseAmount: 1,
-    doseUnit: 'mL',
-    perGallons: 20,
-  ),
-  DosingPreset(
-    name: 'Safe (Seachem)',
-    doseAmount: null,
-    doseUnit: null,
-    perGallons: null,
-  ),
-  DosingPreset(
-    name: 'Purigen (Seachem)',
-    doseAmount: null,
-    doseUnit: null,
-    perGallons: null,
-  ),
-  DosingPreset(
-    name: 'Fritz Complete',
-    doseAmount: 1,
-    doseUnit: 'mL',
-    perGallons: 10,
-  ),
-  DosingPreset(
-    name: 'Alkalinity Buffer',
-    doseAmount: null,
-    doseUnit: null,
-    perGallons: null,
-  ),
-  DosingPreset(
-    name: 'pH Buffer',
-    doseAmount: null,
-    doseUnit: null,
-    perGallons: null,
-  ),
-  DosingPreset(
-    name: 'Other (Custom)',
-    doseAmount: null,
-    doseUnit: null,
-    perGallons: null,
-  ),
-];
+// DosingPreset data class and kDefaultDosingPresets are in
+// lib/models/dosing_preset.dart, imported above.
 
 const List<String> _kDoseUnits = [
   'mL',
@@ -1012,7 +880,9 @@ const List<String> _kDoseUnits = [
   'cups',
 ];
 
-class DosingCalculator extends StatefulWidget {
+// kAddChemicalSentinel is defined in lib/models/dosing_preset.dart.
+
+class DosingCalculator extends ConsumerStatefulWidget {
   /// Optional pre-filled tank volume in gallons (e.g. from a saved tank).
   final double? initialTankGallons;
 
@@ -1030,13 +900,13 @@ class DosingCalculator extends StatefulWidget {
   DosingCalculatorState createState() => DosingCalculatorState();
 }
 
-class DosingCalculatorState extends State<DosingCalculator> {
+class DosingCalculatorState extends ConsumerState<DosingCalculator> {
   final _doseAmountController = TextEditingController();
   final _perVolumeController = TextEditingController();
   final _tankSizeController = TextEditingController();
 
-  String _selectedChemical = kDosingPresets.first.name;
-  String _selectedDoseUnit = kDosingPresets.first.doseUnit ?? 'mL';
+  String? _selectedChemical;
+  String _selectedDoseUnit = 'mL';
   String _tankUnit = 'Gallons';
   String? _result;
   double? _resultValue;
@@ -1044,13 +914,24 @@ class DosingCalculatorState extends State<DosingCalculator> {
   @override
   void initState() {
     super.initState();
-    _applyPreset(kDosingPresets.first);
-    if (widget.initialTankGallons != null) {
-      final gallons = widget.initialTankGallons!;
-      _tankSizeController.text = gallons.toStringAsFixed(
-        gallons == gallons.roundToDouble() ? 0 : 1,
-      );
-    }
+    // initState runs before the first build so chemicals may not be loaded yet;
+    // we apply the preset after the first frame once the provider is ready.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final chemicals = ref.read(customChemicalsProvider).chemicals;
+      if (chemicals.isNotEmpty) {
+        setState(() {
+          _selectedChemical = chemicals.first.name;
+          _applyPreset(chemicals.first);
+        });
+      }
+      if (widget.initialTankGallons != null) {
+        final gallons = widget.initialTankGallons!;
+        _tankSizeController.text = gallons.toStringAsFixed(
+          gallons == gallons.roundToDouble() ? 0 : 1,
+        );
+      }
+    });
   }
 
   @override
@@ -1069,9 +950,33 @@ class DosingCalculatorState extends State<DosingCalculator> {
 
   void _onChemicalSelected(String? name) {
     if (name == null) return;
-    final preset = kDosingPresets.firstWhere(
+    if (name == kAddChemicalSentinel) {
+      // Navigate to chemical management and await a new chemical being added.
+      Navigator.of(context)
+          .push(
+            MaterialPageRoute(
+              builder: (ctx) => const ChemicalManagementScreen(),
+            ),
+          )
+          .then((_) {
+            // After returning, auto-select the last chemical (newly added).
+            if (!mounted) return;
+            final chemicals = ref.read(customChemicalsProvider).chemicals;
+            if (chemicals.isNotEmpty) {
+              setState(() {
+                _selectedChemical = chemicals.last.name;
+                _applyPreset(chemicals.last);
+                _result = null;
+                _resultValue = null;
+              });
+            }
+          });
+      return;
+    }
+    final chemicals = ref.read(customChemicalsProvider).chemicals;
+    final preset = chemicals.firstWhere(
       (p) => p.name == name,
-      orElse: () => kDosingPresets.first,
+      orElse: () => chemicals.first,
     );
     setState(() {
       _selectedChemical = name;
@@ -1118,6 +1023,24 @@ class DosingCalculatorState extends State<DosingCalculator> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
+    final chemicalsState = ref.watch(customChemicalsProvider);
+    final chemicals = chemicalsState.chemicals;
+
+    // Ensure _selectedChemical is still in the current chemicals list.
+    final validSelection = chemicals.any((c) => c.name == _selectedChemical)
+        ? _selectedChemical
+        : (chemicals.isNotEmpty ? chemicals.first.name : null);
+    if (validSelection != _selectedChemical) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          _selectedChemical = validSelection;
+          if (validSelection != null) {
+            _applyPreset(chemicals.firstWhere((c) => c.name == validSelection));
+          }
+        });
+      });
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1125,7 +1048,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
         // Chemical selector
         _buildSubSectionTitle(context, l10n.selectChemical),
         DropdownButtonFormField<String>(
-          value: _selectedChemical,
+          value: validSelection,
           isExpanded: true,
           decoration: InputDecoration(
             border: OutlineInputBorder(
@@ -1136,12 +1059,34 @@ class DosingCalculatorState extends State<DosingCalculator> {
               vertical: 14,
             ),
           ),
-          items: kDosingPresets.map((preset) {
-            return DropdownMenuItem(
-              value: preset.name,
-              child: Text(preset.name, overflow: TextOverflow.ellipsis),
-            );
-          }).toList(),
+          items: [
+            ...chemicals.map((preset) {
+              return DropdownMenuItem(
+                value: preset.name,
+                child: Text(preset.name, overflow: TextOverflow.ellipsis),
+              );
+            }),
+            // "＋ Add Chemical…" sentinel item
+            DropdownMenuItem(
+              value: kAddChemicalSentinel,
+              child: Row(
+                children: [
+                  Icon(Icons.add_circle_outline, size: 16, color: cs.primary),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      l10n.addNewChemical,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: cs.primary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           onChanged: _onChemicalSelected,
         ),
         const SizedBox(height: 24),

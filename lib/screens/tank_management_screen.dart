@@ -33,6 +33,7 @@ import '../widgets/notification_reschedule_dialog.dart';
 import '../widgets/stocking_recommendation_options_dialog.dart';
 import '../widgets/tag_picker_dialog.dart';
 import 'compatibility_report.dart';
+import 'dosing_logger_screen.dart';
 import 'notification_logger_screen.dart';
 import 'notification_management_screen.dart';
 import 'photo_analysis_screen.dart';
@@ -1781,6 +1782,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       ),
       onSelected: (value) {
         switch (value) {
+          case 'add_dose':
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    DosingLoggerScreen(tank: tank, openAddDialog: true),
+              ),
+            );
+            break;
           case 'edit':
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -1968,6 +1977,25 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   child: Text(
                     l10n.shareTank,
                     style: const TextStyle(color: Colors.teal),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'add_dose',
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.medication_liquid_outlined,
+                  color: Colors.purple,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    l10n.addDoseToLog,
+                    style: const TextStyle(color: Colors.purple),
                   ),
                 ),
               ],

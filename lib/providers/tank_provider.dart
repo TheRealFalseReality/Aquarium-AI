@@ -14,6 +14,7 @@ import 'package:uuid/uuid.dart';
 import '../models/tank.dart';
 import '../services/analytics_service.dart';
 import 'app_settings_provider.dart';
+import 'custom_chemicals_provider.dart';
 import 'species_tags_provider.dart';
 import 'tank_tags_provider.dart';
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
@@ -199,6 +200,10 @@ class TankNotifier extends StateNotifier<TankState> {
       final reschedulePreferences = await appSettingsNotifier
           .exportReschedulePreferences();
 
+      // Get custom chemicals for backup
+      final customChemicalsNotifier = _ref.read(customChemicalsProvider.notifier);
+      final customChemicals = customChemicalsNotifier.exportChemicals();
+
       // Create backup data with metadata
       // Exclude local image paths to prevent restore errors on different devices
       final packageInfo = await PackageInfo.fromPlatform();
@@ -214,6 +219,7 @@ class TankNotifier extends StateNotifier<TankState> {
         'speciesTags': speciesTags,
         'tankTags': tankTags,
         'reschedulePreferences': reschedulePreferences,
+        'customChemicals': customChemicals,
       };
 
       // Convert to formatted JSON
@@ -397,6 +403,17 @@ class TankNotifier extends StateNotifier<TankState> {
         await appSettingsNotifier.importReschedulePreferences(
           reschedulePreferences,
         );
+      }
+
+      // Restore custom chemicals if present in backup
+      if (backupData.containsKey('customChemicals')) {
+        final chemicalsList = backupData['customChemicals'] as List;
+        final chemicalsData = chemicalsList
+            .map((e) => e as Map<String, dynamic>)
+            .toList();
+        final customChemicalsNotifier =
+            _ref.read(customChemicalsProvider.notifier);
+        await customChemicalsNotifier.importChemicals(chemicalsData);
       }
 
       final previousTankCount = state.tanks.length;

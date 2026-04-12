@@ -29,6 +29,7 @@ import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/remove_ads_dialog.dart';
 import 'changelog_screen.dart';
+import 'chemical_management_screen.dart';
 import 'onboarding_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -1055,6 +1056,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           iconColor: Theme.of(context).colorScheme.tertiary,
           onTap: () => Navigator.pushNamed(context, '/appearance'),
+        ),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: l10n.manageChemicals,
+          subtitle: l10n.manageChemicalsDesc,
+          icon: Icons.science_outlined,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withOpacity(0.3),
+              Theme.of(
+                context,
+              ).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.primary,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChemicalManagementScreen(),
+            ),
+          ),
         ),
         const SizedBox(height: 16),
         _buildMenuCard(

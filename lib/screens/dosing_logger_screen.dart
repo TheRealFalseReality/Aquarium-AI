@@ -5,10 +5,13 @@ import 'package:intl/intl.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/dosing_entry.dart';
+import '../models/dosing_preset.dart';
 import '../models/tank.dart';
+import '../providers/custom_chemicals_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import 'calculators_screen.dart';
+import 'chemical_management_screen.dart';
 
 class DosingLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
@@ -728,7 +731,7 @@ class _AddDosingEntrySheet extends ConsumerStatefulWidget {
       _AddDosingEntrySheetState();
 }
 
-// Volume units for dosing entries
+// Volume units for dosing entries — shared with calculators_screen
 const List<String> kVolumeUnits = [
   'mL',
   'L',
@@ -752,39 +755,24 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   @override
   void initState() {
     super.initState();
-    // Derive treatment names from the unified kDosingPresets list
-    final allTreatmentNames = kDosingPresets.map((p) => p.name).toList();
-
+    // initState can't reliably call ref.read yet when chemicals are loading;
+    // initialise with the incoming data and let build() reconcile if needed.
     if (widget.existingEntry != null) {
-      // Initialize with existing entry data
-      final existingName = widget.existingEntry!.treatmentName;
-      if (allTreatmentNames.contains(existingName)) {
-        _selectedTreatment = existingName;
-      } else {
-        _selectedTreatment = 'Other (Custom)';
-        _treatmentNameController.text = existingName;
-      }
       _amountController.text = widget.existingEntry!.amount.toString();
       _notesController.text = widget.existingEntry!.notes ?? '';
       _selectedDate = widget.existingEntry!.dateDosed;
       _selectedUnit = widget.existingEntry!.unit;
+      // The actual treatment selection is reconciled in build().
+      _selectedTreatment = null;
     } else if (widget.prefilledTreatment != null) {
-      // Pre-fill from dosing calculator
-      final treatment = widget.prefilledTreatment!;
-      if (allTreatmentNames.contains(treatment)) {
-        _selectedTreatment = treatment;
-      } else {
-        _selectedTreatment = 'Other (Custom)';
-        _treatmentNameController.text = treatment;
-      }
       _amountController.text = widget.prefilledAmount?.toString() ?? '';
       _selectedDate = DateTime.now();
       _selectedUnit = widget.prefilledUnit ?? 'mL';
+      _selectedTreatment = null; // reconciled in build()
     } else {
-      // Default values for new entry
       _selectedDate = DateTime.now();
       _selectedUnit = 'mL';
-      _selectedTreatment = kDosingPresets.first.name;
+      _selectedTreatment = null; // reconciled in build()
     }
   }
 
@@ -823,11 +811,6 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   }
 
   String _getTreatmentName() {
-    // If "Other (Custom)" is selected, use the text field value
-    if (_selectedTreatment == 'Other (Custom)') {
-      return _treatmentNameController.text.trim();
-    }
-    // Otherwise use the selected treatment from dropdown
     return _selectedTreatment ?? _treatmentNameController.text.trim();
   }
 
@@ -913,8 +896,44 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final isEditing = widget.existingEntry != null;
+    final chemicalsState = ref.watch(customChemicalsProvider);
+    final chemicals = chemicalsState.chemicals;
+    final chemicalNames = chemicals.map((c) => c.name).toList();
+
+    // Reconcile _selectedTreatment once chemicals are loaded.
+    if (_selectedTreatment == null && !chemicalsState.isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() {
+          if (widget.existingEntry != null) {
+            final name = widget.existingEntry!.treatmentName;
+            _selectedTreatment = chemicalNames.contains(name)
+                ? name
+                : (chemicals.isNotEmpty ? chemicals.first.name : null);
+            if (!chemicalNames.contains(name)) {
+              _treatmentNameController.text = name;
+            }
+          } else if (widget.prefilledTreatment != null) {
+            final name = widget.prefilledTreatment!;
+            _selectedTreatment = chemicalNames.contains(name)
+                ? name
+                : (chemicals.isNotEmpty ? chemicals.first.name : null);
+          } else {
+            _selectedTreatment = chemicals.isNotEmpty
+                ? chemicals.first.name
+                : null;
+          }
+        });
+      });
+    }
+
+    // Validate selected value against current list.
+    final validSelection = chemicalNames.contains(_selectedTreatment)
+        ? _selectedTreatment
+        : (chemicals.isNotEmpty ? chemicals.first.name : null);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -949,7 +968,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
 
               // Treatment dropdown
               DropdownButtonFormField<String>(
-                value: _selectedTreatment,
+                value: validSelection,
                 decoration: InputDecoration(
                   labelText: 'Treatment Type *',
                   border: const OutlineInputBorder(),
@@ -957,53 +976,70 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                   filled: true,
                   fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
                 ),
-                items: kDosingPresets.map((preset) {
-                  return DropdownMenuItem(
-                    value: preset.name,
-                    child: Text(preset.name),
-                  );
-                }).toList(),
+                items: [
+                  ...chemicals.map((preset) {
+                    return DropdownMenuItem(
+                      value: preset.name,
+                      child: Text(preset.name),
+                    );
+                  }),
+                  // "＋ Add Chemical…" sentinel item
+                  DropdownMenuItem(
+                    value: kAddChemicalSentinel,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.add_circle_outline,
+                          size: 16,
+                          color: cs.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            l10n.addNewChemical,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: cs.primary,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 onChanged: (value) {
+                  if (value == kAddChemicalSentinel) {
+                    Navigator.of(context)
+                        .push(
+                          MaterialPageRoute(
+                            builder: (ctx) => const ChemicalManagementScreen(),
+                          ),
+                        )
+                        .then((_) {
+                          if (!mounted) return;
+                          final updatedChemicals =
+                              ref.read(customChemicalsProvider).chemicals;
+                          if (updatedChemicals.isNotEmpty) {
+                            setState(() {
+                              _selectedTreatment = updatedChemicals.last.name;
+                            });
+                          }
+                        });
+                    return;
+                  }
                   setState(() {
                     _selectedTreatment = value;
-                    // Clear custom name when switching away from "Other"
-                    if (value != 'Other (Custom)') {
-                      _treatmentNameController.clear();
-                    }
                   });
                 },
                 validator: (value) {
-                  if (value == null) {
+                  if (value == null || value == kAddChemicalSentinel) {
                     return 'Please select a treatment type';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-
-              // Custom treatment name (shown only when "Other" is selected)
-              if (_selectedTreatment == 'Other (Custom)') ...[
-                TextFormField(
-                  controller: _treatmentNameController,
-                  decoration: InputDecoration(
-                    labelText: 'Custom Treatment Name *',
-                    hintText: 'Enter treatment name',
-                    border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.edit),
-                    filled: true,
-                    fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
-                  ),
-                  textCapitalization: TextCapitalization.words,
-                  validator: (value) {
-                    if (_selectedTreatment == 'Other (Custom)' &&
-                        (value == null || value.trim().isEmpty)) {
-                      return 'Please enter a treatment name';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
 
               // Amount and unit
               Row(

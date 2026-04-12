@@ -3803,6 +3803,93 @@
   "@logThisDose": {
     "description": "Button label to log the calculated dose result to the dosing diary"
   },
+  "manageChemicals": "Manage Chemicals",
+  "@manageChemicals": {
+    "description": "Title for the chemical management screen in settings"
+  },
+  "manageChemicalsDesc": "Add, edit, and reorder your chemicals list",
+  "@manageChemicalsDesc": {
+    "description": "Subtitle for the Manage Chemicals card in settings"
+  },
+  "addChemical": "Add Chemical",
+  "@addChemical": {
+    "description": "Button label and dialog title for adding a new chemical"
+  },
+  "editChemical": "Edit Chemical",
+  "@editChemical": {
+    "description": "Dialog title for editing an existing chemical"
+  },
+  "deleteChemical": "Delete Chemical",
+  "@deleteChemical": {
+    "description": "Tooltip and dialog title for deleting a chemical"
+  },
+  "deleteChemicalConfirm": "Remove \"{name}\" from your chemicals list?",
+  "@deleteChemicalConfirm": {
+    "description": "Confirmation message when deleting a chemical",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "chemicalName": "Chemical Name",
+  "@chemicalName": {
+    "description": "Label for the chemical name field in the add/edit chemical dialog"
+  },
+  "doseRateOptional": "Dose rate (optional — used by the calculator)",
+  "@doseRateOptional": {
+    "description": "Section hint in the add/edit chemical dialog"
+  },
+  "noStandardRate": "No standard rate",
+  "@noStandardRate": {
+    "description": "Subtitle shown on chemicals that have no pre-filled dosing rate"
+  },
+  "noChemicals": "No chemicals added yet",
+  "@noChemicals": {
+    "description": "Empty state message on the chemical management screen"
+  },
+  "dragToReorder": "Drag to reorder",
+  "@dragToReorder": {
+    "description": "Hint label above the reorderable list on the chemical management screen"
+  },
+  "resetToDefaults": "Reset to Defaults",
+  "@resetToDefaults": {
+    "description": "Menu option and dialog title for resetting chemicals to built-in defaults"
+  },
+  "resetChemicalsConfirm": "This will replace your current list with the built-in defaults. Any custom chemicals will be lost.",
+  "@resetChemicalsConfirm": {
+    "description": "Confirmation message for resetting chemicals to defaults"
+  },
+  "addNewChemical": "＋ Add Chemical…",
+  "@addNewChemical": {
+    "description": "Sentinel dropdown item in dosing dropdowns that opens the add-chemical screen"
+  },
+  "fieldRequired": "This field is required",
+  "@fieldRequired": {
+    "description": "Validation error when a required form field is empty"
+  },
+  "invalidNumber": "Enter a valid number",
+  "@invalidNumber": {
+    "description": "Validation error when a number field has an invalid value"
+  },
+  "mustBePositive": "Must be greater than 0",
+  "@mustBePositive": {
+    "description": "Validation error when a number field must be positive"
+  },
+  "perGallons": "Per Gallons",
+  "@perGallons": {
+    "description": "Label for the reference volume field in the dosing calculator / chemical dialog"
+  },
+  "amount": "Amount",
+  "@amount": {
+    "description": "Label for an amount input field"
+  },
+  "unit": "Unit",
+  "@unit": {
+    "description": "Label for a unit selector field"
+  },
+  "addDoseToLog": "Log a Dose",
+  "@addDoseToLog": {
+    "description": "3-dot menu item on the tank card that navigates to the dosing diary with the add-dose dialog open"
+  },
   "convertFrom": "Convert From",
   "@convertFrom": {
     "description": "Section title for the convert-from unit selector in calculators"
