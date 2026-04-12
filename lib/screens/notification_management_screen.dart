@@ -1382,38 +1382,9 @@ class _NotificationFormScreenState
 
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
 
-    // Schedule notification if enabled and update with scheduled date
-    if (_enabled) {
-      final nextDate = await _notificationService.scheduleNotification(
-        tankId: currentTank.id,
-        tankName: currentTank.name,
-        notification: notification,
-        // Pass activity logs only if user chose "From Last Activity"
-        activityLogs: useActivityLogs ? currentTank.notificationLogs : null,
-        // Use exact date/time if user explicitly chose "Use Specified Time"
-        useExactDateTime: useExactDateTime,
-      );
-
-      // Update the notification with the calculated scheduledNextDate
-      if (nextDate != null) {
-        final notificationWithSchedule = notification.copyWith(
-          scheduledNextDate: nextDate,
-        );
-
-        // Update the tank with the notification that has scheduledNextDate set
-        final finalNotifications = updatedNotifications.map((n) {
-          return n.id == notification.id ? notificationWithSchedule : n;
-        }).toList();
-
-        final tankWithSchedule = currentTank.copyWith(
-          notifications: finalNotifications,
-          updatedAt: DateTime.now(),
-        );
-
-        await ref.read(tankProvider.notifier).updateTank(tankWithSchedule);
-      }
-    }
-
+    // Close the form and show feedback immediately after the data is saved.
+    // Scheduling runs afterwards so that a failure (e.g. missing exact-alarm
+    // permission on Android 12+) never blocks navigation.
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
       context.showAccessibleMessage(
@@ -1432,6 +1403,43 @@ class _NotificationFormScreenState
           'repeat': _repeatFrequency.name,
         },
       );
+    }
+
+    // Schedule notification if enabled and update with scheduled date.
+    // This runs after the screen has already been popped; ref is still valid.
+    if (_enabled) {
+      try {
+        final nextDate = await _notificationService.scheduleNotification(
+          tankId: currentTank.id,
+          tankName: currentTank.name,
+          notification: notification,
+          // Pass activity logs only if user chose "From Last Activity"
+          activityLogs: useActivityLogs ? currentTank.notificationLogs : null,
+          // Use exact date/time if user explicitly chose "Use Specified Time"
+          useExactDateTime: useExactDateTime,
+        );
+
+        // Update the notification with the calculated scheduledNextDate
+        if (nextDate != null) {
+          final notificationWithSchedule = notification.copyWith(
+            scheduledNextDate: nextDate,
+          );
+
+          // Update the tank with the notification that has scheduledNextDate set
+          final finalNotifications = updatedNotifications.map((n) {
+            return n.id == notification.id ? notificationWithSchedule : n;
+          }).toList();
+
+          final tankWithSchedule = currentTank.copyWith(
+            notifications: finalNotifications,
+            updatedAt: DateTime.now(),
+          );
+
+          await ref.read(tankProvider.notifier).updateTank(tankWithSchedule);
+        }
+      } catch (e) {
+        debugPrint('NotificationManagement: scheduling failed: $e');
+      }
     }
   }
 }
