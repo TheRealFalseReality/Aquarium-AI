@@ -80,6 +80,137 @@
   "@tankVolumeDrawerDescription": {
     "description": "Short description of the tank volume calculator (app drawer)"
   },
+  "substrateCalculator": "Substrate Calculator",
+  "@substrateCalculator": {
+    "description": "Name of the substrate calculator feature"
+  },
+  "substrateCalculatorSubtitle": "Estimate how much substrate you need based on your tank volume and bed type.",
+  "@substrateCalculatorSubtitle": {
+    "description": "Subtitle shown below the substrate calculator title"
+  },
+  "substrateDescription": "Estimate substrate quantity by tank volume and bed-depth profile. Enter your tank volume in gallons or liters and get a weight and volume recommendation instantly.",
+  "@substrateDescription": {
+    "description": "Description of the substrate calculator (welcome screen)"
+  },
+  "substrateDrawerDescription": "Calculate substrate weight and volume from tank volume in gallons or liters.",
+  "@substrateDrawerDescription": {
+    "description": "Short description of the substrate calculator (app drawer)"
+  },
+  "substrateBedType": "Bed Type",
+  "@substrateBedType": {
+    "description": "Section heading for the bed-type selector in the substrate calculator"
+  },
+  "substrateBedStandard": "Standard",
+  "@substrateBedStandard": {
+    "description": "Standard bed type option (1–2 lbs/gal)"
+  },
+  "substrateBedPlanted": "Planted",
+  "@substrateBedPlanted": {
+    "description": "Planted bed type option (2–3 lbs/gal)"
+  },
+  "substrateBedDeep": "Deep Bed",
+  "@substrateBedDeep": {
+    "description": "Deep bed type option (3–4 lbs/gal)"
+  },
+  "substrateBedBare": "Bare Bottom",
+  "@substrateBedBare": {
+    "description": "Bare bottom option (no substrate)"
+  },
+  "substrateTankVolume": "Tank Volume",
+  "@substrateTankVolume": {
+    "description": "Input label for tank volume in the substrate calculator"
+  },
+  "substrateUnitGallons": "Gallons",
+  "@substrateUnitGallons": {
+    "description": "Unit label for gallons in the substrate calculator"
+  },
+  "substrateUnitLiters": "Liters",
+  "@substrateUnitLiters": {
+    "description": "Unit label for liters in the substrate calculator"
+  },
+  "substrateBareBottomResult": "No substrate needed for a bare-bottom setup.",
+  "@substrateBareBottomResult": {
+    "description": "Result message shown when bare bottom is selected"
+  },
+  "substrateResultTitle": "Estimated Substrate",
+  "@substrateResultTitle": {
+    "description": "Title of the results card in the substrate calculator"
+  },
+  "substrateResultRecommended": "Recommended Amount",
+  "@substrateResultRecommended": {
+    "description": "Title of the recommended amount card in the substrate calculator"
+  },
+  "substrateResultRange": "Estimated Range",
+  "@substrateResultRange": {
+    "description": "Title of the estimated range card in the substrate calculator"
+  },
+  "substrateResultDepthLabel": "Recommended depth: {depth}",
+  "@substrateResultDepthLabel": {
+    "description": "Label showing the recommended depth range",
+    "placeholders": {
+      "depth": {"type": "String"}
+    }
+  },
+  "substrateResultWeight": "Weight",
+  "@substrateResultWeight": {
+    "description": "Label for the weight result column in the substrate calculator"
+  },
+  "substrateResultVolume": "Volume",
+  "@substrateResultVolume": {
+    "description": "Label for the volume result column in the substrate calculator"
+  },
+  "substrateInfoTitle": "Substrate Guide",
+  "@substrateInfoTitle": {
+    "description": "Heading of the info section in the substrate calculator"
+  },
+  "substrateInfoStandardTitle": "Standard (1–2 lbs/gal · 1–2 in depth)",
+  "@substrateInfoStandardTitle": {
+    "description": "Title for the standard bed info tile"
+  },
+  "substrateInfoStandardBody": "Suitable for most community fish tanks. Provides a natural look and supports beneficial bacteria without requiring root-feeding plants.",
+  "@substrateInfoStandardBody": {
+    "description": "Body text for the standard bed info tile"
+  },
+  "substrateInfoPlantedTitle": "Planted (2–3 lbs/gal · 2–3 in depth)",
+  "@substrateInfoPlantedTitle": {
+    "description": "Title for the planted bed info tile"
+  },
+  "substrateInfoPlantedBody": "Ideal for live plants. A deeper layer gives roots room to anchor and access nutrients, especially when combined with a nutrient-rich substrate.",
+  "@substrateInfoPlantedBody": {
+    "description": "Body text for the planted bed info tile"
+  },
+  "substrateInfoDeepTitle": "Deep Bed (3–4 lbs/gal · 3–4 in depth)",
+  "@substrateInfoDeepTitle": {
+    "description": "Title for the deep bed info tile"
+  },
+  "substrateInfoDeepBody": "Used for advanced planted tanks, deep-rooting species, or intentional anaerobic zones that recycle nutrients. Monitor water parameters closely.",
+  "@substrateInfoDeepBody": {
+    "description": "Body text for the deep bed info tile"
+  },
+  "substrateInfoBareTitle": "Bare Bottom",
+  "@substrateInfoBareTitle": {
+    "description": "Title for the bare bottom info tile"
+  },
+  "substrateInfoBareBody": "Preferred for quarantine tanks, goldfish setups, or high-waste fish. Easy to clean; less biological filtration surface area.",
+  "@substrateInfoBareBody": {
+    "description": "Body text for the bare bottom info tile"
+  },
+  "substrateInfoDensityTitle": "About the Estimate",
+  "@substrateInfoDensityTitle": {
+    "description": "Title for the density / estimate info tile"
+  },
+  "substrateInfoDensityBody": "Results use the standard 1–2 lbs per gallon rule, scaled by bed type. Actual amount varies by substrate type (gravel, sand, soil). Always check the bag weight.",
+  "@substrateInfoDensityBody": {
+    "description": "Body text for the density / estimate info tile"
+  },
+  "substrateInfoTipTitle": "Pro Tip",
+  "@substrateInfoTipTitle": {
+    "description": "Title for the pro tip info tile"
+  },
+  "substrateInfoTipBody": "Buy 10–15% extra to account for settling, displacement by decorations, and uneven depth. Rinse thoroughly before adding to the tank.",
+  "@substrateInfoTipBody": {
+    "description": "Body text for the pro tip info tile"
+  },
   "aquaPiStore": "AquaPi Store",
   "@aquaPiStore": {
     "description": "Name of the AquaPi store"
@@ -321,6 +452,42 @@
   "aiResponseLanguageNameArabic": "Arabic",
   "@aiResponseLanguageNameArabic": {
     "description": "Language name: Arabic"
+  },
+  "aiExperienceLevel": "AI Experience Level",
+  "@aiExperienceLevel": {
+    "description": "Settings label for AI experience level"
+  },
+  "aiExperienceLevelDesc": "Tailors AI responses to your aquarium experience",
+  "@aiExperienceLevelDesc": {
+    "description": "Settings subtitle for AI experience level"
+  },
+  "onboardingExperienceLevelTitle": "Your Experience Level",
+  "@onboardingExperienceLevelTitle": {
+    "description": "Onboarding page title for experience level selection"
+  },
+  "onboardingExperienceLevelSubtitle": "Tell us how much aquarium experience you have so the AI can tailor its advice to you.",
+  "@onboardingExperienceLevelSubtitle": {
+    "description": "Onboarding page subtitle for experience level selection"
+  },
+  "aiExperienceLevelBeginnerDesc": "New to aquariums, still learning the basics",
+  "@aiExperienceLevelBeginnerDesc": {
+    "description": "Description for beginner experience level"
+  },
+  "aiExperienceLevelIntermediateDesc": "Comfortable with basic care, exploring new species",
+  "@aiExperienceLevelIntermediateDesc": {
+    "description": "Description for intermediate experience level"
+  },
+  "aiExperienceLevelAdvancedDesc": "Experienced keeper with complex tank setups",
+  "@aiExperienceLevelAdvancedDesc": {
+    "description": "Description for advanced experience level"
+  },
+  "aiExperienceLevelExpertDesc": "Deep expertise, breeding programs, specialized setups",
+  "@aiExperienceLevelExpertDesc": {
+    "description": "Description for expert experience level"
+  },
+  "experienceLevelSyncedFromProfile": "Synced from your community profile",
+  "@experienceLevelSyncedFromProfile": {
+    "description": "Note shown when experience level is synced from community profile"
   },
   "translationCommunityTitle": "Help Translate",
   "@translationCommunityTitle": {
@@ -1988,6 +2155,50 @@
   "analyzePhoto": "Analyze Photo",
   "@analyzePhoto": {
     "description": "Analyze photo button label"
+  },
+  "photoAnalysisNoteLabel": "Optional Note",
+  "@photoAnalysisNoteLabel": {
+    "description": "Label for the optional note field on the photo analysis screen"
+  },
+  "photoAnalysisNoteHint": "e.g., \"Concerned about algae\"",
+  "@photoAnalysisNoteHint": {
+    "description": "Hint text for the optional note field on the photo analysis screen"
+  },
+  "photoAnalysisSuggestedPrompts": "Suggested prompts:",
+  "@photoAnalysisSuggestedPrompts": {
+    "description": "Label above the row of suggested prompt chips on the photo analysis screen"
+  },
+  "photoAnalysisDisclaimer": "Disclaimer: Visual analysis can be imperfect. Always confirm species and health concerns with reliable sources.",
+  "@photoAnalysisDisclaimer": {
+    "description": "Disclaimer shown below the analyze button on the photo analysis screen"
+  },
+  "photoPromptIdentifyFish": "Identify this fish",
+  "@photoPromptIdentifyFish": {
+    "description": "Suggested prompt chip: asks the AI to identify the fish in the photo"
+  },
+  "photoPromptHealthCheck": "Check for health issues",
+  "@photoPromptHealthCheck": {
+    "description": "Suggested prompt chip: asks the AI to check the fish for health issues"
+  },
+  "photoPromptWaterQuality": "Assess water clarity",
+  "@photoPromptWaterQuality": {
+    "description": "Suggested prompt chip: asks the AI to assess water clarity in the photo"
+  },
+  "photoPromptAlgae": "What type of algae is this?",
+  "@photoPromptAlgae": {
+    "description": "Suggested prompt chip: asks the AI to identify algae in the photo"
+  },
+  "photoPromptPlant": "Identify this plant",
+  "@photoPromptPlant": {
+    "description": "Suggested prompt chip: asks the AI to identify an aquatic plant in the photo"
+  },
+  "photoPromptDisease": "Does this fish look sick?",
+  "@photoPromptDisease": {
+    "description": "Suggested prompt chip: asks the AI whether the fish appears sick"
+  },
+  "photoPromptEquipment": "Identify this equipment",
+  "@photoPromptEquipment": {
+    "description": "Suggested prompt chip: asks the AI to identify aquarium equipment in the photo"
   },
   "doses": "doses",
   "@doses": {

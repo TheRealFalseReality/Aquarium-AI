@@ -183,7 +183,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     );
     final fishNames = state.selectedFish.map((f) => f.name).toList();
     // EDITED: The prompt no longer needs to generate the breakdown.
-    final prompt = appendLanguageInstruction(
+    final prompt = appendAiContextInstructions(
       buildFishCompatibilityPrompt(
         category,
         fishNames,
@@ -192,6 +192,7 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       ),
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
+      experienceLevel: settings.userExperienceLevel,
     );
 
     // Check dev rate limit before consuming the API

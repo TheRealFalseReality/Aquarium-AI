@@ -880,6 +880,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         delay: const Duration(milliseconds: 900),
       ),
       FeatureInfo(
+        icon: '🪨',
+        title: l10n.substrateCalculator,
+        description: l10n.substrateDescription,
+        shortDescription: l10n.substrateDrawerDescription,
+        routeName: '/substrate',
+        delay: const Duration(milliseconds: 910),
+      ),
+      FeatureInfo(
         icon: '🔍',
         title: l10n.fishCompatBrowser,
         description: l10n.fishCompatBrowserDesc,

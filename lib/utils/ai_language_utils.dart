@@ -57,3 +57,45 @@ String appendLanguageInstruction(
   if (lang == null) return prompt;
   return '$prompt\nIMPORTANT: Always respond in $lang.';
 }
+
+/// Returns the human-readable label for an experience level string.
+String _experienceLevelLabel(String level) {
+  switch (level) {
+    case 'intermediate':
+      return 'Intermediate';
+    case 'advanced':
+      return 'Advanced';
+    case 'expert':
+      return 'Expert';
+    default:
+      return 'Beginner';
+  }
+}
+
+/// Appends an experience level instruction to [prompt].
+/// [experienceLevel] should be one of: 'beginner', 'intermediate', 'advanced', 'expert'.
+/// Returns the original prompt unchanged when [experienceLevel] is null or empty.
+String appendExperienceInstruction(
+  String prompt, {
+  required String? experienceLevel,
+}) {
+  if (experienceLevel == null || experienceLevel.isEmpty) return prompt;
+  final label = _experienceLevelLabel(experienceLevel);
+  return '$prompt\nUser experience level: $label. Tailor your response accordingly — use simple explanations for beginners, and more technical depth for advanced/expert users.';
+}
+
+/// Appends both a language instruction and an experience level instruction.
+/// Combines [appendLanguageInstruction] and [appendExperienceInstruction].
+String appendAiContextInstructions(
+  String prompt, {
+  required String? aiResponseLanguage,
+  required String? localeCode,
+  required String? experienceLevel,
+}) {
+  final withLang = appendLanguageInstruction(
+    prompt,
+    aiResponseLanguage: aiResponseLanguage,
+    localeCode: localeCode,
+  );
+  return appendExperienceInstruction(withLang, experienceLevel: experienceLevel);
+}
