@@ -8,6 +8,7 @@ import '../l10n/app_localizations.dart';
 import '../models/fish.dart';
 import '../models/tank.dart';
 import '../providers/purchase_provider.dart';
+import '../providers/app_settings_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
@@ -20,15 +21,16 @@ import '../widgets/remove_ads_dialog.dart';
 import 'tank_creation_screen.dart' show InhabitantDialog;
 import 'tank_volume_calculator.dart';
 
-/// A six-step, skippable onboarding flow shown once on first launch.
+/// A seven-step, skippable onboarding flow shown once on first launch.
 ///
 /// Steps:
 ///   1. Welcome / Sign In  – upsells the community and account features
 ///   2. Choose Your Style  – theme and brightness mode selection
 ///   3. Create Your Tank   – simplified tank setup (name, type, size)
 ///   4. Add Inhabitants    – optionally populate the tank with fish
-///   5. Discover AI Tools  – overview of the key AI features
-///   6. Power Up Your AI   – API key explainer + Founder Aquarist upsell
+///   5. Experience Level   – select aquarium experience for AI tailoring
+///   6. Discover AI Tools  – overview of the key AI features
+///   7. Power Up Your AI   – API key explainer + Founder Aquarist upsell
 ///
 /// Pass [initialPage] to start on a specific step (e.g. when resuming after
 /// sign-in via [AuthScreen]).
@@ -63,7 +65,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  static const int _totalPages = 6;
+  static const int _totalPages = 7;
 
   late final PageController _pageController;
   int _currentPage = 0;
@@ -83,6 +85,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   // ── Step 3 state: inhabitants ────────────────────────────────────────────
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
+
+  // ── Step 4 state: experience level ──────────────────────────────────────
+  String _experienceLevel = 'beginner';
 
   // Track whether the tank has already been saved (guards double-save).
   bool _tankSaved = false;
@@ -194,6 +199,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _finish({required bool skipped}) async {
     await _saveTankIfNeeded();
+    // Save experience level to app settings
+    await ref
+        .read(appSettingsProvider.notifier)
+        .setUserExperienceLevel(_experienceLevel);
     await OnboardingScreen.markCompleted();
     AnalyticsService.logFeatureUsed(
       featureName: skipped ? 'onboarding_skipped' : 'onboarding_completed',
@@ -337,6 +346,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _buildThemePage(context, l10n, cs),
                   _buildCreateTankPage(context, l10n, cs),
                   _buildInhabitantsPage(context, l10n, cs),
+                  _buildExperienceLevelPage(context, l10n, cs),
                   _buildDiscoverToolsPage(context, l10n, cs),
                   _buildApiKeyPage(context, l10n, cs),
                 ],
@@ -419,13 +429,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final isLastPage = _currentPage == _totalPages - 1;
     // On the last page the primary button always says "Get Started".
     // On the Welcome page (0) the button always says "Let's Get Started".
-    // On the Discover Tools page (4) the button always says "Next" since
+    // On the Discover Tools page (5) the button always says "Next" since
     // there is nothing to interact with on that page.
     // On the tank-creation page (2): "Add Inhabitants" when a tank name has
     // been typed; "Skip for now" when the field is still empty.
     // On other pages: "Next" once the user has interacted, "Skip for now" otherwise.
     const _welcomePage = 0;
-    const _discoverToolsPage = 4;
+    const _discoverToolsPage = 5;
     const _tankPage = 2;
     final hasTankName = _tankNameController.text.trim().isNotEmpty;
     final primaryLabel = isLastPage
@@ -1377,7 +1387,128 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
 
-  // ── Step 4: Discover AI Tools ─────────────────────────────────────────────
+  // ── Step 4: Experience Level ──────────────────────────────────────────────
+
+  Widget _buildExperienceLevelPage(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme cs,
+  ) {
+    final levels = ['beginner', 'intermediate', 'advanced', 'expert'];
+    final levelLabels = [
+      l10n.profileLevelBeginner,
+      l10n.profileLevelIntermediate,
+      l10n.profileLevelAdvanced,
+      l10n.profileLevelExpert,
+    ];
+    final levelDescriptions = [
+      l10n.aiExperienceLevelBeginnerDesc,
+      l10n.aiExperienceLevelIntermediateDesc,
+      l10n.aiExperienceLevelAdvancedDesc,
+      l10n.aiExperienceLevelExpertDesc,
+    ];
+    final levelIcons = [
+      Icons.school_outlined,
+      Icons.auto_stories_outlined,
+      Icons.science_outlined,
+      Icons.star_outline,
+    ];
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPageHeader(
+            context,
+            cs,
+            heroContent: const Text('🎓', style: TextStyle(fontSize: 30)),
+            heroDecoration: BoxDecoration(
+              color: cs.secondaryContainer,
+              shape: BoxShape.circle,
+            ),
+            title: l10n.onboardingExperienceLevelTitle,
+            subtitle: l10n.onboardingExperienceLevelSubtitle,
+          ),
+          const SizedBox(height: 24),
+          ...List.generate(levels.length, (i) {
+            final level = levels[i];
+            final isSelected = _experienceLevel == level;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: InkWell(
+                onTap: () {
+                  setState(() => _experienceLevel = level);
+                  _markInteracted();
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? cs.primary
+                          : cs.outline.withOpacity(0.4),
+                      width: isSelected ? 2 : 1,
+                    ),
+                    color: isSelected
+                        ? cs.primaryContainer.withOpacity(0.35)
+                        : cs.surfaceContainer.withOpacity(0.4),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        levelIcons[i],
+                        color: isSelected ? cs.primary : cs.onSurfaceVariant,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              levelLabels[i],
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected
+                                        ? cs.primary
+                                        : cs.onSurface,
+                                  ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              levelDescriptions[i],
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isSelected)
+                        Icon(Icons.check_circle, color: cs.primary, size: 22),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // ── Step 5: Discover AI Tools ─────────────────────────────────────────────
 
   Widget _buildDiscoverToolsPage(
     BuildContext context,
@@ -1604,7 +1735,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // ── Step 5: API Key & Founder Upsell ─────────────────────────────────────
+  // ── Step 6: API Key & Founder Upsell ─────────────────────────────────────
 
   Widget _buildApiKeyPage(
     BuildContext context,
