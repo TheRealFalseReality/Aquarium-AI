@@ -3791,6 +3791,18 @@
   "@openDosingCalculator": {
     "description": "Tooltip/label for the button that opens the dosing calculator popup in the dosing diary"
   },
+  "logManually": "Log Manually",
+  "@logManually": {
+    "description": "FAB menu option label to manually log a dosing entry"
+  },
+  "calculateAndLog": "Calculate & Log",
+  "@calculateAndLog": {
+    "description": "FAB menu option label to calculate dose and then log it"
+  },
+  "logThisDose": "Log This Dose",
+  "@logThisDose": {
+    "description": "Button label to log the calculated dose result to the dosing diary"
+  },
   "convertFrom": "Convert From",
   "@convertFrom": {
     "description": "Section title for the convert-from unit selector in calculators"

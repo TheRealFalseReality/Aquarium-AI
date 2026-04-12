@@ -865,22 +865,30 @@ class TemperatureConverterState extends State<TemperatureConverter> {
 /// Data class for pre-filled aquarium chemical dosing presets.
 class DosingPreset {
   final String name;
-  final double doseAmount;
-  final String doseUnit;
+
+  /// Typical dose amount. Null means no standard rate is available.
+  final double? doseAmount;
+
+  /// Unit for the dose (e.g. 'mL'). Null means no standard rate is available.
+  final String? doseUnit;
 
   /// Reference volume in gallons this dose applies to.
-  final double perGallons;
+  /// Null means no standard rate is available.
+  final double? perGallons;
 
   const DosingPreset({
     required this.name,
-    required this.doseAmount,
-    required this.doseUnit,
-    required this.perGallons,
+    this.doseAmount,
+    this.doseUnit,
+    this.perGallons,
   });
 }
 
 /// Popular aquarium chemicals with typical maintenance dosing rates.
-/// Users should always verify against the product label.
+/// Entries with null rates have no universally agreed standard dose —
+/// users should consult the product label.
+/// This is the single source of truth for treatment names used in both
+/// the dosing calculator and the dosing diary.
 const List<DosingPreset> kDosingPresets = [
   DosingPreset(
     name: 'Prime (Seachem)',
@@ -924,17 +932,30 @@ const List<DosingPreset> kDosingPresets = [
     doseUnit: 'mL',
     perGallons: 10,
   ),
-  DosingPreset(
-    name: 'Ich-X',
-    doseAmount: 5,
-    doseUnit: 'mL',
-    perGallons: 10,
-  ),
+  DosingPreset(name: 'Ich-X', doseAmount: 5, doseUnit: 'mL', perGallons: 10),
   DosingPreset(
     name: 'Paraguard (Seachem)',
     doseAmount: 5,
     doseUnit: 'mL',
     perGallons: 10,
+  ),
+  DosingPreset(
+    name: 'Kanaplex (Seachem)',
+    doseAmount: null,
+    doseUnit: null,
+    perGallons: null,
+  ),
+  DosingPreset(
+    name: 'MetroPlex (Seachem)',
+    doseAmount: null,
+    doseUnit: null,
+    perGallons: null,
+  ),
+  DosingPreset(
+    name: 'Focus (Seachem)',
+    doseAmount: null,
+    doseUnit: null,
+    perGallons: null,
   ),
   DosingPreset(
     name: 'AmGuard (Seachem)',
@@ -943,10 +964,40 @@ const List<DosingPreset> kDosingPresets = [
     perGallons: 20,
   ),
   DosingPreset(
+    name: 'Safe (Seachem)',
+    doseAmount: null,
+    doseUnit: null,
+    perGallons: null,
+  ),
+  DosingPreset(
+    name: 'Purigen (Seachem)',
+    doseAmount: null,
+    doseUnit: null,
+    perGallons: null,
+  ),
+  DosingPreset(
     name: 'Fritz Complete',
     doseAmount: 1,
     doseUnit: 'mL',
     perGallons: 10,
+  ),
+  DosingPreset(
+    name: 'Alkalinity Buffer',
+    doseAmount: null,
+    doseUnit: null,
+    perGallons: null,
+  ),
+  DosingPreset(
+    name: 'pH Buffer',
+    doseAmount: null,
+    doseUnit: null,
+    perGallons: null,
+  ),
+  DosingPreset(
+    name: 'Other (Custom)',
+    doseAmount: null,
+    doseUnit: null,
+    perGallons: null,
   ),
 ];
 
@@ -965,7 +1016,15 @@ class DosingCalculator extends StatefulWidget {
   /// Optional pre-filled tank volume in gallons (e.g. from a saved tank).
   final double? initialTankGallons;
 
-  const DosingCalculator({super.key, this.initialTankGallons});
+  /// Optional callback invoked when the user taps "Log This Dose".
+  /// Receives the selected treatment name, calculated amount, and unit.
+  final void Function(String treatment, double amount, String unit)? onLogDose;
+
+  const DosingCalculator({
+    super.key,
+    this.initialTankGallons,
+    this.onLogDose,
+  });
 
   @override
   DosingCalculatorState createState() => DosingCalculatorState();
@@ -977,9 +1036,10 @@ class DosingCalculatorState extends State<DosingCalculator> {
   final _tankSizeController = TextEditingController();
 
   String _selectedChemical = kDosingPresets.first.name;
-  String _selectedDoseUnit = kDosingPresets.first.doseUnit;
+  String _selectedDoseUnit = kDosingPresets.first.doseUnit ?? 'mL';
   String _tankUnit = 'Gallons';
   String? _result;
+  double? _resultValue;
 
   @override
   void initState() {
@@ -1002,9 +1062,9 @@ class DosingCalculatorState extends State<DosingCalculator> {
   }
 
   void _applyPreset(DosingPreset preset) {
-    _doseAmountController.text = preset.doseAmount.toString();
-    _selectedDoseUnit = preset.doseUnit;
-    _perVolumeController.text = preset.perGallons.toString();
+    _doseAmountController.text = preset.doseAmount?.toString() ?? '';
+    _selectedDoseUnit = preset.doseUnit ?? 'mL';
+    _perVolumeController.text = preset.perGallons?.toString() ?? '';
   }
 
   void _onChemicalSelected(String? name) {
@@ -1017,6 +1077,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
       _selectedChemical = name;
       _applyPreset(preset);
       _result = null;
+      _resultValue = null;
     });
   }
 
@@ -1026,7 +1087,10 @@ class DosingCalculatorState extends State<DosingCalculator> {
     final tankSize = double.tryParse(_tankSizeController.text) ?? 0;
 
     if (doseAmount <= 0 || perVolume <= 0 || tankSize <= 0) {
-      setState(() => _result = null);
+      setState(() {
+        _result = null;
+        _resultValue = null;
+      });
       return;
     }
 
@@ -1035,10 +1099,10 @@ class DosingCalculatorState extends State<DosingCalculator> {
         _tankUnit == 'Gallons' ? tankSize : tankSize * 0.264172;
 
     final totalDose = (tankGallons / perVolume) * doseAmount;
-    setState(
-      () => _result =
-          '${totalDose.toStringAsFixed(2)} $_selectedDoseUnit',
-    );
+    setState(() {
+      _resultValue = totalDose;
+      _result = '${totalDose.toStringAsFixed(2)} $_selectedDoseUnit';
+    });
 
     AnalyticsService.logCalculatorUsed(
       calculatorType: 'dosing',
@@ -1252,6 +1316,24 @@ class DosingCalculatorState extends State<DosingCalculator> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    if (widget.onLogDose != null) ...[
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () => widget.onLogDose!(
+                            _selectedChemical,
+                            _resultValue!,
+                            _selectedDoseUnit,
+                          ),
+                          icon: const Icon(Icons.add_circle_outline),
+                          label: Text(l10n.logThisDose),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

@@ -26,6 +26,7 @@ class DosingLoggerScreen extends ConsumerStatefulWidget {
 
 class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
   String? _expandedTreatment;
+  bool _fabOpen = false;
 
   @override
   void initState() {
@@ -68,71 +69,218 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.85,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (context, scrollController) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 16,
-            right: 16,
-            top: 8,
-          ),
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+      builder: (sheetCtx) => _buildCalculatorSheet(
+        sheetCtx,
+        title: l10n.openDosingCalculator,
+        description: l10n.dosingCalculatorDescription,
+        calculator: DosingCalculator(
+          initialTankGallons: currentTank.sizeGallons,
+        ),
+      ),
+    );
+  }
+
+  void _openCalculateAndLog(BuildContext context) {
+    final currentTank = _getCurrentTank();
+    final l10n = AppLocalizations.of(context)!;
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'dosing_calculator_opened',
+      parameters: {'source': 'calculate_and_log'},
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetCtx) => _buildCalculatorSheet(
+        sheetCtx,
+        title: l10n.calculateAndLog,
+        description: l10n.dosingCalculatorDescription,
+        calculator: DosingCalculator(
+          initialTankGallons: currentTank.sizeGallons,
+          onLogDose: (treatment, amount, unit) {
+            // Close calculator sheet, then open the add-dose form pre-filled
+            Navigator.pop(sheetCtx);
+            final latestTank = _getCurrentTank();
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (formCtx) => _AddDosingEntrySheet(
+                tank: latestTank,
+                prefilledTreatment: treatment,
+                prefilledAmount: amount,
+                prefilledUnit: unit,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Shared bottom-sheet builder for the dosing calculator (read-only or calculate-and-log).
+  Widget _buildCalculatorSheet(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required DosingCalculator calculator,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 8,
+        ),
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: cs.onSurface.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calculate_outlined,
-                      color: Theme.of(context).colorScheme.primary,
+              ),
+              Row(
+                children: [
+                  Icon(Icons.calculate_outlined, color: cs.primary),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        l10n.openDosingCalculator,
-                        style: Theme.of(context).textTheme.titleLarge
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.dosingCalculatorDescription,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.6),
                 ),
-                const SizedBox(height: 20),
-                DosingCalculator(
-                  initialTankGallons: currentTank.sizeGallons,
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+              calculator,
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  /// Speed-dial FAB: "Log Manually" and "Calculate & Log" options.
+  Widget _buildAddFab(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        AnimatedOpacity(
+          opacity: _fabOpen ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          child: AnimatedSlide(
+            offset: _fabOpen ? Offset.zero : const Offset(0, 0.5),
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            child: IgnorePointer(
+              ignoring: !_fabOpen,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _buildFabAction(
+                    heroTag: 'fab_dosing_manual',
+                    icon: Icons.edit_note,
+                    label: l10n.logManually,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      _addDosingEntry(context);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_dosing_calc',
+                    icon: Icons.calculate_outlined,
+                    label: l10n.calculateAndLog,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      _openCalculateAndLog(context);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                ],
+              ),
+            ),
+          ),
+        ),
+        FloatingActionButton.extended(
+          heroTag: 'fab_dosing_main',
+          onPressed: () => setState(() => _fabOpen = !_fabOpen),
+          icon: AnimatedRotation(
+            turns: _fabOpen ? 0.125 : 0,
+            duration: const Duration(milliseconds: 200),
+            child: const Icon(Icons.add),
+          ),
+          label: Text(_fabOpen ? 'Close' : l10n.addDose),
+        ),
+      ],
+    );
+  }
+
+  /// Builds a single mini FAB row: label chip + small FAB.
+  Widget _buildFabAction({
+    required String heroTag,
+    required IconData icon,
+    required String label,
+    required ColorScheme cs,
+    required VoidCallback onPressed,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          elevation: 2,
+          borderRadius: BorderRadius.circular(8),
+          color: cs.surfaceContainerHigh,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: cs.onSurface,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        FloatingActionButton.small(
+          heroTag: heroTag,
+          onPressed: onPressed,
+          child: Icon(icon),
+        ),
+      ],
     );
   }
 
@@ -314,11 +462,7 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
                   }),
                 ],
               ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => _addDosingEntry(context),
-          icon: const Icon(Icons.add),
-          label: Text(l10n.addDose),
-        ),
+        floatingActionButton: _buildAddFab(context),
       ),
     );
   }
@@ -566,7 +710,18 @@ class _AddDosingEntrySheet extends ConsumerStatefulWidget {
   final Tank tank;
   final DosingEntry? existingEntry;
 
-  const _AddDosingEntrySheet({required this.tank, this.existingEntry});
+  /// Optional pre-filled values used when logging from the calculator.
+  final String? prefilledTreatment;
+  final double? prefilledAmount;
+  final String? prefilledUnit;
+
+  const _AddDosingEntrySheet({
+    required this.tank,
+    this.existingEntry,
+    this.prefilledTreatment,
+    this.prefilledAmount,
+    this.prefilledUnit,
+  });
 
   @override
   ConsumerState<_AddDosingEntrySheet> createState() =>
@@ -585,28 +740,6 @@ const List<String> kVolumeUnits = [
   'cups',
 ];
 
-// Common aquarium treatments
-const List<String> kCommonTreatments = [
-  'Prime (Seachem)',
-  'Stability (Seachem)',
-  'Flourish (Seachem)',
-  'Excel (Seachem)',
-  'Stress Coat (API)',
-  'Quick Start (API)',
-  'Stress Zyme (API)',
-  'Ich-X',
-  'Paraguard (Seachem)',
-  'Kanaplex (Seachem)',
-  'MetroPlex (Seachem)',
-  'Focus (Seachem)',
-  'AmGuard (Seachem)',
-  'Safe (Seachem)',
-  'Purigen (Seachem)',
-  'Alkalinity Buffer',
-  'pH Buffer',
-  'Other (Custom)',
-];
-
 class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   final _formKey = GlobalKey<FormState>();
   final _treatmentNameController = TextEditingController();
@@ -619,10 +752,13 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   @override
   void initState() {
     super.initState();
+    // Derive treatment names from the unified kDosingPresets list
+    final allTreatmentNames = kDosingPresets.map((p) => p.name).toList();
+
     if (widget.existingEntry != null) {
       // Initialize with existing entry data
       final existingName = widget.existingEntry!.treatmentName;
-      if (kCommonTreatments.contains(existingName)) {
+      if (allTreatmentNames.contains(existingName)) {
         _selectedTreatment = existingName;
       } else {
         _selectedTreatment = 'Other (Custom)';
@@ -632,11 +768,23 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
       _notesController.text = widget.existingEntry!.notes ?? '';
       _selectedDate = widget.existingEntry!.dateDosed;
       _selectedUnit = widget.existingEntry!.unit;
+    } else if (widget.prefilledTreatment != null) {
+      // Pre-fill from dosing calculator
+      final treatment = widget.prefilledTreatment!;
+      if (allTreatmentNames.contains(treatment)) {
+        _selectedTreatment = treatment;
+      } else {
+        _selectedTreatment = 'Other (Custom)';
+        _treatmentNameController.text = treatment;
+      }
+      _amountController.text = widget.prefilledAmount?.toString() ?? '';
+      _selectedDate = DateTime.now();
+      _selectedUnit = widget.prefilledUnit ?? 'mL';
     } else {
-      // Initialize with default values for new entry
+      // Default values for new entry
       _selectedDate = DateTime.now();
       _selectedUnit = 'mL';
-      _selectedTreatment = kCommonTreatments.first;
+      _selectedTreatment = kDosingPresets.first.name;
     }
   }
 
@@ -809,10 +957,10 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                   filled: true,
                   fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
                 ),
-                items: kCommonTreatments.map((treatment) {
+                items: kDosingPresets.map((preset) {
                   return DropdownMenuItem(
-                    value: treatment,
-                    child: Text(treatment),
+                    value: preset.name,
+                    child: Text(preset.name),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -977,15 +1125,25 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
 
 /// Shows the dosing add/edit bottom sheet.
 /// [existingEntry] – pass to edit an existing entry.
+/// [prefilledTreatment], [prefilledAmount], [prefilledUnit] – pass to pre-fill
+/// a new entry from the dosing calculator.
 void showDosingSheet(
   BuildContext context,
   Tank tank, {
   DosingEntry? existingEntry,
+  String? prefilledTreatment,
+  double? prefilledAmount,
+  String? prefilledUnit,
 }) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    builder: (context) =>
-        _AddDosingEntrySheet(tank: tank, existingEntry: existingEntry),
+    builder: (context) => _AddDosingEntrySheet(
+      tank: tank,
+      existingEntry: existingEntry,
+      prefilledTreatment: prefilledTreatment,
+      prefilledAmount: prefilledAmount,
+      prefilledUnit: prefilledUnit,
+    ),
   );
 }

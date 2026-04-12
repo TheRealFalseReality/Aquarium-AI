@@ -20,6 +20,7 @@ import '../utils/backup_restore_utils.dart';
 import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
 import '../widgets/accessible_feedback.dart';
+import 'calculators_screen.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_logger_screen.dart';
 import 'notification_management_screen.dart';
@@ -1601,6 +1602,17 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             minimumSize: const Size(double.infinity, 48),
           ),
         ),
+        const SizedBox(height: 8),
+
+        // Dosing calculator quick-access button
+        OutlinedButton.icon(
+          icon: const Icon(Icons.calculate_outlined),
+          label: Text(l10n.openDosingCalculator),
+          onPressed: () => _openDosingCalculatorSheet(context, tank),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+          ),
+        ),
         const SizedBox(height: 12),
 
         Text(
@@ -1663,6 +1675,90 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           );
         }),
       ],
+    );
+  }
+
+  /// Opens a dosing calculator bottom sheet pre-filled with this tank's volume.
+  void _openDosingCalculatorSheet(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'dosing_calculator_opened',
+      parameters: {'source': 'tank_details'},
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetCtx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (sheetCtx, scrollController) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 8,
+          ),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: cs.onSurface.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.calculate_outlined, color: cs.primary),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        l10n.openDosingCalculator,
+                        style: Theme.of(sheetCtx).textTheme.titleLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  l10n.dosingCalculatorDescription,
+                  style: Theme.of(sheetCtx).textTheme.bodySmall?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                DosingCalculator(
+                  initialTankGallons: tank.sizeGallons,
+                  onLogDose: (treatment, amount, unit) {
+                    Navigator.pop(sheetCtx);
+                    showDosingSheet(
+                      context,
+                      tank,
+                      prefilledTreatment: treatment,
+                      prefilledAmount: amount,
+                      prefilledUnit: unit,
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
