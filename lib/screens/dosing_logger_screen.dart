@@ -135,14 +135,16 @@ class DosingLoggerScreenState extends ConsumerState<DosingLoggerScreen> {
       minChildSize: 0.5,
       maxChildSize: 0.95,
       builder: (context, scrollController) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+        padding: const EdgeInsets.only(
           left: 16,
           right: 16,
           top: 8,
         ),
         child: SingleChildScrollView(
           controller: scrollController,
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -1763,14 +1763,16 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         minChildSize: 0.5,
         maxChildSize: 0.95,
         builder: (sheetCtx, scrollController) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(sheetCtx).viewInsets.bottom,
+          padding: const EdgeInsets.only(
             left: 16,
             right: 16,
             top: 8,
           ),
           child: SingleChildScrollView(
             controller: scrollController,
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetCtx).viewInsets.bottom + 24,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
