@@ -2251,7 +2251,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     );
   }
 
-
+  Widget _buildInhabitantsSection(
     BuildContext context,
     Tank tank,
     Map<String, List<Fish>> fishData,
