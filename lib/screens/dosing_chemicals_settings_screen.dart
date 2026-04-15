@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
@@ -17,6 +18,24 @@ class DosingChemicalsSettingsScreen extends ConsumerStatefulWidget {
 
 class _DosingChemicalsSettingsScreenState
     extends ConsumerState<DosingChemicalsSettingsScreen> {
+  Future<void> _openChemicalSearch(String chemicalName) async {
+    final l10n = AppLocalizations.of(context)!;
+    final uri = Uri.https('www.google.com', '/search', {
+      'q': '$chemicalName aquarium dosing',
+    });
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.unableToOpenLink)));
+      return;
+    }
+    AnalyticsService.logFeatureUsed(
+      featureName: 'dosing_chemical_search_opened',
+      parameters: {'chemical_name': chemicalName},
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -69,14 +88,21 @@ class _DosingChemicalsSettingsScreenState
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       value: selectedPerUnit,
+                      isExpanded: true,
                       items: [
                         DropdownMenuItem(
                           value: 'gallon',
-                          child: Text(l10n.substrateUnitGallons),
+                          child: Text(
+                            l10n.substrateUnitGallons,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         DropdownMenuItem(
                           value: 'liter',
-                          child: Text(l10n.substrateUnitLiters),
+                          child: Text(
+                            l10n.substrateUnitLiters,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                       onChanged: (value) {
@@ -184,7 +210,7 @@ class _DosingChemicalsSettingsScreenState
                 ),
               )
             : ReorderableListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 104),
                 itemCount: chemicalsState.chemicals.length,
                 onReorder: (oldIndex, newIndex) {
                   ref
@@ -212,6 +238,7 @@ class _DosingChemicalsSettingsScreenState
                       subtitle: Text(
                         '${chemical.amountPerUnit} ${chemical.doseUnit} / $perUnitText',
                       ),
+                      onTap: () => _openChemicalSearch(chemical.name),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
