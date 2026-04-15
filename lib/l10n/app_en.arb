@@ -690,6 +690,65 @@
   "@freshwaterTank": {
     "description": "Freshwater tank label"
   },
+  "plantedFreshwaterTank": "Planted Tank",
+  "@plantedFreshwaterTank": {
+    "description": "Planted freshwater tank label shown in tank details"
+  },
+  "plantedTank": "Planted",
+  "@plantedTank": {
+    "description": "Planted freshwater subtype chip label"
+  },
+  "brackishTank": "Brackish",
+  "@brackishTank": {
+    "description": "Brackish freshwater subtype chip label"
+  },
+  "freshwaterSubtype": "Freshwater subtype:",
+  "@freshwaterSubtype": {
+    "description": "Label shown above freshwater subtype chips (Planted, Brackish) in tank creation"
+  },
+  "substrateRecommendedLbs": "~{amount} lbs substrate",
+  "@substrateRecommendedLbs": {
+    "description": "Substrate recommendation chip label in tank details (imperial)",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "substrateRecommendedLiters": "~{amount} L substrate",
+  "@substrateRecommendedLiters": {
+    "description": "Substrate recommendation chip label in tank details (metric)",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "substrateCustomLbs": "{amount} lbs substrate",
+  "@substrateCustomLbs": {
+    "description": "Substrate chip label when a custom override amount is set (imperial)",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "substrateOverrideTitle": "Set Substrate Amount",
+  "@substrateOverrideTitle": {
+    "description": "Title of the substrate override dialog in tank details"
+  },
+  "substrateOverrideBody": "Enter the actual amount of substrate used in your tank to replace the calculated estimate.",
+  "@substrateOverrideBody": {
+    "description": "Body text explaining the substrate override dialog"
+  },
+  "substrateOverrideFieldLabel": "Substrate Amount",
+  "@substrateOverrideFieldLabel": {
+    "description": "Input field label inside the substrate override dialog"
+  },
+  "substrateOverrideClear": "Use Estimate",
+  "@substrateOverrideClear": {
+    "description": "Button in substrate override dialog to clear the override and revert to calculated estimate"
+  },
   "saltwaterTank": "Saltwater Tank",
   "@saltwaterTank": {
     "description": "Saltwater tank label"

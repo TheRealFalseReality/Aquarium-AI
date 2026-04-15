@@ -194,6 +194,8 @@ class Tank {
   final String name;
   final String type; // 'freshwater' or 'marine'
   final bool isReef; // Only relevant when type == 'marine'
+  final String? freshwaterSubtype; // Only relevant when type == 'freshwater': 'planted' or 'brackish'
+  final double? substrateOverrideLbs; // User-specified substrate amount (lbs); overrides calculated recommendation
   final List<TankInhabitant> inhabitants;
   final double? sizeGallons; // Tank size in gallons
   final double? sizeLiters; // Tank size in liters
@@ -223,6 +225,8 @@ class Tank {
     required this.name,
     required this.type,
     this.isReef = false,
+    this.freshwaterSubtype,
+    this.substrateOverrideLbs,
     required this.inhabitants,
     this.sizeGallons,
     this.sizeLiters,
@@ -255,6 +259,8 @@ class Tank {
     required String name,
     required String type,
     bool isReef = false,
+    String? freshwaterSubtype,
+    double? substrateOverrideLbs,
     List<TankInhabitant>? inhabitants,
     double? sizeGallons,
     double? sizeLiters,
@@ -281,6 +287,8 @@ class Tank {
       name: name,
       type: type,
       isReef: isReef,
+      freshwaterSubtype: freshwaterSubtype,
+      substrateOverrideLbs: substrateOverrideLbs,
       inhabitants: inhabitants ?? [],
       sizeGallons: sizeGallons,
       sizeLiters: sizeLiters,
@@ -310,6 +318,9 @@ class Tank {
       'name': name,
       'type': type,
       'isReef': isReef,
+      if (freshwaterSubtype != null) 'freshwaterSubtype': freshwaterSubtype,
+      if (substrateOverrideLbs != null)
+        'substrateOverrideLbs': substrateOverrideLbs,
       'inhabitants': inhabitants
           .map((i) => i.toJson(includeLocalPaths: includeLocalPaths))
           .toList(),
@@ -344,6 +355,8 @@ class Tank {
       name: json['name'] as String,
       type: json['type'] as String,
       isReef: json['isReef'] as bool? ?? false,
+      freshwaterSubtype: json['freshwaterSubtype'] as String?,
+      substrateOverrideLbs: json['substrateOverrideLbs']?.toDouble(),
       inhabitants: (json['inhabitants'] as List)
           .map((i) => TankInhabitant.fromJson(i))
           .toList(),
@@ -400,6 +413,10 @@ class Tank {
     String? name,
     String? type,
     bool? isReef,
+    String? freshwaterSubtype,
+    bool clearFreshwaterSubtype = false,
+    double? substrateOverrideLbs,
+    bool clearSubstrateOverrideLbs = false,
     List<TankInhabitant>? inhabitants,
     double? sizeGallons,
     double? sizeLiters,
@@ -430,6 +447,12 @@ class Tank {
       name: name ?? this.name,
       type: type ?? this.type,
       isReef: isReef ?? this.isReef,
+      freshwaterSubtype: clearFreshwaterSubtype
+          ? null
+          : (freshwaterSubtype ?? this.freshwaterSubtype),
+      substrateOverrideLbs: clearSubstrateOverrideLbs
+          ? null
+          : (substrateOverrideLbs ?? this.substrateOverrideLbs),
       inhabitants: inhabitants ?? this.inhabitants,
       sizeGallons: sizeGallons ?? this.sizeGallons,
       sizeLiters: sizeLiters ?? this.sizeLiters,

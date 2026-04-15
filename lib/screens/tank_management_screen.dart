@@ -2065,7 +2065,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           final l10n = AppLocalizations.of(context)!;
                           String typeLabel;
                           if (tank.type == 'freshwater') {
-                            typeLabel = l10n.freshwater;
+                            if (tank.freshwaterSubtype == 'planted') {
+                              typeLabel = l10n.plantedTank;
+                            } else if (tank.freshwaterSubtype == 'brackish') {
+                              typeLabel = l10n.brackishTank;
+                            } else {
+                              typeLabel = l10n.freshwater;
+                            }
                           } else if (tank.isReef) {
                             typeLabel = l10n.reefTank;
                           } else {
@@ -2095,6 +2101,41 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                       padding: EdgeInsets.only(right: 4),
                                       child: Text(
                                         '🪸',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  if (tank.type == 'marine' && !tank.isReef)
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                      child: Text(
+                                        '🌊',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  if (tank.type == 'freshwater' &&
+                                      tank.freshwaterSubtype == 'planted')
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                      child: Text(
+                                        '🌿',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  if (tank.type == 'freshwater' &&
+                                      tank.freshwaterSubtype == 'brackish')
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                      child: Text(
+                                        '🦀',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  if (tank.type == 'freshwater' &&
+                                      tank.freshwaterSubtype == null)
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                      child: Text(
+                                        '🐟',
                                         style: TextStyle(fontSize: 12),
                                       ),
                                     ),
@@ -2140,7 +2181,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                     final l10n = AppLocalizations.of(context)!;
                                     String typeLabel;
                                     if (tank.type == 'freshwater') {
-                                      typeLabel = l10n.freshwater;
+                                      if (tank.freshwaterSubtype == 'planted') {
+                                        typeLabel = l10n.plantedTank;
+                                      } else if (tank.freshwaterSubtype ==
+                                          'brackish') {
+                                        typeLabel = l10n.brackishTank;
+                                      } else {
+                                        typeLabel = l10n.freshwater;
+                                      }
                                     } else if (tank.isReef) {
                                       typeLabel = l10n.reefTank;
                                     } else {
@@ -2155,6 +2203,43 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                             padding: EdgeInsets.only(right: 4),
                                             child: Text(
                                               '🪸',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                        if (tank.type == 'marine' &&
+                                            !tank.isReef)
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4),
+                                            child: Text(
+                                              '🌊',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                        if (tank.type == 'freshwater' &&
+                                            tank.freshwaterSubtype == 'planted')
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4),
+                                            child: Text(
+                                              '🌿',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                        if (tank.type == 'freshwater' &&
+                                            tank.freshwaterSubtype ==
+                                                'brackish')
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4),
+                                            child: Text(
+                                              '🦀',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                        if (tank.type == 'freshwater' &&
+                                            tank.freshwaterSubtype == null)
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4),
+                                            child: Text(
+                                              '🐟',
                                               style: TextStyle(fontSize: 12),
                                             ),
                                           ),
