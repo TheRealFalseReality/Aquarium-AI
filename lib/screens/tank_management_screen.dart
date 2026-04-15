@@ -2104,6 +2104,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                         style: TextStyle(fontSize: 12),
                                       ),
                                     ),
+                                  if (tank.type == 'marine' && !tank.isReef)
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                      child: Text(
+                                        '🌊',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
                                   if (tank.type == 'freshwater' &&
                                       tank.freshwaterSubtype == 'planted')
                                     const Padding(
@@ -2119,6 +2127,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                       padding: EdgeInsets.only(right: 4),
                                       child: Text(
                                         '🦀',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  if (tank.type == 'freshwater' &&
+                                      tank.freshwaterSubtype == null)
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                      child: Text(
+                                        '🐟',
                                         style: TextStyle(fontSize: 12),
                                       ),
                                     ),
@@ -2189,6 +2206,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                               style: TextStyle(fontSize: 12),
                                             ),
                                           ),
+                                        if (tank.type == 'marine' &&
+                                            !tank.isReef)
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4),
+                                            child: Text(
+                                              '🌊',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ),
                                         if (tank.type == 'freshwater' &&
                                             tank.freshwaterSubtype == 'planted')
                                           const Padding(
@@ -2205,6 +2231,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                             padding: EdgeInsets.only(right: 4),
                                             child: Text(
                                               '🦀',
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                        if (tank.type == 'freshwater' &&
+                                            tank.freshwaterSubtype == null)
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4),
+                                            child: Text(
+                                              '🐟',
                                               style: TextStyle(fontSize: 12),
                                             ),
                                           ),

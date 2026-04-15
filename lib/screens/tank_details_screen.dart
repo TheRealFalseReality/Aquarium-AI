@@ -847,21 +847,35 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                             style: Theme.of(context).textTheme.headlineSmall
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
-                          Text(
-                            tank.type == 'freshwater'
-                                ? (tank.freshwaterSubtype == 'planted'
-                                      ? l10n.plantedFreshwaterTank
-                                      : tank.freshwaterSubtype == 'brackish'
-                                      ? l10n.brackishTank
-                                      : l10n.freshwaterTank)
-                                : (tank.isReef
-                                      ? l10n.reefTank
-                                      : l10n.saltwaterTank),
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: cs.primary,
-                                  fontWeight: FontWeight.w600,
+                          Row(
+                            children: [
+                              Text(
+                                _tankTypeEmoji(tank),
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  tank.type == 'freshwater'
+                                      ? (tank.freshwaterSubtype == 'planted'
+                                            ? l10n.plantedFreshwaterTank
+                                            : tank.freshwaterSubtype ==
+                                                    'brackish'
+                                            ? l10n.brackishTank
+                                            : l10n.freshwaterTank)
+                                      : (tank.isReef
+                                            ? l10n.reefTank
+                                            : l10n.saltwaterTank),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: cs.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -2071,6 +2085,17 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     return 'N/A';
   }
 
+  /// Returns the emoji representing this tank's type/subtype.
+  String _tankTypeEmoji(Tank tank) {
+    if (tank.type == 'freshwater') {
+      if (tank.freshwaterSubtype == 'planted') return '🌿';
+      if (tank.freshwaterSubtype == 'brackish') return '🦀';
+      return '🐟'; // plain freshwater
+    }
+    if (tank.isReef) return '🪸';
+    return '🌊'; // plain marine/saltwater
+  }
+
   /// Returns the substrate lbs-per-gallon midpoint for the given tank's type.
   /// Planted freshwater uses 2–3 lbs/gal (mid: 2.5); all others use 1–2 (mid: 1.5).
   double _substrateRecLbsPerGallon(Tank tank) {
@@ -2082,31 +2107,151 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
 
   Widget _buildSubstrateChip(BuildContext context, Tank tank) {
     final l10n = AppLocalizations.of(context)!;
-    final lbsPerGal = _substrateRecLbsPerGallon(tank);
 
-    if (tank.sizeGallons != null) {
-      final recLbs = (tank.sizeGallons! * lbsPerGal).round();
-      return _buildStatChip(
-        context,
-        Icons.layers,
-        l10n.substrateRecommendedLbs(recLbs),
-      );
-    } else if (tank.sizeLiters != null) {
-      // Substrate bulk density: 100 lbs/ft³ (standard gravel); 1 ft³ = 28.3168 L
-      const double lbsPerLiterSubstrate = 100.0 / 28.3168;
-      final gallons = tank.sizeLiters! / 3.78541;
-      final recLbs = gallons * lbsPerGal;
-      final recSubLiters = (recLbs / lbsPerLiterSubstrate).round();
-      return _buildStatChip(
-        context,
-        Icons.layers,
-        l10n.substrateRecommendedLiters(recSubLiters),
-      );
+    // Use override if set, otherwise calculate from tank size
+    String label;
+    if (tank.substrateOverrideLbs != null) {
+      label = l10n.substrateCustomLbs(tank.substrateOverrideLbs!.round());
+    } else {
+      final lbsPerGal = _substrateRecLbsPerGallon(tank);
+      if (tank.sizeGallons != null) {
+        final recLbs = (tank.sizeGallons! * lbsPerGal).round();
+        label = l10n.substrateRecommendedLbs(recLbs);
+      } else if (tank.sizeLiters != null) {
+        // Substrate bulk density: 100 lbs/ft³ (standard gravel); 1 ft³ = 28.3168 L
+        const double lbsPerLiterSubstrate = 100.0 / 28.3168;
+        final gallons = tank.sizeLiters! / 3.78541;
+        final recLbs = gallons * lbsPerGal;
+        final recSubLiters = (recLbs / lbsPerLiterSubstrate).round();
+        label = l10n.substrateRecommendedLiters(recSubLiters);
+      } else {
+        return const SizedBox.shrink();
+      }
     }
-    return const SizedBox.shrink();
+
+    final cs = Theme.of(context).colorScheme;
+    final hasOverride = tank.substrateOverrideLbs != null;
+    return GestureDetector(
+      onTap: () => _showSubstrateOverrideDialog(context, tank),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: hasOverride
+              ? cs.tertiaryContainer.withOpacity(0.7)
+              : cs.surfaceContainerHighest.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: hasOverride
+                ? cs.tertiary.withOpacity(0.6)
+                : cs.outlineVariant.withOpacity(0.4),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.layers,
+              size: 16,
+              color: hasOverride
+                  ? cs.tertiary
+                  : cs.onSurface.withOpacity(0.7),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: hasOverride ? cs.onTertiaryContainer : null,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.edit,
+              size: 12,
+              color: hasOverride
+                  ? cs.tertiary
+                  : cs.onSurface.withOpacity(0.4),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  Widget _buildInhabitantsSection(
+  void _showSubstrateOverrideDialog(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController(
+      text: tank.substrateOverrideLbs != null
+          ? tank.substrateOverrideLbs!.toStringAsFixed(1)
+          : '',
+    );
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(l10n.substrateOverrideTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.substrateOverrideBody,
+                style: Theme.of(ctx).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controller,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: l10n.substrateOverrideFieldLabel,
+                  suffixText: 'lbs',
+                  border: const OutlineInputBorder(),
+                ),
+                autofocus: true,
+              ),
+            ],
+          ),
+          actions: [
+            if (tank.substrateOverrideLbs != null)
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  final updated = tank.copyWith(
+                    clearSubstrateOverrideLbs: true,
+                    updatedAt: DateTime.now(),
+                  );
+                  ref.read(tankProvider.notifier).updateTank(updated);
+                },
+                child: Text(l10n.substrateOverrideClear),
+              ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final value = double.tryParse(controller.text.trim());
+                if (value != null && value > 0) {
+                  Navigator.of(ctx).pop();
+                  final updated = tank.copyWith(
+                    substrateOverrideLbs: value,
+                    updatedAt: DateTime.now(),
+                  );
+                  ref.read(tankProvider.notifier).updateTank(updated);
+                }
+              },
+              child: Text(l10n.save),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
     BuildContext context,
     Tank tank,
     Map<String, List<Fish>> fishData,

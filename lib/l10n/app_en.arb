@@ -688,6 +688,31 @@
       }
     }
   },
+  "substrateCustomLbs": "{amount} lbs substrate",
+  "@substrateCustomLbs": {
+    "description": "Substrate chip label when a custom override amount is set (imperial)",
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "substrateOverrideTitle": "Set Substrate Amount",
+  "@substrateOverrideTitle": {
+    "description": "Title of the substrate override dialog in tank details"
+  },
+  "substrateOverrideBody": "Enter the actual amount of substrate used in your tank to replace the calculated estimate.",
+  "@substrateOverrideBody": {
+    "description": "Body text explaining the substrate override dialog"
+  },
+  "substrateOverrideFieldLabel": "Substrate Amount",
+  "@substrateOverrideFieldLabel": {
+    "description": "Input field label inside the substrate override dialog"
+  },
+  "substrateOverrideClear": "Use Estimate",
+  "@substrateOverrideClear": {
+    "description": "Button in substrate override dialog to clear the override and revert to calculated estimate"
+  },
   "saltwaterTank": "Saltwater Tank",
   "@saltwaterTank": {
     "description": "Saltwater tank label"
