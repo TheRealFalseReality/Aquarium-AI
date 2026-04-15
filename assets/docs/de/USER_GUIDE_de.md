@@ -287,6 +287,7 @@ Eine Reihe von Offline-Sofortrechner – kein API-Schlüssel erforderlich.
 | **CO₂** | Schätzt gelöstes CO₂ aus pH und KH |
 | **Alkalinität** | Konvertiert zwischen dKH, meq/L und ppm |
 | **Temperatur** | Konvertiert zwischen °F und °C |
+| **Dosierung** | Berechnet die Gesamtdosis aus Menge pro Gallone/Liter und Tankgröße |
 
 ### Tankvolumen-Rechner
 
@@ -386,6 +387,7 @@ Google, Facebook oder anonym bleiben verwenden. Anonyme Konten können später u
 | **AI-API-Schlüssel** | Persönliche API-Schlüssel speichern |
 | **Chat-Verlaufslimit** | Anzahl der vorherigen Nachrichten, die mit jeder Anfrage gesendet werden |
 | **Tank-Anzeige** | Fotos, Metriken, Bewohner, Notizen usw. ein-/ausblenden |
+| **Dosier-Chemikalien** | App-weite Chemikalien-Voreinstellungen hinzufügen, bearbeiten und umordnen |
 | **Sicherung / Wiederherstellung** | Alle Tank-Daten exportieren und importieren |
 | **Benachrichtigungen** | Erinnerungen für Wasserwechsel, Fütterung usw. planen |
 

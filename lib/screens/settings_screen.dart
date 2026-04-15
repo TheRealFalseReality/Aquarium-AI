@@ -3115,6 +3115,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const Divider(height: 24),
                 ListTile(
                   leading: Icon(
+                    Icons.medication_liquid_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: Text(l10n.dosingChemicalsTitle),
+                  subtitle: Text(l10n.dosingChemicalsSettingsDesc),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/dosing-chemicals');
+                  },
+                ),
+                const Divider(height: 24),
+                ListTile(
+                  leading: Icon(
                     Icons.history,
                     color: Theme.of(context).colorScheme.primary,
                   ),

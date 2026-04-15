@@ -290,6 +290,7 @@ Un ensemble de calculateurs instantanés hors ligne — aucune clé API requise.
 | **CO₂** | Estime le CO₂ dissous à partir du pH et du KH |
 | **Alcalinité** | Convertit entre dKH, meq/L et ppm |
 | **Température** | Convertit entre °F et °C |
+| **Dosage** | Calcule la dose totale à partir de la quantité par gallon/litre et du volume du bac |
 
 ### Calculateur de volume de bac
 
@@ -391,6 +392,7 @@ vers un compte nommé plus tard dans **Profil**.
 | **Clés API AI** | Stocker vos clés API personnelles |
 | **Limite d'historique de chat** | Nombre de messages précédents envoyés avec chaque requête |
 | **Affichage du bac** | Afficher/masquer photos, métriques, habitants, notes, etc. |
+| **Produits de dosage** | Ajouter, modifier et réorganiser les préréglages de dosage globaux |
 | **Sauvegarde / Restauration** | Exporter et importer toutes les données du bac |
 | **Notifications** | Planifier des rappels pour les changements d'eau, l'alimentation, etc. |
 

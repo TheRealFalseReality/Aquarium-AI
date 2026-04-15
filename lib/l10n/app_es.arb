@@ -1569,5 +1569,74 @@
     "customSpeciesLabel": "O ingresa tu propia especie",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
+    },
+    "dosingCalculatorTitle": "Dosificación",
+    "@dosingCalculatorTitle": {
+      "description": "Label for the dosing calculator type in the calculators screen"
+    },
+    "dosingCalculatorPresetLabel": "Preajuste químico",
+    "@dosingCalculatorPresetLabel": {
+      "description": "Section label for selecting a dosing chemical preset"
+    },
+    "dosingCalculatorChemicalLabel": "Químico",
+    "@dosingCalculatorChemicalLabel": {
+      "description": "Input label for selecting a dosing chemical preset"
+    },
+    "dosingCalculatorCustomOption": "Personalizado",
+    "@dosingCalculatorCustomOption": {
+      "description": "Dropdown option to use custom dosing values instead of a preset"
+    },
+    "dosingAmountPerVolumeLabel": "Cantidad por volumen",
+    "@dosingAmountPerVolumeLabel": {
+      "description": "Input label for dosing amount per gallon/liter"
+    },
+    "dosingTankSizeLabel": "Tamaño del acuario ({unit})",
+    "@dosingTankSizeLabel": {
+      "description": "Input label for tank size in the dosing calculator",
+      "placeholders": {
+        "unit": {
+          "type": "String"
+        }
+      }
+    },
+    "dosingDoseUnitLabel": "Unidad de dosis",
+    "@dosingDoseUnitLabel": {
+      "description": "Input label for final dose unit"
+    },
+    "dosingCalculatorCalculateButton": "Calcular dosis",
+    "@dosingCalculatorCalculateButton": {
+      "description": "Button label for calculating total dose"
+    },
+    "dosingCalculatorResultLabel": "Dosis total",
+    "@dosingCalculatorResultLabel": {
+      "description": "Label shown above total dose result"
+    },
+    "dosingChemicalsTitle": "Químicos de dosificación",
+    "@dosingChemicalsTitle": {
+      "description": "Title for dosing chemicals settings screen"
+    },
+    "dosingChemicalsSettingsDesc": "Editar preajustes químicos de dosificación globales",
+    "@dosingChemicalsSettingsDesc": {
+      "description": "Subtitle for dosing chemicals settings entry in app settings"
+    },
+    "dosingChemicalsEmpty": "Aún no hay químicos de dosificación. Agrega uno para comenzar.",
+    "@dosingChemicalsEmpty": {
+      "description": "Empty state text for dosing chemicals settings list"
+    },
+    "dosingChemicalAddTitle": "Agregar químico",
+    "@dosingChemicalAddTitle": {
+      "description": "Dialog title for adding a dosing chemical preset"
+    },
+    "dosingChemicalEditTitle": "Editar químico",
+    "@dosingChemicalEditTitle": {
+      "description": "Dialog title for editing a dosing chemical preset"
+    },
+    "dosingChemicalNameLabel": "Nombre del químico",
+    "@dosingChemicalNameLabel": {
+      "description": "Input label for dosing chemical name"
+    },
+    "dosingPerUnitLabel": "Por unidad",
+    "@dosingPerUnitLabel": {
+      "description": "Input label for per-unit volume type (gallon/liter)"
     }
   }

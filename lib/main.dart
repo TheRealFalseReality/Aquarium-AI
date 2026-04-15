@@ -26,6 +26,7 @@ import './screens/auth_screen.dart';
 import './screens/calculators_screen.dart';
 import './screens/chatbot_screen.dart';
 import './screens/community_screen.dart';
+import './screens/dosing_chemicals_settings_screen.dart';
 import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compat_browser_screen.dart';
 import './screens/fish_compatibility_screen.dart';
@@ -638,6 +639,10 @@ class MyApp extends ConsumerWidget {
               case '/species-tags':
                 page = const SpeciesTagsScreen();
                 screenName = 'species_tags_screen';
+                break;
+              case '/dosing-chemicals':
+                page = const DosingChemicalsSettingsScreen();
+                screenName = 'dosing_chemicals_settings';
                 break;
               case '/analysis-history':
                 page = const AnalysisHistoryScreen();

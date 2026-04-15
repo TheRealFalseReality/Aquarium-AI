@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/dosing_entry.dart';
 import '../models/tank.dart';
+import '../providers/dosing_chemicals_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 
@@ -499,26 +500,14 @@ const List<String> kVolumeUnits = [
   'cups',
 ];
 
-// Common aquarium treatments
-const List<String> kCommonTreatments = [
+const String kCustomTreatmentOption = 'Other (Custom)';
+const List<String> kFallbackTreatmentNames = [
   'Prime (Seachem)',
   'Stability (Seachem)',
-  'Flourish (Seachem)',
   'Excel (Seachem)',
   'Stress Coat (API)',
   'Quick Start (API)',
-  'Stress Zyme (API)',
-  'Ich-X',
   'Paraguard (Seachem)',
-  'Kanaplex (Seachem)',
-  'MetroPlex (Seachem)',
-  'Focus (Seachem)',
-  'AmGuard (Seachem)',
-  'Safe (Seachem)',
-  'Purigen (Seachem)',
-  'Alkalinity Buffer',
-  'pH Buffer',
-  'Other (Custom)',
 ];
 
 class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
@@ -530,16 +519,34 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   late String _selectedUnit;
   String? _selectedTreatment;
 
+  List<String> _treatmentsWithCustom() {
+    final chemicals = ref.watch(dosingChemicalsProvider).chemicals;
+    final names = chemicals.map((c) => c.name).toList();
+    final sourceNames = names.isEmpty ? kFallbackTreatmentNames : names;
+    return [...sourceNames, kCustomTreatmentOption];
+  }
+
   @override
   void initState() {
     super.initState();
+    final initialTreatments = [
+      ...(() {
+        final names = ref
+            .read(dosingChemicalsProvider)
+            .chemicals
+            .map((c) => c.name)
+            .toList();
+        return names.isEmpty ? kFallbackTreatmentNames : names;
+      })(),
+      kCustomTreatmentOption,
+    ];
     if (widget.existingEntry != null) {
       // Initialize with existing entry data
       final existingName = widget.existingEntry!.treatmentName;
-      if (kCommonTreatments.contains(existingName)) {
+      if (initialTreatments.contains(existingName)) {
         _selectedTreatment = existingName;
       } else {
-        _selectedTreatment = 'Other (Custom)';
+        _selectedTreatment = kCustomTreatmentOption;
         _treatmentNameController.text = existingName;
       }
       _amountController.text = widget.existingEntry!.amount.toString();
@@ -550,7 +557,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
       // Initialize with default values for new entry
       _selectedDate = DateTime.now();
       _selectedUnit = 'mL';
-      _selectedTreatment = kCommonTreatments.first;
+      _selectedTreatment = initialTreatments.first;
     }
   }
 
@@ -590,7 +597,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
 
   String _getTreatmentName() {
     // If "Other (Custom)" is selected, use the text field value
-    if (_selectedTreatment == 'Other (Custom)') {
+    if (_selectedTreatment == kCustomTreatmentOption) {
       return _treatmentNameController.text.trim();
     }
     // Otherwise use the selected treatment from dropdown
@@ -681,6 +688,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isEditing = widget.existingEntry != null;
+    final treatmentOptions = _treatmentsWithCustom();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -723,7 +731,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                   filled: true,
                   fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
                 ),
-                items: kCommonTreatments.map((treatment) {
+                items: treatmentOptions.map((treatment) {
                   return DropdownMenuItem(
                     value: treatment,
                     child: Text(treatment),
@@ -733,7 +741,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                   setState(() {
                     _selectedTreatment = value;
                     // Clear custom name when switching away from "Other"
-                    if (value != 'Other (Custom)') {
+                    if (value != kCustomTreatmentOption) {
                       _treatmentNameController.clear();
                     }
                   });
@@ -748,7 +756,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
               const SizedBox(height: 16),
 
               // Custom treatment name (shown only when "Other" is selected)
-              if (_selectedTreatment == 'Other (Custom)') ...[
+              if (_selectedTreatment == kCustomTreatmentOption) ...[
                 TextFormField(
                   controller: _treatmentNameController,
                   decoration: InputDecoration(
@@ -761,7 +769,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                   ),
                   textCapitalization: TextCapitalization.words,
                   validator: (value) {
-                    if (_selectedTreatment == 'Other (Custom)' &&
+                    if (_selectedTreatment == kCustomTreatmentOption &&
                         (value == null || value.trim().isEmpty)) {
                       return 'Please enter a treatment name';
                     }

@@ -284,6 +284,7 @@ Un conjunto de calculadoras instantáneas sin conexión — no se necesita clave
 | **CO₂** | Estima CO₂ disuelto a partir del pH y KH |
 | **Alcalinidad** | Convierte entre dKH, meq/L y ppm |
 | **Temperatura** | Convierte entre °F y °C |
+| **Dosificación** | Calcula la dosis total según cantidad por galón/litro y tamaño del acuario |
 
 ### Calculadora de volumen de acuario
 
@@ -383,6 +384,7 @@ cuenta con nombre más tarde en **Perfil**.
 | **Claves API de AI** | Almacena tus claves API personales |
 | **Límite de historial de chat** | Número de mensajes anteriores enviados con cada solicitud |
 | **Visualización del acuario** | Mostrar/ocultar fotos, métricas, habitantes, notas, etc. |
+| **Químicos de dosificación** | Añadir, editar y reordenar preajustes químicos globales |
 | **Copia de seguridad / Restauración** | Exportar e importar todos los datos del acuario |
 | **Notificaciones** | Programar recordatorios para cambios de agua, alimentación, etc. |
 

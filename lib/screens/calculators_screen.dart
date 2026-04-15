@@ -1,9 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../models/dosing_chemical.dart';
+import '../providers/dosing_chemicals_provider.dart';
 import '../services/analytics_service.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
@@ -34,6 +37,8 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
         return const AlkalinityConverter();
       case 'Temperature':
         return const TemperatureConverter();
+      case 'Dosing':
+        return const DosingCalculator();
       default:
         return const SizedBox.shrink();
     }
@@ -61,12 +66,14 @@ class CalculatorsScreenState extends State<CalculatorsScreen> {
       'CO2',
       'Alkalinity',
       'Temperature',
+      'Dosing',
     ];
     final Map<String, String> calcTypeLabels = {
       'Salinity': l10n.salinity,
       'CO2': l10n.co2Label,
       'Alkalinity': l10n.alkalinity,
       'Temperature': l10n.temperature,
+      'Dosing': l10n.dosingCalculatorTitle,
     };
 
     return MainLayout(
@@ -852,6 +859,221 @@ class TemperatureConverterState extends State<TemperatureConverter> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/* ===================== Dosing Calculator ====================== */
+class DosingCalculator extends ConsumerStatefulWidget {
+  const DosingCalculator({super.key});
+
+  @override
+  ConsumerState<DosingCalculator> createState() => DosingCalculatorState();
+}
+
+class DosingCalculatorState extends ConsumerState<DosingCalculator> {
+  final _amountPerUnitController = TextEditingController();
+  final _tankSizeController = TextEditingController();
+  final _doseUnitController = TextEditingController(text: 'mL');
+  String _selectedTankUnit = 'gallon';
+  String? _selectedChemicalId;
+  String _result = '';
+
+  @override
+  void dispose() {
+    _amountPerUnitController.dispose();
+    _tankSizeController.dispose();
+    _doseUnitController.dispose();
+    super.dispose();
+  }
+
+  void _applyChemicalPreset() {
+    if (_selectedChemicalId == null) return;
+    final chemicals = ref.read(dosingChemicalsProvider).chemicals;
+    DosingChemical? selected;
+    for (final chemical in chemicals) {
+      if (chemical.id == _selectedChemicalId) {
+        selected = chemical;
+        break;
+      }
+    }
+    if (selected == null) return;
+
+    setState(() {
+      _amountPerUnitController.text = selected.amountPerUnit.toString();
+      _doseUnitController.text = selected.doseUnit;
+      _selectedTankUnit = selected.perUnit;
+    });
+  }
+
+  void _calculate() {
+    final amountPerUnit = double.tryParse(_amountPerUnitController.text.trim());
+    final tankSize = double.tryParse(_tankSizeController.text.trim());
+    final doseUnit = _doseUnitController.text.trim();
+    if (amountPerUnit == null ||
+        amountPerUnit <= 0 ||
+        tankSize == null ||
+        tankSize <= 0 ||
+        doseUnit.isEmpty) {
+      setState(() => _result = '');
+      return;
+    }
+
+    final total = amountPerUnit * tankSize;
+    AnalyticsService.logFeatureUsed(
+      featureName: 'aquarium_calculator',
+      parameters: {
+        'calculator_type': 'dosing',
+        'tank_unit': _selectedTankUnit,
+        'has_chemical_preset': _selectedChemicalId != null ? 'true' : 'false',
+      },
+    );
+
+    setState(() => _result = '${total.toStringAsFixed(2)} $doseUnit');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final chemicalsState = ref.watch(dosingChemicalsProvider);
+
+    final chemicalItems = chemicalsState.chemicals;
+    final unitLabel = _selectedTankUnit == 'gallon'
+        ? l10n.substrateUnitGallons
+        : l10n.substrateUnitLiters;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildSubSectionTitle(context, l10n.dosingCalculatorPresetLabel),
+        DropdownButtonFormField<String?>(
+          value: _selectedChemicalId,
+          decoration: InputDecoration(
+            labelText: l10n.dosingCalculatorChemicalLabel,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+          items: [
+            DropdownMenuItem<String?>(
+              value: null,
+              child: Text(l10n.dosingCalculatorCustomOption),
+            ),
+            ...chemicalItems.map(
+              (chemical) => DropdownMenuItem<String?>(
+                value: chemical.id,
+                child: Text(chemical.name),
+              ),
+            ),
+          ],
+          onChanged: (value) {
+            setState(() {
+              _selectedChemicalId = value;
+            });
+            _applyChemicalPreset();
+          },
+        ),
+        const SizedBox(height: 18),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            SizedBox(
+              width: 220,
+              child: TextField(
+                controller: _amountPerUnitController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: l10n.dosingAmountPerVolumeLabel,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 220,
+              child: TextField(
+                controller: _tankSizeController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: l10n.dosingTankSizeLabel(unitLabel),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 150,
+              child: TextField(
+                controller: _doseUnitController,
+                decoration: InputDecoration(
+                  labelText: l10n.dosingDoseUnitLabel,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 10,
+          runSpacing: 8,
+          children: [
+            ModernSelectableChip(
+              label: l10n.substrateUnitGallons,
+              selected: _selectedTankUnit == 'gallon',
+              dense: true,
+              onTap: () => setState(() => _selectedTankUnit = 'gallon'),
+            ),
+            ModernSelectableChip(
+              label: l10n.substrateUnitLiters,
+              selected: _selectedTankUnit == 'liter',
+              dense: true,
+              onTap: () => setState(() => _selectedTankUnit = 'liter'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 22),
+        ElevatedButton.icon(
+          onPressed: _calculate,
+          icon: const Icon(Icons.calculate_outlined),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          label: Text(l10n.dosingCalculatorCalculateButton),
+        ),
+        if (_result.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 22),
+            child: Card(
+              color: Theme.of(context).colorScheme.surface,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+                child: Column(
+                  children: [
+                    Text(
+                      l10n.dosingCalculatorResultLabel,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _result,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

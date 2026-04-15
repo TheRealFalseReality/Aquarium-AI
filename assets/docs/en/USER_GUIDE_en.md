@@ -257,6 +257,7 @@ A set of offline, instant calculators — no API key needed.
 | **CO₂** | Estimates dissolved CO₂ from pH and KH |
 | **Alkalinity** | Converts between dKH, meq/L, and ppm |
 | **Temperature** | Converts between °F and °C |
+| **Dosing** | Calculates total dose from amount-per-gallon/liter and tank size |
 
 ### Tank Volume Calculator
 
@@ -390,6 +391,7 @@ Tap **Sign In** at the top of the Community screen. You can use Google, Facebook
 | **AI API Keys** | Store your personal API keys |
 | **Chat History Limit** | Number of previous messages sent with each request |
 | **Tank Display** | Hide/show photos, metrics, inhabitants, notes, etc. |
+| **Dosing Chemicals** | Add, edit, and reorder app-wide dosing chemical presets |
 | **Backup / Restore** | Export and import all tank data |
 | **Notifications** | Schedule reminders for water changes, feeding, etc. |
 
