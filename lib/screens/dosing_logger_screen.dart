@@ -744,7 +744,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                   fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
                 ),
                 items: treatmentOptions.map((treatment) {
-                  return DropdownMenuItem(
+                  return DropdownMenuItem<String>(
                     value: treatment,
                     child: Text(treatment),
                   );

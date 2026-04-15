@@ -897,12 +897,13 @@ class DosingCalculatorState extends ConsumerState<DosingCalculator> {
         break;
       }
     }
-    if (selected == null) return;
+    final selectedChemical = selected;
+    if (selectedChemical == null) return;
 
     setState(() {
-      _amountPerUnitController.text = selected.amountPerUnit.toString();
-      _doseUnitController.text = selected.doseUnit;
-      _selectedTankUnit = selected.perUnit;
+      _amountPerUnitController.text = selectedChemical.amountPerUnit.toString();
+      _doseUnitController.text = selectedChemical.doseUnit;
+      _selectedTankUnit = selectedChemical.perUnit;
     });
   }
 
