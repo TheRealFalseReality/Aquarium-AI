@@ -106,6 +106,9 @@ class _DosingChemicalsSettingsScreenState
                     final amount = double.tryParse(amountController.text.trim());
                     final unit = doseUnitController.text.trim();
                     if (name.isEmpty || amount == null || amount <= 0 || unit.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.dosingChemicalValidationError)),
+                      );
                       return;
                     }
 
@@ -203,7 +206,7 @@ class _DosingChemicalsSettingsScreenState
                       leading: const SizedBox(
                         width: 40,
                         height: 40,
-                        child: Icon(Icons.medication_liquid_outlined),
+                        child: Icon(Icons.medication_liquid_outlined, size: 28),
                       ),
                       title: Text(chemical.name),
                       subtitle: Text(

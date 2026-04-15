@@ -519,9 +519,12 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   late String _selectedUnit;
   String? _selectedTreatment;
 
-  List<String> _treatmentsWithCustom() {
-    final chemicals = ref.watch(dosingChemicalsProvider).chemicals;
-    final names = chemicals.map((c) => c.name).toList();
+  List<String> _currentTreatmentOptionsFromProviderRead() {
+    final names = ref
+        .read(dosingChemicalsProvider)
+        .chemicals
+        .map((c) => c.name)
+        .toList();
     final sourceNames = names.isEmpty ? kFallbackTreatmentNames : names;
     return [...sourceNames, kCustomTreatmentOption];
   }
@@ -529,17 +532,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
   @override
   void initState() {
     super.initState();
-    final initialTreatments = [
-      ...(() {
-        final names = ref
-            .read(dosingChemicalsProvider)
-            .chemicals
-            .map((c) => c.name)
-            .toList();
-        return names.isEmpty ? kFallbackTreatmentNames : names;
-      })(),
-      kCustomTreatmentOption,
-    ];
+    final initialTreatments = _currentTreatmentOptionsFromProviderRead();
     if (widget.existingEntry != null) {
       // Initialize with existing entry data
       final existingName = widget.existingEntry!.treatmentName;
@@ -599,6 +592,13 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
     // If "Other (Custom)" is selected, use the text field value
     if (_selectedTreatment == kCustomTreatmentOption) {
       return _treatmentNameController.text.trim();
+    }
+    final validTreatments = _currentTreatmentOptionsFromProviderRead();
+    if (validTreatments.isEmpty) {
+      return _treatmentNameController.text.trim();
+    }
+    if (!validTreatments.contains(_selectedTreatment)) {
+      return validTreatments.first;
     }
     // Otherwise use the selected treatment from dropdown
     return _selectedTreatment ?? _treatmentNameController.text.trim();
@@ -686,9 +686,21 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final isEditing = widget.existingEntry != null;
-    final treatmentOptions = _treatmentsWithCustom();
+    final chemicalNames = ref
+        .watch(dosingChemicalsProvider)
+        .chemicals
+        .map((c) => c.name)
+        .toList();
+    final treatmentSource = chemicalNames.isEmpty
+        ? kFallbackTreatmentNames
+        : chemicalNames;
+    final treatmentOptions = [...treatmentSource, kCustomTreatmentOption];
+    final selectedTreatmentValue = treatmentOptions.contains(_selectedTreatment)
+        ? _selectedTreatment
+        : (treatmentOptions.isNotEmpty ? treatmentOptions.first : null);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -723,7 +735,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
 
               // Treatment dropdown
               DropdownButtonFormField<String>(
-                value: _selectedTreatment,
+                value: selectedTreatmentValue,
                 decoration: InputDecoration(
                   labelText: 'Treatment Type *',
                   border: const OutlineInputBorder(),
@@ -771,7 +783,7 @@ class _AddDosingEntrySheetState extends ConsumerState<_AddDosingEntrySheet> {
                   validator: (value) {
                     if (_selectedTreatment == kCustomTreatmentOption &&
                         (value == null || value.trim().isEmpty)) {
-                      return 'Please enter a treatment name';
+                      return l10n.treatmentNameRequired;
                     }
                     return null;
                   },

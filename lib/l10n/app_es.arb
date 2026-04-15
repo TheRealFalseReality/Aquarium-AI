@@ -1638,5 +1638,13 @@
     "dosingPerUnitLabel": "Por unidad",
     "@dosingPerUnitLabel": {
       "description": "Input label for per-unit volume type (gallon/liter)"
+    },
+    "dosingChemicalValidationError": "Introduce un nombre, cantidad y unidad de dosis válidos.",
+    "@dosingChemicalValidationError": {
+      "description": "Validation message shown when dosing chemical editor fields are invalid"
+    },
+    "treatmentNameRequired": "Por favor, introduce un nombre del tratamiento",
+    "@treatmentNameRequired": {
+      "description": "Validation message when custom treatment name is required"
     }
   }

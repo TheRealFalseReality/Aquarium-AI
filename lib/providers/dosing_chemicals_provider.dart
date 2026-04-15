@@ -32,22 +32,22 @@ class DosingChemicalsNotifier extends StateNotifier<DosingChemicalsState> {
   static final List<DosingChemical> _defaultChemicals = [
     DosingChemical.create(
       name: 'Prime (Seachem)',
-      amountPerUnit: 0.1, // 1 mL per 10 gal
+      amountPerUnit: 0.1, // 0.1 mL/gal (1 mL per 10 gal)
       perUnit: 'gallon',
     ),
     DosingChemical.create(
       name: 'Stability (Seachem)',
-      amountPerUnit: 1.0, // 5 mL per 5 gal
+      amountPerUnit: 0.5, // 0.5 mL/gal (5 mL per 10 gal)
       perUnit: 'gallon',
     ),
     DosingChemical.create(
       name: 'Excel (Seachem)',
-      amountPerUnit: 0.2, // 5 mL per 25 gal
+      amountPerUnit: 0.2, // 0.2 mL/gal (5 mL per 25 gal)
       perUnit: 'gallon',
     ),
     DosingChemical.create(
       name: 'Stress Coat (API)',
-      amountPerUnit: 1.0, // 5 mL per 5 gal
+      amountPerUnit: 0.5, // 0.5 mL/gal (5 mL per 10 gal)
       perUnit: 'gallon',
     ),
     DosingChemical.create(
@@ -57,7 +57,7 @@ class DosingChemicalsNotifier extends StateNotifier<DosingChemicalsState> {
     ),
     DosingChemical.create(
       name: 'Paraguard (Seachem)',
-      amountPerUnit: 0.2, // 5 mL per 25 gal
+      amountPerUnit: 0.2, // 0.2 mL/gal (5 mL per 25 gal)
       perUnit: 'gallon',
     ),
   ];
