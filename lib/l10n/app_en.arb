@@ -5342,6 +5342,14 @@
     "@dosingCustomSubtitle": {
       "description": "Subtitle for the custom dosing option in the preset picker"
     },
+    "dosingAddNewProduct": "Add New Product",
+    "@dosingAddNewProduct": {
+      "description": "Label for the add new product option in the dosing preset picker"
+    },
+    "dosingAddNewProductSubtitle": "Save a product for future use",
+    "@dosingAddNewProductSubtitle": {
+      "description": "Subtitle for the add new product option in the dosing preset picker"
+    },
     "dosingResultTitle": "Total Dose",
     "@dosingResultTitle": {
       "description": "Title for the dosing result card"
