@@ -5266,6 +5266,244 @@
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
     },
+    "dosingCalculator": "Dosing Calculator",
+    "@dosingCalculator": {
+      "description": "Name of the dosing calculator feature"
+    },
+    "dosingCalculatorSubtitle": "Calculate the total dose of aquarium chemicals based on your tank size.",
+    "@dosingCalculatorSubtitle": {
+      "description": "Subtitle for the dosing calculator screen"
+    },
+    "dosingDrawerDescription": "Calculate chemical doses for your tank size with popular product presets.",
+    "@dosingDrawerDescription": {
+      "description": "Short description of the dosing calculator (app drawer)"
+    },
+    "dosingPresetTitle": "Product Presets",
+    "@dosingPresetTitle": {
+      "description": "Section title for dosing product presets"
+    },
+    "dosingPresetSeachemPrime": "Seachem Prime",
+    "@dosingPresetSeachemPrime": {
+      "description": "Dosing preset label for Seachem Prime"
+    },
+    "dosingPresetSeachemStability": "Seachem Stability",
+    "@dosingPresetSeachemStability": {
+      "description": "Dosing preset label for Seachem Stability"
+    },
+    "dosingPresetSeachemFlourish": "Seachem Flourish",
+    "@dosingPresetSeachemFlourish": {
+      "description": "Dosing preset label for Seachem Flourish"
+    },
+    "dosingPresetSeachemFlourishExcel": "Seachem Flourish Excel",
+    "@dosingPresetSeachemFlourishExcel": {
+      "description": "Dosing preset label for Seachem Flourish Excel"
+    },
+    "dosingPresetApiStressCoat": "API Stress Coat",
+    "@dosingPresetApiStressCoat": {
+      "description": "Dosing preset label for API Stress Coat"
+    },
+    "dosingPresetApiMelafix": "API Melafix",
+    "@dosingPresetApiMelafix": {
+      "description": "Dosing preset label for API Melafix"
+    },
+    "dosingPresetApiPimafix": "API Pimafix",
+    "@dosingPresetApiPimafix": {
+      "description": "Dosing preset label for API Pimafix"
+    },
+    "dosingPresetSeachemAlkalineBuffer": "Seachem Alkaline Buffer",
+    "@dosingPresetSeachemAlkalineBuffer": {
+      "description": "Dosing preset label for Seachem Alkaline Buffer"
+    },
+    "dosingPresetSeachemAcidBuffer": "Seachem Acid Buffer",
+    "@dosingPresetSeachemAcidBuffer": {
+      "description": "Dosing preset label for Seachem Acid Buffer"
+    },
+    "dosingPresetFritzsoDechlorinator": "Fritz SO Dechlorinator",
+    "@dosingPresetFritzsoDechlorinator": {
+      "description": "Dosing preset label for Fritz SO Dechlorinator"
+    },
+    "dosingPresetCustom": "Custom",
+    "@dosingPresetCustom": {
+      "description": "Dosing preset label for custom/manual entry"
+    },
+    "dosingTankSize": "Tank Size",
+    "@dosingTankSize": {
+      "description": "Label for the tank size input field in dosing calculator"
+    },
+    "dosingDoseAmountLabel": "Dose Amount",
+    "@dosingDoseAmountLabel": {
+      "description": "Label for the dose amount input field in dosing calculator"
+    },
+    "dosingPer": "per",
+    "@dosingPer": {
+      "description": "The word 'per' between dose amount and volume fields"
+    },
+    "dosingSelectProduct": "Select a product…",
+    "@dosingSelectProduct": {
+      "description": "Placeholder text for the product preset selector"
+    },
+    "dosingCustomSubtitle": "Enter your own dose amount and volume",
+    "@dosingCustomSubtitle": {
+      "description": "Subtitle for the custom dosing option in the preset picker"
+    },
+    "dosingAddNewProduct": "Add New Product",
+    "@dosingAddNewProduct": {
+      "description": "Label for the add new product option in the dosing preset picker"
+    },
+    "dosingAddNewProductSubtitle": "Save a product for future use",
+    "@dosingAddNewProductSubtitle": {
+      "description": "Subtitle for the add new product option in the dosing preset picker"
+    },
+    "dosingResultTitle": "Total Dose",
+    "@dosingResultTitle": {
+      "description": "Title for the dosing result card"
+    },
+    "dosingResultProduct": "For: {product}",
+    "@dosingResultProduct": {
+      "description": "Product name in dosing results",
+      "placeholders": {
+        "product": {
+          "type": "String"
+        }
+      }
+    },
+    "dosingTeaspoons": "tsp",
+    "@dosingTeaspoons": {
+      "description": "Teaspoon abbreviation"
+    },
+    "dosingCapfuls": "capfuls",
+    "@dosingCapfuls": {
+      "description": "Capfuls unit label"
+    },
+    "dosingResultSummary": "Dosing Summary",
+    "@dosingResultSummary": {
+      "description": "Title for the dosing summary card"
+    },
+    "dosingTankSizeLabel": "Tank Size",
+    "@dosingTankSizeLabel": {
+      "description": "Label for tank size in results summary"
+    },
+    "dosingDosePerUnitLabel": "Dose Rate",
+    "@dosingDosePerUnitLabel": {
+      "description": "Label for dose per unit in results summary"
+    },
+    "dosingGalAbbrev": "gal",
+    "@dosingGalAbbrev": {
+      "description": "Gallon abbreviation"
+    },
+    "dosingLAbbrev": "L",
+    "@dosingLAbbrev": {
+      "description": "Liter abbreviation"
+    },
+    "dosingInfoTitle": "Dosing Tips",
+    "@dosingInfoTitle": {
+      "description": "Title for the dosing info section"
+    },
+    "dosingInfoDoseTitle": "Follow Manufacturer Instructions",
+    "@dosingInfoDoseTitle": {
+      "description": "Dosing info tip title about following instructions"
+    },
+    "dosingInfoDoseBody": "Always verify dosing amounts on the product label. Preset values are based on standard manufacturer recommendations and may vary by product batch or concentration.",
+    "@dosingInfoDoseBody": {
+      "description": "Dosing info tip body about following instructions"
+    },
+    "dosingInfoWaterTitle": "Account for Actual Water Volume",
+    "@dosingInfoWaterTitle": {
+      "description": "Dosing info tip title about actual water volume"
+    },
+    "dosingInfoWaterBody": "Your actual water volume is less than the tank size due to substrate, rocks, and decorations. Consider dosing for 80-90% of your total tank volume.",
+    "@dosingInfoWaterBody": {
+      "description": "Dosing info tip body about actual water volume"
+    },
+    "dosingInfoWarningTitle": "Avoid Overdosing",
+    "@dosingInfoWarningTitle": {
+      "description": "Dosing info tip title about overdosing warning"
+    },
+    "dosingInfoWarningBody": "When in doubt, under-dose. It is safer to add less and dose again than to overdose, which can harm fish and invertebrates.",
+    "@dosingInfoWarningBody": {
+      "description": "Dosing info tip body about overdosing warning"
+    },
+    "manageDosingPresets": "Dosing Products",
+    "@manageDosingPresets": {
+      "description": "Settings menu title for managing dosing chemical presets"
+    },
+    "manageDosingPresetsDesc": "Add, edit, or reorder your dosing chemicals",
+    "@manageDosingPresetsDesc": {
+      "description": "Settings menu subtitle for dosing presets management"
+    },
+    "addProduct": "Add Product",
+    "@addProduct": {
+      "description": "Button label to add a new dosing product preset"
+    },
+    "editProduct": "Edit Product",
+    "@editProduct": {
+      "description": "Dialog title when editing a dosing product preset"
+    },
+    "productName": "Product Name",
+    "@productName": {
+      "description": "Label for the product name text field"
+    },
+    "doseAmountGal": "Dose (gal)",
+    "@doseAmountGal": {
+      "description": "Label for dose amount in gallons"
+    },
+    "perVolumeGal": "Per Volume (gal)",
+    "@perVolumeGal": {
+      "description": "Label for the per-volume field in gallons"
+    },
+    "doseAmountLiter": "Dose (L)",
+    "@doseAmountLiter": {
+      "description": "Label for dose amount in liters"
+    },
+    "perVolumeLiter": "Per Volume (L)",
+    "@perVolumeLiter": {
+      "description": "Label for the per-volume field in liters"
+    },
+    "doseUnit": "Unit",
+    "@doseUnit": {
+      "description": "Label for the dose unit selector (mL, g, etc.)"
+    },
+    "resetToDefaults": "Reset to Defaults",
+    "@resetToDefaults": {
+      "description": "Button label to reset dosing presets to built-in defaults"
+    },
+    "resetPresetsConfirm": "Reset all dosing products to built-in defaults? Your custom products will be lost.",
+    "@resetPresetsConfirm": {
+      "description": "Confirmation message when resetting dosing presets to defaults"
+    },
+    "deleteProductConfirm": "Are you sure you want to delete this product?",
+    "@deleteProductConfirm": {
+      "description": "Confirmation message when deleting a dosing product preset"
+    },
+    "dragToReorder": "Drag to reorder",
+    "@dragToReorder": {
+      "description": "Hint text for reorderable list items"
+    },
+    "dosingPresetsCount": "{count} products",
+    "@dosingPresetsCount": {
+      "description": "Subtitle showing number of dosing product presets",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "doseAmount": "Dose Amount",
+    "@doseAmount": {
+      "description": "Label for dose amount input field in dosing preset editor"
+    },
+    "perVolume": "Per Volume",
+    "@perVolume": {
+      "description": "Label for per-volume input field in dosing preset editor"
+    },
+    "dosingInputUnit": "Enter dose per",
+    "@dosingInputUnit": {
+      "description": "Label for the gallon vs liter toggle in dosing preset editor"
+    },
+    "autoConvertedNote": "The other unit will be auto-converted.",
+    "@autoConvertedNote": {
+      "description": "Helper text explaining that the opposite gallon/liter value is auto-calculated"
+    },
     "upcomingNotifications": "Upcoming",
     "@upcomingNotifications": {
       "description": "Tab label for the upcoming notifications tab in tank details"

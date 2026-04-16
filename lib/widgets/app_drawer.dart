@@ -549,6 +549,34 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                   ),
                 ),
                 AnimatedDrawerItem(
+                  delay: const Duration(milliseconds: 473),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withOpacity(0.3),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.science_outlined,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      title: Text(l10n.dosingCalculator),
+                      subtitle: Text(l10n.dosingDrawerDescription),
+                      onTap: () => navigate('/dosing-calculator'),
+                    ),
+                  ),
+                ),
+                AnimatedDrawerItem(
                   delay: const Duration(milliseconds: 480),
                   child: Container(
                     margin: const EdgeInsets.symmetric(

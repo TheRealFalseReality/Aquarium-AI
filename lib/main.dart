@@ -26,6 +26,7 @@ import './screens/auth_screen.dart';
 import './screens/calculators_screen.dart';
 import './screens/chatbot_screen.dart';
 import './screens/community_screen.dart';
+import './screens/dosing_calculator.dart';
 import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compat_browser_screen.dart';
 import './screens/fish_compatibility_screen.dart';
@@ -581,6 +582,10 @@ class MyApp extends ConsumerWidget {
               case '/substrate':
                 page = const SubstrateCalculator();
                 screenName = 'substrate_calculator';
+                break;
+              case '/dosing-calculator':
+                page = const DosingCalculator();
+                screenName = 'dosing_calculator';
                 break;
               case '/calculators':
                 page = const CalculatorsScreen();

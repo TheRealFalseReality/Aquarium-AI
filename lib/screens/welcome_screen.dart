@@ -890,6 +890,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         delay: const Duration(milliseconds: 910),
       ),
       FeatureInfo(
+        icon: '💊',
+        title: l10n.dosingCalculator,
+        description: l10n.dosingDrawerDescription,
+        routeName: '/dosing-calculator',
+        delay: const Duration(milliseconds: 915),
+      ),
+      FeatureInfo(
         icon: '🔍',
         title: l10n.fishCompatBrowser,
         description: l10n.fishCompatBrowserDesc,
