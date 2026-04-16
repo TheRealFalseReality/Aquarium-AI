@@ -19,8 +19,8 @@ class ErrorHandlerWidget extends ConsumerWidget {
   /// add or fix their API key.
   final bool isApiKeyError;
 
-  /// When `true`, the widget shows a "Become Founder Aquarist" CTA for users
-  /// who hit the free-tier rate limit.
+  /// When `true`, indicates the error is a free-tier rate limit. Reserved for
+  /// future use by parent widgets that may display additional upsell UI.
   final bool isRateLimitError;
 
   const ErrorHandlerWidget({

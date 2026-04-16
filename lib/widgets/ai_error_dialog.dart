@@ -256,8 +256,8 @@ class _AiErrorDialog extends StatelessWidget {
                       foregroundColor: cs.onError,
                     ),
                   ),
-                // For settings-actionable errors, also show retry when available
-                // (placed after the settings button).
+                // For settings-actionable errors, retry is secondary (outlined)
+                // since the settings button is the primary action.
                 if (onRetry != null && _showSettingsButton)
                   OutlinedButton.icon(
                     onPressed: () {
