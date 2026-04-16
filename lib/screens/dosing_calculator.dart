@@ -28,79 +28,75 @@ class DosingCalculatorState extends State<DosingCalculator> {
   // ── Input ─────────────────────────────────────────────────────────────────
   final _tankSizeController = TextEditingController();
   final _doseAmountController = TextEditingController();
+  final _dosePerVolumeController = TextEditingController();
 
   // ── Results ───────────────────────────────────────────────────────────────
   double? _totalDose;
   String _resultUnit = 'mL';
 
   // ── Prefilled dosing presets ──────────────────────────────────────────────
-  // Each preset maps to: (dose per gallon, dose per liter, unit, icon)
+  // Each preset stores the bottle-readable dose: amount per volume.
+  // E.g. Seachem Prime = 5 mL per 50 gallons (as printed on the bottle).
   static const Map<String, _DosingPreset> _presets = {
     'seachemPrime': _DosingPreset(
-      dosePerGallon: 0.1, // 1 capful (5 mL) per 50 gallons ≈ 0.1 mL/gal
-      dosePerLiter: 0.025, // 5 mL per 200 L
+      doseAmountGal: 5, perVolumeGal: 50,     // 5 mL per 50 gallons
+      doseAmountLiter: 5, perVolumeLiter: 200, // 5 mL per 200 L
       unit: 'mL',
       icon: Icons.shield_outlined,
     ),
     'seachemStability': _DosingPreset(
-      dosePerGallon: 0.1, // 1 capful (5 mL) per 50 gallons ≈ 0.1 mL/gal
-      dosePerLiter: 0.025, // 5 mL per 200 L
+      doseAmountGal: 5, perVolumeGal: 50,     // 5 mL per 50 gallons
+      doseAmountLiter: 5, perVolumeLiter: 200, // 5 mL per 200 L
       unit: 'mL',
       icon: Icons.science_outlined,
     ),
     'seachemFlourish': _DosingPreset(
-      dosePerGallon: 0.1, // 1 capful (5 mL) per 50 gallons
-      dosePerLiter: 0.025,
+      doseAmountGal: 5, perVolumeGal: 50,     // 5 mL per 50 gallons
+      doseAmountLiter: 5, perVolumeLiter: 200,
       unit: 'mL',
       icon: Icons.grass_outlined,
     ),
     'seachemFlourishExcel': _DosingPreset(
-      dosePerGallon: 0.1, // 1 capful (5 mL) per 50 gallons
-      dosePerLiter: 0.025,
+      doseAmountGal: 5, perVolumeGal: 50,     // 5 mL per 50 gallons
+      doseAmountLiter: 5, perVolumeLiter: 200,
       unit: 'mL',
       icon: Icons.eco_outlined,
     ),
     'apiStressCoat': _DosingPreset(
-      dosePerGallon: 0.2, // 1 mL per 5 gallons = 0.2 mL/gal
-      dosePerLiter: 0.05, // 5 mL per 100 L
+      doseAmountGal: 5, perVolumeGal: 25,     // 5 mL per 25 gallons
+      doseAmountLiter: 5, perVolumeLiter: 100, // 5 mL per 100 L
       unit: 'mL',
       icon: Icons.water_drop_outlined,
     ),
     'apiMelafix': _DosingPreset(
-      dosePerGallon: 0.5, // 5 mL per 10 gallons
-      dosePerLiter: 0.13,
+      doseAmountGal: 5, perVolumeGal: 10,     // 5 mL per 10 gallons
+      doseAmountLiter: 5, perVolumeLiter: 38,  // 5 mL per 38 L
       unit: 'mL',
       icon: Icons.healing_outlined,
     ),
     'apiPimafix': _DosingPreset(
-      dosePerGallon: 0.5, // 5 mL per 10 gallons
-      dosePerLiter: 0.13,
+      doseAmountGal: 5, perVolumeGal: 10,     // 5 mL per 10 gallons
+      doseAmountLiter: 5, perVolumeLiter: 38,  // 5 mL per 38 L
       unit: 'mL',
       icon: Icons.local_pharmacy_outlined,
     ),
     'seachemAlkalineBuffer': _DosingPreset(
-      dosePerGallon: 0.07, // 1 tsp (~5 g) per 70 gallons
-      dosePerLiter: 0.019,
+      doseAmountGal: 5, perVolumeGal: 70,     // 1 tsp (~5 g) per 70 gallons
+      doseAmountLiter: 5, perVolumeLiter: 265,
       unit: 'g',
       icon: Icons.balance_outlined,
     ),
     'seachemAcidBuffer': _DosingPreset(
-      dosePerGallon: 0.07, // 1 tsp (~5 g) per 70 gallons
-      dosePerLiter: 0.019,
+      doseAmountGal: 5, perVolumeGal: 70,     // 1 tsp (~5 g) per 70 gallons
+      doseAmountLiter: 5, perVolumeLiter: 265,
       unit: 'g',
       icon: Icons.science_outlined,
     ),
     'fritzsoDechlorinator': _DosingPreset(
-      dosePerGallon: 0.2, // 1 mL per 5 gallons
-      dosePerLiter: 0.05,
+      doseAmountGal: 1, perVolumeGal: 5,      // 1 mL per 5 gallons
+      doseAmountLiter: 5, perVolumeLiter: 95,
       unit: 'mL',
       icon: Icons.cleaning_services_outlined,
-    ),
-    'custom': _DosingPreset(
-      dosePerGallon: 0,
-      dosePerLiter: 0,
-      unit: 'mL',
-      icon: Icons.edit_outlined,
     ),
   };
 
@@ -114,31 +110,53 @@ class DosingCalculatorState extends State<DosingCalculator> {
   void dispose() {
     _tankSizeController.dispose();
     _doseAmountController.dispose();
+    _dosePerVolumeController.dispose();
     super.dispose();
   }
 
   // ── Preset selection ─────────────────────────────────────────────────────
-  void _selectPreset(String key) {
-    final preset = _presets[key]!;
+  void _selectPreset(String? key) {
     setState(() {
       _selectedPreset = key;
-      if (key != 'custom') {
-        final dose = _volumeUnit == 'Gallons'
-            ? preset.dosePerGallon
-            : preset.dosePerLiter;
-        _doseAmountController.text = dose.toString();
+      if (key != null && key != 'custom') {
+        final preset = _presets[key]!;
+        if (_volumeUnit == 'Gallons') {
+          _doseAmountController.text = _formatNumber(preset.doseAmountGal);
+          _dosePerVolumeController.text = _formatNumber(preset.perVolumeGal);
+        } else {
+          _doseAmountController.text = _formatNumber(preset.doseAmountLiter);
+          _dosePerVolumeController.text =
+              _formatNumber(preset.perVolumeLiter);
+        }
         _resultUnit = preset.unit;
+      } else if (key == 'custom') {
+        _doseAmountController.clear();
+        _dosePerVolumeController.clear();
+        _resultUnit = 'mL';
       }
       _totalDose = null;
     });
   }
 
+  /// Format a number for display – drop ".0" for whole numbers.
+  String _formatNumber(double value) {
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toString();
+  }
+
   // ── Calculation ──────────────────────────────────────────────────────────
   void _calculate() {
     final tankSize = double.tryParse(_tankSizeController.text);
-    final dosePerUnit = double.tryParse(_doseAmountController.text);
+    final doseAmount = double.tryParse(_doseAmountController.text);
+    final perVolume = double.tryParse(_dosePerVolumeController.text);
 
-    if (tankSize == null || tankSize <= 0 || dosePerUnit == null || dosePerUnit <= 0) {
+    if (tankSize == null ||
+        tankSize <= 0 ||
+        doseAmount == null ||
+        doseAmount <= 0 ||
+        perVolume == null ||
+        perVolume <= 0) {
       setState(() => _totalDose = null);
       return;
     }
@@ -152,17 +170,15 @@ class DosingCalculatorState extends State<DosingCalculator> {
     );
 
     setState(() {
-      _totalDose = tankSize * dosePerUnit;
+      _totalDose = (doseAmount / perVolume) * tankSize;
     });
   }
 
-  // ── Build ────────────────────────────────────────────────────────────────
-  @override
-  Widget build(BuildContext context) {
+  // ── Preset bottom sheet ──────────────────────────────────────────────────
+  void _showPresetPicker(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    // Localized preset labels
     final Map<String, String> presetLabels = {
       'seachemPrime': l10n.dosingPresetSeachemPrime,
       'seachemStability': l10n.dosingPresetSeachemStability,
@@ -174,8 +190,230 @@ class DosingCalculatorState extends State<DosingCalculator> {
       'seachemAlkalineBuffer': l10n.dosingPresetSeachemAlkalineBuffer,
       'seachemAcidBuffer': l10n.dosingPresetSeachemAcidBuffer,
       'fritzsoDechlorinator': l10n.dosingPresetFritzsoDechlorinator,
-      'custom': l10n.dosingPresetCustom,
     };
+
+    showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: cs.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.55,
+          minChildSize: 0.35,
+          maxChildSize: 0.85,
+          expand: false,
+          builder: (_, scrollController) {
+            return Column(
+              children: [
+                // Drag handle
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 4),
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: cs.onSurfaceVariant.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.science_outlined, color: cs.primary),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          l10n.dosingPresetTitle,
+                          style: Theme.of(ctx)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: cs.onSurface,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    children: [
+                      // Product presets
+                      ..._presets.keys.map((key) {
+                        final preset = _presets[key]!;
+                        final label = presetLabels[key] ?? key;
+                        final isSelected = _selectedPreset == key;
+                        final unitAbbrev = _volumeUnit == 'Gallons'
+                            ? l10n.dosingGalAbbrev
+                            : l10n.dosingLAbbrev;
+                        final doseAmt = _volumeUnit == 'Gallons'
+                            ? preset.doseAmountGal
+                            : preset.doseAmountLiter;
+                        final perVol = _volumeUnit == 'Gallons'
+                            ? preset.perVolumeGal
+                            : preset.perVolumeLiter;
+                        final subtitle =
+                            '${_formatNumber(doseAmt)} ${preset.unit} per ${_formatNumber(perVol)} $unitAbbrev';
+
+                        return ListTile(
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? cs.primaryContainer
+                                  : cs.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              preset.icon,
+                              color: isSelected
+                                  ? cs.primary
+                                  : cs.onSurfaceVariant,
+                              size: 22,
+                            ),
+                          ),
+                          title: Text(
+                            label,
+                            style: TextStyle(
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? cs.primary
+                                  : cs.onSurface,
+                            ),
+                          ),
+                          subtitle: Text(
+                            subtitle,
+                            style: Theme.of(ctx)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                          ),
+                          trailing: isSelected
+                              ? Icon(Icons.check_circle,
+                                  color: cs.primary, size: 22)
+                              : null,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          onTap: () => Navigator.pop(ctx, key),
+                        );
+                      }),
+                      // Custom entry option
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      ListTile(
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _selectedPreset == 'custom'
+                                ? cs.primaryContainer
+                                : cs.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.edit_outlined,
+                            color: _selectedPreset == 'custom'
+                                ? cs.primary
+                                : cs.onSurfaceVariant,
+                            size: 22,
+                          ),
+                        ),
+                        title: Text(
+                          l10n.dosingPresetCustom,
+                          style: TextStyle(
+                            fontWeight: _selectedPreset == 'custom'
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                            color: _selectedPreset == 'custom'
+                                ? cs.primary
+                                : cs.onSurface,
+                          ),
+                        ),
+                        subtitle: Text(
+                          l10n.dosingCustomSubtitle,
+                          style: Theme.of(ctx)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: cs.onSurfaceVariant),
+                        ),
+                        trailing: _selectedPreset == 'custom'
+                            ? Icon(Icons.check_circle,
+                                color: cs.primary, size: 22)
+                            : null,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        onTap: () => Navigator.pop(ctx, 'custom'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((selected) {
+      if (selected != null) {
+        _selectPreset(selected);
+      }
+    });
+  }
+
+  // ── Build ────────────────────────────────────────────────────────────────
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    // Build the current preset display label
+    final String presetDisplayLabel;
+    if (_selectedPreset == null) {
+      presetDisplayLabel = l10n.dosingSelectProduct;
+    } else if (_selectedPreset == 'custom') {
+      presetDisplayLabel = l10n.dosingPresetCustom;
+    } else {
+      presetDisplayLabel = _getPresetLabel(context, _selectedPreset!);
+    }
+
+    final bool isCustom = _selectedPreset == null ||
+        _selectedPreset == 'custom';
+
+    // Dose description for the selected preset
+    String? presetDoseDescription;
+    if (_selectedPreset != null &&
+        _selectedPreset != 'custom' &&
+        _presets.containsKey(_selectedPreset)) {
+      final preset = _presets[_selectedPreset]!;
+      final unitAbbrev = _volumeUnit == 'Gallons'
+          ? l10n.dosingGalAbbrev
+          : l10n.dosingLAbbrev;
+      final doseAmt = _volumeUnit == 'Gallons'
+          ? preset.doseAmountGal
+          : preset.doseAmountLiter;
+      final perVol = _volumeUnit == 'Gallons'
+          ? preset.perVolumeGal
+          : preset.perVolumeLiter;
+      presetDoseDescription =
+          '${_formatNumber(doseAmt)} ${preset.unit} per ${_formatNumber(perVol)} $unitAbbrev';
+    }
 
     return MainLayout(
       title: l10n.dosingCalculator,
@@ -243,24 +481,88 @@ class DosingCalculatorState extends State<DosingCalculator> {
             ],
           ),
 
-          // ── Product presets ───────────────────────────────────────────────
-          _buildSectionTitle(context, l10n.dosingPresetTitle),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 10,
-            runSpacing: 10,
-            children: _presets.keys.map((key) {
-              final preset = _presets[key]!;
-              return ModernSelectableChip(
-                label: presetLabels[key] ?? key,
-                icon: preset.icon,
-                selected: _selectedPreset == key,
-                onTap: () => _selectPreset(key),
-              );
-            }).toList(),
+          // ── Product preset selector ───────────────────────────────────────
+          const SizedBox(height: 20),
+          InkWell(
+            onTap: () => _showPresetPicker(context),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              decoration: BoxDecoration(
+                color: _selectedPreset != null && _selectedPreset != 'custom'
+                    ? cs.primaryContainer
+                    : cs.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: _selectedPreset != null && _selectedPreset != 'custom'
+                      ? cs.primary.withOpacity(0.5)
+                      : cs.outline.withOpacity(0.3),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _selectedPreset != null &&
+                            _selectedPreset != 'custom' &&
+                            _presets.containsKey(_selectedPreset)
+                        ? _presets[_selectedPreset]!.icon
+                        : Icons.science_outlined,
+                    color: _selectedPreset != null &&
+                            _selectedPreset != 'custom'
+                        ? cs.primary
+                        : cs.onSurfaceVariant,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          presetDisplayLabel,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: _selectedPreset != null &&
+                                        _selectedPreset != 'custom'
+                                    ? cs.onPrimaryContainer
+                                    : cs.onSurface,
+                              ),
+                        ),
+                        if (presetDoseDescription != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            presetDoseDescription,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: cs.onPrimaryContainer.withOpacity(0.7),
+                                ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: _selectedPreset != null &&
+                            _selectedPreset != 'custom'
+                        ? cs.onPrimaryContainer
+                        : cs.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
           ),
 
-          // ── Tank size input ──────────────────────────────────────────────
+          // ── Tank size + dose inputs ──────────────────────────────────────
           const SizedBox(height: 16),
           const BannerAdWidget(),
           const SizedBox(height: 16),
@@ -291,24 +593,55 @@ class DosingCalculatorState extends State<DosingCalculator> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: _doseAmountController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: l10n.dosingAmountPerUnit(
-                        _volumeUnit == 'Gallons'
-                            ? l10n.dosingPerGallon
-                            : l10n.dosingPerLiter,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _doseAmountController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: l10n.dosingDoseAmountLabel,
+                            hintText: 'e.g. 5',
+                            suffixText: _resultUnit,
+                            border: const OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.science_outlined),
+                          ),
+                          enabled: isCustom,
+                        ),
                       ),
-                      hintText: 'e.g. 0.1',
-                      suffixText: _resultUnit,
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.science_outlined),
-                    ),
-                    enabled: _selectedPreset == null ||
-                        _selectedPreset == 'custom',
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          l10n.dosingPer,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: cs.onSurfaceVariant,
+                              ),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: _dosePerVolumeController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: _volumeUnit == 'Gallons'
+                                ? l10n.gallons
+                                : l10n.liters,
+                            hintText: 'e.g. 50',
+                            border: const OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.straighten_outlined),
+                          ),
+                          enabled: isCustom,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -390,6 +723,15 @@ class DosingCalculatorState extends State<DosingCalculator> {
             _selectedPreset != 'custom'
         ? _getPresetLabel(context, _selectedPreset!)
         : l10n.dosingPresetCustom;
+
+    // Build the dose rate display in bottle-readable format
+    final String doseRateDisplay;
+    final doseAmt = _doseAmountController.text;
+    final perVol = _dosePerVolumeController.text;
+    final unitAbbrev = _volumeUnit == 'Gallons'
+        ? l10n.dosingGalAbbrev
+        : l10n.dosingLAbbrev;
+    doseRateDisplay = '$doseAmt $_resultUnit / $perVol $unitAbbrev';
 
     return Column(
       children: [
@@ -488,13 +830,13 @@ class DosingCalculatorState extends State<DosingCalculator> {
                   children: [
                     _buildValueChip(
                       context,
-                      '${tankSize.toStringAsFixed(1)} ${_volumeUnit == 'Gallons' ? l10n.dosingGalAbbrev : l10n.dosingLAbbrev}',
+                      '${tankSize.toStringAsFixed(1)} $unitAbbrev',
                       l10n.dosingTankSizeLabel,
                       cs.onSecondaryContainer,
                     ),
                     _buildValueChip(
                       context,
-                      '${_doseAmountController.text} $_resultUnit/${_volumeUnit == 'Gallons' ? l10n.dosingGalAbbrev : l10n.dosingLAbbrev}',
+                      doseRateDisplay,
                       l10n.dosingDosePerUnitLabel,
                       cs.onSecondaryContainer,
                     ),
@@ -659,15 +1001,21 @@ class DosingCalculatorState extends State<DosingCalculator> {
 }
 
 /// Data class for a dosing preset.
+/// Stores bottle-readable doses: doseAmount per perVolume in both gallon and
+/// liter formats. E.g. "5 mL per 50 gallons" → doseAmountGal=5, perVolumeGal=50.
 class _DosingPreset {
-  final double dosePerGallon;
-  final double dosePerLiter;
+  final double doseAmountGal;
+  final double perVolumeGal;
+  final double doseAmountLiter;
+  final double perVolumeLiter;
   final String unit;
   final IconData icon;
 
   const _DosingPreset({
-    required this.dosePerGallon,
-    required this.dosePerLiter,
+    required this.doseAmountGal,
+    required this.perVolumeGal,
+    required this.doseAmountLiter,
+    required this.perVolumeLiter,
     required this.unit,
     required this.icon,
   });

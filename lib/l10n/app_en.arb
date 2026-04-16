@@ -5326,22 +5326,21 @@
     "@dosingTankSize": {
       "description": "Label for the tank size input field in dosing calculator"
     },
-    "dosingAmountPerUnit": "Dose Amount ({unit})",
-    "@dosingAmountPerUnit": {
-      "description": "Label for the dose amount input field with unit",
-      "placeholders": {
-        "unit": {
-          "type": "String"
-        }
-      }
+    "dosingDoseAmountLabel": "Dose Amount",
+    "@dosingDoseAmountLabel": {
+      "description": "Label for the dose amount input field in dosing calculator"
     },
-    "dosingPerGallon": "per gallon",
-    "@dosingPerGallon": {
-      "description": "Per gallon label for dosing calculator"
+    "dosingPer": "per",
+    "@dosingPer": {
+      "description": "The word 'per' between dose amount and volume fields"
     },
-    "dosingPerLiter": "per liter",
-    "@dosingPerLiter": {
-      "description": "Per liter label for dosing calculator"
+    "dosingSelectProduct": "Select a product…",
+    "@dosingSelectProduct": {
+      "description": "Placeholder text for the product preset selector"
+    },
+    "dosingCustomSubtitle": "Enter your own dose amount and volume",
+    "@dosingCustomSubtitle": {
+      "description": "Subtitle for the custom dosing option in the preset picker"
     },
     "dosingResultTitle": "Total Dose",
     "@dosingResultTitle": {
