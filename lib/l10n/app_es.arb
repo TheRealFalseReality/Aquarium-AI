@@ -1580,5 +1580,155 @@
     "customSpeciesLabel": "O ingresa tu propia especie",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
+    },
+    "dosingCalculator": "Calculadora de Dosificación",
+    "@dosingCalculator": {
+      "description": "Name of the dosing calculator feature"
+    },
+    "dosingCalculatorSubtitle": "Calcule la dosis total de productos químicos para acuarios según el tamaño de su tanque.",
+    "@dosingCalculatorSubtitle": {
+      "description": "Subtitle for the dosing calculator screen"
+    },
+    "dosingDrawerDescription": "Calcule dosis químicas para su tanque con preajustes de productos populares.",
+    "@dosingDrawerDescription": {
+      "description": "Short description of the dosing calculator (app drawer)"
+    },
+    "dosingPresetTitle": "Preajustes de Productos",
+    "@dosingPresetTitle": {
+      "description": "Section title for dosing product presets"
+    },
+    "dosingPresetSeachemPrime": "Seachem Prime",
+    "@dosingPresetSeachemPrime": {
+      "description": "Dosing preset label for Seachem Prime"
+    },
+    "dosingPresetSeachemStability": "Seachem Stability",
+    "@dosingPresetSeachemStability": {
+      "description": "Dosing preset label for Seachem Stability"
+    },
+    "dosingPresetSeachemFlourish": "Seachem Flourish",
+    "@dosingPresetSeachemFlourish": {
+      "description": "Dosing preset label for Seachem Flourish"
+    },
+    "dosingPresetSeachemFlourishExcel": "Seachem Flourish Excel",
+    "@dosingPresetSeachemFlourishExcel": {
+      "description": "Dosing preset label for Seachem Flourish Excel"
+    },
+    "dosingPresetApiStressCoat": "API Stress Coat",
+    "@dosingPresetApiStressCoat": {
+      "description": "Dosing preset label for API Stress Coat"
+    },
+    "dosingPresetApiMelafix": "API Melafix",
+    "@dosingPresetApiMelafix": {
+      "description": "Dosing preset label for API Melafix"
+    },
+    "dosingPresetApiPimafix": "API Pimafix",
+    "@dosingPresetApiPimafix": {
+      "description": "Dosing preset label for API Pimafix"
+    },
+    "dosingPresetSeachemAlkalineBuffer": "Seachem Alkaline Buffer",
+    "@dosingPresetSeachemAlkalineBuffer": {
+      "description": "Dosing preset label for Seachem Alkaline Buffer"
+    },
+    "dosingPresetSeachemAcidBuffer": "Seachem Acid Buffer",
+    "@dosingPresetSeachemAcidBuffer": {
+      "description": "Dosing preset label for Seachem Acid Buffer"
+    },
+    "dosingPresetFritzsoDechlorinator": "Fritz SO Dechlorinator",
+    "@dosingPresetFritzsoDechlorinator": {
+      "description": "Dosing preset label for Fritz SO Dechlorinator"
+    },
+    "dosingPresetCustom": "Personalizado",
+    "@dosingPresetCustom": {
+      "description": "Dosing preset label for custom/manual entry"
+    },
+    "dosingTankSize": "Tamaño del Tanque",
+    "@dosingTankSize": {
+      "description": "Label for the tank size input field in dosing calculator"
+    },
+    "dosingAmountPerUnit": "Cantidad de Dosis ({unit})",
+    "@dosingAmountPerUnit": {
+      "description": "Label for the dose amount input field with unit",
+      "placeholders": {
+        "unit": {
+          "type": "String"
+        }
+      }
+    },
+    "dosingPerGallon": "por galón",
+    "@dosingPerGallon": {
+      "description": "Per gallon label for dosing calculator"
+    },
+    "dosingPerLiter": "por litro",
+    "@dosingPerLiter": {
+      "description": "Per liter label for dosing calculator"
+    },
+    "dosingResultTitle": "Dosis Total",
+    "@dosingResultTitle": {
+      "description": "Title for the dosing result card"
+    },
+    "dosingResultProduct": "Para: {product}",
+    "@dosingResultProduct": {
+      "description": "Product name in dosing results",
+      "placeholders": {
+        "product": {
+          "type": "String"
+        }
+      }
+    },
+    "dosingTeaspoons": "cdta",
+    "@dosingTeaspoons": {
+      "description": "Teaspoon abbreviation"
+    },
+    "dosingCapfuls": "tapas",
+    "@dosingCapfuls": {
+      "description": "Capfuls unit label"
+    },
+    "dosingResultSummary": "Resumen de Dosificación",
+    "@dosingResultSummary": {
+      "description": "Title for the dosing summary card"
+    },
+    "dosingTankSizeLabel": "Tamaño del Tanque",
+    "@dosingTankSizeLabel": {
+      "description": "Label for tank size in results summary"
+    },
+    "dosingDosePerUnitLabel": "Tasa de Dosis",
+    "@dosingDosePerUnitLabel": {
+      "description": "Label for dose per unit in results summary"
+    },
+    "dosingGalAbbrev": "gal",
+    "@dosingGalAbbrev": {
+      "description": "Gallon abbreviation"
+    },
+    "dosingLAbbrev": "L",
+    "@dosingLAbbrev": {
+      "description": "Liter abbreviation"
+    },
+    "dosingInfoTitle": "Consejos de Dosificación",
+    "@dosingInfoTitle": {
+      "description": "Title for the dosing info section"
+    },
+    "dosingInfoDoseTitle": "Siga las Instrucciones del Fabricante",
+    "@dosingInfoDoseTitle": {
+      "description": "Dosing info tip title about following instructions"
+    },
+    "dosingInfoDoseBody": "Siempre verifique las cantidades de dosificación en la etiqueta del producto. Los valores preestablecidos se basan en las recomendaciones estándar del fabricante y pueden variar según el lote o la concentración del producto.",
+    "@dosingInfoDoseBody": {
+      "description": "Dosing info tip body about following instructions"
+    },
+    "dosingInfoWaterTitle": "Considere el Volumen Real de Agua",
+    "@dosingInfoWaterTitle": {
+      "description": "Dosing info tip title about actual water volume"
+    },
+    "dosingInfoWaterBody": "Su volumen real de agua es menor que el tamaño del tanque debido al sustrato, rocas y decoraciones. Considere dosificar para el 80-90% del volumen total de su tanque.",
+    "@dosingInfoWaterBody": {
+      "description": "Dosing info tip body about actual water volume"
+    },
+    "dosingInfoWarningTitle": "Evite la Sobredosis",
+    "@dosingInfoWarningTitle": {
+      "description": "Dosing info tip title about overdosing warning"
+    },
+    "dosingInfoWarningBody": "En caso de duda, dosifique menos. Es más seguro agregar menos y volver a dosificar que sobredosificar, lo cual puede dañar a los peces e invertebrados.",
+    "@dosingInfoWarningBody": {
+      "description": "Dosing info tip body about overdosing warning"
     }
   }

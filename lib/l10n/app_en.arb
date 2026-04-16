@@ -5261,5 +5261,155 @@
     "customSpeciesLabel": "Or enter your own species",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
+    },
+    "dosingCalculator": "Dosing Calculator",
+    "@dosingCalculator": {
+      "description": "Name of the dosing calculator feature"
+    },
+    "dosingCalculatorSubtitle": "Calculate the total dose of aquarium chemicals based on your tank size.",
+    "@dosingCalculatorSubtitle": {
+      "description": "Subtitle for the dosing calculator screen"
+    },
+    "dosingDrawerDescription": "Calculate chemical doses for your tank size with popular product presets.",
+    "@dosingDrawerDescription": {
+      "description": "Short description of the dosing calculator (app drawer)"
+    },
+    "dosingPresetTitle": "Product Presets",
+    "@dosingPresetTitle": {
+      "description": "Section title for dosing product presets"
+    },
+    "dosingPresetSeachemPrime": "Seachem Prime",
+    "@dosingPresetSeachemPrime": {
+      "description": "Dosing preset label for Seachem Prime"
+    },
+    "dosingPresetSeachemStability": "Seachem Stability",
+    "@dosingPresetSeachemStability": {
+      "description": "Dosing preset label for Seachem Stability"
+    },
+    "dosingPresetSeachemFlourish": "Seachem Flourish",
+    "@dosingPresetSeachemFlourish": {
+      "description": "Dosing preset label for Seachem Flourish"
+    },
+    "dosingPresetSeachemFlourishExcel": "Seachem Flourish Excel",
+    "@dosingPresetSeachemFlourishExcel": {
+      "description": "Dosing preset label for Seachem Flourish Excel"
+    },
+    "dosingPresetApiStressCoat": "API Stress Coat",
+    "@dosingPresetApiStressCoat": {
+      "description": "Dosing preset label for API Stress Coat"
+    },
+    "dosingPresetApiMelafix": "API Melafix",
+    "@dosingPresetApiMelafix": {
+      "description": "Dosing preset label for API Melafix"
+    },
+    "dosingPresetApiPimafix": "API Pimafix",
+    "@dosingPresetApiPimafix": {
+      "description": "Dosing preset label for API Pimafix"
+    },
+    "dosingPresetSeachemAlkalineBuffer": "Seachem Alkaline Buffer",
+    "@dosingPresetSeachemAlkalineBuffer": {
+      "description": "Dosing preset label for Seachem Alkaline Buffer"
+    },
+    "dosingPresetSeachemAcidBuffer": "Seachem Acid Buffer",
+    "@dosingPresetSeachemAcidBuffer": {
+      "description": "Dosing preset label for Seachem Acid Buffer"
+    },
+    "dosingPresetFritzsoDechlorinator": "Fritz SO Dechlorinator",
+    "@dosingPresetFritzsoDechlorinator": {
+      "description": "Dosing preset label for Fritz SO Dechlorinator"
+    },
+    "dosingPresetCustom": "Custom",
+    "@dosingPresetCustom": {
+      "description": "Dosing preset label for custom/manual entry"
+    },
+    "dosingTankSize": "Tank Size",
+    "@dosingTankSize": {
+      "description": "Label for the tank size input field in dosing calculator"
+    },
+    "dosingAmountPerUnit": "Dose Amount ({unit})",
+    "@dosingAmountPerUnit": {
+      "description": "Label for the dose amount input field with unit",
+      "placeholders": {
+        "unit": {
+          "type": "String"
+        }
+      }
+    },
+    "dosingPerGallon": "per gallon",
+    "@dosingPerGallon": {
+      "description": "Per gallon label for dosing calculator"
+    },
+    "dosingPerLiter": "per liter",
+    "@dosingPerLiter": {
+      "description": "Per liter label for dosing calculator"
+    },
+    "dosingResultTitle": "Total Dose",
+    "@dosingResultTitle": {
+      "description": "Title for the dosing result card"
+    },
+    "dosingResultProduct": "For: {product}",
+    "@dosingResultProduct": {
+      "description": "Product name in dosing results",
+      "placeholders": {
+        "product": {
+          "type": "String"
+        }
+      }
+    },
+    "dosingTeaspoons": "tsp",
+    "@dosingTeaspoons": {
+      "description": "Teaspoon abbreviation"
+    },
+    "dosingCapfuls": "capfuls",
+    "@dosingCapfuls": {
+      "description": "Capfuls unit label"
+    },
+    "dosingResultSummary": "Dosing Summary",
+    "@dosingResultSummary": {
+      "description": "Title for the dosing summary card"
+    },
+    "dosingTankSizeLabel": "Tank Size",
+    "@dosingTankSizeLabel": {
+      "description": "Label for tank size in results summary"
+    },
+    "dosingDosePerUnitLabel": "Dose Rate",
+    "@dosingDosePerUnitLabel": {
+      "description": "Label for dose per unit in results summary"
+    },
+    "dosingGalAbbrev": "gal",
+    "@dosingGalAbbrev": {
+      "description": "Gallon abbreviation"
+    },
+    "dosingLAbbrev": "L",
+    "@dosingLAbbrev": {
+      "description": "Liter abbreviation"
+    },
+    "dosingInfoTitle": "Dosing Tips",
+    "@dosingInfoTitle": {
+      "description": "Title for the dosing info section"
+    },
+    "dosingInfoDoseTitle": "Follow Manufacturer Instructions",
+    "@dosingInfoDoseTitle": {
+      "description": "Dosing info tip title about following instructions"
+    },
+    "dosingInfoDoseBody": "Always verify dosing amounts on the product label. Preset values are based on standard manufacturer recommendations and may vary by product batch or concentration.",
+    "@dosingInfoDoseBody": {
+      "description": "Dosing info tip body about following instructions"
+    },
+    "dosingInfoWaterTitle": "Account for Actual Water Volume",
+    "@dosingInfoWaterTitle": {
+      "description": "Dosing info tip title about actual water volume"
+    },
+    "dosingInfoWaterBody": "Your actual water volume is less than the tank size due to substrate, rocks, and decorations. Consider dosing for 80-90% of your total tank volume.",
+    "@dosingInfoWaterBody": {
+      "description": "Dosing info tip body about actual water volume"
+    },
+    "dosingInfoWarningTitle": "Avoid Overdosing",
+    "@dosingInfoWarningTitle": {
+      "description": "Dosing info tip title about overdosing warning"
+    },
+    "dosingInfoWarningBody": "When in doubt, under-dose. It is safer to add less and dose again than to overdose, which can harm fish and invertebrates.",
+    "@dosingInfoWarningBody": {
+      "description": "Dosing info tip body about overdosing warning"
     }
   }
