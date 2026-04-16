@@ -83,8 +83,13 @@ class FeatureInfo {
   });
 
   /// Unique identifier for this feature card. Uses routeName for most cards,
-  /// or 'aquapi_store' for the full-width AquaPi Store card (which has an empty routeName).
-  String get id => fullWidth ? 'aquapi_store' : routeName;
+  /// 'aquapi_store' for the full-width AquaPi Store card (which has an empty routeName),
+  /// and '/chatbot_photo' for the photo analyzer (which shares /chatbot route).
+  String get id {
+    if (fullWidth) return 'aquapi_store';
+    if (openPhotoAnalyzer) return '/chatbot_photo';
+    return routeName;
+  }
 }
 
 // Converted to ConsumerStatefulWidget to use initState
