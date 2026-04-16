@@ -415,7 +415,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   if (isFounder)
                     Flexible(
                       child: ReorderableListView.builder(
-                        shrinkWrap: true,
                         itemCount: workingFeatures.length,
                         onReorder: (oldIndex, newIndex) {
                           setSheetState(() {

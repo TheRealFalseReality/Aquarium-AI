@@ -175,6 +175,7 @@ List<String> applyCustomOrder(
   final idSet = defaultIds.toSet();
   final ordered = <String>[];
   for (final id in customOrder) {
+    // remove returns true when the item existed, preventing duplicates
     if (idSet.remove(id)) ordered.add(id);
   }
   // Append any new items not in the saved order
