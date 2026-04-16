@@ -40,6 +40,7 @@ import './screens/tank_volume_calculator.dart';
 import './screens/welcome_screen.dart';
 import './services/analytics_service.dart';
 import './services/crashlytics_service.dart';
+import './services/deep_link_service.dart';
 import './services/device_id_service.dart';
 import './services/notification_service.dart';
 import './services/remote_config_service.dart';
@@ -360,6 +361,19 @@ void main() async {
   if (!kIsWeb) {
     unawaited(MobileAds.instance.initialize());
   }
+
+  // Initialize deep-link handling (non-blocking).
+  // This must happen after navigatorKey is created but before runApp so that
+  // cold-start links are captured. Warm-start links are handled by the
+  // stream listener inside DeepLinkService.
+  DeepLinkService.instance
+      .initialize(navigatorKey: navigatorKey)
+      .catchError((error) {
+    if (kDebugMode) {
+      debugPrint('DeepLinkService initialization error: $error');
+    }
+  });
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -554,6 +568,15 @@ class MyApp extends ConsumerWidget {
           ],
           initialRoute: '/',
           navigatorObservers: _getNavigatorObservers(),
+          // Process any pending deep link once the navigator is mounted.
+          builder: (context, child) {
+            // Schedule pending deep-link processing after the current frame
+            // so the navigator is fully mounted before we push routes.
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              DeepLinkService.instance.processPendingDeepLink();
+            });
+            return child!;
+          },
           // debugShowCheckedModeBanner: false,
           onGenerateRoute: (settings) {
             final args = settings.arguments;
