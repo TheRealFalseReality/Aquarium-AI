@@ -5261,5 +5261,81 @@
     "customSpeciesLabel": "Or enter your own species",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
+    },
+    "founderSupport": "Founder Support",
+    "@founderSupport": {
+      "description": "Settings section title for founder/premium features"
+    },
+    "founderSupportDesc": "Exclusive perks for Founder Aquarists",
+    "@founderSupportDesc": {
+      "description": "Subtitle for the Founder Support settings card"
+    },
+    "customizeWelcomeCards": "Customize Welcome Cards",
+    "@customizeWelcomeCards": {
+      "description": "Title for the welcome screen card reorder and visibility settings"
+    },
+    "customizeWelcomeCardsDesc": "Rearrange and show/hide cards on the welcome screen",
+    "@customizeWelcomeCardsDesc": {
+      "description": "Description for welcome card customization"
+    },
+    "customizeSidebar": "Customize Sidebar",
+    "@customizeSidebar": {
+      "description": "Title for sidebar menu customization"
+    },
+    "customizeSidebarDesc": "Rearrange and show/hide sidebar menu items",
+    "@customizeSidebarDesc": {
+      "description": "Description for sidebar customization"
+    },
+    "dragToReorder": "Drag to reorder",
+    "@dragToReorder": {
+      "description": "Hint text for drag-to-reorder functionality"
+    },
+    "resetToDefault": "Reset to Default",
+    "@resetToDefault": {
+      "description": "Button label to reset order to default"
+    },
+    "founderFeatureLocked": "Become a Founder Aquarist to unlock customization features",
+    "@founderFeatureLocked": {
+      "description": "Message shown to non-founder users when trying to access premium customization features"
+    },
+    "founderExclusiveFeatures": "Founder Exclusive Features",
+    "@founderExclusiveFeatures": {
+      "description": "Header for the list of founder-exclusive features in the upsell section"
+    },
+    "featureCustomizeCards": "Customize & reorder welcome screen cards",
+    "@featureCustomizeCards": {
+      "description": "Founder feature bullet: card customization"
+    },
+    "featureCustomizeSidebar": "Customize & reorder sidebar menus",
+    "@featureCustomizeSidebar": {
+      "description": "Founder feature bullet: sidebar customization"
+    },
+    "featureHigherLimits": "Higher AI usage limits",
+    "@featureHigherLimits": {
+      "description": "Founder feature bullet: higher limits"
+    },
+    "featureRemoveAds": "Remove ads permanently",
+    "@featureRemoveAds": {
+      "description": "Founder feature bullet: ad removal"
+    },
+    "unlockAllFeatures": "Unlock All Features",
+    "@unlockAllFeatures": {
+      "description": "CTA button label to purchase founder status"
+    },
+    "sidebarMenuItems": "Sidebar Menu Items",
+    "@sidebarMenuItems": {
+      "description": "Title for sidebar menu items configuration"
+    },
+    "welcomeCards": "Welcome Cards",
+    "@welcomeCards": {
+      "description": "Title for welcome cards configuration"
+    },
+    "orderSaved": "Order saved",
+    "@orderSaved": {
+      "description": "Snackbar message when card/sidebar order is saved"
+    },
+    "orderReset": "Order reset to default",
+    "@orderReset": {
+      "description": "Snackbar message when order is reset to default"
     }
   }

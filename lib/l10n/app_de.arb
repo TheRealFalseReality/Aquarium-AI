@@ -1580,5 +1580,81 @@
     "customSpeciesLabel": "Oder eigene Art eingeben",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
+    },
+    "founderSupport": "Gründer-Unterstützung",
+    "@founderSupport": {
+      "description": "Settings section title for founder/premium features"
+    },
+    "founderSupportDesc": "Exklusive Vorteile für Gründer-Aquarianer",
+    "@founderSupportDesc": {
+      "description": "Subtitle for the Founder Support settings card"
+    },
+    "customizeWelcomeCards": "Willkommenskarten anpassen",
+    "@customizeWelcomeCards": {
+      "description": "Title for the welcome screen card reorder and visibility settings"
+    },
+    "customizeWelcomeCardsDesc": "Karten auf dem Willkommensbildschirm neu anordnen und ein-/ausblenden",
+    "@customizeWelcomeCardsDesc": {
+      "description": "Description for welcome card customization"
+    },
+    "customizeSidebar": "Seitenleiste anpassen",
+    "@customizeSidebar": {
+      "description": "Title for sidebar menu customization"
+    },
+    "customizeSidebarDesc": "Seitenleisten-Menüeinträge neu anordnen und ein-/ausblenden",
+    "@customizeSidebarDesc": {
+      "description": "Description for sidebar customization"
+    },
+    "dragToReorder": "Ziehen zum Neuanordnen",
+    "@dragToReorder": {
+      "description": "Hint text for drag-to-reorder functionality"
+    },
+    "resetToDefault": "Auf Standard zurücksetzen",
+    "@resetToDefault": {
+      "description": "Button label to reset order to default"
+    },
+    "founderFeatureLocked": "Werden Sie Gründer-Aquarianer, um Anpassungsfunktionen freizuschalten",
+    "@founderFeatureLocked": {
+      "description": "Message shown to non-founder users when trying to access premium customization features"
+    },
+    "founderExclusiveFeatures": "Exklusive Gründer-Funktionen",
+    "@founderExclusiveFeatures": {
+      "description": "Header for the list of founder-exclusive features in the upsell section"
+    },
+    "featureCustomizeCards": "Willkommenskarten anpassen und neu anordnen",
+    "@featureCustomizeCards": {
+      "description": "Founder feature bullet: card customization"
+    },
+    "featureCustomizeSidebar": "Seitenleisten-Menüs anpassen und neu anordnen",
+    "@featureCustomizeSidebar": {
+      "description": "Founder feature bullet: sidebar customization"
+    },
+    "featureHigherLimits": "Höhere KI-Nutzungslimits",
+    "@featureHigherLimits": {
+      "description": "Founder feature bullet: higher limits"
+    },
+    "featureRemoveAds": "Werbung dauerhaft entfernen",
+    "@featureRemoveAds": {
+      "description": "Founder feature bullet: ad removal"
+    },
+    "unlockAllFeatures": "Alle Funktionen freischalten",
+    "@unlockAllFeatures": {
+      "description": "CTA button label to purchase founder status"
+    },
+    "sidebarMenuItems": "Seitenleisten-Menüeinträge",
+    "@sidebarMenuItems": {
+      "description": "Title for sidebar menu items configuration"
+    },
+    "welcomeCards": "Willkommenskarten",
+    "@welcomeCards": {
+      "description": "Title for welcome cards configuration"
+    },
+    "orderSaved": "Reihenfolge gespeichert",
+    "@orderSaved": {
+      "description": "Snackbar message when card/sidebar order is saved"
+    },
+    "orderReset": "Reihenfolge auf Standard zurückgesetzt",
+    "@orderReset": {
+      "description": "Snackbar message when order is reset to default"
     }
   }

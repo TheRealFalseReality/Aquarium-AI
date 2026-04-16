@@ -20,6 +20,7 @@ import '../models/community_post.dart';
 import '../models/tank.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/community_provider.dart';
+import '../providers/customization_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
@@ -364,6 +365,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     bool adsRemoved,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    final isFounder = ref.read(isFounderProvider);
+    // Build a mutable working copy of the feature list for reorder support
+    final workingFeatures = List<FeatureInfo>.from(allFeatures);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -381,6 +385,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  if (isFounder) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.dragToReorder,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   // Community card toggle (always first)
                   CheckboxListTile(
@@ -393,33 +406,114 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     },
                   ),
                   const Divider(),
-                  ...allFeatures.map((f) {
-                    final isAquaPiStore = f.fullWidth;
-                    final isDisabled = isAquaPiStore && !adsRemoved;
-                    final isHidden = _hiddenFeatures.contains(f.id);
-                    return CheckboxListTile(
-                      value: !isHidden,
-                      title: Text(f.title),
-                      enabled: !isDisabled,
-                      subtitle: isDisabled
-                          ? Text(l10n.purchaseToHideCard)
-                          : null,
-                      onChanged: isDisabled
-                          ? null
-                          : (val) {
-                              setState(() {
-                                if (val == true) {
-                                  _hiddenFeatures = {..._hiddenFeatures}
-                                    ..remove(f.id);
-                                } else {
-                                  _hiddenFeatures = {..._hiddenFeatures, f.id};
-                                }
-                              });
-                              setSheetState(() {});
-                              _saveHiddenFeatures();
-                            },
-                    );
-                  }),
+                  // Feature cards: reorderable for founders, simple list for free users
+                  if (isFounder)
+                    Flexible(
+                      child: ReorderableListView.builder(
+                        shrinkWrap: true,
+                        itemCount: workingFeatures.length,
+                        onReorder: (oldIndex, newIndex) {
+                          setSheetState(() {
+                            if (newIndex > oldIndex) newIndex--;
+                            final item = workingFeatures.removeAt(oldIndex);
+                            workingFeatures.insert(newIndex, item);
+                          });
+                          // Persist the new order
+                          final order =
+                              workingFeatures.map((f) => f.id).toList();
+                          ref
+                              .read(customizationProvider.notifier)
+                              .setWelcomeCardOrder(order);
+                          // Rebuild main screen
+                          setState(() {});
+                        },
+                        itemBuilder: (context, index) {
+                          final f = workingFeatures[index];
+                          final isAquaPiStore = f.fullWidth;
+                          final isDisabled = isAquaPiStore && !adsRemoved;
+                          final isHidden = _hiddenFeatures.contains(f.id);
+                          return CheckboxListTile(
+                            key: ValueKey(f.id),
+                            value: !isHidden,
+                            title: Text(f.title),
+                            enabled: !isDisabled,
+                            secondary: Icon(
+                              Icons.drag_handle,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                            subtitle: isDisabled
+                                ? Text(l10n.purchaseToHideCard)
+                                : null,
+                            onChanged: isDisabled
+                                ? null
+                                : (val) {
+                                    setState(() {
+                                      if (val == true) {
+                                        _hiddenFeatures = {..._hiddenFeatures}
+                                          ..remove(f.id);
+                                      } else {
+                                        _hiddenFeatures = {
+                                          ..._hiddenFeatures,
+                                          f.id,
+                                        };
+                                      }
+                                    });
+                                    setSheetState(() {});
+                                    _saveHiddenFeatures();
+                                  },
+                          );
+                        },
+                      ),
+                    )
+                  else
+                    ...allFeatures.map((f) {
+                      final isAquaPiStore = f.fullWidth;
+                      final isDisabled = isAquaPiStore && !adsRemoved;
+                      final isHidden = _hiddenFeatures.contains(f.id);
+                      return CheckboxListTile(
+                        value: !isHidden,
+                        title: Text(f.title),
+                        enabled: !isDisabled,
+                        subtitle: isDisabled
+                            ? Text(l10n.purchaseToHideCard)
+                            : null,
+                        onChanged: isDisabled
+                            ? null
+                            : (val) {
+                                setState(() {
+                                  if (val == true) {
+                                    _hiddenFeatures = {..._hiddenFeatures}
+                                      ..remove(f.id);
+                                  } else {
+                                    _hiddenFeatures = {..._hiddenFeatures, f.id};
+                                  }
+                                });
+                                setSheetState(() {});
+                                _saveHiddenFeatures();
+                              },
+                      );
+                    }),
+                  // Reset order button for founders
+                  if (isFounder) ...[
+                    const Divider(),
+                    TextButton.icon(
+                      onPressed: () {
+                        ref
+                            .read(customizationProvider.notifier)
+                            .resetWelcomeCardOrder();
+                        setState(() {});
+                        setSheetState(() {
+                          workingFeatures
+                            ..clear()
+                            ..addAll(allFeatures);
+                        });
+                      },
+                      icon: const Icon(Icons.restore, size: 18),
+                      label: Text(l10n.resetToDefault),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -913,6 +1007,23 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         fullWidth: true,
       ),
     ];
+
+    // Apply custom card ordering for Founder Aquarists
+    final customization = ref.watch(customizationProvider);
+    final customOrder = customization.welcomeCardOrder;
+    if (customOrder != null && customOrder.isNotEmpty) {
+      final featureMap = {for (final f in features) f.id: f};
+      final reordered = <FeatureInfo>[];
+      for (final id in customOrder) {
+        final f = featureMap.remove(id);
+        if (f != null) reordered.add(f);
+      }
+      // Append any new cards not in the saved order
+      reordered.addAll(featureMap.values);
+      features
+        ..clear()
+        ..addAll(reordered);
+    }
 
     return MainLayout(
       title: l10n.welcomeTitle,

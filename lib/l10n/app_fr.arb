@@ -1580,5 +1580,81 @@
     "customSpeciesLabel": "Ou entrez votre propre espèce",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
+    },
+    "founderSupport": "Soutien Fondateur",
+    "@founderSupport": {
+      "description": "Settings section title for founder/premium features"
+    },
+    "founderSupportDesc": "Avantages exclusifs pour les Aquariophiles Fondateurs",
+    "@founderSupportDesc": {
+      "description": "Subtitle for the Founder Support settings card"
+    },
+    "customizeWelcomeCards": "Personnaliser les cartes d'accueil",
+    "@customizeWelcomeCards": {
+      "description": "Title for the welcome screen card reorder and visibility settings"
+    },
+    "customizeWelcomeCardsDesc": "Réorganiser et afficher/masquer les cartes de l'écran d'accueil",
+    "@customizeWelcomeCardsDesc": {
+      "description": "Description for welcome card customization"
+    },
+    "customizeSidebar": "Personnaliser la barre latérale",
+    "@customizeSidebar": {
+      "description": "Title for sidebar menu customization"
+    },
+    "customizeSidebarDesc": "Réorganiser et afficher/masquer les éléments du menu latéral",
+    "@customizeSidebarDesc": {
+      "description": "Description for sidebar customization"
+    },
+    "dragToReorder": "Faites glisser pour réorganiser",
+    "@dragToReorder": {
+      "description": "Hint text for drag-to-reorder functionality"
+    },
+    "resetToDefault": "Réinitialiser par défaut",
+    "@resetToDefault": {
+      "description": "Button label to reset order to default"
+    },
+    "founderFeatureLocked": "Devenez Aquariophile Fondateur pour débloquer les fonctions de personnalisation",
+    "@founderFeatureLocked": {
+      "description": "Message shown to non-founder users when trying to access premium customization features"
+    },
+    "founderExclusiveFeatures": "Fonctionnalités exclusives Fondateur",
+    "@founderExclusiveFeatures": {
+      "description": "Header for the list of founder-exclusive features in the upsell section"
+    },
+    "featureCustomizeCards": "Personnaliser et réorganiser les cartes d'accueil",
+    "@featureCustomizeCards": {
+      "description": "Founder feature bullet: card customization"
+    },
+    "featureCustomizeSidebar": "Personnaliser et réorganiser les menus latéraux",
+    "@featureCustomizeSidebar": {
+      "description": "Founder feature bullet: sidebar customization"
+    },
+    "featureHigherLimits": "Limites d'utilisation IA plus élevées",
+    "@featureHigherLimits": {
+      "description": "Founder feature bullet: higher limits"
+    },
+    "featureRemoveAds": "Supprimer les publicités définitivement",
+    "@featureRemoveAds": {
+      "description": "Founder feature bullet: ad removal"
+    },
+    "unlockAllFeatures": "Débloquer toutes les fonctionnalités",
+    "@unlockAllFeatures": {
+      "description": "CTA button label to purchase founder status"
+    },
+    "sidebarMenuItems": "Éléments du menu latéral",
+    "@sidebarMenuItems": {
+      "description": "Title for sidebar menu items configuration"
+    },
+    "welcomeCards": "Cartes d'accueil",
+    "@welcomeCards": {
+      "description": "Title for welcome cards configuration"
+    },
+    "orderSaved": "Ordre enregistré",
+    "@orderSaved": {
+      "description": "Snackbar message when card/sidebar order is saved"
+    },
+    "orderReset": "Ordre réinitialisé par défaut",
+    "@orderReset": {
+      "description": "Snackbar message when order is reset to default"
     }
   }

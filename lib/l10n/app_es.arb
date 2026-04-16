@@ -1580,5 +1580,81 @@
     "customSpeciesLabel": "O ingresa tu propia especie",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
+    },
+    "founderSupport": "Soporte Fundador",
+    "@founderSupport": {
+      "description": "Settings section title for founder/premium features"
+    },
+    "founderSupportDesc": "Ventajas exclusivas para Acuaristas Fundadores",
+    "@founderSupportDesc": {
+      "description": "Subtitle for the Founder Support settings card"
+    },
+    "customizeWelcomeCards": "Personalizar tarjetas de bienvenida",
+    "@customizeWelcomeCards": {
+      "description": "Title for the welcome screen card reorder and visibility settings"
+    },
+    "customizeWelcomeCardsDesc": "Reorganizar y mostrar/ocultar tarjetas en la pantalla de bienvenida",
+    "@customizeWelcomeCardsDesc": {
+      "description": "Description for welcome card customization"
+    },
+    "customizeSidebar": "Personalizar barra lateral",
+    "@customizeSidebar": {
+      "description": "Title for sidebar menu customization"
+    },
+    "customizeSidebarDesc": "Reorganizar y mostrar/ocultar elementos del menú lateral",
+    "@customizeSidebarDesc": {
+      "description": "Description for sidebar customization"
+    },
+    "dragToReorder": "Arrastra para reordenar",
+    "@dragToReorder": {
+      "description": "Hint text for drag-to-reorder functionality"
+    },
+    "resetToDefault": "Restablecer valores predeterminados",
+    "@resetToDefault": {
+      "description": "Button label to reset order to default"
+    },
+    "founderFeatureLocked": "Conviértete en Acuarista Fundador para desbloquear funciones de personalización",
+    "@founderFeatureLocked": {
+      "description": "Message shown to non-founder users when trying to access premium customization features"
+    },
+    "founderExclusiveFeatures": "Funciones exclusivas de Fundador",
+    "@founderExclusiveFeatures": {
+      "description": "Header for the list of founder-exclusive features in the upsell section"
+    },
+    "featureCustomizeCards": "Personalizar y reordenar tarjetas de bienvenida",
+    "@featureCustomizeCards": {
+      "description": "Founder feature bullet: card customization"
+    },
+    "featureCustomizeSidebar": "Personalizar y reordenar menús laterales",
+    "@featureCustomizeSidebar": {
+      "description": "Founder feature bullet: sidebar customization"
+    },
+    "featureHigherLimits": "Límites de uso de IA más altos",
+    "@featureHigherLimits": {
+      "description": "Founder feature bullet: higher limits"
+    },
+    "featureRemoveAds": "Eliminar anuncios permanentemente",
+    "@featureRemoveAds": {
+      "description": "Founder feature bullet: ad removal"
+    },
+    "unlockAllFeatures": "Desbloquear todas las funciones",
+    "@unlockAllFeatures": {
+      "description": "CTA button label to purchase founder status"
+    },
+    "sidebarMenuItems": "Elementos del menú lateral",
+    "@sidebarMenuItems": {
+      "description": "Title for sidebar menu items configuration"
+    },
+    "welcomeCards": "Tarjetas de bienvenida",
+    "@welcomeCards": {
+      "description": "Title for welcome cards configuration"
+    },
+    "orderSaved": "Orden guardado",
+    "@orderSaved": {
+      "description": "Snackbar message when card/sidebar order is saved"
+    },
+    "orderReset": "Orden restablecido a predeterminado",
+    "@orderReset": {
+      "description": "Snackbar message when order is reset to default"
     }
   }
