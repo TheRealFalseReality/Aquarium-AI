@@ -905,6 +905,10 @@
   "@notifications": {
     "description": "Notifications menu option"
   },
+  "notification": "notification",
+  "@notification": {
+    "description": "Singular notification label"
+  },
   "notificationsExperimental": "Notifications (Experimental)",
   "@notificationsExperimental": {
     "description": "Notifications menu option with experimental tag"

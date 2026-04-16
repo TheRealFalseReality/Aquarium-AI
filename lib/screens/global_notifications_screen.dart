@@ -58,18 +58,89 @@ class _GlobalNotificationsScreenState
       return aDate.compareTo(bDate);
     });
 
+    // Count overdue notifications
+    final overdueCount = entries
+        .where((e) => e.notification.getImmediateNextDate().isBefore(DateTime.now()))
+        .length;
+
     return MainLayout(
       title: l10n.allNotifications,
       child: entries.isEmpty
           ? _buildEmptyState(context, tanks.isEmpty)
           : ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
-              itemCount: entries.length,
+              itemCount: entries.length + 1, // +1 for the header
               itemBuilder: (context, index) {
-                final entry = entries[index];
+                if (index == 0) {
+                  return _buildScreenHeader(
+                    context,
+                    totalCount: entries.length,
+                    overdueCount: overdueCount,
+                  );
+                }
+                final entry = entries[index - 1];
                 return _buildNotificationCard(context, entry);
               },
             ),
+    );
+  }
+
+  Widget _buildScreenHeader(
+    BuildContext context, {
+    required int totalCount,
+    required int overdueCount,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.allNotifications,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  '$totalCount ${totalCount == 1 ? l10n.notification : l10n.notifications}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              if (overdueCount > 0) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: cs.error.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '$overdueCount ${l10n.overdue.toLowerCase()}',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: cs.error,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          Divider(color: cs.outlineVariant.withOpacity(0.3)),
+        ],
+      ),
     );
   }
 

@@ -219,6 +219,7 @@
   "noBackupHistory": "Aún no hay historial de copias de seguridad",
   "dosingDiary": "Diario de Dosificación",
   "notifications": "Notificaciones",
+  "notification": "notificación",
   "notificationsExperimental": "Notificaciones (Experimental)",
   "experimental": "Experimental",
   "sendTestNotification": "Enviar Notificación de Prueba",
