@@ -28,6 +28,7 @@ import '../services/fish_data_service.dart';
 import '../services/in_app_review_service.dart';
 import '../services/remote_config_service.dart';
 import '../theme_colors.dart';
+import '../widgets/dosing_preset_editor_dialog.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/remove_ads_dialog.dart';
@@ -328,7 +329,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ),
                               ),
                               subtitle: Text(
-                                '${_fmtNum(preset.doseAmountGal)} ${preset.unit} / ${_fmtNum(preset.perVolumeGal)} gal  •  ${_fmtNum(preset.doseAmountLiter)} ${preset.unit} / ${_fmtNum(preset.perVolumeLiter)} L',
+                                '${dosingFmtNum(preset.doseAmountGal)} ${preset.unit} / ${dosingFmtNum(preset.perVolumeGal)} gal  •  ${dosingFmtNum(preset.doseAmountLiter)} ${preset.unit} / ${dosingFmtNum(preset.perVolumeLiter)} L',
                                 style: Theme.of(ctx)
                                     .textTheme
                                     .bodySmall
@@ -346,7 +347,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                         Icons.edit_outlined,
                                         size: 20),
                                     onPressed: () =>
-                                        _showPresetEditorDialog(
+                                        showDosingPresetEditorDialog(
                                             dialogCtx,
                                             dialogRef,
                                             preset: preset),
@@ -459,7 +460,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             const Spacer(),
                             FilledButton.icon(
                               onPressed: () =>
-                                  _showPresetEditorDialog(
+                                  showDosingPresetEditorDialog(
                                       dialogCtx, dialogRef),
                               icon: const Icon(Icons.add,
                                   size: 18),
@@ -473,322 +474,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               );
             },
-          );
-        },
-      ),
-    );
-  }
-
-  /// Format a number for display – drop ".0" for whole numbers.
-  String _fmtNum(double value) {
-    return value == value.roundToDouble()
-        ? value.toInt().toString()
-        : value.toString();
-  }
-
-  /// Conversion factor: 1 US gallon = 3.78541 liters.
-  static const double _galToLiter = 3.78541;
-
-  /// Show a dialog to add or edit a dosing preset.
-  ///
-  /// The user enters a single dose (amount per volume) in either gallons or
-  /// liters. The opposite unit is auto-converted on save.
-  void _showPresetEditorDialog(
-    BuildContext parentCtx,
-    WidgetRef parentRef, {
-    DosingPreset? preset,
-  }) {
-    final l10n = AppLocalizations.of(parentCtx)!;
-    final isEditing = preset != null;
-
-    final nameCtrl = TextEditingController(text: preset?.name ?? '');
-    String selectedUnit = preset?.unit ?? 'mL';
-
-    // The user picks whether they're entering the dose per gallon or per liter.
-    bool inputInGallons = true;
-
-    // Pre-fill from gallon values (the "primary" values in the model).
-    final doseAmtCtrl = TextEditingController(
-        text: preset != null ? _fmtNum(preset.doseAmountGal) : '');
-    final perVolCtrl = TextEditingController(
-        text: preset != null ? _fmtNum(preset.perVolumeGal) : '');
-
-    showDialog(
-      context: parentCtx,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setEditorState) {
-          final cs = Theme.of(ctx).colorScheme;
-          final volumeLabel = inputInGallons
-              ? l10n.dosingGalAbbrev
-              : l10n.dosingLAbbrev;
-
-          return Dialog(
-            insetPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 24,
-            ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(ctx).size.width,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ── Title ──────────────────────────────────
-                      Text(
-                        isEditing
-                            ? l10n.editProduct
-                            : l10n.addProduct,
-                        style: Theme.of(ctx)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // ── Product name ──────────────────────────
-                      TextField(
-                        controller: nameCtrl,
-                        decoration: InputDecoration(
-                          labelText: l10n.productName,
-                          border: const OutlineInputBorder(),
-                          prefixIcon:
-                              const Icon(Icons.label_outlined),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // ── Dose unit (mL / g / drops) ────────────
-                      DropdownButtonFormField<String>(
-                        value: selectedUnit,
-                        decoration: InputDecoration(
-                          labelText: l10n.doseUnit,
-                          border: const OutlineInputBorder(),
-                          prefixIcon: const Icon(
-                              Icons.straighten_outlined),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                              value: 'mL', child: Text('mL')),
-                          DropdownMenuItem(
-                              value: 'g', child: Text('g')),
-                          DropdownMenuItem(
-                              value: 'drops',
-                              child: Text('drops')),
-                        ],
-                        onChanged: (v) {
-                          if (v != null) {
-                            setEditorState(
-                                () => selectedUnit = v);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // ── Gal / Liter toggle ────────────────────
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              l10n.dosingInputUnit,
-                              style: Theme.of(ctx)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          SegmentedButton<bool>(
-                            segments: [
-                              ButtonSegment<bool>(
-                                value: true,
-                                label: Text(
-                                    l10n.dosingGalAbbrev),
-                              ),
-                              ButtonSegment<bool>(
-                                value: false,
-                                label: Text(
-                                    l10n.dosingLAbbrev),
-                              ),
-                            ],
-                            selected: {inputInGallons},
-                            onSelectionChanged: (sel) {
-                              setEditorState(() {
-                                inputInGallons = sel.first;
-                              });
-                            },
-                            showSelectedIcon: false,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // ── Dose amount + per volume ──────────────
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: doseAmtCtrl,
-                              keyboardType:
-                                  const TextInputType
-                                      .numberWithOptions(
-                                      decimal: true),
-                              decoration: InputDecoration(
-                                labelText: l10n.doseAmount,
-                                suffixText: selectedUnit,
-                                border:
-                                    const OutlineInputBorder(),
-                                prefixIcon: const Icon(
-                                    Icons.science_outlined),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8),
-                            child: Text(
-                              l10n.dosingPer,
-                              style: Theme.of(ctx)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color:
-                                        cs.onSurfaceVariant,
-                                  ),
-                            ),
-                          ),
-                          Expanded(
-                            child: TextField(
-                              controller: perVolCtrl,
-                              keyboardType:
-                                  const TextInputType
-                                      .numberWithOptions(
-                                      decimal: true),
-                              decoration: InputDecoration(
-                                labelText: l10n.perVolume,
-                                suffixText: volumeLabel,
-                                border:
-                                    const OutlineInputBorder(),
-                                prefixIcon: const Icon(
-                                    Icons.water_outlined),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-
-                      // ── Auto-convert note ─────────────────────
-                      Text(
-                        l10n.autoConvertedNote,
-                        style: Theme.of(ctx)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(
-                              color: cs.onSurfaceVariant,
-                              fontStyle: FontStyle.italic,
-                            ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // ── Actions ────────────────────────────────
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.pop(ctx),
-                            child: Text(l10n.cancel),
-                          ),
-                          const SizedBox(width: 8),
-                          FilledButton(
-                            onPressed: () {
-                              final name =
-                                  nameCtrl.text.trim();
-                              final doseAmt =
-                                  double.tryParse(
-                                      doseAmtCtrl.text);
-                              final perVol =
-                                  double.tryParse(
-                                      perVolCtrl.text);
-
-                              if (name.isEmpty ||
-                                  doseAmt == null ||
-                                  perVol == null ||
-                                  doseAmt <= 0 ||
-                                  perVol <= 0) {
-                                return;
-                              }
-
-                              // Auto-convert to the other unit system.
-                              final double doseGal;
-                              final double perGal;
-                              final double doseLiter;
-                              final double perLiter;
-
-                              if (inputInGallons) {
-                                doseGal = doseAmt;
-                                perGal = perVol;
-                                // Same dose amount, volume converted.
-                                doseLiter = doseAmt;
-                                perLiter = perVol *
-                                    _galToLiter;
-                              } else {
-                                doseLiter = doseAmt;
-                                perLiter = perVol;
-                                doseGal = doseAmt;
-                                perGal = perVol /
-                                    _galToLiter;
-                              }
-
-                              final notifier = parentRef
-                                  .read(
-                                      dosingPresetsProvider
-                                          .notifier);
-                              if (isEditing) {
-                                notifier.updatePreset(
-                                    preset.copyWith(
-                                  name: name,
-                                  doseAmountGal: doseGal,
-                                  perVolumeGal: perGal,
-                                  doseAmountLiter:
-                                      doseLiter,
-                                  perVolumeLiter:
-                                      perLiter,
-                                  unit: selectedUnit,
-                                ));
-                              } else {
-                                notifier.addPreset(
-                                    DosingPreset.create(
-                                  name: name,
-                                  doseAmountGal: doseGal,
-                                  perVolumeGal: perGal,
-                                  doseAmountLiter:
-                                      doseLiter,
-                                  perVolumeLiter:
-                                      perLiter,
-                                  unit: selectedUnit,
-                                ));
-                              }
-                              Navigator.pop(ctx);
-                            },
-                            child: Text(l10n.save),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
           );
         },
       ),
