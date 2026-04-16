@@ -1573,17 +1573,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final currentOrder = customization.welcomeCardOrder;
 
     // Build working list
-    List<String> workingOrder;
-    if (currentOrder != null && currentOrder.isNotEmpty) {
-      final idSet = defaultIds.toSet();
-      workingOrder = [];
-      for (final id in currentOrder) {
-        if (idSet.remove(id)) workingOrder.add(id);
-      }
-      workingOrder.addAll(idSet);
-    } else {
-      workingOrder = List.from(defaultIds);
-    }
+    List<String> workingOrder = applyCustomOrder(defaultIds, currentOrder);
 
     showDialog(
       context: context,
@@ -1749,17 +1739,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final hiddenItems = Set<String>.from(customization.hiddenSidebarItems);
 
     // Build working list
-    List<String> workingOrder;
-    if (currentOrder != null && currentOrder.isNotEmpty) {
-      final idSet = defaultIds.toSet();
-      workingOrder = [];
-      for (final id in currentOrder) {
-        if (idSet.remove(id)) workingOrder.add(id);
-      }
-      workingOrder.addAll(idSet);
-    } else {
-      workingOrder = List.from(defaultIds);
-    }
+    List<String> workingOrder = applyCustomOrder(defaultIds, currentOrder);
 
     showDialog(
       context: context,

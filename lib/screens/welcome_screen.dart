@@ -1012,17 +1012,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     final customization = ref.watch(customizationProvider);
     final customOrder = customization.welcomeCardOrder;
     if (customOrder != null && customOrder.isNotEmpty) {
+      final featureIds = features.map((f) => f.id).toList();
+      final orderedIds = applyCustomOrder(featureIds, customOrder);
       final featureMap = {for (final f in features) f.id: f};
-      final reordered = <FeatureInfo>[];
-      for (final id in customOrder) {
-        final f = featureMap.remove(id);
-        if (f != null) reordered.add(f);
-      }
-      // Append any new cards not in the saved order
-      reordered.addAll(featureMap.values);
       features
         ..clear()
-        ..addAll(reordered);
+        ..addAll(orderedIds.map((id) => featureMap[id]!));
     }
 
     return MainLayout(

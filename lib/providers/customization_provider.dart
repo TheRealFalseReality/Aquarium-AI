@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Keys for SharedPreferences storage.
@@ -12,7 +11,6 @@ const String _hiddenSidebarItemsKey = 'hiddenSidebarItems';
 ///
 /// Each ID corresponds to a route or logical section in the app drawer.
 const List<String> defaultSidebarOrder = [
-  'tank-management',
   'compat-ai',
   'chatbot',
   'stocking',
@@ -159,3 +157,27 @@ final customizationProvider =
     StateNotifierProvider<CustomizationNotifier, CustomizationState>(
   (ref) => CustomizationNotifier(),
 );
+
+/// Applies a custom order to a list of default IDs.
+///
+/// Items in [customOrder] that exist in [defaultIds] are placed first
+/// (in the custom order), followed by any remaining items from [defaultIds]
+/// that were not in the custom order (preserving their default order).
+///
+/// Used by the welcome screen, drawer, and settings dialogs to apply
+/// saved ordering.
+List<String> applyCustomOrder(
+  List<String> defaultIds,
+  List<String>? customOrder,
+) {
+  if (customOrder == null || customOrder.isEmpty) return List.from(defaultIds);
+
+  final idSet = defaultIds.toSet();
+  final ordered = <String>[];
+  for (final id in customOrder) {
+    if (idSet.remove(id)) ordered.add(id);
+  }
+  // Append any new items not in the saved order
+  ordered.addAll(idSet);
+  return ordered;
+}

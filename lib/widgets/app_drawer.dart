@@ -441,20 +441,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
     ];
 
     // Apply custom order if available
-    List<String> orderedIds;
-    if (customization.sidebarOrder != null &&
-        customization.sidebarOrder!.isNotEmpty) {
-      final idSet = defaultIds.toSet();
-      final ordered = <String>[];
-      for (final id in customization.sidebarOrder!) {
-        if (idSet.remove(id)) ordered.add(id);
-      }
-      // Append any new items not in the saved order
-      ordered.addAll(idSet);
-      orderedIds = ordered;
-    } else {
-      orderedIds = defaultIds;
-    }
+    final orderedIds = applyCustomOrder(defaultIds, customization.sidebarOrder);
 
     // Filter out hidden items
     final visibleIds =
