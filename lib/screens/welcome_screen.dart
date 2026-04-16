@@ -1675,7 +1675,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               color: isOverdue ? cs.error : cs.onSurfaceVariant,
             ),
             const SizedBox(width: 4),
-            Flexible(
+            Expanded(
+              flex: 2,
               child: Text(
                 dateFormat.format(displayDate),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
