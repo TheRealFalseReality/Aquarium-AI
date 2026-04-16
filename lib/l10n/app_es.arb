@@ -219,6 +219,7 @@
   "noBackupHistory": "Aún no hay historial de copias de seguridad",
   "dosingDiary": "Diario de Dosificación",
   "notifications": "Notificaciones",
+  "notification": "notificación",
   "notificationsExperimental": "Notificaciones (Experimental)",
   "experimental": "Experimental",
   "sendTestNotification": "Enviar Notificación de Prueba",
@@ -1592,5 +1593,283 @@
     "errorServerTitle": "Servicio no disponible",
     "errorQuotaTitle": "Cuota de API excedida",
     "errorContentFilterTitle": "Contenido filtrado",
-    "errorForbiddenTitle": "Acceso denegado"
+    "errorForbiddenTitle": "Acceso denegado",
+    "dosingCalculator": "Calculadora de Dosificación",
+    "@dosingCalculator": {
+      "description": "Name of the dosing calculator feature"
+    },
+    "dosingCalculatorSubtitle": "Calcule la dosis total de productos químicos para acuarios según el tamaño de su tanque.",
+    "@dosingCalculatorSubtitle": {
+      "description": "Subtitle for the dosing calculator screen"
+    },
+    "dosingDrawerDescription": "Calcule dosis químicas para su tanque con preajustes de productos populares.",
+    "@dosingDrawerDescription": {
+      "description": "Short description of the dosing calculator (app drawer)"
+    },
+    "dosingPresetTitle": "Preajustes de Productos",
+    "@dosingPresetTitle": {
+      "description": "Section title for dosing product presets"
+    },
+    "dosingPresetSeachemPrime": "Seachem Prime",
+    "@dosingPresetSeachemPrime": {
+      "description": "Dosing preset label for Seachem Prime"
+    },
+    "dosingPresetSeachemStability": "Seachem Stability",
+    "@dosingPresetSeachemStability": {
+      "description": "Dosing preset label for Seachem Stability"
+    },
+    "dosingPresetSeachemFlourish": "Seachem Flourish",
+    "@dosingPresetSeachemFlourish": {
+      "description": "Dosing preset label for Seachem Flourish"
+    },
+    "dosingPresetSeachemFlourishExcel": "Seachem Flourish Excel",
+    "@dosingPresetSeachemFlourishExcel": {
+      "description": "Dosing preset label for Seachem Flourish Excel"
+    },
+    "dosingPresetApiStressCoat": "API Stress Coat",
+    "@dosingPresetApiStressCoat": {
+      "description": "Dosing preset label for API Stress Coat"
+    },
+    "dosingPresetApiMelafix": "API Melafix",
+    "@dosingPresetApiMelafix": {
+      "description": "Dosing preset label for API Melafix"
+    },
+    "dosingPresetApiPimafix": "API Pimafix",
+    "@dosingPresetApiPimafix": {
+      "description": "Dosing preset label for API Pimafix"
+    },
+    "dosingPresetSeachemAlkalineBuffer": "Seachem Alkaline Buffer",
+    "@dosingPresetSeachemAlkalineBuffer": {
+      "description": "Dosing preset label for Seachem Alkaline Buffer"
+    },
+    "dosingPresetSeachemAcidBuffer": "Seachem Acid Buffer",
+    "@dosingPresetSeachemAcidBuffer": {
+      "description": "Dosing preset label for Seachem Acid Buffer"
+    },
+    "dosingPresetFritzsoDechlorinator": "Fritz SO Dechlorinator",
+    "@dosingPresetFritzsoDechlorinator": {
+      "description": "Dosing preset label for Fritz SO Dechlorinator"
+    },
+    "dosingPresetCustom": "Personalizado",
+    "@dosingPresetCustom": {
+      "description": "Dosing preset label for custom/manual entry"
+    },
+    "dosingTankSize": "Tamaño del Tanque",
+    "@dosingTankSize": {
+      "description": "Label for the tank size input field in dosing calculator"
+    },
+    "dosingDoseAmountLabel": "Cantidad de Dosis",
+    "@dosingDoseAmountLabel": {
+      "description": "Label for the dose amount input field in dosing calculator"
+    },
+    "dosingPer": "por",
+    "@dosingPer": {
+      "description": "The word 'per' between dose amount and volume fields"
+    },
+    "dosingSelectProduct": "Seleccionar un producto…",
+    "@dosingSelectProduct": {
+      "description": "Placeholder text for the product preset selector"
+    },
+    "dosingCustomSubtitle": "Ingrese su propia cantidad de dosis y volumen",
+    "@dosingCustomSubtitle": {
+      "description": "Subtitle for the custom dosing option in the preset picker"
+    },
+    "dosingAddNewProduct": "Agregar Nuevo Producto",
+    "@dosingAddNewProduct": {
+      "description": "Label for the add new product option in the dosing preset picker"
+    },
+    "dosingAddNewProductSubtitle": "Guardar un producto para uso futuro",
+    "@dosingAddNewProductSubtitle": {
+      "description": "Subtitle for the add new product option in the dosing preset picker"
+    },
+    "dosingResultTitle": "Dosis Total",
+    "@dosingResultTitle": {
+      "description": "Title for the dosing result card"
+    },
+    "dosingResultProduct": "Para: {product}",
+    "@dosingResultProduct": {
+      "description": "Product name in dosing results",
+      "placeholders": {
+        "product": {
+          "type": "String"
+        }
+      }
+    },
+    "dosingTeaspoons": "cdta",
+    "@dosingTeaspoons": {
+      "description": "Teaspoon abbreviation"
+    },
+    "dosingCapfuls": "tapas",
+    "@dosingCapfuls": {
+      "description": "Capfuls unit label"
+    },
+    "dosingResultSummary": "Resumen de Dosificación",
+    "@dosingResultSummary": {
+      "description": "Title for the dosing summary card"
+    },
+    "dosingTankSizeLabel": "Tamaño del Tanque",
+    "@dosingTankSizeLabel": {
+      "description": "Label for tank size in results summary"
+    },
+    "dosingDosePerUnitLabel": "Tasa de Dosis",
+    "@dosingDosePerUnitLabel": {
+      "description": "Label for dose per unit in results summary"
+    },
+    "dosingGalAbbrev": "gal",
+    "@dosingGalAbbrev": {
+      "description": "Gallon abbreviation"
+    },
+    "dosingLAbbrev": "L",
+    "@dosingLAbbrev": {
+      "description": "Liter abbreviation"
+    },
+    "dosingInfoTitle": "Consejos de Dosificación",
+    "@dosingInfoTitle": {
+      "description": "Title for the dosing info section"
+    },
+    "dosingInfoDoseTitle": "Siga las Instrucciones del Fabricante",
+    "@dosingInfoDoseTitle": {
+      "description": "Dosing info tip title about following instructions"
+    },
+    "dosingInfoDoseBody": "Siempre verifique las cantidades de dosificación en la etiqueta del producto. Los valores preestablecidos se basan en las recomendaciones estándar del fabricante y pueden variar según el lote o la concentración del producto.",
+    "@dosingInfoDoseBody": {
+      "description": "Dosing info tip body about following instructions"
+    },
+    "dosingInfoWaterTitle": "Considere el Volumen Real de Agua",
+    "@dosingInfoWaterTitle": {
+      "description": "Dosing info tip title about actual water volume"
+    },
+    "dosingInfoWaterBody": "Su volumen real de agua es menor que el tamaño del tanque debido al sustrato, rocas y decoraciones. Considere dosificar para el 80-90% del volumen total de su tanque.",
+    "@dosingInfoWaterBody": {
+      "description": "Dosing info tip body about actual water volume"
+    },
+    "dosingInfoWarningTitle": "Evite la Sobredosis",
+    "@dosingInfoWarningTitle": {
+      "description": "Dosing info tip title about overdosing warning"
+    },
+    "dosingInfoWarningBody": "En caso de duda, dosifique menos. Es más seguro agregar menos y volver a dosificar que sobredosificar, lo cual puede dañar a los peces e invertebrados.",
+    "@dosingInfoWarningBody": {
+      "description": "Dosing info tip body about overdosing warning"
+    },
+    "manageDosingPresets": "Productos de dosificación",
+    "@manageDosingPresets": {
+      "description": "Settings menu title for managing dosing chemical presets"
+    },
+    "manageDosingPresetsDesc": "Agregar, editar o reordenar sus químicos de dosificación",
+    "@manageDosingPresetsDesc": {
+      "description": "Settings menu subtitle for dosing presets management"
+    },
+    "addProduct": "Agregar producto",
+    "@addProduct": {
+      "description": "Button label to add a new dosing product preset"
+    },
+    "editProduct": "Editar producto",
+    "@editProduct": {
+      "description": "Dialog title when editing a dosing product preset"
+    },
+    "productName": "Nombre del producto",
+    "@productName": {
+      "description": "Label for the product name text field"
+    },
+    "doseAmountGal": "Dosis (gal)",
+    "@doseAmountGal": {
+      "description": "Label for dose amount in gallons"
+    },
+    "perVolumeGal": "Por volumen (gal)",
+    "@perVolumeGal": {
+      "description": "Label for the per-volume field in gallons"
+    },
+    "doseAmountLiter": "Dosis (L)",
+    "@doseAmountLiter": {
+      "description": "Label for dose amount in liters"
+    },
+    "perVolumeLiter": "Por volumen (L)",
+    "@perVolumeLiter": {
+      "description": "Label for the per-volume field in liters"
+    },
+    "doseUnit": "Unidad",
+    "@doseUnit": {
+      "description": "Label for the dose unit selector (mL, g, etc.)"
+    },
+    "resetToDefaults": "Restablecer valores predeterminados",
+    "@resetToDefaults": {
+      "description": "Button label to reset dosing presets to built-in defaults"
+    },
+    "resetPresetsConfirm": "¿Restablecer todos los productos de dosificación a los valores predeterminados? Se perderán sus productos personalizados.",
+    "@resetPresetsConfirm": {
+      "description": "Confirmation message when resetting dosing presets to defaults"
+    },
+    "deleteProductConfirm": "¿Está seguro de que desea eliminar este producto?",
+    "@deleteProductConfirm": {
+      "description": "Confirmation message when deleting a dosing product preset"
+    },
+    "dragToReorder": "Arrastrar para reordenar",
+    "@dragToReorder": {
+      "description": "Hint text for reorderable list items"
+    },
+    "dosingPresetsCount": "{count} productos",
+    "@dosingPresetsCount": {
+      "description": "Subtitle showing number of dosing product presets",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "doseAmount": "Cantidad de dosis",
+    "@doseAmount": {
+      "description": "Label for dose amount input field in dosing preset editor"
+    },
+    "perVolume": "Por volumen",
+    "@perVolume": {
+      "description": "Label for per-volume input field in dosing preset editor"
+    },
+    "dosingInputUnit": "Ingresar dosis por",
+    "@dosingInputUnit": {
+      "description": "Label for the gallon vs liter toggle in dosing preset editor"
+    },
+    "autoConvertedNote": "La otra unidad se convertirá automáticamente.",
+    "@autoConvertedNote": {
+      "description": "Helper text explaining that the opposite gallon/liter value is auto-calculated"
+    },
+    "upcomingNotifications": "Próximas",
+    "@upcomingNotifications": {
+      "description": "Tab label for the upcoming notifications tab in tank details"
+    },
+    "noUpcomingNotifications": "Sin notificaciones próximas",
+    "@noUpcomingNotifications": {
+      "description": "Empty state title when there are no upcoming notifications for a tank"
+    },
+    "noUpcomingNotificationsDescription": "Agrega notificaciones desde el administrador de notificaciones para recibir recordatorios de alimentación, cambios de agua y más.",
+    "@noUpcomingNotificationsDescription": {
+      "description": "Empty state description when there are no upcoming notifications"
+    },
+    "manageNotifications": "Administrar notificaciones",
+    "@manageNotifications": {
+      "description": "Button label to navigate to the notification management screen"
+    },
+    "reschedule": "Reprogramar",
+    "@reschedule": {
+      "description": "Button label for the reschedule action on a notification"
+    },
+    "allNotifications": "Notificaciones",
+    "@allNotifications": {
+      "description": "Title for the global notifications screen showing all notifications across tanks"
+    },
+    "allNotificationsDescription": "Ver y administrar todas las notificaciones próximas de tus acuarios. Registra actividades rápidamente y reprograma recordatorios desde un solo lugar.",
+    "@allNotificationsDescription": {
+      "description": "Description for the notifications feature card on the welcome screen"
+    },
+    "allNotificationsDrawerDescription": "Ver todas las notificaciones y recordatorios próximos de tus acuarios.",
+    "@allNotificationsDrawerDescription": {
+      "description": "Short description for the notifications feature in the drawer"
+    },
+    "globalNotificationsEmptyDescription": "Configura notificaciones en acuarios individuales para verlas aquí. Usa el administrador de notificaciones de cada acuario para crear recordatorios.",
+    "@globalNotificationsEmptyDescription": {
+      "description": "Empty state description when there are no notifications across any tank"
+    },
+    "globalNotificationsNoTanksDescription": "Crea un acuario primero, luego configura notificaciones para recibir recordatorios de alimentación, cambios de agua y más.",
+    "@globalNotificationsNoTanksDescription": {
+      "description": "Empty state description when there are no tanks yet"
+    }
   }

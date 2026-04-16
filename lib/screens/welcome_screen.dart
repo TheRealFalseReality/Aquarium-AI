@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,6 +19,7 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/community_post.dart';
 import '../models/tank.dart';
+import '../models/tank_notification.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/community_provider.dart';
 import '../providers/fish_compatibility_provider.dart';
@@ -888,6 +890,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         delay: const Duration(milliseconds: 910),
       ),
       FeatureInfo(
+        icon: '💊',
+        title: l10n.dosingCalculator,
+        description: l10n.dosingDrawerDescription,
+        routeName: '/dosing-calculator',
+        delay: const Duration(milliseconds: 915),
+      ),
+      FeatureInfo(
         icon: '🔍',
         title: l10n.fishCompatBrowser,
         description: l10n.fishCompatBrowserDesc,
@@ -980,6 +989,49 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                         const SizedBox(height: 16),
                       ],
 
+                      // Full-width Upcoming Notification Card
+                      _buildUpcomingNotificationCard(context, tankState),
+
+                      // Visible Cards filter + grid layout toggle (moved up)
+                      Builder(
+                        builder: (context) {
+                          final useGrid = appSettings.welcomeGridLayout;
+                          final adsRemoved = ref
+                              .watch(purchaseProvider)
+                              .adsRemoved;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.tune, size: 20),
+                                tooltip: l10n.filterCards,
+                                onPressed: () => _showCardFilterSheet(
+                                  context,
+                                  features,
+                                  adsRemoved,
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  useGrid
+                                      ? Icons.view_list
+                                      : Icons.grid_view,
+                                  size: 20,
+                                ),
+                                tooltip: useGrid
+                                    ? l10n.switchToListView
+                                    : l10n.switchToGridView,
+                                onPressed: () {
+                                  ref
+                                      .read(appSettingsProvider.notifier)
+                                      .setWelcomeGridLayout(!useGrid);
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+
                       // Prominent My Tanks Section
                       _buildMyTanksSection(
                         context,
@@ -1009,7 +1061,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           fullWidth: true,
                         ),
 
-                      // Feature Cards section header with layout toggle
+                      // Feature Cards section
                       Builder(
                         builder: (context) {
                           final useGrid = appSettings.welcomeGridLayout;
@@ -1045,37 +1097,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
                           return Column(
                             children: [
-                              // Layout toggle row
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.tune, size: 20),
-                                    tooltip: l10n.filterCards,
-                                    onPressed: () => _showCardFilterSheet(
-                                      context,
-                                      features,
-                                      adsRemoved,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      useGrid
-                                          ? Icons.view_list
-                                          : Icons.grid_view,
-                                      size: 20,
-                                    ),
-                                    tooltip: useGrid
-                                        ? l10n.switchToListView
-                                        : l10n.switchToGridView,
-                                    onPressed: () {
-                                      ref
-                                          .read(appSettingsProvider.notifier)
-                                          .setWelcomeGridLayout(!useGrid);
-                                    },
-                                  ),
-                                ],
-                              ),
                               if (adsRemoved) ...[
                                 // No ad break — render all grid features as one continuous mosaic
                                 if (gridFeatures.isNotEmpty)
@@ -1482,6 +1503,366 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         ),
       ),
     );
+  }
+
+  /// Full-width card showing the next upcoming notification across all tanks.
+  /// Taps to the global notifications screen.
+  Widget _buildUpcomingNotificationCard(
+    BuildContext context,
+    TankState tankState,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final tanks = tankState.tanks;
+
+    // Collect all enabled notifications across all tanks
+    TankNotification? nextNotification;
+    Tank? nextTank;
+    for (final tank in tanks) {
+      for (final notification in tank.notifications) {
+        if (!notification.enabled) continue;
+        if (nextNotification == null ||
+            notification
+                .getImmediateNextDate()
+                .isBefore(nextNotification.getImmediateNextDate())) {
+          nextNotification = notification;
+          nextTank = tank;
+        }
+      }
+    }
+
+    final hasNotification = nextNotification != null && nextTank != null;
+    final isOverdue = hasNotification &&
+        nextNotification!.getImmediateNextDate().isBefore(DateTime.now());
+
+    return AnimatedFeatureCard(
+      delay: const Duration(milliseconds: 580),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isOverdue
+                ? [
+                    cs.error.withOpacity(0.12),
+                    cs.errorContainer.withOpacity(0.5),
+                  ]
+                : [
+                    Colors.orange.shade400.withOpacity(0.12),
+                    cs.primaryContainer.withOpacity(0.5),
+                  ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: cs.outlineVariant.withOpacity(0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () {
+              AnalyticsService.logFeatureUsed(
+                featureName: 'upcoming_notification_card',
+                parameters: {'source': 'welcome_screen'},
+              );
+              Navigator.pushNamed(context, '/notifications');
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: hasNotification
+                  ? _buildNotificationPreview(
+                      context,
+                      nextNotification!,
+                      nextTank!,
+                      isOverdue,
+                    )
+                  : _buildNoNotificationsPreview(context),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationPreview(
+    BuildContext context,
+    TankNotification notification,
+    Tank tank,
+    bool isOverdue,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final displayDate = notification.getImmediateNextDate();
+    final dateFormat = DateFormat('MMM d, y h:mm a');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: (isOverdue ? cs.error : Colors.orange).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                _getNotificationTypeIcon(notification.type),
+                color: isOverdue
+                    ? cs.error
+                    : _getNotificationTypeColor(notification.type),
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.allNotifications,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    notification.customTitle ?? notification.getDisplayName(),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: cs.onSurface,
+              size: 20,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Divider(color: cs.onSurfaceVariant.withOpacity(0.3)),
+        const SizedBox(height: 12),
+        // Schedule info row
+        Row(
+          children: [
+            Icon(
+              Icons.water,
+              size: 14,
+              color: cs.onSurfaceVariant,
+            ),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                tank.name,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Icon(
+              Icons.schedule,
+              size: 14,
+              color: isOverdue ? cs.error : cs.onSurfaceVariant,
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              flex: 2,
+              child: Text(
+                dateFormat.format(displayDate),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: isOverdue ? cs.error : cs.onSurfaceVariant,
+                  fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Chips: overdue or time-from-now + repeat frequency
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            if (isOverdue)
+              Chip(
+                label: Text(
+                  l10n.overdue,
+                  style: TextStyle(fontSize: 12, color: cs.onError),
+                ),
+                backgroundColor: cs.error,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              )
+            else
+              Builder(
+                builder: (context) {
+                  final timeText = _notificationTimeFromNow(displayDate);
+                  if (timeText == null) return const SizedBox.shrink();
+                  return Chip(
+                    label: Text(timeText, style: const TextStyle(fontSize: 12)),
+                    avatar: const Icon(Icons.schedule, size: 16),
+                    backgroundColor: cs.secondaryContainer,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  );
+                },
+              ),
+            if (notification.repeatFrequency != RepeatFrequency.none)
+              Chip(
+                label: Text(
+                  _notificationRepeatText(notification),
+                  style: const TextStyle(fontSize: 12),
+                ),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                visualDensity: VisualDensity.compact,
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoNotificationsPreview(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.orange.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Text('🔔', style: TextStyle(fontSize: 24)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.allNotifications,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                l10n.noUpcomingNotifications,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Icon(
+          Icons.arrow_forward_ios,
+          color: cs.onSurface,
+          size: 20,
+        ),
+      ],
+    );
+  }
+
+  IconData _getNotificationTypeIcon(NotificationType type) {
+    switch (type) {
+      case NotificationType.feeding:
+        return Icons.restaurant;
+      case NotificationType.dosing:
+        return Icons.medication_liquid;
+      case NotificationType.waterChange:
+        return Icons.water_drop;
+      case NotificationType.testing:
+        return Icons.science;
+      case NotificationType.maintenance:
+        return Icons.build;
+      case NotificationType.other:
+        return Icons.notifications;
+    }
+  }
+
+  Color _getNotificationTypeColor(NotificationType type) {
+    switch (type) {
+      case NotificationType.feeding:
+        return Colors.orange;
+      case NotificationType.dosing:
+        return Colors.purple;
+      case NotificationType.waterChange:
+        return Colors.blue;
+      case NotificationType.testing:
+        return Colors.teal;
+      case NotificationType.maintenance:
+        return Colors.brown;
+      case NotificationType.other:
+        return Colors.grey;
+    }
+  }
+
+  String _notificationRepeatText(TankNotification notification) {
+    final l10n = AppLocalizations.of(context)!;
+    if (notification.repeatInterval == 1) {
+      return notification.repeatFrequency.displayName;
+    }
+    final String unitName;
+    switch (notification.repeatFrequency) {
+      case RepeatFrequency.daily:
+        unitName = l10n.days;
+        break;
+      case RepeatFrequency.weekly:
+        unitName = l10n.weeks;
+        break;
+      case RepeatFrequency.monthly:
+        unitName = l10n.months;
+        break;
+      case RepeatFrequency.yearly:
+        unitName = l10n.years;
+        break;
+      default:
+        return notification.repeatFrequency.displayName;
+    }
+    return l10n.everyXDays(notification.repeatInterval, unitName);
+  }
+
+  String? _notificationTimeFromNow(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = dateTime.difference(now);
+    final l10n = AppLocalizations.of(context)!;
+    if (difference.isNegative) return null;
+    final days = difference.inDays;
+    final hours = difference.inHours;
+    final minutes = difference.inMinutes;
+    if (days > 0) {
+      if (days == 1) return l10n.inLessThan2Days;
+      return l10n.inXDays(days);
+    } else if (hours > 0) {
+      if (hours == 1) return l10n.inLessThan2Hours;
+      return l10n.inXHours(hours);
+    } else if (minutes > 0) {
+      if (minutes == 1) return l10n.inOneMinute;
+      return l10n.inXMinutes(minutes);
+    } else {
+      return l10n.inLessThanAMinute;
+    }
   }
 
   Widget _buildMyTanksSection(
