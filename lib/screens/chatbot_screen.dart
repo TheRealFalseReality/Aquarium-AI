@@ -1173,6 +1173,7 @@ class _RetryButtonState extends State<_RetryButton> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, left: 48.0),
       child: GestureDetector(
@@ -1204,7 +1205,7 @@ class _RetryButtonState extends State<_RetryButton> {
               Icon(Icons.refresh_rounded, size: 18, color: cs.onError),
               const SizedBox(width: 8),
               Text(
-                'Retry',
+                l10n.retry,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: cs.onError,
                   fontWeight: FontWeight.w600,
@@ -1233,6 +1234,7 @@ class _SettingsButtonState extends State<_SettingsButton> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, left: 48.0),
       child: GestureDetector(
@@ -1264,7 +1266,7 @@ class _SettingsButtonState extends State<_SettingsButton> {
               Icon(Icons.settings_outlined, size: 18, color: cs.onPrimary),
               const SizedBox(width: 8),
               Text(
-                'AI Provider Settings',
+                l10n.aiProviderSettings,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: cs.onPrimary,
                   fontWeight: FontWeight.w600,
