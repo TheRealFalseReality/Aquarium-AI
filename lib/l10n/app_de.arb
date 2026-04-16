@@ -1729,5 +1729,70 @@
     "dosingInfoWarningBody": "Im Zweifelsfall weniger dosieren. Es ist sicherer, weniger hinzuzufügen und erneut zu dosieren, als zu überdosieren, was Fischen und Wirbellosen schaden kann.",
     "@dosingInfoWarningBody": {
       "description": "Dosing info tip body about overdosing warning"
+    },
+    "manageDosingPresets": "Dosierungsprodukte",
+    "@manageDosingPresets": {
+      "description": "Settings menu title for managing dosing chemical presets"
+    },
+    "manageDosingPresetsDesc": "Dosierungschemikalien hinzufügen, bearbeiten oder neu anordnen",
+    "@manageDosingPresetsDesc": {
+      "description": "Settings menu subtitle for dosing presets management"
+    },
+    "addProduct": "Produkt hinzufügen",
+    "@addProduct": {
+      "description": "Button label to add a new dosing product preset"
+    },
+    "editProduct": "Produkt bearbeiten",
+    "@editProduct": {
+      "description": "Dialog title when editing a dosing product preset"
+    },
+    "productName": "Produktname",
+    "@productName": {
+      "description": "Label for the product name text field"
+    },
+    "doseAmountGal": "Dosis (gal)",
+    "@doseAmountGal": {
+      "description": "Label for dose amount in gallons"
+    },
+    "perVolumeGal": "Pro Volumen (gal)",
+    "@perVolumeGal": {
+      "description": "Label for the per-volume field in gallons"
+    },
+    "doseAmountLiter": "Dosis (L)",
+    "@doseAmountLiter": {
+      "description": "Label for dose amount in liters"
+    },
+    "perVolumeLiter": "Pro Volumen (L)",
+    "@perVolumeLiter": {
+      "description": "Label for the per-volume field in liters"
+    },
+    "doseUnit": "Einheit",
+    "@doseUnit": {
+      "description": "Label for the dose unit selector (mL, g, etc.)"
+    },
+    "resetToDefaults": "Auf Standard zurücksetzen",
+    "@resetToDefaults": {
+      "description": "Button label to reset dosing presets to built-in defaults"
+    },
+    "resetPresetsConfirm": "Alle Dosierungsprodukte auf die Standardwerte zurücksetzen? Ihre benutzerdefinierten Produkte gehen verloren.",
+    "@resetPresetsConfirm": {
+      "description": "Confirmation message when resetting dosing presets to defaults"
+    },
+    "deleteProductConfirm": "Möchten Sie dieses Produkt wirklich löschen?",
+    "@deleteProductConfirm": {
+      "description": "Confirmation message when deleting a dosing product preset"
+    },
+    "dragToReorder": "Zum Neuanordnen ziehen",
+    "@dragToReorder": {
+      "description": "Hint text for reorderable list items"
+    },
+    "dosingPresetsCount": "{count} Produkte",
+    "@dosingPresetsCount": {
+      "description": "Subtitle showing number of dosing product presets",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
     }
   }

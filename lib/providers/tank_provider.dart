@@ -14,6 +14,7 @@ import 'package:uuid/uuid.dart';
 import '../models/tank.dart';
 import '../services/analytics_service.dart';
 import 'app_settings_provider.dart';
+import 'dosing_presets_provider.dart';
 import 'species_tags_provider.dart';
 import 'tank_tags_provider.dart';
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
@@ -199,6 +200,10 @@ class TankNotifier extends StateNotifier<TankState> {
       final reschedulePreferences = await appSettingsNotifier
           .exportReschedulePreferences();
 
+      // Get dosing presets for backup
+      final dosingPresetsNotifier = _ref.read(dosingPresetsProvider.notifier);
+      final dosingPresets = dosingPresetsNotifier.exportPresets();
+
       // Create backup data with metadata
       // Exclude local image paths to prevent restore errors on different devices
       final packageInfo = await PackageInfo.fromPlatform();
@@ -214,6 +219,7 @@ class TankNotifier extends StateNotifier<TankState> {
         'speciesTags': speciesTags,
         'tankTags': tankTags,
         'reschedulePreferences': reschedulePreferences,
+        'dosingPresets': dosingPresets,
       };
 
       // Convert to formatted JSON
@@ -397,6 +403,14 @@ class TankNotifier extends StateNotifier<TankState> {
         await appSettingsNotifier.importReschedulePreferences(
           reschedulePreferences,
         );
+      }
+
+      // Restore dosing presets if present in backup
+      if (backupData.containsKey('dosingPresets')) {
+        final dosingPresetsList = backupData['dosingPresets'] as List;
+        final dosingPresetsNotifier =
+            _ref.read(dosingPresetsProvider.notifier);
+        await dosingPresetsNotifier.importPresets(dosingPresetsList);
       }
 
       final previousTankCount = state.tanks.length;

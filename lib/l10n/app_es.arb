@@ -1729,5 +1729,70 @@
     "dosingInfoWarningBody": "En caso de duda, dosifique menos. Es más seguro agregar menos y volver a dosificar que sobredosificar, lo cual puede dañar a los peces e invertebrados.",
     "@dosingInfoWarningBody": {
       "description": "Dosing info tip body about overdosing warning"
+    },
+    "manageDosingPresets": "Productos de dosificación",
+    "@manageDosingPresets": {
+      "description": "Settings menu title for managing dosing chemical presets"
+    },
+    "manageDosingPresetsDesc": "Agregar, editar o reordenar sus químicos de dosificación",
+    "@manageDosingPresetsDesc": {
+      "description": "Settings menu subtitle for dosing presets management"
+    },
+    "addProduct": "Agregar producto",
+    "@addProduct": {
+      "description": "Button label to add a new dosing product preset"
+    },
+    "editProduct": "Editar producto",
+    "@editProduct": {
+      "description": "Dialog title when editing a dosing product preset"
+    },
+    "productName": "Nombre del producto",
+    "@productName": {
+      "description": "Label for the product name text field"
+    },
+    "doseAmountGal": "Dosis (gal)",
+    "@doseAmountGal": {
+      "description": "Label for dose amount in gallons"
+    },
+    "perVolumeGal": "Por volumen (gal)",
+    "@perVolumeGal": {
+      "description": "Label for the per-volume field in gallons"
+    },
+    "doseAmountLiter": "Dosis (L)",
+    "@doseAmountLiter": {
+      "description": "Label for dose amount in liters"
+    },
+    "perVolumeLiter": "Por volumen (L)",
+    "@perVolumeLiter": {
+      "description": "Label for the per-volume field in liters"
+    },
+    "doseUnit": "Unidad",
+    "@doseUnit": {
+      "description": "Label for the dose unit selector (mL, g, etc.)"
+    },
+    "resetToDefaults": "Restablecer valores predeterminados",
+    "@resetToDefaults": {
+      "description": "Button label to reset dosing presets to built-in defaults"
+    },
+    "resetPresetsConfirm": "¿Restablecer todos los productos de dosificación a los valores predeterminados? Se perderán sus productos personalizados.",
+    "@resetPresetsConfirm": {
+      "description": "Confirmation message when resetting dosing presets to defaults"
+    },
+    "deleteProductConfirm": "¿Está seguro de que desea eliminar este producto?",
+    "@deleteProductConfirm": {
+      "description": "Confirmation message when deleting a dosing product preset"
+    },
+    "dragToReorder": "Arrastrar para reordenar",
+    "@dragToReorder": {
+      "description": "Hint text for reorderable list items"
+    },
+    "dosingPresetsCount": "{count} productos",
+    "@dosingPresetsCount": {
+      "description": "Subtitle showing number of dosing product presets",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
     }
   }

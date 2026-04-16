@@ -1,29 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../models/dosing_preset.dart';
+import '../providers/dosing_presets_provider.dart';
 import '../services/analytics_service.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
 
+/// Map icon name strings to Material [IconData] for dosing presets.
+IconData dosingIconFromName(String name) {
+  switch (name) {
+    case 'shield_outlined':
+      return Icons.shield_outlined;
+    case 'grass_outlined':
+      return Icons.grass_outlined;
+    case 'eco_outlined':
+      return Icons.eco_outlined;
+    case 'water_drop_outlined':
+      return Icons.water_drop_outlined;
+    case 'healing_outlined':
+      return Icons.healing_outlined;
+    case 'local_pharmacy_outlined':
+      return Icons.local_pharmacy_outlined;
+    case 'balance_outlined':
+      return Icons.balance_outlined;
+    case 'cleaning_services_outlined':
+      return Icons.cleaning_services_outlined;
+    case 'medication_outlined':
+      return Icons.medication_outlined;
+    case 'colorize_outlined':
+      return Icons.colorize_outlined;
+    case 'science_outlined':
+    default:
+      return Icons.science_outlined;
+  }
+}
+
 /// A dosing calculator that computes the total amount of an aquarium chemical
 /// to add based on the dosage per gallon/liter and the tank volume.
 ///
-/// Includes prefilled presets for popular aquarium products.
-class DosingCalculator extends StatefulWidget {
+/// Uses the user-customizable presets from [dosingPresetsProvider].
+class DosingCalculator extends ConsumerStatefulWidget {
   const DosingCalculator({super.key});
 
   @override
-  DosingCalculatorState createState() => DosingCalculatorState();
+  ConsumerState<DosingCalculator> createState() => _DosingCalculatorState();
 }
 
-class DosingCalculatorState extends State<DosingCalculator> {
+class _DosingCalculatorState extends ConsumerState<DosingCalculator> {
   // ── Options ──────────────────────────────────────────────────────────────
-  /// Volume unit: 'Gallons' or 'Liters'
   String _volumeUnit = 'Gallons';
-
-  /// Currently selected preset key, or null for custom.
-  String? _selectedPreset;
+  String? _selectedPresetId;
 
   // ── Input ─────────────────────────────────────────────────────────────────
   final _tankSizeController = TextEditingController();
@@ -33,72 +62,6 @@ class DosingCalculatorState extends State<DosingCalculator> {
   // ── Results ───────────────────────────────────────────────────────────────
   double? _totalDose;
   String _resultUnit = 'mL';
-
-  // ── Prefilled dosing presets ──────────────────────────────────────────────
-  // Each preset stores the bottle-readable dose: amount per volume.
-  // E.g. Seachem Prime = 5 mL per 50 gallons (as printed on the bottle).
-  static const Map<String, _DosingPreset> _presets = {
-    'seachemPrime': _DosingPreset(
-      doseAmountGal: 5, perVolumeGal: 50,     // 5 mL per 50 gallons
-      doseAmountLiter: 5, perVolumeLiter: 200, // 5 mL per 200 L
-      unit: 'mL',
-      icon: Icons.shield_outlined,
-    ),
-    'seachemStability': _DosingPreset(
-      doseAmountGal: 5, perVolumeGal: 50,     // 5 mL per 50 gallons
-      doseAmountLiter: 5, perVolumeLiter: 200, // 5 mL per 200 L
-      unit: 'mL',
-      icon: Icons.science_outlined,
-    ),
-    'seachemFlourish': _DosingPreset(
-      doseAmountGal: 5, perVolumeGal: 50,     // 5 mL per 50 gallons
-      doseAmountLiter: 5, perVolumeLiter: 200,
-      unit: 'mL',
-      icon: Icons.grass_outlined,
-    ),
-    'seachemFlourishExcel': _DosingPreset(
-      doseAmountGal: 5, perVolumeGal: 50,     // 5 mL per 50 gallons
-      doseAmountLiter: 5, perVolumeLiter: 200,
-      unit: 'mL',
-      icon: Icons.eco_outlined,
-    ),
-    'apiStressCoat': _DosingPreset(
-      doseAmountGal: 5, perVolumeGal: 25,     // 5 mL per 25 gallons
-      doseAmountLiter: 5, perVolumeLiter: 100, // 5 mL per 100 L
-      unit: 'mL',
-      icon: Icons.water_drop_outlined,
-    ),
-    'apiMelafix': _DosingPreset(
-      doseAmountGal: 5, perVolumeGal: 10,     // 5 mL per 10 gallons
-      doseAmountLiter: 5, perVolumeLiter: 38,  // 5 mL per 38 L
-      unit: 'mL',
-      icon: Icons.healing_outlined,
-    ),
-    'apiPimafix': _DosingPreset(
-      doseAmountGal: 5, perVolumeGal: 10,     // 5 mL per 10 gallons
-      doseAmountLiter: 5, perVolumeLiter: 38,  // 5 mL per 38 L
-      unit: 'mL',
-      icon: Icons.local_pharmacy_outlined,
-    ),
-    'seachemAlkalineBuffer': _DosingPreset(
-      doseAmountGal: 5, perVolumeGal: 70,     // 1 tsp (~5 g) per 70 gallons
-      doseAmountLiter: 5, perVolumeLiter: 265,
-      unit: 'g',
-      icon: Icons.balance_outlined,
-    ),
-    'seachemAcidBuffer': _DosingPreset(
-      doseAmountGal: 5, perVolumeGal: 70,     // 1 tsp (~5 g) per 70 gallons
-      doseAmountLiter: 5, perVolumeLiter: 265,
-      unit: 'g',
-      icon: Icons.science_outlined,
-    ),
-    'fritzsoDechlorinator': _DosingPreset(
-      doseAmountGal: 1, perVolumeGal: 5,      // 1 mL per 5 gallons
-      doseAmountLiter: 5, perVolumeLiter: 95,
-      unit: 'mL',
-      icon: Icons.cleaning_services_outlined,
-    ),
-  };
 
   @override
   void initState() {
@@ -114,35 +77,51 @@ class DosingCalculatorState extends State<DosingCalculator> {
     super.dispose();
   }
 
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  DosingPreset? _findPreset(List<DosingPreset> presets, String? id) {
+    if (id == null || id == 'custom') return null;
+    try {
+      return presets.firstWhere((p) => p.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _formatNumber(double value) {
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toString();
+  }
+
   // ── Preset selection ─────────────────────────────────────────────────────
-  void _selectPreset(String? key) {
+  void _selectPreset(String? id) {
+    final presets = ref.read(dosingPresetsProvider);
     setState(() {
-      _selectedPreset = key;
-      if (key != null && key != 'custom') {
-        final preset = _presets[key]!;
-        if (_volumeUnit == 'Gallons') {
-          _doseAmountController.text = _formatNumber(preset.doseAmountGal);
-          _dosePerVolumeController.text = _formatNumber(preset.perVolumeGal);
-        } else {
-          _doseAmountController.text = _formatNumber(preset.doseAmountLiter);
-          _dosePerVolumeController.text =
-              _formatNumber(preset.perVolumeLiter);
+      _selectedPresetId = id;
+      if (id != null && id != 'custom') {
+        final preset = _findPreset(presets, id);
+        if (preset != null) {
+          if (_volumeUnit == 'Gallons') {
+            _doseAmountController.text =
+                _formatNumber(preset.doseAmountGal);
+            _dosePerVolumeController.text =
+                _formatNumber(preset.perVolumeGal);
+          } else {
+            _doseAmountController.text =
+                _formatNumber(preset.doseAmountLiter);
+            _dosePerVolumeController.text =
+                _formatNumber(preset.perVolumeLiter);
+          }
+          _resultUnit = preset.unit;
         }
-        _resultUnit = preset.unit;
-      } else if (key == 'custom') {
+      } else if (id == 'custom') {
         _doseAmountController.clear();
         _dosePerVolumeController.clear();
         _resultUnit = 'mL';
       }
       _totalDose = null;
     });
-  }
-
-  /// Format a number for display – drop ".0" for whole numbers.
-  String _formatNumber(double value) {
-    return value == value.roundToDouble()
-        ? value.toInt().toString()
-        : value.toString();
   }
 
   // ── Calculation ──────────────────────────────────────────────────────────
@@ -164,7 +143,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
     AnalyticsService.logCalculatorUsed(
       calculatorType: 'dosing',
       inputData: {
-        'preset': _selectedPreset ?? 'none',
+        'preset': _selectedPresetId ?? 'none',
         'volume_unit': _volumeUnit,
       },
     );
@@ -178,19 +157,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
   void _showPresetPicker(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-
-    final Map<String, String> presetLabels = {
-      'seachemPrime': l10n.dosingPresetSeachemPrime,
-      'seachemStability': l10n.dosingPresetSeachemStability,
-      'seachemFlourish': l10n.dosingPresetSeachemFlourish,
-      'seachemFlourishExcel': l10n.dosingPresetSeachemFlourishExcel,
-      'apiStressCoat': l10n.dosingPresetApiStressCoat,
-      'apiMelafix': l10n.dosingPresetApiMelafix,
-      'apiPimafix': l10n.dosingPresetApiPimafix,
-      'seachemAlkalineBuffer': l10n.dosingPresetSeachemAlkalineBuffer,
-      'seachemAcidBuffer': l10n.dosingPresetSeachemAcidBuffer,
-      'fritzsoDechlorinator': l10n.dosingPresetFritzsoDechlorinator,
-    };
+    final presets = ref.read(dosingPresetsProvider);
 
     showModalBottomSheet<String>(
       context: context,
@@ -250,11 +217,9 @@ class DosingCalculatorState extends State<DosingCalculator> {
                     controller: scrollController,
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     children: [
-                      // Product presets
-                      ..._presets.keys.map((key) {
-                        final preset = _presets[key]!;
-                        final label = presetLabels[key] ?? key;
-                        final isSelected = _selectedPreset == key;
+                      // Product presets from provider
+                      ...presets.map((preset) {
+                        final isSelected = _selectedPresetId == preset.id;
                         final unitAbbrev = _volumeUnit == 'Gallons'
                             ? l10n.dosingGalAbbrev
                             : l10n.dosingLAbbrev;
@@ -278,7 +243,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
-                              preset.icon,
+                              dosingIconFromName(preset.iconName),
                               color: isSelected
                                   ? cs.primary
                                   : cs.onSurfaceVariant,
@@ -286,7 +251,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
                             ),
                           ),
                           title: Text(
-                            label,
+                            preset.name,
                             style: TextStyle(
                               fontWeight: isSelected
                                   ? FontWeight.bold
@@ -312,7 +277,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          onTap: () => Navigator.pop(ctx, key),
+                          onTap: () => Navigator.pop(ctx, preset.id),
                         );
                       }),
                       // Custom entry option
@@ -322,14 +287,14 @@ class DosingCalculatorState extends State<DosingCalculator> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: _selectedPreset == 'custom'
+                            color: _selectedPresetId == 'custom'
                                 ? cs.primaryContainer
                                 : cs.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
                             Icons.edit_outlined,
-                            color: _selectedPreset == 'custom'
+                            color: _selectedPresetId == 'custom'
                                 ? cs.primary
                                 : cs.onSurfaceVariant,
                             size: 22,
@@ -338,10 +303,10 @@ class DosingCalculatorState extends State<DosingCalculator> {
                         title: Text(
                           l10n.dosingPresetCustom,
                           style: TextStyle(
-                            fontWeight: _selectedPreset == 'custom'
+                            fontWeight: _selectedPresetId == 'custom'
                                 ? FontWeight.bold
                                 : FontWeight.w500,
-                            color: _selectedPreset == 'custom'
+                            color: _selectedPresetId == 'custom'
                                 ? cs.primary
                                 : cs.onSurface,
                           ),
@@ -353,7 +318,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
                               .bodySmall
                               ?.copyWith(color: cs.onSurfaceVariant),
                         ),
-                        trailing: _selectedPreset == 'custom'
+                        trailing: _selectedPresetId == 'custom'
                             ? Icon(Icons.check_circle,
                                 color: cs.primary, size: 22)
                             : null,
@@ -382,37 +347,36 @@ class DosingCalculatorState extends State<DosingCalculator> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
+    final presets = ref.watch(dosingPresetsProvider);
+    final selectedPreset = _findPreset(presets, _selectedPresetId);
 
     // Build the current preset display label
     final String presetDisplayLabel;
-    if (_selectedPreset == null) {
+    if (_selectedPresetId == null) {
       presetDisplayLabel = l10n.dosingSelectProduct;
-    } else if (_selectedPreset == 'custom') {
+    } else if (_selectedPresetId == 'custom') {
       presetDisplayLabel = l10n.dosingPresetCustom;
     } else {
-      presetDisplayLabel = _getPresetLabel(context, _selectedPreset!);
+      presetDisplayLabel = selectedPreset?.name ?? l10n.dosingPresetCustom;
     }
 
-    final bool isCustom = _selectedPreset == null ||
-        _selectedPreset == 'custom';
+    final bool isCustom =
+        _selectedPresetId == null || _selectedPresetId == 'custom';
 
     // Dose description for the selected preset
     String? presetDoseDescription;
-    if (_selectedPreset != null &&
-        _selectedPreset != 'custom' &&
-        _presets.containsKey(_selectedPreset)) {
-      final preset = _presets[_selectedPreset]!;
+    if (selectedPreset != null) {
       final unitAbbrev = _volumeUnit == 'Gallons'
           ? l10n.dosingGalAbbrev
           : l10n.dosingLAbbrev;
       final doseAmt = _volumeUnit == 'Gallons'
-          ? preset.doseAmountGal
-          : preset.doseAmountLiter;
+          ? selectedPreset.doseAmountGal
+          : selectedPreset.doseAmountLiter;
       final perVol = _volumeUnit == 'Gallons'
-          ? preset.perVolumeGal
-          : preset.perVolumeLiter;
+          ? selectedPreset.perVolumeGal
+          : selectedPreset.perVolumeLiter;
       presetDoseDescription =
-          '${_formatNumber(doseAmt)} ${preset.unit} per ${_formatNumber(perVol)} $unitAbbrev';
+          '${_formatNumber(doseAmt)} ${selectedPreset.unit} per ${_formatNumber(perVol)} $unitAbbrev';
     }
 
     return MainLayout(
@@ -457,8 +421,9 @@ class DosingCalculatorState extends State<DosingCalculator> {
                     _volumeUnit = 'Gallons';
                     _totalDose = null;
                   });
-                  if (_selectedPreset != null && _selectedPreset != 'custom') {
-                    _selectPreset(_selectedPreset!);
+                  if (_selectedPresetId != null &&
+                      _selectedPresetId != 'custom') {
+                    _selectPreset(_selectedPresetId!);
                   }
                 },
               ),
@@ -473,8 +438,9 @@ class DosingCalculatorState extends State<DosingCalculator> {
                     _volumeUnit = 'Liters';
                     _totalDose = null;
                   });
-                  if (_selectedPreset != null && _selectedPreset != 'custom') {
-                    _selectPreset(_selectedPreset!);
+                  if (_selectedPresetId != null &&
+                      _selectedPresetId != 'custom') {
+                    _selectPreset(_selectedPresetId!);
                   }
                 },
               ),
@@ -492,12 +458,12 @@ class DosingCalculatorState extends State<DosingCalculator> {
                 vertical: 14,
               ),
               decoration: BoxDecoration(
-                color: _selectedPreset != null && _selectedPreset != 'custom'
+                color: selectedPreset != null
                     ? cs.primaryContainer
                     : cs.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: _selectedPreset != null && _selectedPreset != 'custom'
+                  color: selectedPreset != null
                       ? cs.primary.withOpacity(0.5)
                       : cs.outline.withOpacity(0.3),
                   width: 1.5,
@@ -506,13 +472,10 @@ class DosingCalculatorState extends State<DosingCalculator> {
               child: Row(
                 children: [
                   Icon(
-                    _selectedPreset != null &&
-                            _selectedPreset != 'custom' &&
-                            _presets.containsKey(_selectedPreset)
-                        ? _presets[_selectedPreset]!.icon
+                    selectedPreset != null
+                        ? dosingIconFromName(selectedPreset.iconName)
                         : Icons.science_outlined,
-                    color: _selectedPreset != null &&
-                            _selectedPreset != 'custom'
+                    color: selectedPreset != null
                         ? cs.primary
                         : cs.onSurfaceVariant,
                     size: 22,
@@ -529,8 +492,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
                               .titleSmall
                               ?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: _selectedPreset != null &&
-                                        _selectedPreset != 'custom'
+                                color: selectedPreset != null
                                     ? cs.onPrimaryContainer
                                     : cs.onSurface,
                               ),
@@ -543,7 +505,8 @@ class DosingCalculatorState extends State<DosingCalculator> {
                                 .textTheme
                                 .bodySmall
                                 ?.copyWith(
-                                  color: cs.onPrimaryContainer.withOpacity(0.7),
+                                  color:
+                                      cs.onPrimaryContainer.withOpacity(0.7),
                                 ),
                           ),
                         ],
@@ -552,8 +515,7 @@ class DosingCalculatorState extends State<DosingCalculator> {
                   ),
                   Icon(
                     Icons.keyboard_arrow_down_rounded,
-                    color: _selectedPreset != null &&
-                            _selectedPreset != 'custom'
+                    color: selectedPreset != null
                         ? cs.onPrimaryContainer
                         : cs.onSurfaceVariant,
                   ),
@@ -704,6 +666,8 @@ class DosingCalculatorState extends State<DosingCalculator> {
     final cs = Theme.of(context).colorScheme;
     final dose = _totalDose!;
     final tankSize = double.tryParse(_tankSizeController.text) ?? 0;
+    final presets = ref.read(dosingPresetsProvider);
+    final selectedPreset = _findPreset(presets, _selectedPresetId);
 
     // Format the dose nicely
     final String formattedDose =
@@ -719,19 +683,15 @@ class DosingCalculatorState extends State<DosingCalculator> {
     final bool showCaps = _resultUnit == 'mL' && dose >= 5;
     final String capValue = showCaps ? (dose / 5).toStringAsFixed(1) : '';
 
-    final String presetLabel = _selectedPreset != null &&
-            _selectedPreset != 'custom'
-        ? _getPresetLabel(context, _selectedPreset!)
-        : l10n.dosingPresetCustom;
+    final String presetLabel = selectedPreset?.name ?? l10n.dosingPresetCustom;
 
     // Build the dose rate display in bottle-readable format
-    final String doseRateDisplay;
     final doseAmt = _doseAmountController.text;
     final perVol = _dosePerVolumeController.text;
     final unitAbbrev = _volumeUnit == 'Gallons'
         ? l10n.dosingGalAbbrev
         : l10n.dosingLAbbrev;
-    doseRateDisplay = '$doseAmt $_resultUnit / $perVol $unitAbbrev';
+    final doseRateDisplay = '$doseAmt $_resultUnit / $perVol $unitAbbrev';
 
     return Column(
       children: [
@@ -879,34 +839,6 @@ class DosingCalculatorState extends State<DosingCalculator> {
     );
   }
 
-  String _getPresetLabel(BuildContext context, String key) {
-    final l10n = AppLocalizations.of(context)!;
-    switch (key) {
-      case 'seachemPrime':
-        return l10n.dosingPresetSeachemPrime;
-      case 'seachemStability':
-        return l10n.dosingPresetSeachemStability;
-      case 'seachemFlourish':
-        return l10n.dosingPresetSeachemFlourish;
-      case 'seachemFlourishExcel':
-        return l10n.dosingPresetSeachemFlourishExcel;
-      case 'apiStressCoat':
-        return l10n.dosingPresetApiStressCoat;
-      case 'apiMelafix':
-        return l10n.dosingPresetApiMelafix;
-      case 'apiPimafix':
-        return l10n.dosingPresetApiPimafix;
-      case 'seachemAlkalineBuffer':
-        return l10n.dosingPresetSeachemAlkalineBuffer;
-      case 'seachemAcidBuffer':
-        return l10n.dosingPresetSeachemAcidBuffer;
-      case 'fritzsoDechlorinator':
-        return l10n.dosingPresetFritzsoDechlorinator;
-      default:
-        return l10n.dosingPresetCustom;
-    }
-  }
-
   Widget _buildInfoSection(BuildContext context, AppLocalizations l10n) {
     final cs = Theme.of(context).colorScheme;
     return Card(
@@ -998,25 +930,4 @@ class DosingCalculatorState extends State<DosingCalculator> {
       ),
     );
   }
-}
-
-/// Data class for a dosing preset.
-/// Stores bottle-readable doses: doseAmount per perVolume in both gallon and
-/// liter formats. E.g. "5 mL per 50 gallons" → doseAmountGal=5, perVolumeGal=50.
-class _DosingPreset {
-  final double doseAmountGal;
-  final double perVolumeGal;
-  final double doseAmountLiter;
-  final double perVolumeLiter;
-  final String unit;
-  final IconData icon;
-
-  const _DosingPreset({
-    required this.doseAmountGal,
-    required this.perVolumeGal,
-    required this.doseAmountLiter,
-    required this.perVolumeLiter,
-    required this.unit,
-    required this.icon,
-  });
 }
