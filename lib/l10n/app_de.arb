@@ -1582,8 +1582,23 @@
       "description": "Label above the custom species text field in the Ask AI species picker"
     },
     "upcomingNotifications": "Anstehend",
+    "@upcomingNotifications": {
+      "description": "Tab label for the upcoming notifications tab in tank details"
+    },
     "noUpcomingNotifications": "Keine anstehenden Benachrichtigungen",
+    "@noUpcomingNotifications": {
+      "description": "Empty state title when there are no upcoming notifications for a tank"
+    },
     "noUpcomingNotificationsDescription": "Fügen Sie Benachrichtigungen über den Benachrichtigungsmanager hinzu, um Erinnerungen für Fütterung, Wasserwechsel und mehr zu erhalten.",
+    "@noUpcomingNotificationsDescription": {
+      "description": "Empty state description when there are no upcoming notifications"
+    },
     "manageNotifications": "Benachrichtigungen verwalten",
-    "reschedule": "Neu planen"
+    "@manageNotifications": {
+      "description": "Button label to navigate to the notification management screen"
+    },
+    "reschedule": "Neu planen",
+    "@reschedule": {
+      "description": "Button label for the reschedule action on a notification"
+    }
   }
