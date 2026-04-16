@@ -3951,7 +3951,7 @@ class _RecordDoseSheetState extends ConsumerState<_RecordDoseSheet> {
                             color: cs.primary,
                           ),
                           const SizedBox(width: 8),
-                          Flexible(child: Text(preset.name, overflow: TextOverflow.ellipsis)),
+                          Flexible(child: Text(preset.name)),
                         ],
                       ),
                     );
@@ -3962,7 +3962,7 @@ class _RecordDoseSheetState extends ConsumerState<_RecordDoseSheet> {
                       children: [
                         Icon(Icons.edit_outlined, size: 18, color: cs.primary),
                         const SizedBox(width: 8),
-                        Flexible(child: Text(l10n.dosingCustomProduct, overflow: TextOverflow.ellipsis)),
+                        Flexible(child: Text(l10n.dosingCustomProduct)),
                       ],
                     ),
                   ),
