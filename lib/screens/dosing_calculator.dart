@@ -37,8 +37,8 @@ class DosingCalculatorState extends State<DosingCalculator> {
   // Each preset maps to: (dose per gallon, dose per liter, unit, icon)
   static const Map<String, _DosingPreset> _presets = {
     'seachemPrime': _DosingPreset(
-      dosePerGallon: 0.1, // 2 drops ≈ 0.1 mL per gallon
-      dosePerLiter: 0.1, // 5 mL per 200 L = 0.025 mL/L, but label says 1 cap (5 mL) per 50 gal
+      dosePerGallon: 0.1, // 1 capful (5 mL) per 50 gallons ≈ 0.1 mL/gal
+      dosePerLiter: 0.025, // 5 mL per 200 L
       unit: 'mL',
       icon: Icons.shield_outlined,
     ),
