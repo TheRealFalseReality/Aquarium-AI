@@ -905,6 +905,10 @@
   "@notifications": {
     "description": "Notifications menu option"
   },
+  "notification": "notification",
+  "@notification": {
+    "description": "Singular notification label"
+  },
   "notificationsExperimental": "Notifications (Experimental)",
   "@notificationsExperimental": {
     "description": "Notifications menu option with experimental tag"
@@ -5261,5 +5265,45 @@
     "customSpeciesLabel": "Or enter your own species",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
+    },
+    "upcomingNotifications": "Upcoming",
+    "@upcomingNotifications": {
+      "description": "Tab label for the upcoming notifications tab in tank details"
+    },
+    "noUpcomingNotifications": "No Upcoming Notifications",
+    "@noUpcomingNotifications": {
+      "description": "Empty state title when there are no upcoming notifications for a tank"
+    },
+    "noUpcomingNotificationsDescription": "Add notifications from the notification manager to get reminders for feeding, water changes, and more.",
+    "@noUpcomingNotificationsDescription": {
+      "description": "Empty state description when there are no upcoming notifications"
+    },
+    "manageNotifications": "Manage Notifications",
+    "@manageNotifications": {
+      "description": "Button label to navigate to the notification management screen"
+    },
+    "reschedule": "Reschedule",
+    "@reschedule": {
+      "description": "Button label for the reschedule action on a notification"
+    },
+    "allNotifications": "Notifications",
+    "@allNotifications": {
+      "description": "Title for the global notifications screen showing all notifications across tanks"
+    },
+    "allNotificationsDescription": "View and manage all upcoming notifications across your tanks. Quick-log activities and reschedule reminders from one place.",
+    "@allNotificationsDescription": {
+      "description": "Description for the notifications feature card on the welcome screen"
+    },
+    "allNotificationsDrawerDescription": "View all upcoming notifications and reminders across your tanks.",
+    "@allNotificationsDrawerDescription": {
+      "description": "Short description for the notifications feature in the drawer"
+    },
+    "globalNotificationsEmptyDescription": "Set up notifications on individual tanks to see them here. Use the notification manager on each tank to create reminders.",
+    "@globalNotificationsEmptyDescription": {
+      "description": "Empty state description when there are no notifications across any tank"
+    },
+    "globalNotificationsNoTanksDescription": "Create a tank first, then set up notifications to get reminders for feeding, water changes, and more.",
+    "@globalNotificationsNoTanksDescription": {
+      "description": "Empty state description when there are no tanks yet"
     }
   }
