@@ -1580,5 +1580,10 @@
     "customSpeciesLabel": "Oder eigene Art eingeben",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
-    }
+    },
+    "upcomingNotifications": "Anstehend",
+    "noUpcomingNotifications": "Keine anstehenden Benachrichtigungen",
+    "noUpcomingNotificationsDescription": "Fügen Sie Benachrichtigungen über den Benachrichtigungsmanager hinzu, um Erinnerungen für Fütterung, Wasserwechsel und mehr zu erhalten.",
+    "manageNotifications": "Benachrichtigungen verwalten",
+    "reschedule": "Neu planen"
   }

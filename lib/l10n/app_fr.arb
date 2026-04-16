@@ -1580,5 +1580,10 @@
     "customSpeciesLabel": "Ou entrez votre propre espèce",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
-    }
+    },
+    "upcomingNotifications": "À venir",
+    "noUpcomingNotifications": "Aucune notification à venir",
+    "noUpcomingNotificationsDescription": "Ajoutez des notifications depuis le gestionnaire de notifications pour recevoir des rappels pour l'alimentation, les changements d'eau et plus encore.",
+    "manageNotifications": "Gérer les notifications",
+    "reschedule": "Replanifier"
   }
