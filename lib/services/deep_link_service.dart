@@ -163,7 +163,11 @@ class DeepLinkService {
     AnalyticsService.logFeatureUsed(
       featureName: 'deep_link',
       parameters: {'path': path},
-    ).catchError((_) {});
+    ).catchError((e) {
+      if (kDebugMode) {
+        debugPrint('DeepLinkService: analytics error – $e');
+      }
+    });
 
     switch (path) {
       case '/':
@@ -269,17 +273,16 @@ class DeepLinkService {
   }
 
   /// Build a custom-scheme deep-link URI for the given [path] and optional [queryParameters].
+  ///
+  /// Produces URIs like `aquariumai://chatbot` or `aquariumai://profile?userId=abc`.
   static Uri buildCustomSchemeUri(
     String path, {
     Map<String, String>? queryParameters,
   }) {
-    return Uri(
-      scheme: deepLinkScheme,
-      host: '',
-      path: path,
-      queryParameters:
-          queryParameters?.isNotEmpty == true ? queryParameters : null,
-    );
+    final queryString = queryParameters != null && queryParameters.isNotEmpty
+        ? '?${queryParameters.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&')}'
+        : '';
+    return Uri.parse('$deepLinkScheme:/$path$queryString');
   }
 
   /// Build a shareable HTTPS link to a community post.

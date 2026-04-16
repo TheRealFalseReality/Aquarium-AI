@@ -54,6 +54,9 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 /// Global flag to track Firebase initialization status
 bool _firebaseInitialized = false;
 
+/// Whether the initial pending deep link has been processed.
+bool _deepLinkProcessed = false;
+
 /// Initialize Firebase with retry logic and error handling
 ///
 /// Handles TLS/SSL handshake exceptions and other connection issues gracefully
@@ -570,11 +573,12 @@ class MyApp extends ConsumerWidget {
           navigatorObservers: _getNavigatorObservers(),
           // Process any pending deep link once the navigator is mounted.
           builder: (context, child) {
-            // Schedule pending deep-link processing after the current frame
-            // so the navigator is fully mounted before we push routes.
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              DeepLinkService.instance.processPendingDeepLink();
-            });
+            if (!_deepLinkProcessed) {
+              _deepLinkProcessed = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                DeepLinkService.instance.processPendingDeepLink();
+              });
+            }
             return child!;
           },
           // debugShowCheckedModeBanner: false,
