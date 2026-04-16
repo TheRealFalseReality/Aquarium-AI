@@ -55,6 +55,7 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   in_app_update: ^4.2.5
   firebase_performance: ^0.11.1+5
+  app_links: ^7.0.0
 
 dev_dependencies:
   flutter_test:
