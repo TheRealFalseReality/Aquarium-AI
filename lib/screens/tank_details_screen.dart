@@ -638,22 +638,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   ),
                   const SizedBox(height: 10),
                   _buildFabAction(
-                    heroTag: 'fab_action_edit',
-                    icon: Icons.edit_outlined,
-                    label: l10n.editTank,
-                    cs: cs,
-                    onPressed: () {
-                      setState(() => _fabOpen = false);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              TankCreationScreen(existingTank: tank),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 10),
-                  _buildFabAction(
                     heroTag: 'fab_action_activity',
                     icon: Icons.history,
                     label: l10n.addLogEntry,
@@ -725,6 +709,22 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     onPressed: () {
                       setState(() => _fabOpen = false);
                       _quickAddInhabitant(context, tank);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFabAction(
+                    heroTag: 'fab_action_edit',
+                    icon: Icons.edit_outlined,
+                    label: l10n.editTank,
+                    cs: cs,
+                    onPressed: () {
+                      setState(() => _fabOpen = false);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TankCreationScreen(existingTank: tank),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 14),
