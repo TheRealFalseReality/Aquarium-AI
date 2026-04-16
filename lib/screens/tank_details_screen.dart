@@ -9,10 +9,13 @@ import 'package:uuid/uuid.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../models/dosing_entry.dart';
+import '../models/dosing_preset.dart';
 import '../models/fish.dart';
 import '../models/tank.dart';
 import '../models/water_parameter.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/dosing_presets_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
@@ -21,8 +24,9 @@ import '../utils/backup_restore_utils.dart';
 import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
 import '../widgets/accessible_feedback.dart';
+import '../widgets/dosing_preset_editor_dialog.dart';
 import '../widgets/notification_reschedule_dialog.dart';
-import 'dosing_logger_screen.dart';
+import 'dosing_calculator.dart';
 import 'notification_logger_screen.dart';
 import 'notification_management_screen.dart';
 import 'parameter_logger_screen.dart';
@@ -549,17 +553,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           label: Text(l10n.addParameter),
         );
       case 3: // Dosing
-        return FloatingActionButton.extended(
-          heroTag: 'fab_dosing',
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>
-                  DosingLoggerScreen(tank: tank, openAddDialog: true),
-            ),
-          ),
-          icon: const Icon(Icons.add),
-          label: Text(l10n.addDose),
-        );
+        return _buildDosingFab(context, tank);
       case 4: // Upcoming Notifications
         return FloatingActionButton.extended(
           heroTag: 'fab_notifications',
@@ -681,16 +675,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                   _buildFabAction(
                     heroTag: 'fab_action_dosing',
                     icon: Icons.medication_outlined,
-                    label: l10n.addDose,
+                    label: l10n.recordDose,
                     cs: cs,
                     onPressed: () {
                       setState(() => _fabOpen = false);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              DosingLoggerScreen(tank: tank, openAddDialog: true),
-                        ),
-                      );
+                      _showRecordDoseSheet(context, tank);
                     },
                   ),
                   const SizedBox(height: 10),
@@ -1597,114 +1586,333 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     }
   }
 
-  /// Dosing tab - Dosing diary entries
+  /// Dosing tab - Integrated dosing calculator + dosing history log
   Widget _buildDosingTab(BuildContext context, Tank tank) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
 
-    if (tank.dosingEntries.isEmpty) {
+    // All dosing entries, newest first
+    final allEntries = tank.dosingEntries.toList()
+      ..sort((a, b) => b.dateDosed.compareTo(a.dateDosed));
+
+    // Group entries by treatment name
+    final grouped = <String, List<DosingEntry>>{};
+    for (var entry in allEntries) {
+      grouped.putIfAbsent(entry.treatmentName, () => []).add(entry);
+    }
+
+    if (allEntries.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.medication_outlined,
-              size: 64,
-              color: cs.onSurface.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.noDosing,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: cs.onSurface.withOpacity(0.6),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.medication_outlined,
+                size: 64,
+                color: cs.onSurface.withOpacity(0.3),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                l10n.noDosingEntries,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: cs.onSurface.withOpacity(0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    // All dosing entries, newest first
-    final allEntries = tank.dosingEntries.reversed.toList();
-
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Navigation banner → full DosingLoggerScreen
-        OutlinedButton.icon(
-          icon: const Icon(Icons.medication_outlined),
-          label: Text(l10n.openDosingDiary),
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => DosingLoggerScreen(tank: tank),
-            ),
-          ),
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 48),
-          ),
-        ),
-        const SizedBox(height: 12),
+        // ── Summary card ────────────────────────────────────────────────
+        _buildDosingSummaryCard(context, tank, allEntries),
+        const SizedBox(height: 16),
 
+        // ── Dosing History ──────────────────────────────────────────────
         Text(
-          '${l10n.recentDosing} (${allEntries.length})',
+          '${l10n.dosingHistory} (${allEntries.length})',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
-        ...allEntries.map((entry) {
+
+        // Grouped by treatment name
+        ...grouped.entries.map((group) {
+          final treatmentName = group.key;
+          final entries = group.value;
           return Card(
-            child: ListTile(
+            margin: const EdgeInsets.only(bottom: 10),
+            child: ExpansionTile(
               leading: Container(
                 width: 40,
                 height: 40,
-                padding: const EdgeInsets.all(8),
-                child: Icon(Icons.medication, color: cs.primary),
-              ),
-              title: Text(entry.treatmentName),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('${entry.amount} ${entry.unit}'),
-                  Text(
-                    DateFormat.yMMMd().add_jm().format(entry.dateDosed),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: cs.onSurface.withOpacity(0.6),
-                    ),
-                  ),
-                  if (entry.notes != null && entry.notes!.isNotEmpty)
-                    Text(
-                      entry.notes!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                        color: cs.onSurface.withOpacity(0.7),
-                      ),
-                    ),
-                ],
-              ),
-              trailing: _buildEditDeleteMenu(
-                context: context,
-                onEdit: () =>
-                    showDosingSheet(context, tank, existingEntry: entry),
-                onDelete: () => _confirmDelete(
-                  context,
-                  onConfirm: () {
-                    final updatedTank = tank.copyWith(
-                      dosingEntries: tank.dosingEntries
-                          .where((e) => e.id != entry.id)
-                          .toList(),
-                      updatedAt: DateTime.now(),
-                    );
-                    ref.read(tankProvider.notifier).updateTank(updatedTank);
-                  },
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.medication,
+                  color: cs.primary,
+                  size: 22,
                 ),
               ),
+              title: Text(
+                treatmentName,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                l10n.dosingEntryCount(entries.length),
+                style: TextStyle(
+                  color: cs.onSurfaceVariant,
+                  fontSize: 12,
+                ),
+              ),
+              children: entries.map((entry) {
+                return ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 2,
+                  ),
+                  title: Text(
+                    '${entry.amount} ${entry.unit}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DateFormat.yMMMd().add_jm().format(entry.dateDosed),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: cs.onSurface.withOpacity(0.6),
+                        ),
+                      ),
+                      if (entry.notes != null && entry.notes!.isNotEmpty)
+                        Text(
+                          entry.notes!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                            color: cs.onSurface.withOpacity(0.7),
+                          ),
+                        ),
+                    ],
+                  ),
+                  trailing: _buildEditDeleteMenu(
+                    context: context,
+                    onEdit: () => _showRecordDoseSheet(
+                      context,
+                      tank,
+                      existingEntry: entry,
+                    ),
+                    onDelete: () => _confirmDelete(
+                      context,
+                      onConfirm: () {
+                        final updatedTank = tank.copyWith(
+                          dosingEntries: tank.dosingEntries
+                              .where((e) => e.id != entry.id)
+                              .toList(),
+                          updatedAt: DateTime.now(),
+                        );
+                        ref.read(tankProvider.notifier).updateTank(updatedTank);
+                        AnalyticsService.logFeatureUsed(
+                          featureName: 'dosing_entry_deleted',
+                          parameters: {
+                            'treatment_name': entry.treatmentName,
+                            'tank_type': tank.type,
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           );
         }),
+        // Extra bottom padding so FAB doesn't obscure the last item
+        const SizedBox(height: 80),
       ],
+    );
+  }
+
+  /// Summary card for the dosing tab showing totals and last dose
+  Widget _buildDosingSummaryCard(
+    BuildContext context,
+    Tank tank,
+    List<DosingEntry> allEntries,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final uniqueTreatments =
+        allEntries.map((e) => e.treatmentName).toSet().length;
+    final lastDose = allEntries.isNotEmpty ? allEntries.first : null;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.summarize, color: cs.primary),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    l10n.dosingSum,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDosingSummaryItem(
+                    context,
+                    l10n.totalDoses,
+                    allEntries.length.toString(),
+                    Icons.medication,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildDosingSummaryItem(
+                    context,
+                    l10n.treatments,
+                    uniqueTreatments.toString(),
+                    Icons.inventory_2,
+                  ),
+                ),
+              ],
+            ),
+            if (lastDose != null) ...[
+              const SizedBox(height: 12),
+              const Divider(),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.schedule, size: 16, color: cs.onSurfaceVariant),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      l10n.dosingLastDose(
+                        DateFormat('MMM d, yyyy').format(lastDose.dateDosed),
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDosingSummaryItem(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 20, color: cs.primary),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: cs.primary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the dosing FAB with two options: Record Dose & Calculate & Record
+  Widget _buildDosingFab(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Calculate & Record option
+        FloatingActionButton.extended(
+          heroTag: 'fab_dosing_calc',
+          onPressed: () => _showCalcAndRecordSheet(context, tank),
+          icon: const Icon(Icons.calculate_outlined),
+          label: Text(l10n.calculateAndRecord),
+          backgroundColor: cs.secondaryContainer,
+          foregroundColor: cs.onSecondaryContainer,
+        ),
+        const SizedBox(height: 10),
+        // Quick Record option
+        FloatingActionButton.extended(
+          heroTag: 'fab_dosing_record',
+          onPressed: () => _showRecordDoseSheet(context, tank),
+          icon: const Icon(Icons.add),
+          label: Text(l10n.recordDose),
+        ),
+      ],
+    );
+  }
+
+  /// Shows a bottom sheet to quickly record a dose using dosing presets
+  void _showRecordDoseSheet(
+    BuildContext context,
+    Tank tank, {
+    DosingEntry? existingEntry,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => _RecordDoseSheet(
+        tank: tank,
+        existingEntry: existingEntry,
+      ),
+    );
+  }
+
+  /// Shows a bottom sheet to calculate a dose for a tank and record it
+  void _showCalcAndRecordSheet(BuildContext context, Tank tank) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => _CalcAndRecordDoseSheet(tank: tank),
     );
   }
 
@@ -3483,6 +3691,1296 @@ class _TankPhotoDialogState extends State<_TankPhotoDialog> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// ── Volume units for dosing entries ────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+
+const List<String> _kDosingVolumeUnits = [
+  'mL',
+  'L',
+  'oz',
+  'tsp',
+  'tbsp',
+  'drops',
+  'g',
+  'gal',
+  'cups',
+];
+
+// ════════════════════════════════════════════════════════════════════════════
+// ── Record Dose Bottom Sheet ──────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+
+/// A bottom sheet for quickly recording a dose using dosing presets.
+/// Replaces the old DosingLoggerScreen's _AddDosingEntrySheet.
+class _RecordDoseSheet extends ConsumerStatefulWidget {
+  final Tank tank;
+  final DosingEntry? existingEntry;
+
+  const _RecordDoseSheet({required this.tank, this.existingEntry});
+
+  @override
+  ConsumerState<_RecordDoseSheet> createState() => _RecordDoseSheetState();
+}
+
+class _RecordDoseSheetState extends ConsumerState<_RecordDoseSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _amountController = TextEditingController();
+  final _notesController = TextEditingController();
+  final _customNameController = TextEditingController();
+  late DateTime _selectedDate;
+  late String _selectedUnit;
+  String? _selectedPresetId; // null = not chosen, 'custom' = custom entry
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingEntry != null) {
+      final entry = widget.existingEntry!;
+      _amountController.text = entry.amount.toString();
+      _notesController.text = entry.notes ?? '';
+      _selectedDate = entry.dateDosed;
+      _selectedUnit = entry.unit;
+      // Try to match existing entry to a preset
+      final presets = ref.read(dosingPresetsProvider);
+      final matchedPreset = presets.where(
+        (p) => p.name == entry.treatmentName,
+      );
+      if (matchedPreset.isNotEmpty) {
+        _selectedPresetId = matchedPreset.first.id;
+      } else {
+        _selectedPresetId = 'custom';
+        _customNameController.text = entry.treatmentName;
+      }
+    } else {
+      _selectedDate = DateTime.now();
+      _selectedUnit = 'mL';
+    }
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _notesController.dispose();
+    _customNameController.dispose();
+    super.dispose();
+  }
+
+  String _getTreatmentName() {
+    if (_selectedPresetId == 'custom') {
+      return _customNameController.text.trim();
+    }
+    final presets = ref.read(dosingPresetsProvider);
+    try {
+      return presets.firstWhere((p) => p.id == _selectedPresetId).name;
+    } catch (_) {
+      return _customNameController.text.trim();
+    }
+  }
+
+  Future<void> _selectDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && mounted) {
+      final time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_selectedDate),
+      );
+      if (time != null && mounted) {
+        setState(() {
+          _selectedDate = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            time.hour,
+            time.minute,
+          );
+        });
+      }
+    }
+  }
+
+  void _saveEntry() {
+    if (!_formKey.currentState!.validate()) return;
+    final isEditing = widget.existingEntry != null;
+    final treatmentName = _getTreatmentName();
+    final amount = double.parse(_amountController.text);
+    final notes = _notesController.text.trim().isNotEmpty
+        ? _notesController.text.trim()
+        : null;
+
+    // Get current tank from provider for latest state
+    final tanks = ref.read(tankProvider).tanks;
+    final currentTank = tanks.firstWhere(
+      (t) => t.id == widget.tank.id,
+      orElse: () => widget.tank,
+    );
+
+    if (isEditing) {
+      final entry = widget.existingEntry!.copyWith(
+        treatmentName: treatmentName,
+        amount: amount,
+        unit: _selectedUnit,
+        dateDosed: _selectedDate,
+        notes: notes,
+      );
+      final updatedEntries = currentTank.dosingEntries.map((e) {
+        return e.id == entry.id ? entry : e;
+      }).toList();
+      final updatedTank = currentTank.copyWith(
+        dosingEntries: updatedEntries,
+        updatedAt: DateTime.now(),
+      );
+      ref.read(tankProvider.notifier).updateTank(updatedTank);
+      AnalyticsService.logFeatureUsed(
+        featureName: 'dosing_entry_updated',
+        parameters: {
+          'treatment_name': treatmentName,
+          'tank_type': currentTank.type,
+          'unit': _selectedUnit,
+        },
+      );
+    } else {
+      final entry = DosingEntry.create(
+        treatmentName: treatmentName,
+        amount: amount,
+        unit: _selectedUnit,
+        dateDosed: _selectedDate,
+        notes: notes,
+      );
+      final updatedEntries = [...currentTank.dosingEntries, entry];
+      final updatedTank = currentTank.copyWith(
+        dosingEntries: updatedEntries,
+        updatedAt: DateTime.now(),
+      );
+      ref.read(tankProvider.notifier).updateTank(updatedTank);
+      AnalyticsService.logFeatureUsed(
+        featureName: 'dosing_entry_added',
+        parameters: {
+          'treatment_name': treatmentName,
+          'tank_type': currentTank.type,
+          'unit': _selectedUnit,
+          'has_notes': notes != null ? 'true' : 'false',
+        },
+      );
+      AnalyticsService.logTankAction(
+        action: 'dosing_entry_added',
+        tankType: currentTank.type,
+      );
+    }
+
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.dosingRecordedSnack),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final isEditing = widget.existingEntry != null;
+    final presets = ref.watch(dosingPresetsProvider);
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 16,
+        right: 16,
+        top: 16,
+      ),
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      isEditing ? l10n.dosingRecordTitle : l10n.dosingRecordTitle,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Product preset dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedPresetId,
+                decoration: InputDecoration(
+                  labelText: '${l10n.dosingProduct} *',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.medication_outlined),
+                  filled: true,
+                  fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
+                ),
+                items: [
+                  ...presets.map((preset) {
+                    return DropdownMenuItem(
+                      value: preset.id,
+                      child: Row(
+                        children: [
+                          Icon(
+                            dosingIconFromName(preset.iconName),
+                            size: 18,
+                            color: cs.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(child: Text(preset.name)),
+                        ],
+                      ),
+                    );
+                  }),
+                  DropdownMenuItem(
+                    value: 'custom',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_outlined, size: 18, color: cs.primary),
+                        const SizedBox(width: 8),
+                        Flexible(child: Text(l10n.dosingCustomProduct)),
+                      ],
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _selectedPresetId = value;
+                    if (value != 'custom') {
+                      _customNameController.clear();
+                      // Auto-set unit from preset
+                      try {
+                        final preset =
+                            presets.firstWhere((p) => p.id == value);
+                        _selectedUnit = preset.unit;
+                      } catch (_) {}
+                    }
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a product';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Custom name (shown only when "Custom" is selected)
+              if (_selectedPresetId == 'custom') ...[
+                TextFormField(
+                  controller: _customNameController,
+                  decoration: InputDecoration(
+                    labelText: '${l10n.dosingCustomProductName} *',
+                    hintText: l10n.dosingCustomProductName,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.edit),
+                    filled: true,
+                    fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
+                  ),
+                  textCapitalization: TextCapitalization.words,
+                  validator: (value) {
+                    if (_selectedPresetId == 'custom' &&
+                        (value == null || value.trim().isEmpty)) {
+                      return 'Please enter a product name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Amount and unit
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _amountController,
+                      decoration: InputDecoration(
+                        labelText: '${l10n.dosingAmount} *',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.science),
+                        filled: true,
+                        fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Required';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Enter valid number';
+                        }
+                        if (double.parse(value) <= 0) {
+                          return 'Must be > 0';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedUnit,
+                      decoration: InputDecoration(
+                        labelText: l10n.doseUnit,
+                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
+                      ),
+                      items: _kDosingVolumeUnits
+                          .map(
+                            (unit) => DropdownMenuItem(
+                              value: unit,
+                              child: Text(unit),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedUnit = value);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Date & Time
+              InkWell(
+                onTap: _selectDate,
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: l10n.dosingDateLabel,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.calendar_today),
+                    filled: true,
+                    fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
+                  ),
+                  child: Text(
+                    DateFormat('MMM d, yyyy - h:mm a').format(_selectedDate),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Notes
+              TextFormField(
+                controller: _notesController,
+                decoration: InputDecoration(
+                  labelText: l10n.dosingNotes,
+                  hintText: l10n.dosingNotesHint,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.note),
+                  filled: true,
+                  fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
+                ),
+                maxLines: 3,
+                textCapitalization: TextCapitalization.sentences,
+              ),
+              const SizedBox(height: 24),
+
+              // Save button
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _saveEntry,
+                  icon: const Icon(Icons.save),
+                  label: Text(
+                    isEditing ? l10n.dosingRecordUpdate : l10n.dosingRecordSave,
+                  ),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// ── Calculate & Record Dose Bottom Sheet ──────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════
+
+/// A bottom sheet that integrates the dosing calculator and then records the
+/// calculated dose as a dosing entry on the tank.
+class _CalcAndRecordDoseSheet extends ConsumerStatefulWidget {
+  final Tank tank;
+
+  const _CalcAndRecordDoseSheet({required this.tank});
+
+  @override
+  ConsumerState<_CalcAndRecordDoseSheet> createState() =>
+      _CalcAndRecordDoseSheetState();
+}
+
+class _CalcAndRecordDoseSheetState
+    extends ConsumerState<_CalcAndRecordDoseSheet> {
+  // ── Calculator state ─────────────────────────────────────────────────────
+  String _volumeUnit = 'Gallons';
+  String? _selectedPresetId;
+  final _tankSizeController = TextEditingController();
+  final _doseAmountController = TextEditingController();
+  final _dosePerVolumeController = TextEditingController();
+  final _notesController = TextEditingController();
+  double? _totalDose;
+  String _resultUnit = 'mL';
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-fill tank size from tank settings
+    final tank = widget.tank;
+    if (tank.sizeGallons != null && tank.sizeGallons! > 0) {
+      _tankSizeController.text = _formatNumber(tank.sizeGallons!);
+      _volumeUnit = 'Gallons';
+    } else if (tank.sizeLiters != null && tank.sizeLiters! > 0) {
+      _tankSizeController.text = _formatNumber(tank.sizeLiters!);
+      _volumeUnit = 'Liters';
+    }
+  }
+
+  @override
+  void dispose() {
+    _tankSizeController.dispose();
+    _doseAmountController.dispose();
+    _dosePerVolumeController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  String _formatNumber(double value) {
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toString();
+  }
+
+  DosingPreset? _findPreset(List<DosingPreset> presets, String? id) {
+    if (id == null || id == 'custom') return null;
+    try {
+      return presets.firstWhere((p) => p.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _selectPreset(String? id) {
+    final presets = ref.read(dosingPresetsProvider);
+    setState(() {
+      _selectedPresetId = id;
+      _totalDose = null;
+      if (id != null && id != 'custom') {
+        final preset = _findPreset(presets, id);
+        if (preset != null) {
+          if (_volumeUnit == 'Gallons') {
+            _doseAmountController.text =
+                _formatNumber(preset.doseAmountGal);
+            _dosePerVolumeController.text =
+                _formatNumber(preset.perVolumeGal);
+          } else {
+            _doseAmountController.text =
+                _formatNumber(preset.doseAmountLiter);
+            _dosePerVolumeController.text =
+                _formatNumber(preset.perVolumeLiter);
+          }
+          _resultUnit = preset.unit;
+        }
+      } else if (id == 'custom') {
+        _doseAmountController.clear();
+        _dosePerVolumeController.clear();
+        _resultUnit = 'mL';
+      }
+    });
+  }
+
+  void _calculate() {
+    final tankSize = double.tryParse(_tankSizeController.text);
+    final doseAmount = double.tryParse(_doseAmountController.text);
+    final perVolume = double.tryParse(_dosePerVolumeController.text);
+
+    if (tankSize == null ||
+        tankSize <= 0 ||
+        doseAmount == null ||
+        doseAmount <= 0 ||
+        perVolume == null ||
+        perVolume <= 0) {
+      setState(() => _totalDose = null);
+      return;
+    }
+
+    AnalyticsService.logCalculatorUsed(
+      calculatorType: 'dosing',
+      inputData: {
+        'preset': _selectedPresetId ?? 'none',
+        'volume_unit': _volumeUnit,
+        'source': 'tank_details',
+      },
+    );
+
+    setState(() {
+      _totalDose = (doseAmount / perVolume) * tankSize;
+    });
+  }
+
+  void _recordCalculatedDose() {
+    if (_totalDose == null || _selectedPresetId == null) return;
+
+    final presets = ref.read(dosingPresetsProvider);
+    final selectedPreset = _findPreset(presets, _selectedPresetId);
+    final treatmentName =
+        selectedPreset?.name ?? AppLocalizations.of(context)!.dosingCustomProduct;
+
+    final tanks = ref.read(tankProvider).tanks;
+    final currentTank = tanks.firstWhere(
+      (t) => t.id == widget.tank.id,
+      orElse: () => widget.tank,
+    );
+
+    final notes = _notesController.text.trim().isNotEmpty
+        ? _notesController.text.trim()
+        : null;
+
+    final entry = DosingEntry.create(
+      treatmentName: treatmentName,
+      amount: double.parse(_totalDose!.toStringAsFixed(2)),
+      unit: _resultUnit,
+      dateDosed: DateTime.now(),
+      notes: notes,
+    );
+
+    final updatedEntries = [...currentTank.dosingEntries, entry];
+    final updatedTank = currentTank.copyWith(
+      dosingEntries: updatedEntries,
+      updatedAt: DateTime.now(),
+    );
+    ref.read(tankProvider.notifier).updateTank(updatedTank);
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'dosing_entry_added',
+      parameters: {
+        'treatment_name': treatmentName,
+        'tank_type': currentTank.type,
+        'unit': _resultUnit,
+        'source': 'calculator',
+      },
+    );
+    AnalyticsService.logTankAction(
+      action: 'dosing_entry_added',
+      tankType: currentTank.type,
+    );
+
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.dosingRecordedSnack),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showPresetPicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final presets = ref.read(dosingPresetsProvider);
+
+    showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: cs.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.55,
+          minChildSize: 0.35,
+          maxChildSize: 0.85,
+          expand: false,
+          builder: (_, scrollController) {
+            return Column(
+              children: [
+                // Drag handle
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 4),
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: cs.onSurfaceVariant.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.science_outlined, color: cs.primary),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          l10n.dosingPresetTitle,
+                          style: Theme.of(ctx)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: cs.onSurface,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    children: [
+                      ...presets.map((preset) {
+                        final isSelected = _selectedPresetId == preset.id;
+                        final unitAbbrev = _volumeUnit == 'Gallons'
+                            ? l10n.dosingGalAbbrev
+                            : l10n.dosingLAbbrev;
+                        final doseAmt = _volumeUnit == 'Gallons'
+                            ? preset.doseAmountGal
+                            : preset.doseAmountLiter;
+                        final perVol = _volumeUnit == 'Gallons'
+                            ? preset.perVolumeGal
+                            : preset.perVolumeLiter;
+                        final subtitle =
+                            '${_formatNumber(doseAmt)} ${preset.unit} per ${_formatNumber(perVol)} $unitAbbrev';
+
+                        return ListTile(
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? cs.primaryContainer
+                                  : cs.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              dosingIconFromName(preset.iconName),
+                              color: isSelected
+                                  ? cs.primary
+                                  : cs.onSurfaceVariant,
+                              size: 22,
+                            ),
+                          ),
+                          title: Text(
+                            preset.name,
+                            style: TextStyle(
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? cs.primary
+                                  : cs.onSurface,
+                            ),
+                          ),
+                          subtitle: Text(
+                            subtitle,
+                            style: Theme.of(ctx)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: cs.onSurfaceVariant),
+                          ),
+                          trailing: isSelected
+                              ? Icon(Icons.check_circle,
+                                  color: cs.primary, size: 22)
+                              : null,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          onTap: () => Navigator.pop(ctx, preset.id),
+                        );
+                      }),
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      ListTile(
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _selectedPresetId == 'custom'
+                                ? cs.primaryContainer
+                                : cs.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.edit_outlined,
+                            color: _selectedPresetId == 'custom'
+                                ? cs.primary
+                                : cs.onSurfaceVariant,
+                            size: 22,
+                          ),
+                        ),
+                        title: Text(
+                          l10n.dosingPresetCustom,
+                          style: TextStyle(
+                            fontWeight: _selectedPresetId == 'custom'
+                                ? FontWeight.bold
+                                : FontWeight.w500,
+                            color: _selectedPresetId == 'custom'
+                                ? cs.primary
+                                : cs.onSurface,
+                          ),
+                        ),
+                        subtitle: Text(
+                          l10n.dosingCustomSubtitle,
+                          style: Theme.of(ctx)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: cs.onSurfaceVariant),
+                        ),
+                        trailing: _selectedPresetId == 'custom'
+                            ? Icon(Icons.check_circle,
+                                color: cs.primary, size: 22)
+                            : null,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        onTap: () => Navigator.pop(ctx, 'custom'),
+                      ),
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      ListTile(
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: cs.primaryContainer,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.add_circle_outline,
+                            color: cs.primary,
+                            size: 22,
+                          ),
+                        ),
+                        title: Text(
+                          l10n.dosingAddNewProduct,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: cs.primary,
+                          ),
+                        ),
+                        subtitle: Text(
+                          l10n.dosingAddNewProductSubtitle,
+                          style: Theme.of(ctx)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: cs.onSurfaceVariant),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          showDosingPresetEditorDialog(context, ref)
+                              .then((newPresetId) {
+                            if (newPresetId != null) {
+                              _selectPreset(newPresetId);
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((selected) {
+      if (selected != null) {
+        _selectPreset(selected);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final presets = ref.watch(dosingPresetsProvider);
+    final selectedPreset = _findPreset(presets, _selectedPresetId);
+
+    // Build the current preset display label
+    final String presetDisplayLabel;
+    if (_selectedPresetId == null) {
+      presetDisplayLabel = l10n.dosingSelectProduct;
+    } else if (_selectedPresetId == 'custom') {
+      presetDisplayLabel = l10n.dosingPresetCustom;
+    } else {
+      presetDisplayLabel = selectedPreset?.name ?? l10n.dosingPresetCustom;
+    }
+
+    final bool isCustom =
+        _selectedPresetId == null || _selectedPresetId == 'custom';
+
+    // Dose description for the selected preset
+    String? presetDoseDescription;
+    if (selectedPreset != null) {
+      final unitAbbrev = _volumeUnit == 'Gallons'
+          ? l10n.dosingGalAbbrev
+          : l10n.dosingLAbbrev;
+      final doseAmt = _volumeUnit == 'Gallons'
+          ? selectedPreset.doseAmountGal
+          : selectedPreset.doseAmountLiter;
+      final perVol = _volumeUnit == 'Gallons'
+          ? selectedPreset.perVolumeGal
+          : selectedPreset.perVolumeLiter;
+      presetDoseDescription =
+          '${_formatNumber(doseAmt)} ${selectedPreset.unit} per ${_formatNumber(perVol)} $unitAbbrev';
+    }
+
+    // Format the dose result
+    final String? formattedDose = _totalDose != null
+        ? (_totalDose! == _totalDose!.roundToDouble()
+            ? _totalDose!.toStringAsFixed(1)
+            : _totalDose!.toStringAsFixed(2))
+        : null;
+
+    final bool showTsp =
+        _totalDose != null && _resultUnit == 'mL' && _totalDose! >= 1;
+    final String tspValue =
+        showTsp ? (_totalDose! / 5).toStringAsFixed(2) : '';
+    final bool showCaps =
+        _totalDose != null && _resultUnit == 'mL' && _totalDose! >= 5;
+    final String capValue =
+        showCaps ? (_totalDose! / 5).toStringAsFixed(1) : '';
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 16,
+        right: 16,
+        top: 16,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    l10n.dosingCalcRecordTitle,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.dosingCalculatorSubtitle,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: cs.onSurface.withOpacity(0.65),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // ── Volume unit toggle ────────────────────────────────────────
+            Row(
+              children: [
+                Text(
+                  l10n.units,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(
+                      value: 'Gallons',
+                      label: Text(l10n.gallons),
+                    ),
+                    ButtonSegment(
+                      value: 'Liters',
+                      label: Text(l10n.liters),
+                    ),
+                  ],
+                  selected: {_volumeUnit},
+                  onSelectionChanged: (value) {
+                    setState(() {
+                      _volumeUnit = value.first;
+                      _totalDose = null;
+                      // Update tank size for the other unit
+                      final tank = widget.tank;
+                      if (_volumeUnit == 'Gallons' &&
+                          tank.sizeGallons != null &&
+                          tank.sizeGallons! > 0) {
+                        _tankSizeController.text =
+                            _formatNumber(tank.sizeGallons!);
+                      } else if (_volumeUnit == 'Liters' &&
+                          tank.sizeLiters != null &&
+                          tank.sizeLiters! > 0) {
+                        _tankSizeController.text =
+                            _formatNumber(tank.sizeLiters!);
+                      }
+                    });
+                    if (_selectedPresetId != null &&
+                        _selectedPresetId != 'custom') {
+                      _selectPreset(_selectedPresetId!);
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // ── Product preset selector ───────────────────────────────────
+            InkWell(
+              onTap: () => _showPresetPicker(context),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: selectedPreset != null
+                      ? cs.primaryContainer
+                      : cs.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: selectedPreset != null
+                        ? cs.primary.withOpacity(0.5)
+                        : cs.outline.withOpacity(0.3),
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      selectedPreset != null
+                          ? dosingIconFromName(selectedPreset.iconName)
+                          : Icons.science_outlined,
+                      color: selectedPreset != null
+                          ? cs.primary
+                          : cs.onSurfaceVariant,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            presetDisplayLabel,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: selectedPreset != null
+                                      ? cs.onPrimaryContainer
+                                      : cs.onSurface,
+                                ),
+                          ),
+                          if (presetDoseDescription != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              presetDoseDescription,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: cs.onPrimaryContainer
+                                        .withOpacity(0.7),
+                                  ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: selectedPreset != null
+                          ? cs.onPrimaryContainer
+                          : cs.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // ── Tank size input ───────────────────────────────────────────
+            TextField(
+              controller: _tankSizeController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(
+                labelText: l10n.dosingTankSize,
+                hintText:
+                    _volumeUnit == 'Gallons' ? 'e.g. 55' : 'e.g. 200',
+                suffixText:
+                    _volumeUnit == 'Gallons' ? l10n.gallons : l10n.liters,
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.water_outlined),
+                helperText: (widget.tank.sizeGallons != null ||
+                        widget.tank.sizeLiters != null)
+                    ? l10n.dosingTankSizeAutoFilled
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // ── Dose amount / per volume ──────────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _doseAmountController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: l10n.dosingDoseAmountLabel,
+                      hintText: 'e.g. 5',
+                      suffixText: _resultUnit,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.science_outlined),
+                    ),
+                    enabled: isCustom,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    l10n.dosingPer,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: TextField(
+                    controller: _dosePerVolumeController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: _volumeUnit == 'Gallons'
+                          ? l10n.gallons
+                          : l10n.liters,
+                      hintText: 'e.g. 50',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.straighten_outlined),
+                    ),
+                    enabled: isCustom,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // ── Notes (optional) ──────────────────────────────────────────
+            TextFormField(
+              controller: _notesController,
+              decoration: InputDecoration(
+                labelText: l10n.dosingNotes,
+                hintText: l10n.dosingNotesHint,
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.note),
+                filled: true,
+                fillColor: cs.surfaceContainerHighest.withOpacity(0.5),
+              ),
+              maxLines: 2,
+              textCapitalization: TextCapitalization.sentences,
+            ),
+            const SizedBox(height: 20),
+
+            // ── Calculate button ──────────────────────────────────────────
+            if (_totalDose == null)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate_outlined),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: cs.primary,
+                    foregroundColor: cs.onPrimary,
+                  ),
+                  label: Text(
+                    l10n.dosingCalculateFirst,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+            // ── Results + Record button ───────────────────────────────────
+            if (_totalDose != null) ...[
+              Container(
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: cs.primary, width: 1.5),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 16,
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.science_rounded,
+                            color: cs.primary, size: 20),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            l10n.dosingResultTitle,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: cs.onPrimaryContainer,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (selectedPreset != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.dosingResultProduct(selectedPreset.name),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(
+                              color:
+                                  cs.onPrimaryContainer.withOpacity(0.7),
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    Text(
+                      '$formattedDose $_resultUnit',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onPrimaryContainer,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (showTsp) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '≈ $tspValue ${l10n.dosingTeaspoons}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(
+                              color:
+                                  cs.onPrimaryContainer.withOpacity(0.8),
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    if (showCaps) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        '≈ $capValue ${l10n.dosingCapfuls}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(
+                              color:
+                                  cs.onPrimaryContainer.withOpacity(0.8),
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _recordCalculatedDose,
+                  icon: const Icon(Icons.save),
+                  label: Text(l10n.dosingRecordCalculated),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Recalculate link
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => setState(() => _totalDose = null),
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: Text(l10n.dosingCalculateFirst),
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );
