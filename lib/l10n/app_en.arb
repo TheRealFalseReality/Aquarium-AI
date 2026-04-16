@@ -5261,5 +5261,53 @@
     "customSpeciesLabel": "Or enter your own species",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
+    },
+    "somethingWentWrong": "Something went wrong",
+    "@somethingWentWrong": {
+      "description": "Generic error heading shown in the ErrorHandlerWidget"
+    },
+    "tryAgain": "Try Again",
+    "@tryAgain": {
+      "description": "Label for generic retry button in the ErrorHandlerWidget"
+    },
+    "aiProviderSettings": "AI Provider Settings",
+    "@aiProviderSettings": {
+      "description": "Button label that navigates to AI provider settings when an API key error occurs"
+    },
+    "goToSettings": "Go to Settings",
+    "@goToSettings": {
+      "description": "Button label that navigates to the settings screen"
+    },
+    "neverShowAgain": "Never Show Again",
+    "@neverShowAgain": {
+      "description": "Button label to permanently dismiss a dialog"
+    },
+    "checkYourApiPlan": "Check API Plan",
+    "@checkYourApiPlan": {
+      "description": "Button label shown when the user has exceeded their API quota or billing limit"
+    },
+    "errorTimeoutTitle": "Request Timed Out",
+    "@errorTimeoutTitle": {
+      "description": "Title for timeout error dialog"
+    },
+    "errorNetworkTitle": "Connection Issue",
+    "@errorNetworkTitle": {
+      "description": "Title for network error dialog"
+    },
+    "errorServerTitle": "Service Unavailable",
+    "@errorServerTitle": {
+      "description": "Title for server error dialog"
+    },
+    "errorQuotaTitle": "API Quota Exceeded",
+    "@errorQuotaTitle": {
+      "description": "Title for quota exceeded error dialog"
+    },
+    "errorContentFilterTitle": "Content Filtered",
+    "@errorContentFilterTitle": {
+      "description": "Title for content safety filter error dialog"
+    },
+    "errorForbiddenTitle": "Access Denied",
+    "@errorForbiddenTitle": {
+      "description": "Title for 403 forbidden error dialog"
     }
   }

@@ -35,6 +35,8 @@ class AquariumStockingState {
   final bool isApiKeyError;
   final bool isRetryable;
   final bool isRateLimitError;
+  final bool isQuotaError;
+  final bool isNetworkError;
   final List<Fish> selectedFish;
 
   AquariumStockingState({
@@ -45,6 +47,8 @@ class AquariumStockingState {
     this.isApiKeyError = false,
     this.isRetryable = false,
     this.isRateLimitError = false,
+    this.isQuotaError = false,
+    this.isNetworkError = false,
     this.selectedFish = const [],
   });
 
@@ -56,6 +60,8 @@ class AquariumStockingState {
     bool? isApiKeyError,
     bool? isRetryable,
     bool? isRateLimitError,
+    bool? isQuotaError,
+    bool? isNetworkError,
     List<Fish>? selectedFish,
     bool clearError = false,
     bool clearRecommendation = false,
@@ -71,6 +77,8 @@ class AquariumStockingState {
       isRetryable: clearError ? false : isRetryable ?? this.isRetryable,
       isRateLimitError:
           clearError ? false : isRateLimitError ?? this.isRateLimitError,
+      isQuotaError: clearError ? false : isQuotaError ?? this.isQuotaError,
+      isNetworkError: clearError ? false : isNetworkError ?? this.isNetworkError,
       selectedFish: selectedFish ?? this.selectedFish,
     );
   }
@@ -341,17 +349,20 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
       }
     } catch (e) {
-      final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());
+      final errorStr = e.toString();
+      final isApiKeyErr = ApiErrorHandler.isApiKeyError(errorStr);
+      final isQuotaErr = ApiErrorHandler.isQuotaError(errorStr);
+      final isNetworkErr = ApiErrorHandler.isNetworkError(errorStr);
       if (!isApiKeyErr && models.usingDeveloperGroqKeyForText) {
         await DevRateLimiter.undoLastRequest();
       }
-      final errorMessage = ApiErrorHandler.getFriendlyErrorMessage(
-        e.toString(),
-      );
+      final errorMessage = ApiErrorHandler.getFriendlyErrorMessage(errorStr);
       state = state.copyWith(
         error: errorMessage,
         isApiKeyError: isApiKeyErr,
-        isRetryable: !isApiKeyErr,
+        isRetryable: !isApiKeyErr && !isQuotaErr,
+        isQuotaError: isQuotaErr,
+        isNetworkError: isNetworkErr,
         isLoading: false,
       );
     }
@@ -641,17 +652,20 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
         );
       }
     } catch (e) {
-      final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());
+      final errorStr = e.toString();
+      final isApiKeyErr = ApiErrorHandler.isApiKeyError(errorStr);
+      final isQuotaErr = ApiErrorHandler.isQuotaError(errorStr);
+      final isNetworkErr = ApiErrorHandler.isNetworkError(errorStr);
       if (!isApiKeyErr && models.usingDeveloperGroqKeyForText) {
         await DevRateLimiter.undoLastRequest();
       }
-      final errorMessage = ApiErrorHandler.getFriendlyErrorMessage(
-        e.toString(),
-      );
+      final errorMessage = ApiErrorHandler.getFriendlyErrorMessage(errorStr);
       state = state.copyWith(
         error: errorMessage,
         isApiKeyError: isApiKeyErr,
-        isRetryable: !isApiKeyErr,
+        isRetryable: !isApiKeyErr && !isQuotaErr,
+        isQuotaError: isQuotaErr,
+        isNetworkError: isNetworkErr,
         isLoading: false,
       );
     }

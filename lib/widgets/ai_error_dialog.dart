@@ -3,12 +3,14 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 import '../l10n/app_localizations.dart';
 import '../theme_colors.dart';
+import '../utils/api_error_handler.dart';
 import 'remove_ads_dialog.dart';
 
 /// Shows a modern, sleek dialog for AI errors.
 ///
 /// Provides a [Retry] button when [onRetry] is supplied and an optional
-/// [Go to AI Provider Settings] button when [isApiKeyError] is `true`.
+/// [Go to AI Provider Settings] button when [isApiKeyError] or
+/// [isQuotaError] is `true`.
 ///
 /// When [isRateLimitError] is `true`, the dialog shows a Founder Aquarist
 /// upsell (ad removal + higher limits) instead of the generic error header.
@@ -21,6 +23,8 @@ void showAiErrorDialog(
   bool isApiKeyError = false,
   bool isRetryable = true,
   bool isRateLimitError = false,
+  bool isQuotaError = false,
+  bool isNetworkError = false,
 }) {
   if (!context.mounted) return;
   showDialog<void>(
@@ -31,6 +35,8 @@ void showAiErrorDialog(
       onRetry: isRetryable ? onRetry : null,
       isApiKeyError: isApiKeyError,
       isRateLimitError: isRateLimitError,
+      isQuotaError: isQuotaError,
+      isNetworkError: isNetworkError,
       parentContext: context,
     ),
   );
@@ -41,6 +47,8 @@ class _AiErrorDialog extends StatelessWidget {
   final VoidCallback? onRetry;
   final bool isApiKeyError;
   final bool isRateLimitError;
+  final bool isQuotaError;
+  final bool isNetworkError;
 
   /// The parent screen's [BuildContext], used to open the Founder dialog after
   /// this dialog is dismissed (the dialog's own context becomes invalid after
@@ -53,7 +61,13 @@ class _AiErrorDialog extends StatelessWidget {
     this.onRetry,
     this.isApiKeyError = false,
     this.isRateLimitError = false,
+    this.isQuotaError = false,
+    this.isNetworkError = false,
   });
+
+  /// Whether this error type should show a "Go to Settings" CTA button.
+  bool get _showSettingsButton =>
+      (isApiKeyError || isQuotaError) && !isRateLimitError;
 
   @override
   Widget build(BuildContext context) {
@@ -62,14 +76,12 @@ class _AiErrorDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final founderColor = AquaThemeColors.founderColor(context);
 
-    String headerTitle;
-    if (isRateLimitError) {
-      headerTitle = l10n.rateLimitReachedTitle;
-    } else if (isApiKeyError) {
-      headerTitle = l10n.apiKeyRequiredTitle;
-    } else {
-      headerTitle = l10n.aiErrorTitle;
-    }
+    final headerTitle = _resolveTitle(l10n);
+    final headerIcon = _resolveIcon();
+    final headerColor = isRateLimitError ? founderColor : cs.onErrorContainer;
+    final headerBg = isRateLimitError
+        ? founderColor.withOpacity(0.15)
+        : cs.errorContainer;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -81,40 +93,22 @@ class _AiErrorDialog extends StatelessWidget {
           // Header
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-            decoration: BoxDecoration(
-              color: isRateLimitError
-                  ? founderColor.withOpacity(0.15)
-                  : cs.errorContainer,
-            ),
+            decoration: BoxDecoration(color: headerBg),
             child: Row(
               children: [
-                Icon(
-                  isRateLimitError
-                      ? Icons.timer_off_rounded
-                      : Icons.error_rounded,
-                  color:
-                      isRateLimitError ? founderColor : cs.onErrorContainer,
-                  size: 28,
-                ),
+                Icon(headerIcon, color: headerColor, size: 28),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     headerTitle,
                     style: tt.titleLarge?.copyWith(
-                      color: isRateLimitError
-                          ? founderColor
-                          : cs.onErrorContainer,
+                      color: headerColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(
-                    Icons.close,
-                    color: isRateLimitError
-                        ? founderColor
-                        : cs.onErrorContainer,
-                  ),
+                  icon: Icon(Icons.close, color: headerColor),
                   onPressed: () => Navigator.of(context).pop(),
                   tooltip: l10n.dismiss,
                   constraints: const BoxConstraints(
@@ -230,20 +224,26 @@ class _AiErrorDialog extends StatelessWidget {
                       foregroundColor: Colors.white,
                     ),
                   ),
-                if (isApiKeyError && !isRateLimitError)
+                if (_showSettingsButton)
                   FilledButton.icon(
                     onPressed: () {
                       Navigator.of(context).pop();
                       Navigator.of(context).pushNamed('/settings');
                     },
                     icon: const Icon(Icons.settings_outlined, size: 18),
-                    label: const Text('AI Provider Settings'),
+                    label: Text(
+                      isQuotaError
+                          ? l10n.checkYourApiPlan
+                          : l10n.aiProviderSettings,
+                    ),
                     style: FilledButton.styleFrom(
                       backgroundColor: cs.primary,
                       foregroundColor: cs.onPrimary,
                     ),
                   ),
-                if (!isApiKeyError && !isRateLimitError && onRetry != null)
+                if (onRetry != null &&
+                    !isRateLimitError &&
+                    !_showSettingsButton)
                   FilledButton.icon(
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -256,12 +256,41 @@ class _AiErrorDialog extends StatelessWidget {
                       foregroundColor: cs.onError,
                     ),
                   ),
+                // For settings-actionable errors, also show retry when available
+                // (placed after the settings button).
+                if (onRetry != null && _showSettingsButton)
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      onRetry!();
+                    },
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: Text(l10n.retry),
+                  ),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// Returns the localized dialog title based on the error type.
+  String _resolveTitle(AppLocalizations l10n) {
+    if (isRateLimitError) return l10n.rateLimitReachedTitle;
+    if (isQuotaError) return l10n.errorQuotaTitle;
+    if (isApiKeyError) return l10n.apiKeyRequiredTitle;
+    if (isNetworkError) return l10n.errorNetworkTitle;
+    return l10n.aiErrorTitle;
+  }
+
+  /// Returns the header icon based on the error type.
+  IconData _resolveIcon() {
+    if (isRateLimitError) return Icons.timer_off_rounded;
+    if (isQuotaError) return Icons.data_usage_rounded;
+    if (isApiKeyError) return Icons.vpn_key_off_rounded;
+    if (isNetworkError) return Icons.wifi_off_rounded;
+    return Icons.error_rounded;
   }
 }
 

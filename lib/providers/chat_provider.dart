@@ -45,6 +45,8 @@ class ChatMessage {
   final bool isRetryable;
   final bool isApiKeyError;
   final bool isRateLimitError;
+  final bool isQuotaError;
+  final bool isNetworkError;
   final String? originalMessage;
   final bool isAd;
 
@@ -61,6 +63,8 @@ class ChatMessage {
     this.isRetryable = false,
     this.isApiKeyError = false,
     this.isRateLimitError = false,
+    this.isQuotaError = false,
+    this.isNetworkError = false,
     this.originalMessage,
     this.isAd = false,
   });
@@ -849,10 +853,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
           await DevRateLimiter.undoLastRequest();
           if (!isRegeneration) await DevRateLimiter.undoPhotoAnalysis();
         }
-        final apiKeyError = ApiErrorHandler.isApiKeyError(e.toString());
-        final msg = apiKeyError
-            ? ApiErrorHandler.getFriendlyErrorMessage(e.toString())
-            : _getPhotoError(e.toString());
+        final errorStr = e.toString();
+        final apiKeyError = ApiErrorHandler.isApiKeyError(errorStr);
+        final quotaError =
+            !apiKeyError && ApiErrorHandler.isQuotaError(errorStr);
+        final networkError = ApiErrorHandler.isNetworkError(errorStr);
+        final msg = apiKeyError || quotaError
+            ? ApiErrorHandler.getFriendlyErrorMessage(errorStr)
+            : _getPhotoError(errorStr);
         state = ChatState(
           messages: [
             ...state.messages,
@@ -860,9 +868,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
               text: msg,
               isUser: false,
               isError: true,
-              isRetryable: !apiKeyError,
+              isRetryable: !apiKeyError && !quotaError,
               isApiKeyError: apiKeyError,
-              originalMessage: apiKeyError ? null : originalMessage,
+              isQuotaError: quotaError,
+              isNetworkError: networkError,
+              originalMessage:
+                  apiKeyError || quotaError ? null : originalMessage,
               photoBytes: imageBytes,
             ),
           ],
@@ -1093,6 +1104,10 @@ class ChatNotifier extends StateNotifier<ChatState> {
   }) async {
     final apiKeyError =
         !isRateLimitError && ApiErrorHandler.isApiKeyError(error);
+    final quotaError =
+        !isRateLimitError && !apiKeyError && ApiErrorHandler.isQuotaError(error);
+    final networkError =
+        !isRateLimitError && ApiErrorHandler.isNetworkError(error);
     // Rollback the rate-limit slot for real AI errors (not pre-flight limit checks).
     if (!isRateLimitError &&
         !apiKeyError &&
@@ -1111,10 +1126,14 @@ class ChatNotifier extends StateNotifier<ChatState> {
           text: friendlyError,
           isUser: false,
           isError: true,
-          isRetryable: !apiKeyError && !isRateLimitError,
+          isRetryable: !apiKeyError && !isRateLimitError && !quotaError,
           isApiKeyError: apiKeyError,
           isRateLimitError: isRateLimitError,
-          originalMessage: apiKeyError || isRateLimitError ? null : originalMessage,
+          isQuotaError: quotaError,
+          isNetworkError: networkError,
+          originalMessage: apiKeyError || isRateLimitError || quotaError
+              ? null
+              : originalMessage,
         ),
       ],
       isLoading: false,

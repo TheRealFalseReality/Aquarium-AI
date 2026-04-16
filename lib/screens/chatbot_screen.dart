@@ -187,6 +187,8 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   isApiKeyError: last.isApiKeyError,
                   isRetryable: last.isRetryable,
                   isRateLimitError: last.isRateLimitError,
+                  isQuotaError: last.isQuotaError,
+                  isNetworkError: last.isNetworkError,
                   onRetry: !last.isRateLimitError ? retryCallback : null,
                 );
               }
@@ -272,6 +274,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   isError: item.isError,
                   isRetryable: item.isRetryable,
                   isApiKeyError: item.isApiKeyError,
+                  isQuotaError: item.isQuotaError,
                   originalMessage: item.originalMessage,
                 );
               },
@@ -817,6 +820,7 @@ class MessageBubble extends ConsumerWidget {
   final bool isError;
   final bool isRetryable;
   final bool isApiKeyError;
+  final bool isQuotaError;
   final String? originalMessage;
 
   const MessageBubble({
@@ -832,6 +836,7 @@ class MessageBubble extends ConsumerWidget {
     this.isError = false,
     this.isRetryable = false,
     this.isApiKeyError = false,
+    this.isQuotaError = false,
     this.originalMessage,
   });
 
@@ -1056,7 +1061,7 @@ class MessageBubble extends ConsumerWidget {
                 }
               },
             ),
-          if (isError && isApiKeyError)
+          if (isError && (isApiKeyError || isQuotaError))
             _SettingsButton(
               onTap: () => Navigator.of(context).pushNamed('/settings'),
             ),

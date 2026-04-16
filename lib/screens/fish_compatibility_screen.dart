@@ -392,6 +392,8 @@ class FishCompatibilityScreenState
               isApiKeyError: next.isApiKeyError,
               isRetryable: next.isRetryable,
               isRateLimitError: next.isRateLimitError,
+              isQuotaError: next.isQuotaError,
+              isNetworkError: next.isNetworkError,
               onRetry: next.isRetryable && !next.isRateLimitError
                   ? () => notifier.retryCompatibilityReport()
                   : null,

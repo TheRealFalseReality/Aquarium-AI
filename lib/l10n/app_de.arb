@@ -1580,5 +1580,17 @@
     "customSpeciesLabel": "Oder eigene Art eingeben",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
-    }
+    },
+    "somethingWentWrong": "Etwas ist schiefgelaufen",
+    "tryAgain": "Erneut versuchen",
+    "aiProviderSettings": "KI-Anbieter Einstellungen",
+    "goToSettings": "Zu den Einstellungen",
+    "neverShowAgain": "Nie wieder anzeigen",
+    "checkYourApiPlan": "API-Plan prüfen",
+    "errorTimeoutTitle": "Zeitüberschreitung",
+    "errorNetworkTitle": "Verbindungsproblem",
+    "errorServerTitle": "Dienst nicht verfügbar",
+    "errorQuotaTitle": "API-Kontingent erschöpft",
+    "errorContentFilterTitle": "Inhalt gefiltert",
+    "errorForbiddenTitle": "Zugriff verweigert"
   }

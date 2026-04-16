@@ -204,6 +204,8 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                 isApiKeyError: last.isApiKeyError,
                 isRetryable: last.isRetryable,
                 isRateLimitError: last.isRateLimitError,
+                isQuotaError: last.isQuotaError,
+                isNetworkError: last.isNetworkError,
               );
             }
           });

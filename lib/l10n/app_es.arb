@@ -1580,5 +1580,17 @@
     "customSpeciesLabel": "O ingresa tu propia especie",
     "@customSpeciesLabel": {
       "description": "Label above the custom species text field in the Ask AI species picker"
-    }
+    },
+    "somethingWentWrong": "Algo salió mal",
+    "tryAgain": "Intentar de nuevo",
+    "aiProviderSettings": "Configuración del proveedor de IA",
+    "goToSettings": "Ir a Configuración",
+    "neverShowAgain": "No mostrar de nuevo",
+    "checkYourApiPlan": "Revisar plan de API",
+    "errorTimeoutTitle": "Tiempo de espera agotado",
+    "errorNetworkTitle": "Problema de conexión",
+    "errorServerTitle": "Servicio no disponible",
+    "errorQuotaTitle": "Cuota de API excedida",
+    "errorContentFilterTitle": "Contenido filtrado",
+    "errorForbiddenTitle": "Acceso denegado"
   }
