@@ -1859,5 +1859,99 @@
     "globalNotificationsNoTanksDescription": "Créez d'abord un aquarium, puis configurez des notifications pour recevoir des rappels pour l'alimentation, les changements d'eau et plus encore.",
     "@globalNotificationsNoTanksDescription": {
       "description": "Empty state description when there are no tanks yet"
+    },
+    "recordDose": "Enregistrer une dose",
+    "@recordDose": {
+      "description": "FAB label for recording a dose directly"
+    },
+    "calculateAndRecord": "Calculer et enregistrer",
+    "@calculateAndRecord": {
+      "description": "FAB label for calculating a dose then recording it"
+    },
+    "dosingHistory": "Historique de dosage",
+    "@dosingHistory": {
+      "description": "Section heading for dosing history in the dosing tab"
+    },
+    "noDosingEntries": "Aucune entrée de dosage. Utilisez le bouton ci-dessous pour enregistrer ou calculer une dose.",
+    "@noDosingEntries": {
+      "description": "Empty state message for the dosing tab when there are no dosing entries"
+    },
+    "dosingRecordedSnack": "Dose enregistrée",
+    "@dosingRecordedSnack": {
+      "description": "Snackbar message when a dose is recorded"
+    },
+    "dosingRecordTitle": "Enregistrer une dose",
+    "@dosingRecordTitle": {
+      "description": "Title for the record dose bottom sheet"
+    },
+    "dosingCalcRecordTitle": "Calculer et enregistrer une dose",
+    "@dosingCalcRecordTitle": {
+      "description": "Title for the calculate and record dose bottom sheet"
+    },
+    "dosingRecordSave": "Enregistrer la dose",
+    "@dosingRecordSave": {
+      "description": "Button label to save a recorded dose"
+    },
+    "dosingRecordUpdate": "Mettre à jour la dose",
+    "@dosingRecordUpdate": {
+      "description": "Button label to update an existing dose"
+    },
+    "dosingProduct": "Produit",
+    "@dosingProduct": {
+      "description": "Label for the dosing product selector in the record dose form"
+    },
+    "dosingAmount": "Quantité",
+    "@dosingAmount": {
+      "description": "Label for the dosing amount field"
+    },
+    "dosingNotes": "Notes (Facultatif)",
+    "@dosingNotes": {
+      "description": "Label for the optional notes field in dosing record form"
+    },
+    "dosingNotesHint": "Ajouter des informations supplémentaires...",
+    "@dosingNotesHint": {
+      "description": "Hint text for the optional notes field in dosing record form"
+    },
+    "dosingDateLabel": "Date et heure",
+    "@dosingDateLabel": {
+      "description": "Label for the date and time picker in dosing record form"
+    },
+    "dosingEntryCount": "{count} entrées",
+    "@dosingEntryCount": {
+      "description": "Subtitle showing number of dosing entries",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "dosingLastDose": "Dernière dose : {date}",
+    "@dosingLastDose": {
+      "description": "Last dose date text in dosing summary",
+      "placeholders": {
+        "date": {
+          "type": "String"
+        }
+      }
+    },
+    "dosingTankSizeAutoFilled": "Taille de l'aquarium remplie automatiquement à partir des paramètres",
+    "@dosingTankSizeAutoFilled": {
+      "description": "Hint that tank size was auto-filled from the tank's configured volume"
+    },
+    "dosingCalculateFirst": "Calculer",
+    "@dosingCalculateFirst": {
+      "description": "Button label to calculate dose before recording"
+    },
+    "dosingRecordCalculated": "Enregistrer cette dose",
+    "@dosingRecordCalculated": {
+      "description": "Button label to record a calculated dose"
+    },
+    "dosingCustomProduct": "Personnalisé",
+    "@dosingCustomProduct": {
+      "description": "Label for custom product entry in dosing"
+    },
+    "dosingCustomProductName": "Nom de produit personnalisé",
+    "@dosingCustomProductName": {
+      "description": "Label for custom product name text field"
     }
   }
