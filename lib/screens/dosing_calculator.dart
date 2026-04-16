@@ -50,6 +50,10 @@ class DosingCalculator extends ConsumerStatefulWidget {
 }
 
 class _DosingCalculatorState extends ConsumerState<DosingCalculator> {
+  // ── Constants ────────────────────────────────────────────────────────────
+  /// Conversion factor: 1 US gallon = 3.78541 liters.
+  static const double _galToLiter = 3.78541;
+
   // ── Options ──────────────────────────────────────────────────────────────
   String _volumeUnit = 'Gallons';
   String? _selectedPresetId;
