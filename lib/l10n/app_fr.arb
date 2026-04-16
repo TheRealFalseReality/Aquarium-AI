@@ -1794,5 +1794,21 @@
           "type": "int"
         }
       }
+    },
+    "doseAmount": "Quantité de dose",
+    "@doseAmount": {
+      "description": "Label for dose amount input field in dosing preset editor"
+    },
+    "perVolume": "Par volume",
+    "@perVolume": {
+      "description": "Label for per-volume input field in dosing preset editor"
+    },
+    "dosingInputUnit": "Saisir la dose par",
+    "@dosingInputUnit": {
+      "description": "Label for the gallon vs liter toggle in dosing preset editor"
+    },
+    "autoConvertedNote": "L'autre unité sera convertie automatiquement.",
+    "@autoConvertedNote": {
+      "description": "Helper text explaining that the opposite gallon/liter value is auto-calculated"
     }
   }
