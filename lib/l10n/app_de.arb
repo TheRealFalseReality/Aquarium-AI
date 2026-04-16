@@ -1600,5 +1600,25 @@
     "reschedule": "Neu planen",
     "@reschedule": {
       "description": "Button label for the reschedule action on a notification"
+    },
+    "allNotifications": "Benachrichtigungen",
+    "@allNotifications": {
+      "description": "Title for the global notifications screen showing all notifications across tanks"
+    },
+    "allNotificationsDescription": "Alle anstehenden Benachrichtigungen Ihrer Aquarien anzeigen und verwalten. Aktivitäten schnell protokollieren und Erinnerungen umplanen.",
+    "@allNotificationsDescription": {
+      "description": "Description for the notifications feature card on the welcome screen"
+    },
+    "allNotificationsDrawerDescription": "Alle anstehenden Benachrichtigungen und Erinnerungen Ihrer Aquarien anzeigen.",
+    "@allNotificationsDrawerDescription": {
+      "description": "Short description for the notifications feature in the drawer"
+    },
+    "globalNotificationsEmptyDescription": "Richten Sie Benachrichtigungen für einzelne Aquarien ein, um sie hier anzuzeigen. Verwenden Sie den Benachrichtigungsmanager jedes Aquariums, um Erinnerungen zu erstellen.",
+    "@globalNotificationsEmptyDescription": {
+      "description": "Empty state description when there are no notifications across any tank"
+    },
+    "globalNotificationsNoTanksDescription": "Erstellen Sie zuerst ein Aquarium und richten Sie dann Benachrichtigungen ein, um Erinnerungen für Fütterung, Wasserwechsel und mehr zu erhalten.",
+    "@globalNotificationsNoTanksDescription": {
+      "description": "Empty state description when there are no tanks yet"
     }
   }

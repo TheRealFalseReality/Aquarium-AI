@@ -1600,5 +1600,25 @@
     "reschedule": "Reprogramar",
     "@reschedule": {
       "description": "Button label for the reschedule action on a notification"
+    },
+    "allNotifications": "Notificaciones",
+    "@allNotifications": {
+      "description": "Title for the global notifications screen showing all notifications across tanks"
+    },
+    "allNotificationsDescription": "Ver y administrar todas las notificaciones próximas de tus acuarios. Registra actividades rápidamente y reprograma recordatorios desde un solo lugar.",
+    "@allNotificationsDescription": {
+      "description": "Description for the notifications feature card on the welcome screen"
+    },
+    "allNotificationsDrawerDescription": "Ver todas las notificaciones y recordatorios próximos de tus acuarios.",
+    "@allNotificationsDrawerDescription": {
+      "description": "Short description for the notifications feature in the drawer"
+    },
+    "globalNotificationsEmptyDescription": "Configura notificaciones en acuarios individuales para verlas aquí. Usa el administrador de notificaciones de cada acuario para crear recordatorios.",
+    "@globalNotificationsEmptyDescription": {
+      "description": "Empty state description when there are no notifications across any tank"
+    },
+    "globalNotificationsNoTanksDescription": "Crea un acuario primero, luego configura notificaciones para recibir recordatorios de alimentación, cambios de agua y más.",
+    "@globalNotificationsNoTanksDescription": {
+      "description": "Empty state description when there are no tanks yet"
     }
   }

@@ -5281,5 +5281,25 @@
     "reschedule": "Reschedule",
     "@reschedule": {
       "description": "Button label for the reschedule action on a notification"
+    },
+    "allNotifications": "Notifications",
+    "@allNotifications": {
+      "description": "Title for the global notifications screen showing all notifications across tanks"
+    },
+    "allNotificationsDescription": "View and manage all upcoming notifications across your tanks. Quick-log activities and reschedule reminders from one place.",
+    "@allNotificationsDescription": {
+      "description": "Description for the notifications feature card on the welcome screen"
+    },
+    "allNotificationsDrawerDescription": "View all upcoming notifications and reminders across your tanks.",
+    "@allNotificationsDrawerDescription": {
+      "description": "Short description for the notifications feature in the drawer"
+    },
+    "globalNotificationsEmptyDescription": "Set up notifications on individual tanks to see them here. Use the notification manager on each tank to create reminders.",
+    "@globalNotificationsEmptyDescription": {
+      "description": "Empty state description when there are no notifications across any tank"
+    },
+    "globalNotificationsNoTanksDescription": "Create a tank first, then set up notifications to get reminders for feeding, water changes, and more.",
+    "@globalNotificationsNoTanksDescription": {
+      "description": "Empty state description when there are no tanks yet"
     }
   }

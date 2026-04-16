@@ -896,6 +896,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         delay: const Duration(milliseconds: 910),
       ),
       FeatureInfo(
+        icon: '🔔',
+        title: l10n.allNotifications,
+        description: l10n.allNotificationsDescription,
+        shortDescription: l10n.allNotificationsDrawerDescription,
+        routeName: '/notifications',
+        delay: const Duration(milliseconds: 915),
+      ),
+      FeatureInfo(
         icon: '🌊',
         title: l10n.communityTitle,
         description: l10n.communityDrawerDescription,
