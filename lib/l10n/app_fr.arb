@@ -219,6 +219,7 @@
   "noBackupHistory": "Pas encore d'historique de sauvegarde",
   "dosingDiary": "Journal de Dosage",
   "notifications": "Notifications",
+  "notification": "notification",
   "notificationsExperimental": "Notifications (Expérimental)",
   "experimental": "Expérimental",
   "sendTestNotification": "Envoyer une Notification de Test",
@@ -1818,5 +1819,45 @@
     "autoConvertedNote": "L'autre unité sera convertie automatiquement.",
     "@autoConvertedNote": {
       "description": "Helper text explaining that the opposite gallon/liter value is auto-calculated"
+    },
+    "upcomingNotifications": "À venir",
+    "@upcomingNotifications": {
+      "description": "Tab label for the upcoming notifications tab in tank details"
+    },
+    "noUpcomingNotifications": "Aucune notification à venir",
+    "@noUpcomingNotifications": {
+      "description": "Empty state title when there are no upcoming notifications for a tank"
+    },
+    "noUpcomingNotificationsDescription": "Ajoutez des notifications depuis le gestionnaire de notifications pour recevoir des rappels pour l'alimentation, les changements d'eau et plus encore.",
+    "@noUpcomingNotificationsDescription": {
+      "description": "Empty state description when there are no upcoming notifications"
+    },
+    "manageNotifications": "Gérer les notifications",
+    "@manageNotifications": {
+      "description": "Button label to navigate to the notification management screen"
+    },
+    "reschedule": "Replanifier",
+    "@reschedule": {
+      "description": "Button label for the reschedule action on a notification"
+    },
+    "allNotifications": "Notifications",
+    "@allNotifications": {
+      "description": "Title for the global notifications screen showing all notifications across tanks"
+    },
+    "allNotificationsDescription": "Voir et gérer toutes les notifications à venir de vos aquariums. Enregistrez rapidement les activités et replanifiez les rappels depuis un seul endroit.",
+    "@allNotificationsDescription": {
+      "description": "Description for the notifications feature card on the welcome screen"
+    },
+    "allNotificationsDrawerDescription": "Voir toutes les notifications et rappels à venir de vos aquariums.",
+    "@allNotificationsDrawerDescription": {
+      "description": "Short description for the notifications feature in the drawer"
+    },
+    "globalNotificationsEmptyDescription": "Configurez des notifications sur les aquariums individuels pour les voir ici. Utilisez le gestionnaire de notifications de chaque aquarium pour créer des rappels.",
+    "@globalNotificationsEmptyDescription": {
+      "description": "Empty state description when there are no notifications across any tank"
+    },
+    "globalNotificationsNoTanksDescription": "Créez d'abord un aquarium, puis configurez des notifications pour recevoir des rappels pour l'alimentation, les changements d'eau et plus encore.",
+    "@globalNotificationsNoTanksDescription": {
+      "description": "Empty state description when there are no tanks yet"
     }
   }

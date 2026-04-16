@@ -16,10 +16,12 @@ import '../providers/app_settings_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
+import '../services/notification_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
 import '../widgets/accessible_feedback.dart';
+import '../widgets/notification_reschedule_dialog.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_logger_screen.dart';
 import 'notification_management_screen.dart';
@@ -49,7 +51,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
 
     // Add listener to rebuild when tab changes
     _tabController.addListener(() {
@@ -195,15 +197,22 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                 ),
                 Tab(
                   icon: Icon(
-                    Icons.history,
+                    Icons.notifications_outlined,
                     color: _tabIconColor(4, cs, hasBanner),
+                  ),
+                  text: l10n.upcomingNotifications,
+                ),
+                Tab(
+                  icon: Icon(
+                    Icons.history,
+                    color: _tabIconColor(5, cs, hasBanner),
                   ),
                   text: l10n.activity,
                 ),
                 Tab(
                   icon: Icon(
                     Icons.note_outlined,
-                    color: _tabIconColor(5, cs, hasBanner),
+                    color: _tabIconColor(6, cs, hasBanner),
                   ),
                   text: l10n.notes,
                 ),
@@ -218,6 +227,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
               _buildPhotosTab(context, tank),
               _buildWaterParametersTab(context, tank),
               _buildDosingTab(context, tank),
+              _buildUpcomingNotificationsTab(context, tank),
               _buildActivityTab(context, tank),
               _buildNotesTab(context, tank),
             ],
@@ -239,11 +249,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     final Color selectedColor;
     switch (tabIndex) {
       case 1:
-      case 4:
+      case 5:
         selectedColor = cs.secondary;
         break;
       case 2:
-      case 5:
+      case 6:
         selectedColor = cs.tertiary;
         break;
       default:
@@ -550,7 +560,19 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           icon: const Icon(Icons.add),
           label: Text(l10n.addDose),
         );
-      case 4: // Activity
+      case 4: // Upcoming Notifications
+        return FloatingActionButton.extended(
+          heroTag: 'fab_notifications',
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  NotificationManagementScreen(tank: tank),
+            ),
+          ),
+          icon: const Icon(Icons.notifications_outlined),
+          label: Text(l10n.manageNotifications),
+        );
+      case 5: // Activity
         return FloatingActionButton.extended(
           heroTag: 'fab_activity',
           onPressed: () => Navigator.of(context).push(
@@ -565,7 +587,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           icon: const Icon(Icons.add),
           label: Text(l10n.addLogEntry),
         );
-      case 5: // Notes
+      case 6: // Notes
         return FloatingActionButton.extended(
           heroTag: 'fab_notes',
           onPressed: () => Navigator.of(context).push(
@@ -1684,6 +1706,483 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         }),
       ],
     );
+  }
+
+  /// Upcoming Notifications tab - Shows enabled notifications sorted by next date
+  Widget _buildUpcomingNotificationsTab(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    // Filter to enabled notifications and sort by next scheduled date
+    final enabledNotifications = tank.notifications
+        .where((n) => n.enabled)
+        .toList()
+      ..sort((a, b) {
+        final aDate = a.getImmediateNextDate();
+        final bDate = b.getImmediateNextDate();
+        return aDate.compareTo(bDate);
+      });
+
+    if (enabledNotifications.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.notifications_none,
+                size: 64,
+                color: cs.onSurface.withOpacity(0.3),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.noUpcomingNotifications,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: cs.onSurface.withOpacity(0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.noUpcomingNotificationsDescription,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface.withOpacity(0.5),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.notifications_outlined),
+                label: Text(l10n.manageNotifications),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        NotificationManagementScreen(tank: tank),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+      children: [
+        // Navigate to full notification management screen
+        OutlinedButton.icon(
+          icon: const Icon(Icons.notifications_outlined),
+          label: Text(l10n.manageNotifications),
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  NotificationManagementScreen(tank: tank),
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...enabledNotifications.map((notification) {
+          return _buildUpcomingNotificationCard(
+            context,
+            tank,
+            notification,
+          );
+        }),
+      ],
+    );
+  }
+
+  /// Builds a card for an upcoming notification with reschedule and quick-log actions
+  Widget _buildUpcomingNotificationCard(
+    BuildContext context,
+    Tank tank,
+    TankNotification notification,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    final dateFormat = DateFormat('MMM d, y h:mm a');
+    final DateTime displayDate = notification.getImmediateNextDate();
+    final now = DateTime.now();
+    final isOverdue = displayDate.isBefore(now);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  _getNotificationIcon(notification.type),
+                  color: _getNotificationColor(notification.type),
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        notification.customTitle ??
+                            notification.getDisplayName(),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        dateFormat.format(displayDate),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isOverdue
+                              ? cs.error
+                              : cs.onSurface.withOpacity(0.6),
+                          fontWeight:
+                              isOverdue ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (notification.notes != null &&
+                notification.notes!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  notification.notes!,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                if (notification.repeatFrequency != RepeatFrequency.none)
+                  Chip(
+                    label: Text(
+                      _getUpcomingRepeatText(notification),
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                if (isOverdue)
+                  Chip(
+                    label: Text(
+                      AppLocalizations.of(context)!.overdue,
+                      style: TextStyle(fontSize: 12, color: cs.onError),
+                    ),
+                    backgroundColor: cs.error,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  )
+                else
+                  Builder(
+                    builder: (context) {
+                      final timeText = _getUpcomingTimeFromNow(displayDate);
+                      if (timeText == null) return const SizedBox.shrink();
+                      return Chip(
+                        label: Text(
+                          timeText,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        avatar: const Icon(Icons.schedule, size: 16),
+                        backgroundColor: cs.secondaryContainer,
+                        materialTapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      );
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Action buttons: Quick Log + Reschedule
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        _quickLogFromUpcoming(tank, notification),
+                    icon: const Icon(Icons.add_task, size: 18),
+                    label: Text(AppLocalizations.of(context)!.quickLog),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor:
+                          _getNotificationColor(notification.type),
+                      side: BorderSide(
+                        color: _getNotificationColor(notification.type)
+                            .withOpacity(0.5),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        _rescheduleFromUpcoming(tank, notification),
+                    icon: const Icon(Icons.update, size: 18),
+                    label: Text(AppLocalizations.of(context)!.reschedule),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: cs.primary,
+                      side: BorderSide(
+                        color: cs.primary.withOpacity(0.5),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Quick log an activity from the upcoming notifications tab
+  Future<void> _quickLogFromUpcoming(
+    Tank tank,
+    TankNotification notification,
+  ) async {
+    final currentTank = _getCurrentTank();
+    final notificationService = NotificationService();
+
+    // Create a new log entry based on the notification type
+    final log = NotificationLog.create(
+      type: notification.type,
+      customCategory: notification.type == NotificationType.other
+          ? (notification.customCategory ?? 'Other')
+          : null,
+      notes: notification.notes,
+      notificationId: notification.id,
+    );
+
+    final updatedLogs = [...currentTank.notificationLogs, log];
+
+    // Reschedule matching notifications based on the new activity
+    final updatedNotifications = await notificationService
+        .rescheduleMatchingNotifications(
+          tankId: currentTank.id,
+          tankName: currentTank.name,
+          notifications: currentTank.notifications,
+          activityLogs: updatedLogs,
+          activityType: log.type,
+          activityCustomCategory: log.customCategory,
+        );
+
+    // Update the tank with new activity logs and updated notifications
+    var updatedTank = currentTank.copyWith(
+      notificationLogs: updatedLogs,
+      updatedAt: DateTime.now(),
+    );
+
+    // Apply the updated notifications with new scheduledNextDate
+    if (updatedNotifications.isNotEmpty) {
+      final notificationsList = updatedTank.notifications.map((n) {
+        final updated = updatedNotifications.firstWhere(
+          (u) => u.id == n.id,
+          orElse: () => n,
+        );
+        return updated;
+      }).toList();
+      updatedTank = updatedTank.copyWith(notifications: notificationsList);
+    }
+
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
+
+    if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      context.showAccessibleMessage(l10n.activityLogged);
+    }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'quick_log_from_upcoming',
+      parameters: {'type': notification.type.name},
+    );
+  }
+
+  /// Reschedule a notification from the upcoming notifications tab
+  Future<void> _rescheduleFromUpcoming(
+    Tank tank,
+    TankNotification notification,
+  ) async {
+    final option = await NotificationRescheduleDialog.show(
+      context,
+      notification,
+    );
+
+    if (option == null || !mounted) return;
+
+    final currentTank = _getCurrentTank();
+    final notificationService = NotificationService();
+
+    TankNotification updatedNotification;
+    switch (option) {
+      case RescheduleOption.rescheduleFromNow:
+        final nextDate = notification.getNextNotificationDateFromBase(
+          DateTime.now(),
+          useCurrentTime: true,
+        );
+        updatedNotification = notification.copyWith(
+          scheduledNextDate: nextDate,
+          updatedAt: DateTime.now(),
+        );
+        break;
+      case RescheduleOption.keepOriginal:
+        final nextDate = notification.getNextNotificationDateFromBase(
+          DateTime.now(),
+          useCurrentTime: false,
+        );
+        updatedNotification = notification.copyWith(
+          scheduledNextDate: nextDate,
+          updatedAt: DateTime.now(),
+        );
+        break;
+      case RescheduleOption.doNothing:
+      case RescheduleOption.cancelAll:
+        return;
+    }
+
+    // Update the notification in the tank
+    final updatedNotifications = currentTank.notifications
+        .map((n) => n.id == notification.id ? updatedNotification : n)
+        .toList();
+
+    final updatedTank = currentTank.copyWith(
+      notifications: updatedNotifications,
+      updatedAt: DateTime.now(),
+    );
+
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
+
+    // Re-schedule the platform notification
+    await notificationService.scheduleNotification(
+      tankId: currentTank.id,
+      tankName: currentTank.name,
+      notification: updatedNotification,
+      activityLogs: currentTank.notificationLogs,
+    );
+
+    if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      context.showAccessibleMessage(l10n.notificationUpdated);
+    }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'reschedule_from_upcoming',
+      parameters: {
+        'type': notification.type.name,
+        'option': option.name,
+      },
+    );
+  }
+
+  /// Get notification icon for upcoming tab
+  IconData _getNotificationIcon(NotificationType type) {
+    switch (type) {
+      case NotificationType.feeding:
+        return Icons.restaurant;
+      case NotificationType.dosing:
+        return Icons.medication_liquid;
+      case NotificationType.waterChange:
+        return Icons.water_drop;
+      case NotificationType.testing:
+        return Icons.science;
+      case NotificationType.maintenance:
+        return Icons.build;
+      case NotificationType.other:
+        return Icons.notifications;
+    }
+  }
+
+  /// Get notification color for upcoming tab
+  Color _getNotificationColor(NotificationType type) {
+    switch (type) {
+      case NotificationType.feeding:
+        return Colors.orange;
+      case NotificationType.dosing:
+        return Colors.purple;
+      case NotificationType.waterChange:
+        return Colors.blue;
+      case NotificationType.testing:
+        return Colors.teal;
+      case NotificationType.maintenance:
+        return Colors.brown;
+      case NotificationType.other:
+        return Colors.grey;
+    }
+  }
+
+  /// Get repeat text for upcoming notification cards
+  String _getUpcomingRepeatText(TankNotification notification) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (notification.repeatInterval == 1) {
+      return notification.repeatFrequency.displayName;
+    }
+
+    final String unitName;
+    switch (notification.repeatFrequency) {
+      case RepeatFrequency.daily:
+        unitName = l10n.days;
+        break;
+      case RepeatFrequency.weekly:
+        unitName = l10n.weeks;
+        break;
+      case RepeatFrequency.monthly:
+        unitName = l10n.months;
+        break;
+      case RepeatFrequency.yearly:
+        unitName = l10n.years;
+        break;
+      default:
+        return notification.repeatFrequency.displayName;
+    }
+
+    return l10n.everyXDays(notification.repeatInterval, unitName);
+  }
+
+  /// Get time-from-now text for upcoming notification cards
+  String? _getUpcomingTimeFromNow(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = dateTime.difference(now);
+    final l10n = AppLocalizations.of(context)!;
+
+    if (difference.isNegative) return null;
+
+    final days = difference.inDays;
+    final hours = difference.inHours;
+    final minutes = difference.inMinutes;
+
+    if (days > 0) {
+      if (days == 1) return l10n.inLessThan2Days;
+      return l10n.inXDays(days);
+    } else if (hours > 0) {
+      if (hours == 1) return l10n.inLessThan2Hours;
+      return l10n.inXHours(hours);
+    } else if (minutes > 0) {
+      if (minutes == 1) return l10n.inOneMinute;
+      return l10n.inXMinutes(minutes);
+    } else {
+      return l10n.inLessThanAMinute;
+    }
   }
 
   /// Activity tab - Activity log and notification logs

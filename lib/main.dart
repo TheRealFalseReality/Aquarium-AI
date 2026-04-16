@@ -30,6 +30,7 @@ import './screens/dosing_calculator.dart';
 import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compat_browser_screen.dart';
 import './screens/fish_compatibility_screen.dart';
+import './screens/global_notifications_screen.dart';
 import './screens/information_screen.dart';
 import './screens/onboarding_screen.dart';
 import './screens/photo_analysis_screen.dart';
@@ -639,6 +640,10 @@ class MyApp extends ConsumerWidget {
               case '/tank-management':
                 page = const TankManagementScreen();
                 screenName = 'tank_management_screen';
+                break;
+              case '/notifications':
+                page = const GlobalNotificationsScreen();
+                screenName = 'global_notifications_screen';
                 break;
               case '/species-tags':
                 page = const SpeciesTagsScreen();
