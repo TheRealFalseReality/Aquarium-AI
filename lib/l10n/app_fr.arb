@@ -1953,5 +1953,25 @@
     "dosingCustomProductName": "Nom de produit personnalisé",
     "@dosingCustomProductName": {
       "description": "Label for custom product name text field"
+    },
+    "validationRequired": "Obligatoire",
+    "@validationRequired": {
+      "description": "Generic validation error for a required field"
+    },
+    "validationInvalidNumber": "Entrez un nombre valide",
+    "@validationInvalidNumber": {
+      "description": "Validation error for an invalid numeric input"
+    },
+    "validationMustBePositive": "Doit être > 0",
+    "@validationMustBePositive": {
+      "description": "Validation error when a number must be positive"
+    },
+    "validationSelectProduct": "Veuillez sélectionner un produit",
+    "@validationSelectProduct": {
+      "description": "Validation error when no product is selected"
+    },
+    "validationEnterProductName": "Veuillez entrer un nom de produit",
+    "@validationEnterProductName": {
+      "description": "Validation error when custom product name is empty"
     }
   }

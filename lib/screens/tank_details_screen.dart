@@ -3915,7 +3915,7 @@ class _RecordDoseSheetState extends ConsumerState<_RecordDoseSheet> {
                 children: [
                   Flexible(
                     child: Text(
-                      isEditing ? l10n.dosingRecordTitle : l10n.dosingRecordTitle,
+                      isEditing ? l10n.dosingRecordUpdate : l10n.dosingRecordTitle,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -3951,7 +3951,7 @@ class _RecordDoseSheetState extends ConsumerState<_RecordDoseSheet> {
                             color: cs.primary,
                           ),
                           const SizedBox(width: 8),
-                          Flexible(child: Text(preset.name)),
+                          Flexible(child: Text(preset.name, overflow: TextOverflow.ellipsis)),
                         ],
                       ),
                     );
@@ -3962,7 +3962,7 @@ class _RecordDoseSheetState extends ConsumerState<_RecordDoseSheet> {
                       children: [
                         Icon(Icons.edit_outlined, size: 18, color: cs.primary),
                         const SizedBox(width: 8),
-                        Flexible(child: Text(l10n.dosingCustomProduct)),
+                        Flexible(child: Text(l10n.dosingCustomProduct, overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                   ),
@@ -3983,7 +3983,7 @@ class _RecordDoseSheetState extends ConsumerState<_RecordDoseSheet> {
                 },
                 validator: (value) {
                   if (value == null) {
-                    return 'Please select a product';
+                    return l10n.validationSelectProduct;
                   }
                   return null;
                 },
@@ -4006,7 +4006,7 @@ class _RecordDoseSheetState extends ConsumerState<_RecordDoseSheet> {
                   validator: (value) {
                     if (_selectedPresetId == 'custom' &&
                         (value == null || value.trim().isEmpty)) {
-                      return 'Please enter a product name';
+                      return l10n.validationEnterProductName;
                     }
                     return null;
                   },
@@ -4034,13 +4034,13 @@ class _RecordDoseSheetState extends ConsumerState<_RecordDoseSheet> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Required';
+                          return l10n.validationRequired;
                         }
                         if (double.tryParse(value) == null) {
-                          return 'Enter valid number';
+                          return l10n.validationInvalidNumber;
                         }
                         if (double.parse(value) <= 0) {
-                          return 'Must be > 0';
+                          return l10n.validationMustBePositive;
                         }
                         return null;
                       },
