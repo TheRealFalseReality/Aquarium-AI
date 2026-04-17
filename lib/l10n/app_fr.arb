@@ -884,7 +884,7 @@
   "aquaPiPerfectFor": "Parfait pour les passionnés de bricolage et les aquariophiles férus de technologie !",
   "learnMore": "En Savoir Plus",
   "neverShow": "Ne Plus Afficher",
-  "neverShowAgain": "Ne Plus Jamais Afficher",
+  "neverShowAgain": "Ne plus afficher",
   "themeDefault": "Par défaut",
   "themeMaterialYou": "Material You",
   "themeOceanBlue": "Bleu Océan",
@@ -1537,339 +1537,461 @@
   "@latestReadings": {
     "description": "Section header showing the latest water parameter readings per type"
   },
-
-    "askAI": "Demander à l'IA",
-    "@askAI": {
-      "description": "Label for the Ask AI floating action button shown when a fish is selected in the browser"
-    },
-    "askAIAboutFish": "Demander à l'IA sur un poisson",
-    "@askAIAboutFish": {
-      "description": "Title of the species picker sheet before an AI fish info request"
-    },
-    "selectFishSpecies": "Sélectionner ou saisir une espèce de poisson",
-    "@selectFishSpecies": {
-      "description": "Subtitle in the species picker sheet prompting the user to select or type a fish"
-    },
-    "askAIFollowUpHint": "Posez une question de suivi...",
-    "@askAIFollowUpHint": {
-      "description": "Hint text in the follow-up chat input field of the fish AI chat sheet"
-    },
-    "keyFacts": "Faits clés",
-    "@keyFacts": {
-      "description": "Section header for key facts in a fish AI info card"
-    },
-    "funFacts": "Le saviez-vous ?",
-    "@funFacts": {
-      "description": "Section header for fun facts in a fish AI info card"
-    },
-    "compatibleWith": "Compatible avec",
-    "@compatibleWith": {
-      "description": "Section header listing compatible tank mates"
-    },
-    "incompatibleWith": "Incompatible avec",
-    "@incompatibleWith": {
-      "description": "Section header listing incompatible species"
-    },
-    "fishSpeciesHint": "ex. Poisson clown, Betta...",
-    "@fishSpeciesHint": {
-      "description": "Placeholder hint in the species input field of the Ask AI sheet"
-    },
-    "selectSpecificVariety": "Sélectionner une variété spécifique",
-    "@selectSpecificVariety": {
-      "description": "Label above the common-name chips in the Ask AI species picker"
-    },
-    "customSpeciesLabel": "Ou entrez votre propre espèce",
-    "@customSpeciesLabel": {
-      "description": "Label above the custom species text field in the Ask AI species picker"
-    },
-    "somethingWentWrong": "Un problème est survenu",
-    "tryAgain": "Réessayer",
-    "aiProviderSettings": "Paramètres du fournisseur IA",
-    "goToSettings": "Aller aux paramètres",
-    "neverShowAgain": "Ne plus afficher",
-    "checkYourApiPlan": "Vérifier le forfait API",
-    "errorTimeoutTitle": "Délai d'attente dépassé",
-    "errorNetworkTitle": "Problème de connexion",
-    "errorServerTitle": "Service indisponible",
-    "errorQuotaTitle": "Quota API dépassé",
-    "errorContentFilterTitle": "Contenu filtré",
-    "errorForbiddenTitle": "Accès refusé",
-    "dosingCalculator": "Calculateur de Dosage",
-    "@dosingCalculator": {
-      "description": "Name of the dosing calculator feature"
-    },
-    "dosingCalculatorSubtitle": "Calculez la dose totale de produits chimiques pour aquarium en fonction de la taille de votre bac.",
-    "@dosingCalculatorSubtitle": {
-      "description": "Subtitle for the dosing calculator screen"
-    },
-    "dosingDrawerDescription": "Calculez les doses chimiques pour votre bac avec des préréglages de produits populaires.",
-    "@dosingDrawerDescription": {
-      "description": "Short description of the dosing calculator (app drawer)"
-    },
-    "dosingPresetTitle": "Préréglages de Produits",
-    "@dosingPresetTitle": {
-      "description": "Section title for dosing product presets"
-    },
-    "dosingPresetSeachemPrime": "Seachem Prime",
-    "@dosingPresetSeachemPrime": {
-      "description": "Dosing preset label for Seachem Prime"
-    },
-    "dosingPresetSeachemStability": "Seachem Stability",
-    "@dosingPresetSeachemStability": {
-      "description": "Dosing preset label for Seachem Stability"
-    },
-    "dosingPresetSeachemFlourish": "Seachem Flourish",
-    "@dosingPresetSeachemFlourish": {
-      "description": "Dosing preset label for Seachem Flourish"
-    },
-    "dosingPresetSeachemFlourishExcel": "Seachem Flourish Excel",
-    "@dosingPresetSeachemFlourishExcel": {
-      "description": "Dosing preset label for Seachem Flourish Excel"
-    },
-    "dosingPresetApiStressCoat": "API Stress Coat",
-    "@dosingPresetApiStressCoat": {
-      "description": "Dosing preset label for API Stress Coat"
-    },
-    "dosingPresetApiMelafix": "API Melafix",
-    "@dosingPresetApiMelafix": {
-      "description": "Dosing preset label for API Melafix"
-    },
-    "dosingPresetApiPimafix": "API Pimafix",
-    "@dosingPresetApiPimafix": {
-      "description": "Dosing preset label for API Pimafix"
-    },
-    "dosingPresetSeachemAlkalineBuffer": "Seachem Alkaline Buffer",
-    "@dosingPresetSeachemAlkalineBuffer": {
-      "description": "Dosing preset label for Seachem Alkaline Buffer"
-    },
-    "dosingPresetSeachemAcidBuffer": "Seachem Acid Buffer",
-    "@dosingPresetSeachemAcidBuffer": {
-      "description": "Dosing preset label for Seachem Acid Buffer"
-    },
-    "dosingPresetFritzsoDechlorinator": "Fritz SO Dechlorinator",
-    "@dosingPresetFritzsoDechlorinator": {
-      "description": "Dosing preset label for Fritz SO Dechlorinator"
-    },
-    "dosingPresetCustom": "Personnalisé",
-    "@dosingPresetCustom": {
-      "description": "Dosing preset label for custom/manual entry"
-    },
-    "dosingTankSize": "Taille du Bac",
-    "@dosingTankSize": {
-      "description": "Label for the tank size input field in dosing calculator"
-    },
-    "dosingDoseAmountLabel": "Quantité de Dose",
-    "@dosingDoseAmountLabel": {
-      "description": "Label for the dose amount input field in dosing calculator"
-    },
-    "dosingPer": "par",
-    "@dosingPer": {
-      "description": "The word 'per' between dose amount and volume fields"
-    },
-    "dosingSelectProduct": "Sélectionner un produit…",
-    "@dosingSelectProduct": {
-      "description": "Placeholder text for the product preset selector"
-    },
-    "dosingCustomSubtitle": "Entrez votre propre quantité de dose et volume",
-    "@dosingCustomSubtitle": {
-      "description": "Subtitle for the custom dosing option in the preset picker"
-    },
-    "dosingAddNewProduct": "Ajouter un Nouveau Produit",
-    "@dosingAddNewProduct": {
-      "description": "Label for the add new product option in the dosing preset picker"
-    },
-    "dosingAddNewProductSubtitle": "Enregistrer un produit pour une utilisation future",
-    "@dosingAddNewProductSubtitle": {
-      "description": "Subtitle for the add new product option in the dosing preset picker"
-    },
-    "dosingResultTitle": "Dose Totale",
-    "@dosingResultTitle": {
-      "description": "Title for the dosing result card"
-    },
-    "dosingResultProduct": "Pour : {product}",
-    "@dosingResultProduct": {
-      "description": "Product name in dosing results",
-      "placeholders": {
-        "product": {
-          "type": "String"
-        }
+  "askAI": "Demander à l'IA",
+  "@askAI": {
+    "description": "Label for the Ask AI floating action button shown when a fish is selected in the browser"
+  },
+  "askAIAboutFish": "Demander à l'IA sur un poisson",
+  "@askAIAboutFish": {
+    "description": "Title of the species picker sheet before an AI fish info request"
+  },
+  "selectFishSpecies": "Sélectionner ou saisir une espèce de poisson",
+  "@selectFishSpecies": {
+    "description": "Subtitle in the species picker sheet prompting the user to select or type a fish"
+  },
+  "askAIFollowUpHint": "Posez une question de suivi...",
+  "@askAIFollowUpHint": {
+    "description": "Hint text in the follow-up chat input field of the fish AI chat sheet"
+  },
+  "keyFacts": "Faits clés",
+  "@keyFacts": {
+    "description": "Section header for key facts in a fish AI info card"
+  },
+  "funFacts": "Le saviez-vous ?",
+  "@funFacts": {
+    "description": "Section header for fun facts in a fish AI info card"
+  },
+  "compatibleWith": "Compatible avec",
+  "@compatibleWith": {
+    "description": "Section header listing compatible tank mates"
+  },
+  "incompatibleWith": "Incompatible avec",
+  "@incompatibleWith": {
+    "description": "Section header listing incompatible species"
+  },
+  "fishSpeciesHint": "ex. Poisson clown, Betta...",
+  "@fishSpeciesHint": {
+    "description": "Placeholder hint in the species input field of the Ask AI sheet"
+  },
+  "selectSpecificVariety": "Sélectionner une variété spécifique",
+  "@selectSpecificVariety": {
+    "description": "Label above the common-name chips in the Ask AI species picker"
+  },
+  "customSpeciesLabel": "Ou entrez votre propre espèce",
+  "@customSpeciesLabel": {
+    "description": "Label above the custom species text field in the Ask AI species picker"
+  },
+  "somethingWentWrong": "Un problème est survenu",
+  "tryAgain": "Réessayer",
+  "aiProviderSettings": "Paramètres du fournisseur IA",
+  "goToSettings": "Aller aux paramètres",
+  "checkYourApiPlan": "Vérifier le forfait API",
+  "errorTimeoutTitle": "Délai d'attente dépassé",
+  "errorNetworkTitle": "Problème de connexion",
+  "errorServerTitle": "Service indisponible",
+  "errorQuotaTitle": "Quota API dépassé",
+  "errorContentFilterTitle": "Contenu filtré",
+  "errorForbiddenTitle": "Accès refusé",
+  "dosingCalculator": "Calculateur de Dosage",
+  "@dosingCalculator": {
+    "description": "Name of the dosing calculator feature"
+  },
+  "dosingCalculatorSubtitle": "Calculez la dose totale de produits chimiques pour aquarium en fonction de la taille de votre bac.",
+  "@dosingCalculatorSubtitle": {
+    "description": "Subtitle for the dosing calculator screen"
+  },
+  "dosingDrawerDescription": "Calculez les doses chimiques pour votre bac avec des préréglages de produits populaires.",
+  "@dosingDrawerDescription": {
+    "description": "Short description of the dosing calculator (app drawer)"
+  },
+  "dosingPresetTitle": "Préréglages de Produits",
+  "@dosingPresetTitle": {
+    "description": "Section title for dosing product presets"
+  },
+  "dosingPresetSeachemPrime": "Seachem Prime",
+  "@dosingPresetSeachemPrime": {
+    "description": "Dosing preset label for Seachem Prime"
+  },
+  "dosingPresetSeachemStability": "Seachem Stability",
+  "@dosingPresetSeachemStability": {
+    "description": "Dosing preset label for Seachem Stability"
+  },
+  "dosingPresetSeachemFlourish": "Seachem Flourish",
+  "@dosingPresetSeachemFlourish": {
+    "description": "Dosing preset label for Seachem Flourish"
+  },
+  "dosingPresetSeachemFlourishExcel": "Seachem Flourish Excel",
+  "@dosingPresetSeachemFlourishExcel": {
+    "description": "Dosing preset label for Seachem Flourish Excel"
+  },
+  "dosingPresetApiStressCoat": "API Stress Coat",
+  "@dosingPresetApiStressCoat": {
+    "description": "Dosing preset label for API Stress Coat"
+  },
+  "dosingPresetApiMelafix": "API Melafix",
+  "@dosingPresetApiMelafix": {
+    "description": "Dosing preset label for API Melafix"
+  },
+  "dosingPresetApiPimafix": "API Pimafix",
+  "@dosingPresetApiPimafix": {
+    "description": "Dosing preset label for API Pimafix"
+  },
+  "dosingPresetSeachemAlkalineBuffer": "Seachem Alkaline Buffer",
+  "@dosingPresetSeachemAlkalineBuffer": {
+    "description": "Dosing preset label for Seachem Alkaline Buffer"
+  },
+  "dosingPresetSeachemAcidBuffer": "Seachem Acid Buffer",
+  "@dosingPresetSeachemAcidBuffer": {
+    "description": "Dosing preset label for Seachem Acid Buffer"
+  },
+  "dosingPresetFritzsoDechlorinator": "Fritz SO Dechlorinator",
+  "@dosingPresetFritzsoDechlorinator": {
+    "description": "Dosing preset label for Fritz SO Dechlorinator"
+  },
+  "dosingPresetCustom": "Personnalisé",
+  "@dosingPresetCustom": {
+    "description": "Dosing preset label for custom/manual entry"
+  },
+  "dosingTankSize": "Taille du Bac",
+  "@dosingTankSize": {
+    "description": "Label for the tank size input field in dosing calculator"
+  },
+  "dosingDoseAmountLabel": "Quantité de Dose",
+  "@dosingDoseAmountLabel": {
+    "description": "Label for the dose amount input field in dosing calculator"
+  },
+  "dosingPer": "par",
+  "@dosingPer": {
+    "description": "The word 'per' between dose amount and volume fields"
+  },
+  "dosingSelectProduct": "Sélectionner un produit…",
+  "@dosingSelectProduct": {
+    "description": "Placeholder text for the product preset selector"
+  },
+  "dosingCustomSubtitle": "Entrez votre propre quantité de dose et volume",
+  "@dosingCustomSubtitle": {
+    "description": "Subtitle for the custom dosing option in the preset picker"
+  },
+  "dosingAddNewProduct": "Ajouter un Nouveau Produit",
+  "@dosingAddNewProduct": {
+    "description": "Label for the add new product option in the dosing preset picker"
+  },
+  "dosingAddNewProductSubtitle": "Enregistrer un produit pour une utilisation future",
+  "@dosingAddNewProductSubtitle": {
+    "description": "Subtitle for the add new product option in the dosing preset picker"
+  },
+  "dosingResultTitle": "Dose Totale",
+  "@dosingResultTitle": {
+    "description": "Title for the dosing result card"
+  },
+  "dosingResultProduct": "Pour : {product}",
+  "@dosingResultProduct": {
+    "description": "Product name in dosing results",
+    "placeholders": {
+      "product": {
+        "type": "String"
       }
-    },
-    "dosingTeaspoons": "c. à c.",
-    "@dosingTeaspoons": {
-      "description": "Teaspoon abbreviation"
-    },
-    "dosingCapfuls": "bouchons",
-    "@dosingCapfuls": {
-      "description": "Capfuls unit label"
-    },
-    "dosingResultSummary": "Résumé du Dosage",
-    "@dosingResultSummary": {
-      "description": "Title for the dosing summary card"
-    },
-    "dosingTankSizeLabel": "Taille du Bac",
-    "@dosingTankSizeLabel": {
-      "description": "Label for tank size in results summary"
-    },
-    "dosingDosePerUnitLabel": "Taux de Dosage",
-    "@dosingDosePerUnitLabel": {
-      "description": "Label for dose per unit in results summary"
-    },
-    "dosingGalAbbrev": "gal",
-    "@dosingGalAbbrev": {
-      "description": "Gallon abbreviation"
-    },
-    "dosingLAbbrev": "L",
-    "@dosingLAbbrev": {
-      "description": "Liter abbreviation"
-    },
-    "dosingInfoTitle": "Conseils de Dosage",
-    "@dosingInfoTitle": {
-      "description": "Title for the dosing info section"
-    },
-    "dosingInfoDoseTitle": "Suivez les Instructions du Fabricant",
-    "@dosingInfoDoseTitle": {
-      "description": "Dosing info tip title about following instructions"
-    },
-    "dosingInfoDoseBody": "Vérifiez toujours les quantités de dosage sur l'étiquette du produit. Les valeurs prédéfinies sont basées sur les recommandations standard du fabricant et peuvent varier selon le lot ou la concentration du produit.",
-    "@dosingInfoDoseBody": {
-      "description": "Dosing info tip body about following instructions"
-    },
-    "dosingInfoWaterTitle": "Tenez Compte du Volume d'Eau Réel",
-    "@dosingInfoWaterTitle": {
-      "description": "Dosing info tip title about actual water volume"
-    },
-    "dosingInfoWaterBody": "Votre volume d'eau réel est inférieur à la taille du bac en raison du substrat, des roches et des décorations. Envisagez de doser pour 80-90% du volume total de votre bac.",
-    "@dosingInfoWaterBody": {
-      "description": "Dosing info tip body about actual water volume"
-    },
-    "dosingInfoWarningTitle": "Évitez le Surdosage",
-    "@dosingInfoWarningTitle": {
-      "description": "Dosing info tip title about overdosing warning"
-    },
-    "dosingInfoWarningBody": "En cas de doute, sous-dosez. Il est plus sûr d'ajouter moins et de doser à nouveau que de surdoser, ce qui peut nuire aux poissons et aux invertébrés.",
-    "@dosingInfoWarningBody": {
-      "description": "Dosing info tip body about overdosing warning"
-    },
-    "manageDosingPresets": "Produits de dosage",
-    "@manageDosingPresets": {
-      "description": "Settings menu title for managing dosing chemical presets"
-    },
-    "manageDosingPresetsDesc": "Ajouter, modifier ou réorganiser vos produits chimiques de dosage",
-    "@manageDosingPresetsDesc": {
-      "description": "Settings menu subtitle for dosing presets management"
-    },
-    "addProduct": "Ajouter un produit",
-    "@addProduct": {
-      "description": "Button label to add a new dosing product preset"
-    },
-    "editProduct": "Modifier le produit",
-    "@editProduct": {
-      "description": "Dialog title when editing a dosing product preset"
-    },
-    "productName": "Nom du produit",
-    "@productName": {
-      "description": "Label for the product name text field"
-    },
-    "doseAmountGal": "Dose (gal)",
-    "@doseAmountGal": {
-      "description": "Label for dose amount in gallons"
-    },
-    "perVolumeGal": "Par volume (gal)",
-    "@perVolumeGal": {
-      "description": "Label for the per-volume field in gallons"
-    },
-    "doseAmountLiter": "Dose (L)",
-    "@doseAmountLiter": {
-      "description": "Label for dose amount in liters"
-    },
-    "perVolumeLiter": "Par volume (L)",
-    "@perVolumeLiter": {
-      "description": "Label for the per-volume field in liters"
-    },
-    "doseUnit": "Unité",
-    "@doseUnit": {
-      "description": "Label for the dose unit selector (mL, g, etc.)"
-    },
-    "resetToDefaults": "Réinitialiser aux valeurs par défaut",
-    "@resetToDefaults": {
-      "description": "Button label to reset dosing presets to built-in defaults"
-    },
-    "resetPresetsConfirm": "Réinitialiser tous les produits de dosage aux valeurs par défaut ? Vos produits personnalisés seront perdus.",
-    "@resetPresetsConfirm": {
-      "description": "Confirmation message when resetting dosing presets to defaults"
-    },
-    "deleteProductConfirm": "Êtes-vous sûr de vouloir supprimer ce produit ?",
-    "@deleteProductConfirm": {
-      "description": "Confirmation message when deleting a dosing product preset"
-    },
-    "dragToReorder": "Glisser pour réorganiser",
-    "@dragToReorder": {
-      "description": "Hint text for reorderable list items"
-    },
-    "dosingPresetsCount": "{count} produits",
-    "@dosingPresetsCount": {
-      "description": "Subtitle showing number of dosing product presets",
-      "placeholders": {
-        "count": {
-          "type": "int"
-        }
-      }
-    },
-    "doseAmount": "Quantité de dose",
-    "@doseAmount": {
-      "description": "Label for dose amount input field in dosing preset editor"
-    },
-    "perVolume": "Par volume",
-    "@perVolume": {
-      "description": "Label for per-volume input field in dosing preset editor"
-    },
-    "dosingInputUnit": "Saisir la dose par",
-    "@dosingInputUnit": {
-      "description": "Label for the gallon vs liter toggle in dosing preset editor"
-    },
-    "autoConvertedNote": "L'autre unité sera convertie automatiquement.",
-    "@autoConvertedNote": {
-      "description": "Helper text explaining that the opposite gallon/liter value is auto-calculated"
-    },
-    "upcomingNotifications": "À venir",
-    "@upcomingNotifications": {
-      "description": "Tab label for the upcoming notifications tab in tank details"
-    },
-    "noUpcomingNotifications": "Aucune notification à venir",
-    "@noUpcomingNotifications": {
-      "description": "Empty state title when there are no upcoming notifications for a tank"
-    },
-    "noUpcomingNotificationsDescription": "Ajoutez des notifications depuis le gestionnaire de notifications pour recevoir des rappels pour l'alimentation, les changements d'eau et plus encore.",
-    "@noUpcomingNotificationsDescription": {
-      "description": "Empty state description when there are no upcoming notifications"
-    },
-    "manageNotifications": "Gérer les notifications",
-    "@manageNotifications": {
-      "description": "Button label to navigate to the notification management screen"
-    },
-    "reschedule": "Replanifier",
-    "@reschedule": {
-      "description": "Button label for the reschedule action on a notification"
-    },
-    "allNotifications": "Notifications",
-    "@allNotifications": {
-      "description": "Title for the global notifications screen showing all notifications across tanks"
-    },
-    "allNotificationsDescription": "Voir et gérer toutes les notifications à venir de vos aquariums. Enregistrez rapidement les activités et replanifiez les rappels depuis un seul endroit.",
-    "@allNotificationsDescription": {
-      "description": "Description for the notifications feature card on the welcome screen"
-    },
-    "allNotificationsDrawerDescription": "Voir toutes les notifications et rappels à venir de vos aquariums.",
-    "@allNotificationsDrawerDescription": {
-      "description": "Short description for the notifications feature in the drawer"
-    },
-    "globalNotificationsEmptyDescription": "Configurez des notifications sur les aquariums individuels pour les voir ici. Utilisez le gestionnaire de notifications de chaque aquarium pour créer des rappels.",
-    "@globalNotificationsEmptyDescription": {
-      "description": "Empty state description when there are no notifications across any tank"
-    },
-    "globalNotificationsNoTanksDescription": "Créez d'abord un aquarium, puis configurez des notifications pour recevoir des rappels pour l'alimentation, les changements d'eau et plus encore.",
-    "@globalNotificationsNoTanksDescription": {
-      "description": "Empty state description when there are no tanks yet"
     }
+  },
+  "dosingTeaspoons": "c. à c.",
+  "@dosingTeaspoons": {
+    "description": "Teaspoon abbreviation"
+  },
+  "dosingCapfuls": "bouchons",
+  "@dosingCapfuls": {
+    "description": "Capfuls unit label"
+  },
+  "dosingResultSummary": "Résumé du Dosage",
+  "@dosingResultSummary": {
+    "description": "Title for the dosing summary card"
+  },
+  "dosingTankSizeLabel": "Taille du Bac",
+  "@dosingTankSizeLabel": {
+    "description": "Label for tank size in results summary"
+  },
+  "dosingDosePerUnitLabel": "Taux de Dosage",
+  "@dosingDosePerUnitLabel": {
+    "description": "Label for dose per unit in results summary"
+  },
+  "dosingGalAbbrev": "gal",
+  "@dosingGalAbbrev": {
+    "description": "Gallon abbreviation"
+  },
+  "dosingLAbbrev": "L",
+  "@dosingLAbbrev": {
+    "description": "Liter abbreviation"
+  },
+  "dosingInfoTitle": "Conseils de Dosage",
+  "@dosingInfoTitle": {
+    "description": "Title for the dosing info section"
+  },
+  "dosingInfoDoseTitle": "Suivez les Instructions du Fabricant",
+  "@dosingInfoDoseTitle": {
+    "description": "Dosing info tip title about following instructions"
+  },
+  "dosingInfoDoseBody": "Vérifiez toujours les quantités de dosage sur l'étiquette du produit. Les valeurs prédéfinies sont basées sur les recommandations standard du fabricant et peuvent varier selon le lot ou la concentration du produit.",
+  "@dosingInfoDoseBody": {
+    "description": "Dosing info tip body about following instructions"
+  },
+  "dosingInfoWaterTitle": "Tenez Compte du Volume d'Eau Réel",
+  "@dosingInfoWaterTitle": {
+    "description": "Dosing info tip title about actual water volume"
+  },
+  "dosingInfoWaterBody": "Votre volume d'eau réel est inférieur à la taille du bac en raison du substrat, des roches et des décorations. Envisagez de doser pour 80-90% du volume total de votre bac.",
+  "@dosingInfoWaterBody": {
+    "description": "Dosing info tip body about actual water volume"
+  },
+  "dosingInfoWarningTitle": "Évitez le Surdosage",
+  "@dosingInfoWarningTitle": {
+    "description": "Dosing info tip title about overdosing warning"
+  },
+  "dosingInfoWarningBody": "En cas de doute, sous-dosez. Il est plus sûr d'ajouter moins et de doser à nouveau que de surdoser, ce qui peut nuire aux poissons et aux invertébrés.",
+  "@dosingInfoWarningBody": {
+    "description": "Dosing info tip body about overdosing warning"
+  },
+  "manageDosingPresets": "Produits de dosage",
+  "@manageDosingPresets": {
+    "description": "Settings menu title for managing dosing chemical presets"
+  },
+  "manageDosingPresetsDesc": "Ajouter, modifier ou réorganiser vos produits chimiques de dosage",
+  "@manageDosingPresetsDesc": {
+    "description": "Settings menu subtitle for dosing presets management"
+  },
+  "addProduct": "Ajouter un produit",
+  "@addProduct": {
+    "description": "Button label to add a new dosing product preset"
+  },
+  "editProduct": "Modifier le produit",
+  "@editProduct": {
+    "description": "Dialog title when editing a dosing product preset"
+  },
+  "productName": "Nom du produit",
+  "@productName": {
+    "description": "Label for the product name text field"
+  },
+  "doseAmountGal": "Dose (gal)",
+  "@doseAmountGal": {
+    "description": "Label for dose amount in gallons"
+  },
+  "perVolumeGal": "Par volume (gal)",
+  "@perVolumeGal": {
+    "description": "Label for the per-volume field in gallons"
+  },
+  "doseAmountLiter": "Dose (L)",
+  "@doseAmountLiter": {
+    "description": "Label for dose amount in liters"
+  },
+  "perVolumeLiter": "Par volume (L)",
+  "@perVolumeLiter": {
+    "description": "Label for the per-volume field in liters"
+  },
+  "doseUnit": "Unité",
+  "@doseUnit": {
+    "description": "Label for the dose unit selector (mL, g, etc.)"
+  },
+  "resetToDefaults": "Réinitialiser aux valeurs par défaut",
+  "@resetToDefaults": {
+    "description": "Button label to reset dosing presets to built-in defaults"
+  },
+  "resetPresetsConfirm": "Réinitialiser tous les produits de dosage aux valeurs par défaut ? Vos produits personnalisés seront perdus.",
+  "@resetPresetsConfirm": {
+    "description": "Confirmation message when resetting dosing presets to defaults"
+  },
+  "deleteProductConfirm": "Êtes-vous sûr de vouloir supprimer ce produit ?",
+  "@deleteProductConfirm": {
+    "description": "Confirmation message when deleting a dosing product preset"
+  },
+  "dragToReorder": "Glisser pour réorganiser",
+  "@dragToReorder": {
+    "description": "Hint text for reorderable list items"
+  },
+  "dosingPresetsCount": "{count} produits",
+  "@dosingPresetsCount": {
+    "description": "Subtitle showing number of dosing product presets",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "doseAmount": "Quantité de dose",
+  "@doseAmount": {
+    "description": "Label for dose amount input field in dosing preset editor"
+  },
+  "perVolume": "Par volume",
+  "@perVolume": {
+    "description": "Label for per-volume input field in dosing preset editor"
+  },
+  "dosingInputUnit": "Saisir la dose par",
+  "@dosingInputUnit": {
+    "description": "Label for the gallon vs liter toggle in dosing preset editor"
+  },
+  "autoConvertedNote": "L'autre unité sera convertie automatiquement.",
+  "@autoConvertedNote": {
+    "description": "Helper text explaining that the opposite gallon/liter value is auto-calculated"
+  },
+  "upcomingNotifications": "À venir",
+  "@upcomingNotifications": {
+    "description": "Tab label for the upcoming notifications tab in tank details"
+  },
+  "noUpcomingNotifications": "Aucune notification à venir",
+  "@noUpcomingNotifications": {
+    "description": "Empty state title when there are no upcoming notifications for a tank"
+  },
+  "noUpcomingNotificationsDescription": "Ajoutez des notifications depuis le gestionnaire de notifications pour recevoir des rappels pour l'alimentation, les changements d'eau et plus encore.",
+  "@noUpcomingNotificationsDescription": {
+    "description": "Empty state description when there are no upcoming notifications"
+  },
+  "manageNotifications": "Gérer les notifications",
+  "@manageNotifications": {
+    "description": "Button label to navigate to the notification management screen"
+  },
+  "reschedule": "Replanifier",
+  "@reschedule": {
+    "description": "Button label for the reschedule action on a notification"
+  },
+  "allNotifications": "Notifications",
+  "@allNotifications": {
+    "description": "Title for the global notifications screen showing all notifications across tanks"
+  },
+  "allNotificationsDescription": "Voir et gérer toutes les notifications à venir de vos aquariums. Enregistrez rapidement les activités et replanifiez les rappels depuis un seul endroit.",
+  "@allNotificationsDescription": {
+    "description": "Description for the notifications feature card on the welcome screen"
+  },
+  "allNotificationsDrawerDescription": "Voir toutes les notifications et rappels à venir de vos aquariums.",
+  "@allNotificationsDrawerDescription": {
+    "description": "Short description for the notifications feature in the drawer"
+  },
+  "globalNotificationsEmptyDescription": "Configurez des notifications sur les aquariums individuels pour les voir ici. Utilisez le gestionnaire de notifications de chaque aquarium pour créer des rappels.",
+  "@globalNotificationsEmptyDescription": {
+    "description": "Empty state description when there are no notifications across any tank"
+  },
+  "globalNotificationsNoTanksDescription": "Créez d'abord un aquarium, puis configurez des notifications pour recevoir des rappels pour l'alimentation, les changements d'eau et plus encore.",
+  "@globalNotificationsNoTanksDescription": {
+    "description": "Empty state description when there are no tanks yet"
+  },
+  "founderSupport": "Soutien Fondateur",
+  "@founderSupport": {
+    "description": "Settings section title for founder/premium features"
+  },
+  "founderSupportDesc": "Avantages exclusifs pour les Aquariophiles Fondateurs",
+  "@founderSupportDesc": {
+    "description": "Subtitle for the Founder Support settings card"
+  },
+  "customizeWelcomeCards": "Personnaliser les cartes d'accueil",
+  "@customizeWelcomeCards": {
+    "description": "Title for the welcome screen card reorder and visibility settings"
+  },
+  "customizeWelcomeCardsDesc": "Réorganiser et afficher/masquer les cartes de l'écran d'accueil",
+  "@customizeWelcomeCardsDesc": {
+    "description": "Description for welcome card customization"
+  },
+  "customizeSidebar": "Personnaliser la barre latérale",
+  "@customizeSidebar": {
+    "description": "Title for sidebar menu customization"
+  },
+  "customizeSidebarDesc": "Réorganiser et afficher/masquer les éléments du menu latéral",
+  "@customizeSidebarDesc": {
+    "description": "Description for sidebar customization"
+  },
+  "resetToDefault": "Réinitialiser par défaut",
+  "@resetToDefault": {
+    "description": "Button label to reset order to default"
+  },
+  "founderFeatureLocked": "Devenez Aquariophile Fondateur pour débloquer les fonctions de personnalisation",
+  "@founderFeatureLocked": {
+    "description": "Message shown to non-founder users when trying to access premium customization features"
+  },
+  "founderExclusiveFeatures": "Fonctionnalités exclusives Fondateur",
+  "@founderExclusiveFeatures": {
+    "description": "Header for the list of founder-exclusive features in the upsell section"
+  },
+  "featureCustomizeCards": "Personnaliser et réorganiser les cartes d'accueil",
+  "@featureCustomizeCards": {
+    "description": "Founder feature bullet: card customization"
+  },
+  "featureCustomizeSidebar": "Personnaliser et réorganiser les menus latéraux",
+  "@featureCustomizeSidebar": {
+    "description": "Founder feature bullet: sidebar customization"
+  },
+  "featureHigherLimits": "Limites d'utilisation IA plus élevées",
+  "@featureHigherLimits": {
+    "description": "Founder feature bullet: higher limits"
+  },
+  "featureRemoveAds": "Supprimer les publicités définitivement",
+  "@featureRemoveAds": {
+    "description": "Founder feature bullet: ad removal"
+  },
+  "unlockAllFeatures": "Débloquer toutes les fonctionnalités",
+  "@unlockAllFeatures": {
+    "description": "CTA button label to purchase founder status"
+  },
+  "sidebarMenuItems": "Éléments du menu latéral",
+  "@sidebarMenuItems": {
+    "description": "Title for sidebar menu items configuration"
+  },
+  "welcomeCards": "Cartes d'accueil",
+  "@welcomeCards": {
+    "description": "Title for welcome cards configuration"
+  },
+  "orderSaved": "Ordre enregistré",
+  "@orderSaved": {
+    "description": "Snackbar message when card/sidebar order is saved"
+  },
+  "orderReset": "Ordre réinitialisé par défaut",
+  "@orderReset": {
+    "description": "Snackbar message when order is reset to default"
+  },
+  "founderPerksScreenTitle": "Avantages Aquariophile Fondateur",
+  "@founderPerksScreenTitle": {
+    "description": "Title for the dedicated Founder Aquarist perks screen"
+  },
+  "founderPerksScreenSubtitle": "Tous les avantages inclus avec votre statut d'Aquariophile Fondateur",
+  "@founderPerksScreenSubtitle": {
+    "description": "Subtitle on the Founder Perks screen for founders"
+  },
+  "founderPerksNonFounderSubtitle": "Devenez Aquariophile Fondateur pour débloquer ces avantages exclusifs",
+  "@founderPerksNonFounderSubtitle": {
+    "description": "Subtitle on the Founder Perks screen for non-founders"
+  },
+  "perkAccessSettings": "Aller dans Paramètres → Paramètres de l'app",
+  "@perkAccessSettings": {
+    "description": "How to access a perk available in settings"
+  },
+  "perkAccessAppearance": "Aller dans Paramètres → Apparence",
+  "@perkAccessAppearance": {
+    "description": "How to access a perk available in the appearance screen"
+  },
+  "perkAccessCommunity": "Visible sur vos publications communautaires",
+  "@perkAccessCommunity": {
+    "description": "How to access the post border perk"
+  },
+  "perkAccessProfile": "Visible sur votre profil et vos publications",
+  "@perkAccessProfile": {
+    "description": "How to access the badge perk"
+  },
+  "perkAccessAutomatic": "Appliqué automatiquement",
+  "@perkAccessAutomatic": {
+    "description": "How to access a perk that is applied automatically"
+  },
+  "perkAccessAITools": "Actif sur tous les outils IA",
+  "@perkAccessAITools": {
+    "description": "How to access AI model and limit perks"
+  },
+  "founderPerkCustomization": "Personnalisation des cartes d'accueil et de la barre latérale",
+  "@founderPerkCustomization": {
+    "description": "Founder perk: customization of welcome cards and sidebar"
+  },
+  "layoutCustomization": "Personnalisation de la disposition",
+  "@layoutCustomization": {
+    "description": "Section header for welcome card and sidebar customization in appearance screen"
+  },
+  "layoutCustomizationDesc": "Réorganiser les cartes d'accueil et les éléments du menu latéral",
+  "@layoutCustomizationDesc": {
+    "description": "Description for layout customization section"
+  },
+  "founderRequiredTooltip": "Aquariophile Fondateur requis",
+  "@founderRequiredTooltip": {
+    "description": "Tooltip shown on locked customization features for non-founders"
   }
+}

@@ -1387,6 +1387,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 16),
+        _buildFounderSupportCard(context),
+        const SizedBox(height: 16),
         _buildRemoveAdsCard(context),
         const SizedBox(height: 16),
         _buildMenuCard(
@@ -1526,6 +1528,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showRemoveAdsDialog() {
     showRemoveAdsDialog(context);
+  }
+
+  Widget _buildFounderSupportCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final founderColor = AquaThemeColors.founderColor(context);
+
+    return _buildMenuCard(
+      context: context,
+      title: l10n.founderPerksScreenTitle,
+      subtitle: l10n.founderSupportDesc,
+      icon: Icons.diamond,
+      gradient: LinearGradient(
+        colors: [
+          founderColor.withOpacity(0.15),
+          Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      iconColor: founderColor,
+      onTap: () => Navigator.pushNamed(context, '/founder-perks'),
+    );
   }
 
   void _showDebugMenuDialog() {

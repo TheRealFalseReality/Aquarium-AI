@@ -5,21 +5,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
+import '../providers/app_settings_provider.dart';
+import '../providers/customization_provider.dart';
+import '../providers/purchase_provider.dart';
 import '../services/analytics_service.dart';
 import '../theme_colors.dart';
 import '../theme_provider.dart';
+import '../widgets/remove_ads_dialog.dart';
 
-class AppearanceScreen extends ConsumerWidget {
+class AppearanceScreen extends ConsumerStatefulWidget {
   const AppearanceScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppearanceScreen> createState() => _AppearanceScreenState();
+}
+
+class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.logScreenView(screenName: 'appearance_screen');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final themeState = ref.watch(themeProviderNotifierProvider);
     final themeNotifier = ref.read(themeProviderNotifierProvider.notifier);
+    final isFounder = ref.watch(isFounderProvider);
     final isMaterialYouAvailable =
         !kIsWeb && (defaultTargetPlatform == TargetPlatform.android);
+    final founderColor = AquaThemeColors.founderColor(context);
 
     return MainLayout(
       title: l10n.appearance,
@@ -181,7 +198,447 @@ class AppearanceScreen extends ConsumerWidget {
               ),
             ),
           ),
+
+          const SizedBox(height: 16),
+
+          // ── Layout Customization (Founder only) ────────────────────────
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _sectionHeader(
+                    context,
+                    Icons.dashboard_customize,
+                    l10n.layoutCustomization,
+                    isFounder ? founderColor : cs.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.layoutCustomizationDesc,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Customize Welcome Cards
+                  Opacity(
+                    opacity: isFounder ? 1.0 : 0.5,
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.dashboard_customize,
+                        color: isFounder ? founderColor : cs.onSurfaceVariant,
+                      ),
+                      title: Text(l10n.customizeWelcomeCards),
+                      subtitle: Text(l10n.customizeWelcomeCardsDesc),
+                      trailing: isFounder
+                          ? const Icon(Icons.arrow_forward_ios, size: 16)
+                          : Tooltip(
+                              message: l10n.founderRequiredTooltip,
+                              child: Icon(
+                                Icons.lock,
+                                size: 16,
+                                color: founderColor,
+                              ),
+                            ),
+                      onTap: isFounder
+                          ? () => _showWelcomeCardReorderDialog()
+                          : kIsWeb
+                              ? null
+                              : () => showRemoveAdsDialog(context),
+                    ),
+                  ),
+                  const Divider(height: 1),
+
+                  // Customize Sidebar
+                  Opacity(
+                    opacity: isFounder ? 1.0 : 0.5,
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.menu_open,
+                        color: isFounder ? founderColor : cs.onSurfaceVariant,
+                      ),
+                      title: Text(l10n.customizeSidebar),
+                      subtitle: Text(l10n.customizeSidebarDesc),
+                      trailing: isFounder
+                          ? const Icon(Icons.arrow_forward_ios, size: 16)
+                          : Tooltip(
+                              message: l10n.founderRequiredTooltip,
+                              child: Icon(
+                                Icons.lock,
+                                size: 16,
+                                color: founderColor,
+                              ),
+                            ),
+                      onTap: isFounder
+                          ? () => _showSidebarReorderDialog()
+                          : kIsWeb
+                              ? null
+                              : () => showRemoveAdsDialog(context),
+                    ),
+                  ),
+
+                  if (!isFounder) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.founderFeatureLocked,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: founderColor,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  // ── Reorder Dialogs ──────────────────────────────────────────────────
+
+  void _showWelcomeCardReorderDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    final appSettings = ref.read(appSettingsProvider);
+    final founderColor = AquaThemeColors.founderColor(context);
+
+    // Build the default feature list (same IDs as welcome screen)
+    final defaultIds = <String>[
+      if (appSettings.enableAI) ...[
+        '/compat-ai',
+        '/chatbot',
+        '/chatbot_photo', // photo analyzer
+        '/stocking',
+      ],
+      '/calculators',
+      '/tank-volume',
+      '/substrate',
+      '/dosing-calculator',
+      '/compat-browser',
+      '/community',
+      'aquapi_store',
+    ];
+
+    // Map IDs to display names
+    final idToName = <String, String>{
+      '/compat-ai': l10n.aiCompatibilityTool,
+      '/chatbot': l10n.aiChatbot,
+      '/chatbot_photo': l10n.photoAnalyzer,
+      '/stocking': l10n.aiStockingAssistant,
+      '/calculators': l10n.aquariumCalculators,
+      '/tank-volume': l10n.tankVolumeCalculator,
+      '/substrate': l10n.substrateCalculator,
+      '/dosing-calculator': l10n.dosingCalculator,
+      '/compat-browser': l10n.fishCompatBrowser,
+      '/community': l10n.communityTitle,
+      'aquapi_store': l10n.aquaPiStore,
+    };
+
+    // Get current order from provider
+    final customization = ref.read(customizationProvider);
+    final currentOrder = customization.welcomeCardOrder;
+
+    // Build working list
+    List<String> workingOrder = applyCustomOrder(defaultIds, currentOrder);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: MediaQuery.of(ctx).size.width,
+            height: MediaQuery.of(ctx).size.height * 0.8,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: founderColor.withOpacity(0.1),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.dashboard_customize,
+                        color: founderColor,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          l10n.welcomeCards,
+                          style: Theme.of(ctx)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        tooltip: l10n.close,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    l10n.dragToReorder,
+                    style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ReorderableListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    itemCount: workingOrder.length,
+                    onReorder: (oldIndex, newIndex) {
+                      setDialogState(() {
+                        if (newIndex > oldIndex) newIndex--;
+                        final item = workingOrder.removeAt(oldIndex);
+                        workingOrder.insert(newIndex, item);
+                      });
+                      ref
+                          .read(customizationProvider.notifier)
+                          .setWelcomeCardOrder(workingOrder);
+                    },
+                    itemBuilder: (ctx, index) {
+                      final id = workingOrder[index];
+                      return ListTile(
+                        key: ValueKey(id),
+                        leading: Icon(
+                          Icons.drag_handle,
+                          color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                        ),
+                        title: Text(idToName[id] ?? id),
+                        trailing: Text(
+                          '${index + 1}',
+                          style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      ref
+                          .read(customizationProvider.notifier)
+                          .resetWelcomeCardOrder();
+                      setDialogState(() {
+                        workingOrder
+                          ..clear()
+                          ..addAll(defaultIds);
+                      });
+                      if (ctx.mounted) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          SnackBar(content: Text(l10n.orderReset)),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.restore, size: 18),
+                    label: Text(l10n.resetToDefault),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSidebarReorderDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    final appSettings = ref.read(appSettingsProvider);
+    final founderColor = AquaThemeColors.founderColor(context);
+
+    // Build the default list of sidebar items, respecting AI toggle
+    final defaultIds = <String>[
+      if (appSettings.enableAI) ...[
+        'compat-ai',
+        'chatbot',
+        'stocking',
+        'analysis-history',
+      ],
+      'calculators',
+      'tank-volume',
+      'substrate',
+      'dosing-calculator',
+      'compat-browser',
+      'notifications',
+      'community',
+      'profile',
+      'information',
+    ];
+
+    // Map IDs to display names
+    final idToName = <String, String>{
+      'compat-ai': l10n.aiCompatibilityTool,
+      'chatbot': l10n.aiChatbot,
+      'stocking': l10n.aiStockingAssistant,
+      'analysis-history': l10n.analysisHistory,
+      'calculators': l10n.aquariumCalculators,
+      'tank-volume': l10n.tankVolumeCalculator,
+      'substrate': l10n.substrateCalculator,
+      'dosing-calculator': l10n.dosingCalculator,
+      'compat-browser': l10n.fishCompatBrowser,
+      'notifications': l10n.allNotifications,
+      'community': l10n.communityTitle,
+      'profile': l10n.profileTitle,
+      'information': l10n.information,
+    };
+
+    // Get current state
+    final customization = ref.read(customizationProvider);
+    final currentOrder = customization.sidebarOrder;
+    final hiddenItems = Set<String>.from(customization.hiddenSidebarItems);
+
+    // Build working list
+    List<String> workingOrder = applyCustomOrder(defaultIds, currentOrder);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: MediaQuery.of(ctx).size.width,
+            height: MediaQuery.of(ctx).size.height * 0.8,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: founderColor.withOpacity(0.1),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.menu_open, color: founderColor),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          l10n.sidebarMenuItems,
+                          style: Theme.of(ctx)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        tooltip: l10n.close,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    l10n.dragToReorder,
+                    style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ReorderableListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    itemCount: workingOrder.length,
+                    onReorder: (oldIndex, newIndex) {
+                      setDialogState(() {
+                        if (newIndex > oldIndex) newIndex--;
+                        final item = workingOrder.removeAt(oldIndex);
+                        workingOrder.insert(newIndex, item);
+                      });
+                      ref
+                          .read(customizationProvider.notifier)
+                          .setSidebarOrder(workingOrder);
+                    },
+                    itemBuilder: (ctx, index) {
+                      final id = workingOrder[index];
+                      final isHidden = hiddenItems.contains(id);
+                      return CheckboxListTile(
+                        key: ValueKey(id),
+                        value: !isHidden,
+                        title: Text(idToName[id] ?? id),
+                        secondary: Icon(
+                          Icons.drag_handle,
+                          color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                        ),
+                        onChanged: (val) {
+                          setDialogState(() {
+                            if (val == true) {
+                              hiddenItems.remove(id);
+                            } else {
+                              hiddenItems.add(id);
+                            }
+                          });
+                          ref
+                              .read(customizationProvider.notifier)
+                              .setHiddenSidebarItems(hiddenItems);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      ref
+                          .read(customizationProvider.notifier)
+                          .resetSidebarOrder();
+                      setDialogState(() {
+                        workingOrder
+                          ..clear()
+                          ..addAll(defaultIds);
+                        hiddenItems.clear();
+                      });
+                      if (ctx.mounted) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          SnackBar(content: Text(l10n.orderReset)),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.restore, size: 18),
+                    label: Text(l10n.resetToDefault),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -196,11 +653,13 @@ class AppearanceScreen extends ConsumerWidget {
       children: [
         Icon(icon, color: color, size: 20),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: color,
+        Flexible(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
           ),
         ),
       ],

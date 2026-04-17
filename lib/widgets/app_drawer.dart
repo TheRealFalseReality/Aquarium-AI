@@ -13,6 +13,7 @@ import '../l10n/app_localizations.dart';
 import '../models/tank.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/community_provider.dart';
+import '../providers/customization_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../providers/tank_provider.dart';
@@ -327,426 +328,13 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
                     ),
                   ),
                 ),
-                if (appSettings.enableAI) ...[
-                  _sectionHeader(
-                    context,
-                    l10n.aiTools,
-                    Theme.of(context).colorScheme.primary,
-                  ),
-                  AnimatedDrawerItem(
-                    delay: const Duration(milliseconds: 250),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.3),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.calculate,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        title: Text(l10n.aiCompatibilityTool),
-                        subtitle: Text(l10n.aiCompatibilityDrawerDescription),
-                        onTap: () => navigate('/compat-ai'),
-                      ),
-                    ),
-                  ),
-                  AnimatedDrawerItem(
-                    delay: const Duration(milliseconds: 300),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.3),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.chat,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        title: Text(l10n.aiChatbot),
-                        subtitle: Text(l10n.aiChatbotDrawerDescription),
-                        onTap: () => navigate('/chatbot'),
-                      ),
-                    ),
-                  ),
-                  AnimatedDrawerItem(
-                    delay: const Duration(milliseconds: 350),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.3),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.auto_awesome,
-                          color: Theme.of(context).colorScheme.tertiary,
-                        ),
-                        title: Text(l10n.aiStockingAssistant),
-                        subtitle: Text(l10n.aiStockingDrawerDescription),
-                        onTap: () => navigate('/stocking'),
-                      ),
-                    ),
-                  ),
-                  // History under AI Tools
-                  AnimatedDrawerItem(
-                    delay: const Duration(milliseconds: 380),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.3),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.history,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        title: Text(l10n.analysisHistory),
-                        subtitle: Text(l10n.analysisHistoryDesc),
-                        onTap: () => navigate('/analysis-history'),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Divider(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.2),
-                      thickness: 1,
-                    ),
-                  ),
-                ],
-                _sectionHeader(
+                // ── Customizable sidebar items ────────────────────────────
+                ..._buildOrderedSidebarItems(
                   context,
-                  l10n.toolsAndResources,
-                  Theme.of(context).colorScheme.secondary,
+                  l10n,
+                  navigate,
+                  appSettings,
                 ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 400),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.science,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      title: Text(l10n.aquariumCalculators),
-                      subtitle: Text(l10n.aquariumCalculatorsDrawerDescription),
-                      onTap: () => navigate('/calculators'),
-                    ),
-                  ),
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 450),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.view_in_ar,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                      title: Text(l10n.tankVolumeCalculator),
-                      subtitle: Text(l10n.tankVolumeDrawerDescription),
-                      onTap: () => navigate('/tank-volume'),
-                    ),
-                  ),
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 465),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.grass_outlined,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                      title: Text(l10n.substrateCalculator),
-                      subtitle: Text(l10n.substrateDrawerDescription),
-                      onTap: () => navigate('/substrate'),
-                    ),
-                  ),
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 473),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.science_outlined,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                      title: Text(l10n.dosingCalculator),
-                      subtitle: Text(l10n.dosingDrawerDescription),
-                      onTap: () => navigate('/dosing-calculator'),
-                    ),
-                  ),
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 480),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.grid_view_rounded,
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
-                      title: Text(l10n.fishCompatBrowser),
-                      subtitle: Text(l10n.fishCompatBrowserDrawerDesc),
-                      onTap: () => navigate('/compat-browser'),
-                    ),
-                  ),
-                ),
-                // ── Community & Profile ───────────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  child: Divider(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.secondary.withOpacity(0.2),
-                    thickness: 1,
-                  ),
-                ),
-                _sectionHeader(
-                  context,
-                  '${l10n.communityTitle} & ${l10n.profileTitle}',
-                  Theme.of(context).colorScheme.secondary,
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 550),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.people,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                      title: Text(l10n.communityTitle),
-                      subtitle: Text(l10n.communityDrawerDescription),
-                      onTap: () => navigate('/community'),
-                    ),
-                  ),
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 575),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.secondary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: _buildProfileTile(context, l10n, navigate),
-                  ),
-                ),
-                // ── Guides & Docs ─────────────────────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  child: Divider(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.tertiary.withOpacity(0.2),
-                    thickness: 1,
-                  ),
-                ),
-                _sectionHeader(
-                  context,
-                  l10n.guidesAndDocs,
-                  Theme.of(context).colorScheme.tertiary,
-                ),
-                AnimatedDrawerItem(
-                  delay: const Duration(milliseconds: 600),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        left: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.tertiary.withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.library_books,
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
-                      title: Text(l10n.information),
-                      subtitle: Text(l10n.informationDescription),
-                      onTap: () => navigate('/information'),
-                    ),
-                  ),
-                ),
-                // Debug-only: Fish Compat Editor
-                if (kDebugMode) ...[
-                  AnimatedDrawerItem(
-                    delay: const Duration(milliseconds: 600),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            color: Colors.amber.withOpacity(0.6),
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      child: ListTile(
-                        leading: const Icon(
-                          Icons.bug_report,
-                          color: Colors.amber,
-                        ),
-                        title: const Text('Fish Compat Editor'),
-                        subtitle: const Text(
-                          'Debug: edit & validate fish data',
-                        ),
-                        onTap: () => navigate('/fishcompat-editor'),
-                      ),
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
@@ -820,6 +408,313 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           ),
           _buildDrawerFooter(context, navigate),
         ],
+      ),
+    );
+  }
+
+  /// Builds the ordered and filtered sidebar menu items based on the
+  /// customization provider state.
+  List<Widget> _buildOrderedSidebarItems(
+    BuildContext context,
+    AppLocalizations l10n,
+    void Function(String) navigate,
+    AppSettingsState appSettings,
+  ) {
+    final customization = ref.watch(customizationProvider);
+    final hiddenItems = customization.hiddenSidebarItems;
+
+    // Build the default ordered list of IDs, respecting AI toggle
+    final defaultIds = <String>[
+      if (appSettings.enableAI) ...[
+        'compat-ai',
+        'chatbot',
+        'stocking',
+        'analysis-history',
+      ],
+      'calculators',
+      'tank-volume',
+      'substrate',
+      'dosing-calculator',
+      'compat-browser',
+      'notifications',
+      'community',
+      'profile',
+      'information',
+    ];
+
+    // Apply custom order if available
+    final orderedIds = applyCustomOrder(defaultIds, customization.sidebarOrder);
+
+    // Filter out hidden items
+    final visibleIds =
+        orderedIds.where((id) => !hiddenItems.contains(id)).toList();
+
+    // Group items into sections for visual separation
+    const aiToolIds = {
+      'compat-ai',
+      'chatbot',
+      'stocking',
+      'analysis-history',
+    };
+    const toolIds = {
+      'calculators',
+      'tank-volume',
+      'substrate',
+      'dosing-calculator',
+      'compat-browser',
+      'notifications',
+    };
+    const communityIds = {'community', 'profile'};
+
+    final widgets = <Widget>[];
+    var baseDelay = 250;
+    String? lastSection;
+
+    for (final id in visibleIds) {
+      // Determine which section this item belongs to
+      String section;
+      if (aiToolIds.contains(id)) {
+        section = 'ai';
+      } else if (toolIds.contains(id)) {
+        section = 'tools';
+      } else if (communityIds.contains(id)) {
+        section = 'community';
+      } else {
+        // guidesIds and any unknown IDs fall into the guides section
+        section = 'guides';
+      }
+
+      // Add section header when section changes
+      if (section != lastSection) {
+        if (lastSection != null) {
+          // Add divider between sections
+          final dividerColor = section == 'ai'
+              ? Theme.of(context).colorScheme.primary
+              : section == 'tools'
+                  ? Theme.of(context).colorScheme.secondary
+                  : section == 'community'
+                      ? Theme.of(context).colorScheme.secondary
+                      : Theme.of(context).colorScheme.tertiary;
+          widgets.add(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Divider(
+                color: dividerColor.withOpacity(0.2),
+                thickness: 1,
+              ),
+            ),
+          );
+        }
+        // Add section header
+        String sectionLabel;
+        Color sectionColor;
+        if (section == 'ai') {
+          sectionLabel = l10n.aiTools;
+          sectionColor = Theme.of(context).colorScheme.primary;
+        } else if (section == 'tools') {
+          sectionLabel = l10n.toolsAndResources;
+          sectionColor = Theme.of(context).colorScheme.secondary;
+        } else if (section == 'community') {
+          sectionLabel = '${l10n.communityTitle} & ${l10n.profileTitle}';
+          sectionColor = Theme.of(context).colorScheme.secondary;
+        } else {
+          sectionLabel = l10n.guidesAndDocs;
+          sectionColor = Theme.of(context).colorScheme.tertiary;
+        }
+        widgets.add(_sectionHeader(context, sectionLabel, sectionColor));
+        lastSection = section;
+      }
+
+      // Build the item widget
+      widgets.add(
+        _buildDrawerItemById(
+          context,
+          l10n,
+          navigate,
+          id,
+          Duration(milliseconds: baseDelay),
+        ),
+      );
+      baseDelay += 50;
+    }
+
+    // Debug-only: Fish Compat Editor
+    if (kDebugMode) {
+      widgets.add(
+        AnimatedDrawerItem(
+          delay: Duration(milliseconds: baseDelay),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  color: Colors.amber.withOpacity(0.6),
+                  width: 2,
+                ),
+              ),
+            ),
+            child: ListTile(
+              leading: const Icon(Icons.bug_report, color: Colors.amber),
+              title: const Text('Fish Compat Editor'),
+              subtitle: const Text('Debug: edit & validate fish data'),
+              onTap: () => navigate('/fishcompat-editor'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
+  /// Builds a single drawer menu item by its ID.
+  Widget _buildDrawerItemById(
+    BuildContext context,
+    AppLocalizations l10n,
+    void Function(String) navigate,
+    String id,
+    Duration delay,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+
+    // Determine the border color based on item section
+    Color borderColor;
+    switch (id) {
+      case 'compat-ai':
+      case 'chatbot':
+      case 'stocking':
+      case 'analysis-history':
+        borderColor = cs.primary.withOpacity(0.3);
+        break;
+      case 'calculators':
+      case 'tank-volume':
+      case 'substrate':
+      case 'dosing-calculator':
+      case 'compat-browser':
+      case 'notifications':
+      case 'community':
+      case 'profile':
+        borderColor = cs.secondary.withOpacity(0.3);
+        break;
+      default:
+        borderColor = cs.tertiary.withOpacity(0.3);
+    }
+
+    Widget tile;
+    switch (id) {
+      case 'compat-ai':
+        tile = ListTile(
+          leading: Icon(Icons.calculate, color: cs.primary),
+          title: Text(l10n.aiCompatibilityTool),
+          subtitle: Text(l10n.aiCompatibilityDrawerDescription),
+          onTap: () => navigate('/compat-ai'),
+        );
+        break;
+      case 'chatbot':
+        tile = ListTile(
+          leading: Icon(Icons.chat, color: cs.secondary),
+          title: Text(l10n.aiChatbot),
+          subtitle: Text(l10n.aiChatbotDrawerDescription),
+          onTap: () => navigate('/chatbot'),
+        );
+        break;
+      case 'stocking':
+        tile = ListTile(
+          leading: Icon(Icons.auto_awesome, color: cs.tertiary),
+          title: Text(l10n.aiStockingAssistant),
+          subtitle: Text(l10n.aiStockingDrawerDescription),
+          onTap: () => navigate('/stocking'),
+        );
+        break;
+      case 'analysis-history':
+        tile = ListTile(
+          leading: Icon(Icons.history, color: cs.primary),
+          title: Text(l10n.analysisHistory),
+          subtitle: Text(l10n.analysisHistoryDesc),
+          onTap: () => navigate('/analysis-history'),
+        );
+        break;
+      case 'calculators':
+        tile = ListTile(
+          leading: Icon(Icons.science, color: cs.primary),
+          title: Text(l10n.aquariumCalculators),
+          subtitle: Text(l10n.aquariumCalculatorsDrawerDescription),
+          onTap: () => navigate('/calculators'),
+        );
+        break;
+      case 'tank-volume':
+        tile = ListTile(
+          leading: Icon(Icons.view_in_ar, color: cs.secondary),
+          title: Text(l10n.tankVolumeCalculator),
+          subtitle: Text(l10n.tankVolumeDrawerDescription),
+          onTap: () => navigate('/tank-volume'),
+        );
+        break;
+      case 'substrate':
+        tile = ListTile(
+          leading: Icon(Icons.grass_outlined, color: cs.secondary),
+          title: Text(l10n.substrateCalculator),
+          subtitle: Text(l10n.substrateDrawerDescription),
+          onTap: () => navigate('/substrate'),
+        );
+        break;
+      case 'compat-browser':
+        tile = ListTile(
+          leading: Icon(Icons.grid_view_rounded, color: cs.tertiary),
+          title: Text(l10n.fishCompatBrowser),
+          subtitle: Text(l10n.fishCompatBrowserDrawerDesc),
+          onTap: () => navigate('/compat-browser'),
+        );
+        break;
+      case 'dosing-calculator':
+        tile = ListTile(
+          leading: Icon(Icons.science_outlined, color: cs.secondary),
+          title: Text(l10n.dosingCalculator),
+          subtitle: Text(l10n.dosingDrawerDescription),
+          onTap: () => navigate('/dosing-calculator'),
+        );
+        break;
+      case 'notifications':
+        tile = ListTile(
+          leading: Icon(Icons.notifications_outlined, color: cs.secondary),
+          title: Text(l10n.allNotifications),
+          subtitle: Text(l10n.allNotificationsDrawerDescription),
+          onTap: () => navigate('/notifications'),
+        );
+        break;
+      case 'community':
+        tile = ListTile(
+          leading: Icon(Icons.people, color: cs.secondary),
+          title: Text(l10n.communityTitle),
+          subtitle: Text(l10n.communityDrawerDescription),
+          onTap: () => navigate('/community'),
+        );
+        break;
+      case 'profile':
+        tile = _buildProfileTile(context, l10n, navigate);
+        break;
+      case 'information':
+        tile = ListTile(
+          leading: Icon(Icons.library_books, color: cs.tertiary),
+          title: Text(l10n.information),
+          subtitle: Text(l10n.informationDescription),
+          onTap: () => navigate('/information'),
+        );
+        break;
+      default:
+        tile = const SizedBox.shrink();
+    }
+
+    return AnimatedDrawerItem(
+      delay: delay,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(color: borderColor, width: 2),
+          ),
+        ),
+        child: tile,
       ),
     );
   }
