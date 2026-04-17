@@ -480,6 +480,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         section = 'tools';
       } else if (communityIds.contains(id)) {
         section = 'community';
+      } else if (guidesIds.contains(id)) {
+        section = 'guides';
       } else {
         section = 'guides';
       }
