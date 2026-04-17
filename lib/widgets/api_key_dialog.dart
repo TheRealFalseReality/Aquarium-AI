@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/app_localizations.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/purchase_provider.dart' show isFounderProvider;
 import '../services/remote_config_service.dart';
@@ -55,6 +56,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
   List<Widget> _buildDialogActions(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < _smallScreenBreakpoint;
+    final l10n = AppLocalizations.of(context)!;
 
     if (isSmallScreen) {
       // For small screens, create a custom compact layout
@@ -70,7 +72,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                   Expanded(
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Dismiss'),
+                      child: Text(l10n.dismiss),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -85,7 +87,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                       style: TextButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.error,
                       ),
-                      child: const Text('Never Show Again'),
+                      child: Text(l10n.neverShowAgain),
                     ),
                   ),
                 ],
@@ -98,7 +100,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
                     Navigator.of(context).pop();
                     Navigator.of(context).pushNamed('/settings');
                   },
-                  child: const Text('Go to Settings'),
+                  child: Text(l10n.goToSettings),
                 ),
               ),
             ],
@@ -111,7 +113,7 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
     return [
       TextButton(
         onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Dismiss'),
+        child: Text(l10n.dismiss),
       ),
       TextButton(
         onPressed: () async {
@@ -123,14 +125,14 @@ class _ApiKeyDialogState extends ConsumerState<ApiKeyDialog> {
         style: TextButton.styleFrom(
           foregroundColor: Theme.of(context).colorScheme.error,
         ),
-        child: const Text('Never Show Again'),
+        child: Text(l10n.neverShowAgain),
       ),
       ElevatedButton(
         onPressed: () {
           Navigator.of(context).pop();
           Navigator.of(context).pushNamed('/settings');
         },
-        child: const Text('Go to Settings'),
+        child: Text(l10n.goToSettings),
       ),
     ];
   }
