@@ -1046,6 +1046,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ),
               const SizedBox(width: 8),
 
+              // Global notifications button
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                tooltip: l10n.allNotifications,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/notifications');
+                },
+              ),
+
               // 3-dot menu for backup/restore/import
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),

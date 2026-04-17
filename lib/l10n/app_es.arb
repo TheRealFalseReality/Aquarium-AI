@@ -219,6 +219,7 @@
   "noBackupHistory": "Aún no hay historial de copias de seguridad",
   "dosingDiary": "Diario de Dosificación",
   "notifications": "Notificaciones",
+  "notification": "notificación",
   "notificationsExperimental": "Notificaciones (Experimental)",
   "experimental": "Experimental",
   "sendTestNotification": "Enviar Notificación de Prueba",
@@ -883,7 +884,7 @@
   "aquaPiPerfectFor": "¡Perfecto para entusiastas del bricolaje y acuaristas con conocimientos tecnológicos!",
   "learnMore": "Más Información",
   "neverShow": "No Mostrar",
-  "neverShowAgain": "No Mostrar de Nuevo",
+  "neverShowAgain": "No mostrar de nuevo",
   "themeDefault": "Predeterminado",
   "themeMaterialYou": "Material You",
   "themeOceanBlue": "Azul Océano",
@@ -1536,177 +1537,461 @@
   "@latestReadings": {
     "description": "Section header showing the latest water parameter readings per type"
   },
-
-    "askAI": "Preguntar a IA",
-    "@askAI": {
-      "description": "Label for the Ask AI floating action button shown when a fish is selected in the browser"
-    },
-    "askAIAboutFish": "Preguntar a la IA sobre un pez",
-    "@askAIAboutFish": {
-      "description": "Title of the species picker sheet before an AI fish info request"
-    },
-    "selectFishSpecies": "Selecciona o escribe una especie de pez",
-    "@selectFishSpecies": {
-      "description": "Subtitle in the species picker sheet prompting the user to select or type a fish"
-    },
-    "askAIFollowUpHint": "Haz una pregunta de seguimiento...",
-    "@askAIFollowUpHint": {
-      "description": "Hint text in the follow-up chat input field of the fish AI chat sheet"
-    },
-    "keyFacts": "Datos clave",
-    "@keyFacts": {
-      "description": "Section header for key facts in a fish AI info card"
-    },
-    "funFacts": "Curiosidades",
-    "@funFacts": {
-      "description": "Section header for fun facts in a fish AI info card"
-    },
-    "compatibleWith": "Compatible con",
-    "@compatibleWith": {
-      "description": "Section header listing compatible tank mates"
-    },
-    "incompatibleWith": "Incompatible con",
-    "@incompatibleWith": {
-      "description": "Section header listing incompatible species"
-    },
-    "fishSpeciesHint": "p. ej. Pez payaso, Betta...",
-    "@fishSpeciesHint": {
-      "description": "Placeholder hint in the species input field of the Ask AI sheet"
-    },
-    "selectSpecificVariety": "Selecciona una variedad específica",
-    "@selectSpecificVariety": {
-      "description": "Label above the common-name chips in the Ask AI species picker"
-    },
-    "customSpeciesLabel": "O ingresa tu propia especie",
-    "@customSpeciesLabel": {
-      "description": "Label above the custom species text field in the Ask AI species picker"
-    },
-    "founderSupport": "Soporte Fundador",
-    "@founderSupport": {
-      "description": "Settings section title for founder/premium features"
-    },
-    "founderSupportDesc": "Ventajas exclusivas para Acuaristas Fundadores",
-    "@founderSupportDesc": {
-      "description": "Subtitle for the Founder Support settings card"
-    },
-    "customizeWelcomeCards": "Personalizar tarjetas de bienvenida",
-    "@customizeWelcomeCards": {
-      "description": "Title for the welcome screen card reorder and visibility settings"
-    },
-    "customizeWelcomeCardsDesc": "Reorganizar y mostrar/ocultar tarjetas en la pantalla de bienvenida",
-    "@customizeWelcomeCardsDesc": {
-      "description": "Description for welcome card customization"
-    },
-    "customizeSidebar": "Personalizar barra lateral",
-    "@customizeSidebar": {
-      "description": "Title for sidebar menu customization"
-    },
-    "customizeSidebarDesc": "Reorganizar y mostrar/ocultar elementos del menú lateral",
-    "@customizeSidebarDesc": {
-      "description": "Description for sidebar customization"
-    },
-    "dragToReorder": "Arrastra para reordenar",
-    "@dragToReorder": {
-      "description": "Hint text for drag-to-reorder functionality"
-    },
-    "resetToDefault": "Restablecer valores predeterminados",
-    "@resetToDefault": {
-      "description": "Button label to reset order to default"
-    },
-    "founderFeatureLocked": "Conviértete en Acuarista Fundador para desbloquear funciones de personalización",
-    "@founderFeatureLocked": {
-      "description": "Message shown to non-founder users when trying to access premium customization features"
-    },
-    "founderExclusiveFeatures": "Funciones exclusivas de Fundador",
-    "@founderExclusiveFeatures": {
-      "description": "Header for the list of founder-exclusive features in the upsell section"
-    },
-    "featureCustomizeCards": "Personalizar y reordenar tarjetas de bienvenida",
-    "@featureCustomizeCards": {
-      "description": "Founder feature bullet: card customization"
-    },
-    "featureCustomizeSidebar": "Personalizar y reordenar menús laterales",
-    "@featureCustomizeSidebar": {
-      "description": "Founder feature bullet: sidebar customization"
-    },
-    "featureHigherLimits": "Límites de uso de IA más altos",
-    "@featureHigherLimits": {
-      "description": "Founder feature bullet: higher limits"
-    },
-    "featureRemoveAds": "Eliminar anuncios permanentemente",
-    "@featureRemoveAds": {
-      "description": "Founder feature bullet: ad removal"
-    },
-    "unlockAllFeatures": "Desbloquear todas las funciones",
-    "@unlockAllFeatures": {
-      "description": "CTA button label to purchase founder status"
-    },
-    "sidebarMenuItems": "Elementos del menú lateral",
-    "@sidebarMenuItems": {
-      "description": "Title for sidebar menu items configuration"
-    },
-    "welcomeCards": "Tarjetas de bienvenida",
-    "@welcomeCards": {
-      "description": "Title for welcome cards configuration"
-    },
-    "orderSaved": "Orden guardado",
-    "@orderSaved": {
-      "description": "Snackbar message when card/sidebar order is saved"
-    },
-    "orderReset": "Orden restablecido a predeterminado",
-    "@orderReset": {
-      "description": "Snackbar message when order is reset to default"
-    },
-    "founderPerksScreenTitle": "Ventajas de Acuarista Fundador",
-    "@founderPerksScreenTitle": {
-      "description": "Title for the dedicated Founder Aquarist perks screen"
-    },
-    "founderPerksScreenSubtitle": "Todas las ventajas incluidas con tu estado de Acuarista Fundador",
-    "@founderPerksScreenSubtitle": {
-      "description": "Subtitle on the Founder Perks screen for founders"
-    },
-    "founderPerksNonFounderSubtitle": "Conviértete en Acuarista Fundador para desbloquear estas ventajas exclusivas",
-    "@founderPerksNonFounderSubtitle": {
-      "description": "Subtitle on the Founder Perks screen for non-founders"
-    },
-    "perkAccessSettings": "Ir a Ajustes → Ajustes de la app",
-    "@perkAccessSettings": {
-      "description": "How to access a perk available in settings"
-    },
-    "perkAccessAppearance": "Ir a Ajustes → Apariencia",
-    "@perkAccessAppearance": {
-      "description": "How to access a perk available in the appearance screen"
-    },
-    "perkAccessCommunity": "Visible en tus publicaciones de la comunidad",
-    "@perkAccessCommunity": {
-      "description": "How to access the post border perk"
-    },
-    "perkAccessProfile": "Visible en tu perfil y publicaciones",
-    "@perkAccessProfile": {
-      "description": "How to access the badge perk"
-    },
-    "perkAccessAutomatic": "Aplicado automáticamente",
-    "@perkAccessAutomatic": {
-      "description": "How to access a perk that is applied automatically"
-    },
-    "perkAccessAITools": "Activo en todas las herramientas de IA",
-    "@perkAccessAITools": {
-      "description": "How to access AI model and limit perks"
-    },
-    "founderPerkCustomization": "Personalización de tarjetas de bienvenida y barra lateral",
-    "@founderPerkCustomization": {
-      "description": "Founder perk: customization of welcome cards and sidebar"
-    },
-    "layoutCustomization": "Personalización del diseño",
-    "@layoutCustomization": {
-      "description": "Section header for welcome card and sidebar customization in appearance screen"
-    },
-    "layoutCustomizationDesc": "Reordenar tarjetas de bienvenida y elementos del menú lateral",
-    "@layoutCustomizationDesc": {
-      "description": "Description for layout customization section"
-    },
-    "founderRequiredTooltip": "Se requiere Acuarista Fundador",
-    "@founderRequiredTooltip": {
-      "description": "Tooltip shown on locked customization features for non-founders"
+  "askAI": "Preguntar a IA",
+  "@askAI": {
+    "description": "Label for the Ask AI floating action button shown when a fish is selected in the browser"
+  },
+  "askAIAboutFish": "Preguntar a la IA sobre un pez",
+  "@askAIAboutFish": {
+    "description": "Title of the species picker sheet before an AI fish info request"
+  },
+  "selectFishSpecies": "Selecciona o escribe una especie de pez",
+  "@selectFishSpecies": {
+    "description": "Subtitle in the species picker sheet prompting the user to select or type a fish"
+  },
+  "askAIFollowUpHint": "Haz una pregunta de seguimiento...",
+  "@askAIFollowUpHint": {
+    "description": "Hint text in the follow-up chat input field of the fish AI chat sheet"
+  },
+  "keyFacts": "Datos clave",
+  "@keyFacts": {
+    "description": "Section header for key facts in a fish AI info card"
+  },
+  "funFacts": "Curiosidades",
+  "@funFacts": {
+    "description": "Section header for fun facts in a fish AI info card"
+  },
+  "compatibleWith": "Compatible con",
+  "@compatibleWith": {
+    "description": "Section header listing compatible tank mates"
+  },
+  "incompatibleWith": "Incompatible con",
+  "@incompatibleWith": {
+    "description": "Section header listing incompatible species"
+  },
+  "fishSpeciesHint": "p. ej. Pez payaso, Betta...",
+  "@fishSpeciesHint": {
+    "description": "Placeholder hint in the species input field of the Ask AI sheet"
+  },
+  "selectSpecificVariety": "Selecciona una variedad específica",
+  "@selectSpecificVariety": {
+    "description": "Label above the common-name chips in the Ask AI species picker"
+  },
+  "customSpeciesLabel": "O ingresa tu propia especie",
+  "@customSpeciesLabel": {
+    "description": "Label above the custom species text field in the Ask AI species picker"
+  },
+  "somethingWentWrong": "Algo salió mal",
+  "tryAgain": "Intentar de nuevo",
+  "aiProviderSettings": "Configuración del proveedor de IA",
+  "goToSettings": "Ir a Configuración",
+  "checkYourApiPlan": "Revisar plan de API",
+  "errorTimeoutTitle": "Tiempo de espera agotado",
+  "errorNetworkTitle": "Problema de conexión",
+  "errorServerTitle": "Servicio no disponible",
+  "errorQuotaTitle": "Cuota de API excedida",
+  "errorContentFilterTitle": "Contenido filtrado",
+  "errorForbiddenTitle": "Acceso denegado",
+  "dosingCalculator": "Calculadora de Dosificación",
+  "@dosingCalculator": {
+    "description": "Name of the dosing calculator feature"
+  },
+  "dosingCalculatorSubtitle": "Calcule la dosis total de productos químicos para acuarios según el tamaño de su tanque.",
+  "@dosingCalculatorSubtitle": {
+    "description": "Subtitle for the dosing calculator screen"
+  },
+  "dosingDrawerDescription": "Calcule dosis químicas para su tanque con preajustes de productos populares.",
+  "@dosingDrawerDescription": {
+    "description": "Short description of the dosing calculator (app drawer)"
+  },
+  "dosingPresetTitle": "Preajustes de Productos",
+  "@dosingPresetTitle": {
+    "description": "Section title for dosing product presets"
+  },
+  "dosingPresetSeachemPrime": "Seachem Prime",
+  "@dosingPresetSeachemPrime": {
+    "description": "Dosing preset label for Seachem Prime"
+  },
+  "dosingPresetSeachemStability": "Seachem Stability",
+  "@dosingPresetSeachemStability": {
+    "description": "Dosing preset label for Seachem Stability"
+  },
+  "dosingPresetSeachemFlourish": "Seachem Flourish",
+  "@dosingPresetSeachemFlourish": {
+    "description": "Dosing preset label for Seachem Flourish"
+  },
+  "dosingPresetSeachemFlourishExcel": "Seachem Flourish Excel",
+  "@dosingPresetSeachemFlourishExcel": {
+    "description": "Dosing preset label for Seachem Flourish Excel"
+  },
+  "dosingPresetApiStressCoat": "API Stress Coat",
+  "@dosingPresetApiStressCoat": {
+    "description": "Dosing preset label for API Stress Coat"
+  },
+  "dosingPresetApiMelafix": "API Melafix",
+  "@dosingPresetApiMelafix": {
+    "description": "Dosing preset label for API Melafix"
+  },
+  "dosingPresetApiPimafix": "API Pimafix",
+  "@dosingPresetApiPimafix": {
+    "description": "Dosing preset label for API Pimafix"
+  },
+  "dosingPresetSeachemAlkalineBuffer": "Seachem Alkaline Buffer",
+  "@dosingPresetSeachemAlkalineBuffer": {
+    "description": "Dosing preset label for Seachem Alkaline Buffer"
+  },
+  "dosingPresetSeachemAcidBuffer": "Seachem Acid Buffer",
+  "@dosingPresetSeachemAcidBuffer": {
+    "description": "Dosing preset label for Seachem Acid Buffer"
+  },
+  "dosingPresetFritzsoDechlorinator": "Fritz SO Dechlorinator",
+  "@dosingPresetFritzsoDechlorinator": {
+    "description": "Dosing preset label for Fritz SO Dechlorinator"
+  },
+  "dosingPresetCustom": "Personalizado",
+  "@dosingPresetCustom": {
+    "description": "Dosing preset label for custom/manual entry"
+  },
+  "dosingTankSize": "Tamaño del Tanque",
+  "@dosingTankSize": {
+    "description": "Label for the tank size input field in dosing calculator"
+  },
+  "dosingDoseAmountLabel": "Cantidad de Dosis",
+  "@dosingDoseAmountLabel": {
+    "description": "Label for the dose amount input field in dosing calculator"
+  },
+  "dosingPer": "por",
+  "@dosingPer": {
+    "description": "The word 'per' between dose amount and volume fields"
+  },
+  "dosingSelectProduct": "Seleccionar un producto…",
+  "@dosingSelectProduct": {
+    "description": "Placeholder text for the product preset selector"
+  },
+  "dosingCustomSubtitle": "Ingrese su propia cantidad de dosis y volumen",
+  "@dosingCustomSubtitle": {
+    "description": "Subtitle for the custom dosing option in the preset picker"
+  },
+  "dosingAddNewProduct": "Agregar Nuevo Producto",
+  "@dosingAddNewProduct": {
+    "description": "Label for the add new product option in the dosing preset picker"
+  },
+  "dosingAddNewProductSubtitle": "Guardar un producto para uso futuro",
+  "@dosingAddNewProductSubtitle": {
+    "description": "Subtitle for the add new product option in the dosing preset picker"
+  },
+  "dosingResultTitle": "Dosis Total",
+  "@dosingResultTitle": {
+    "description": "Title for the dosing result card"
+  },
+  "dosingResultProduct": "Para: {product}",
+  "@dosingResultProduct": {
+    "description": "Product name in dosing results",
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
     }
+  },
+  "dosingTeaspoons": "cdta",
+  "@dosingTeaspoons": {
+    "description": "Teaspoon abbreviation"
+  },
+  "dosingCapfuls": "tapas",
+  "@dosingCapfuls": {
+    "description": "Capfuls unit label"
+  },
+  "dosingResultSummary": "Resumen de Dosificación",
+  "@dosingResultSummary": {
+    "description": "Title for the dosing summary card"
+  },
+  "dosingTankSizeLabel": "Tamaño del Tanque",
+  "@dosingTankSizeLabel": {
+    "description": "Label for tank size in results summary"
+  },
+  "dosingDosePerUnitLabel": "Tasa de Dosis",
+  "@dosingDosePerUnitLabel": {
+    "description": "Label for dose per unit in results summary"
+  },
+  "dosingGalAbbrev": "gal",
+  "@dosingGalAbbrev": {
+    "description": "Gallon abbreviation"
+  },
+  "dosingLAbbrev": "L",
+  "@dosingLAbbrev": {
+    "description": "Liter abbreviation"
+  },
+  "dosingInfoTitle": "Consejos de Dosificación",
+  "@dosingInfoTitle": {
+    "description": "Title for the dosing info section"
+  },
+  "dosingInfoDoseTitle": "Siga las Instrucciones del Fabricante",
+  "@dosingInfoDoseTitle": {
+    "description": "Dosing info tip title about following instructions"
+  },
+  "dosingInfoDoseBody": "Siempre verifique las cantidades de dosificación en la etiqueta del producto. Los valores preestablecidos se basan en las recomendaciones estándar del fabricante y pueden variar según el lote o la concentración del producto.",
+  "@dosingInfoDoseBody": {
+    "description": "Dosing info tip body about following instructions"
+  },
+  "dosingInfoWaterTitle": "Considere el Volumen Real de Agua",
+  "@dosingInfoWaterTitle": {
+    "description": "Dosing info tip title about actual water volume"
+  },
+  "dosingInfoWaterBody": "Su volumen real de agua es menor que el tamaño del tanque debido al sustrato, rocas y decoraciones. Considere dosificar para el 80-90% del volumen total de su tanque.",
+  "@dosingInfoWaterBody": {
+    "description": "Dosing info tip body about actual water volume"
+  },
+  "dosingInfoWarningTitle": "Evite la Sobredosis",
+  "@dosingInfoWarningTitle": {
+    "description": "Dosing info tip title about overdosing warning"
+  },
+  "dosingInfoWarningBody": "En caso de duda, dosifique menos. Es más seguro agregar menos y volver a dosificar que sobredosificar, lo cual puede dañar a los peces e invertebrados.",
+  "@dosingInfoWarningBody": {
+    "description": "Dosing info tip body about overdosing warning"
+  },
+  "manageDosingPresets": "Productos de dosificación",
+  "@manageDosingPresets": {
+    "description": "Settings menu title for managing dosing chemical presets"
+  },
+  "manageDosingPresetsDesc": "Agregar, editar o reordenar sus químicos de dosificación",
+  "@manageDosingPresetsDesc": {
+    "description": "Settings menu subtitle for dosing presets management"
+  },
+  "addProduct": "Agregar producto",
+  "@addProduct": {
+    "description": "Button label to add a new dosing product preset"
+  },
+  "editProduct": "Editar producto",
+  "@editProduct": {
+    "description": "Dialog title when editing a dosing product preset"
+  },
+  "productName": "Nombre del producto",
+  "@productName": {
+    "description": "Label for the product name text field"
+  },
+  "doseAmountGal": "Dosis (gal)",
+  "@doseAmountGal": {
+    "description": "Label for dose amount in gallons"
+  },
+  "perVolumeGal": "Por volumen (gal)",
+  "@perVolumeGal": {
+    "description": "Label for the per-volume field in gallons"
+  },
+  "doseAmountLiter": "Dosis (L)",
+  "@doseAmountLiter": {
+    "description": "Label for dose amount in liters"
+  },
+  "perVolumeLiter": "Por volumen (L)",
+  "@perVolumeLiter": {
+    "description": "Label for the per-volume field in liters"
+  },
+  "doseUnit": "Unidad",
+  "@doseUnit": {
+    "description": "Label for the dose unit selector (mL, g, etc.)"
+  },
+  "resetToDefaults": "Restablecer valores predeterminados",
+  "@resetToDefaults": {
+    "description": "Button label to reset dosing presets to built-in defaults"
+  },
+  "resetPresetsConfirm": "¿Restablecer todos los productos de dosificación a los valores predeterminados? Se perderán sus productos personalizados.",
+  "@resetPresetsConfirm": {
+    "description": "Confirmation message when resetting dosing presets to defaults"
+  },
+  "deleteProductConfirm": "¿Está seguro de que desea eliminar este producto?",
+  "@deleteProductConfirm": {
+    "description": "Confirmation message when deleting a dosing product preset"
+  },
+  "dragToReorder": "Arrastrar para reordenar",
+  "@dragToReorder": {
+    "description": "Hint text for reorderable list items"
+  },
+  "dosingPresetsCount": "{count} productos",
+  "@dosingPresetsCount": {
+    "description": "Subtitle showing number of dosing product presets",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "doseAmount": "Cantidad de dosis",
+  "@doseAmount": {
+    "description": "Label for dose amount input field in dosing preset editor"
+  },
+  "perVolume": "Por volumen",
+  "@perVolume": {
+    "description": "Label for per-volume input field in dosing preset editor"
+  },
+  "dosingInputUnit": "Ingresar dosis por",
+  "@dosingInputUnit": {
+    "description": "Label for the gallon vs liter toggle in dosing preset editor"
+  },
+  "autoConvertedNote": "La otra unidad se convertirá automáticamente.",
+  "@autoConvertedNote": {
+    "description": "Helper text explaining that the opposite gallon/liter value is auto-calculated"
+  },
+  "upcomingNotifications": "Próximas",
+  "@upcomingNotifications": {
+    "description": "Tab label for the upcoming notifications tab in tank details"
+  },
+  "noUpcomingNotifications": "Sin notificaciones próximas",
+  "@noUpcomingNotifications": {
+    "description": "Empty state title when there are no upcoming notifications for a tank"
+  },
+  "noUpcomingNotificationsDescription": "Agrega notificaciones desde el administrador de notificaciones para recibir recordatorios de alimentación, cambios de agua y más.",
+  "@noUpcomingNotificationsDescription": {
+    "description": "Empty state description when there are no upcoming notifications"
+  },
+  "manageNotifications": "Administrar notificaciones",
+  "@manageNotifications": {
+    "description": "Button label to navigate to the notification management screen"
+  },
+  "reschedule": "Reprogramar",
+  "@reschedule": {
+    "description": "Button label for the reschedule action on a notification"
+  },
+  "allNotifications": "Notificaciones",
+  "@allNotifications": {
+    "description": "Title for the global notifications screen showing all notifications across tanks"
+  },
+  "allNotificationsDescription": "Ver y administrar todas las notificaciones próximas de tus acuarios. Registra actividades rápidamente y reprograma recordatorios desde un solo lugar.",
+  "@allNotificationsDescription": {
+    "description": "Description for the notifications feature card on the welcome screen"
+  },
+  "allNotificationsDrawerDescription": "Ver todas las notificaciones y recordatorios próximos de tus acuarios.",
+  "@allNotificationsDrawerDescription": {
+    "description": "Short description for the notifications feature in the drawer"
+  },
+  "globalNotificationsEmptyDescription": "Configura notificaciones en acuarios individuales para verlas aquí. Usa el administrador de notificaciones de cada acuario para crear recordatorios.",
+  "@globalNotificationsEmptyDescription": {
+    "description": "Empty state description when there are no notifications across any tank"
+  },
+  "globalNotificationsNoTanksDescription": "Crea un acuario primero, luego configura notificaciones para recibir recordatorios de alimentación, cambios de agua y más.",
+  "@globalNotificationsNoTanksDescription": {
+    "description": "Empty state description when there are no tanks yet"
+  },
+  "founderSupport": "Soporte Fundador",
+  "@founderSupport": {
+    "description": "Settings section title for founder/premium features"
+  },
+  "founderSupportDesc": "Ventajas exclusivas para Acuaristas Fundadores",
+  "@founderSupportDesc": {
+    "description": "Subtitle for the Founder Support settings card"
+  },
+  "customizeWelcomeCards": "Personalizar tarjetas de bienvenida",
+  "@customizeWelcomeCards": {
+    "description": "Title for the welcome screen card reorder and visibility settings"
+  },
+  "customizeWelcomeCardsDesc": "Reorganizar y mostrar/ocultar tarjetas en la pantalla de bienvenida",
+  "@customizeWelcomeCardsDesc": {
+    "description": "Description for welcome card customization"
+  },
+  "customizeSidebar": "Personalizar barra lateral",
+  "@customizeSidebar": {
+    "description": "Title for sidebar menu customization"
+  },
+  "customizeSidebarDesc": "Reorganizar y mostrar/ocultar elementos del menú lateral",
+  "@customizeSidebarDesc": {
+    "description": "Description for sidebar customization"
+  },
+  "resetToDefault": "Restablecer valores predeterminados",
+  "@resetToDefault": {
+    "description": "Button label to reset order to default"
+  },
+  "founderFeatureLocked": "Conviértete en Acuarista Fundador para desbloquear funciones de personalización",
+  "@founderFeatureLocked": {
+    "description": "Message shown to non-founder users when trying to access premium customization features"
+  },
+  "founderExclusiveFeatures": "Funciones exclusivas de Fundador",
+  "@founderExclusiveFeatures": {
+    "description": "Header for the list of founder-exclusive features in the upsell section"
+  },
+  "featureCustomizeCards": "Personalizar y reordenar tarjetas de bienvenida",
+  "@featureCustomizeCards": {
+    "description": "Founder feature bullet: card customization"
+  },
+  "featureCustomizeSidebar": "Personalizar y reordenar menús laterales",
+  "@featureCustomizeSidebar": {
+    "description": "Founder feature bullet: sidebar customization"
+  },
+  "featureHigherLimits": "Límites de uso de IA más altos",
+  "@featureHigherLimits": {
+    "description": "Founder feature bullet: higher limits"
+  },
+  "featureRemoveAds": "Eliminar anuncios permanentemente",
+  "@featureRemoveAds": {
+    "description": "Founder feature bullet: ad removal"
+  },
+  "unlockAllFeatures": "Desbloquear todas las funciones",
+  "@unlockAllFeatures": {
+    "description": "CTA button label to purchase founder status"
+  },
+  "sidebarMenuItems": "Elementos del menú lateral",
+  "@sidebarMenuItems": {
+    "description": "Title for sidebar menu items configuration"
+  },
+  "welcomeCards": "Tarjetas de bienvenida",
+  "@welcomeCards": {
+    "description": "Title for welcome cards configuration"
+  },
+  "orderSaved": "Orden guardado",
+  "@orderSaved": {
+    "description": "Snackbar message when card/sidebar order is saved"
+  },
+  "orderReset": "Orden restablecido a predeterminado",
+  "@orderReset": {
+    "description": "Snackbar message when order is reset to default"
+  },
+  "founderPerksScreenTitle": "Ventajas de Acuarista Fundador",
+  "@founderPerksScreenTitle": {
+    "description": "Title for the dedicated Founder Aquarist perks screen"
+  },
+  "founderPerksScreenSubtitle": "Todas las ventajas incluidas con tu estado de Acuarista Fundador",
+  "@founderPerksScreenSubtitle": {
+    "description": "Subtitle on the Founder Perks screen for founders"
+  },
+  "founderPerksNonFounderSubtitle": "Conviértete en Acuarista Fundador para desbloquear estas ventajas exclusivas",
+  "@founderPerksNonFounderSubtitle": {
+    "description": "Subtitle on the Founder Perks screen for non-founders"
+  },
+  "perkAccessSettings": "Ir a Ajustes → Ajustes de la app",
+  "@perkAccessSettings": {
+    "description": "How to access a perk available in settings"
+  },
+  "perkAccessAppearance": "Ir a Ajustes → Apariencia",
+  "@perkAccessAppearance": {
+    "description": "How to access a perk available in the appearance screen"
+  },
+  "perkAccessCommunity": "Visible en tus publicaciones de la comunidad",
+  "@perkAccessCommunity": {
+    "description": "How to access the post border perk"
+  },
+  "perkAccessProfile": "Visible en tu perfil y publicaciones",
+  "@perkAccessProfile": {
+    "description": "How to access the badge perk"
+  },
+  "perkAccessAutomatic": "Aplicado automáticamente",
+  "@perkAccessAutomatic": {
+    "description": "How to access a perk that is applied automatically"
+  },
+  "perkAccessAITools": "Activo en todas las herramientas de IA",
+  "@perkAccessAITools": {
+    "description": "How to access AI model and limit perks"
+  },
+  "founderPerkCustomization": "Personalización de tarjetas de bienvenida y barra lateral",
+  "@founderPerkCustomization": {
+    "description": "Founder perk: customization of welcome cards and sidebar"
+  },
+  "layoutCustomization": "Personalización del diseño",
+  "@layoutCustomization": {
+    "description": "Section header for welcome card and sidebar customization in appearance screen"
+  },
+  "layoutCustomizationDesc": "Reordenar tarjetas de bienvenida y elementos del menú lateral",
+  "@layoutCustomizationDesc": {
+    "description": "Description for layout customization section"
+  },
+  "founderRequiredTooltip": "Se requiere Acuarista Fundador",
+  "@founderRequiredTooltip": {
+    "description": "Tooltip shown on locked customization features for non-founders"
   }
+}

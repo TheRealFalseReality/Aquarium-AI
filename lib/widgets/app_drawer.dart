@@ -434,7 +434,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       'calculators',
       'tank-volume',
       'substrate',
+      'dosing-calculator',
       'compat-browser',
+      'notifications',
       'community',
       'profile',
       'information',
@@ -458,7 +460,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       'calculators',
       'tank-volume',
       'substrate',
+      'dosing-calculator',
       'compat-browser',
+      'notifications',
     };
     const communityIds = {'community', 'profile'};
     const guidesIds = {'information'};
@@ -585,7 +589,9 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       case 'calculators':
       case 'tank-volume':
       case 'substrate':
+      case 'dosing-calculator':
       case 'compat-browser':
+      case 'notifications':
       case 'community':
       case 'profile':
         borderColor = cs.secondary.withOpacity(0.3);
@@ -658,6 +664,22 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           title: Text(l10n.fishCompatBrowser),
           subtitle: Text(l10n.fishCompatBrowserDrawerDesc),
           onTap: () => navigate('/compat-browser'),
+        );
+        break;
+      case 'dosing-calculator':
+        tile = ListTile(
+          leading: Icon(Icons.science_outlined, color: cs.secondary),
+          title: Text(l10n.dosingCalculator),
+          subtitle: Text(l10n.dosingDrawerDescription),
+          onTap: () => navigate('/dosing-calculator'),
+        );
+        break;
+      case 'notifications':
+        tile = ListTile(
+          leading: Icon(Icons.notifications_outlined, color: cs.secondary),
+          title: Text(l10n.allNotifications),
+          subtitle: Text(l10n.allNotificationsDrawerDescription),
+          onTap: () => navigate('/notifications'),
         );
         break;
       case 'community':

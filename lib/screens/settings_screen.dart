@@ -10,21 +10,25 @@ import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/dosing_entry.dart';
+import '../models/dosing_preset.dart';
 import '../models/notification_log.dart';
 import '../models/tank.dart';
 import '../models/tank_note.dart';
 import '../models/tank_notification.dart';
 import '../models/water_parameter.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/dosing_presets_provider.dart';
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../providers/tank_provider.dart';
+import '../screens/dosing_calculator.dart';
 import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/fish_data_service.dart';
 import '../services/in_app_review_service.dart';
 import '../services/remote_config_service.dart';
 import '../theme_colors.dart';
+import '../widgets/dosing_preset_editor_dialog.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/remove_ads_dialog.dart';
@@ -200,6 +204,278 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showDosingPresetsDialog() {
+    final l10n = AppLocalizations.of(context)!;
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (dialogCtx, setDialogState) {
+          return Consumer(
+            builder: (dialogCtx, dialogRef, _) {
+              final presets = dialogRef.watch(dosingPresetsProvider);
+              return Dialog(
+                insetPadding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: MediaQuery.of(dialogCtx).size.width,
+                  height: MediaQuery.of(dialogCtx).size.height * 0.9,
+                  child: Column(
+                    children: [
+                      // Header
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(dialogCtx)
+                              .colorScheme
+                              .primaryContainer
+                              .withOpacity(0.3),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(28),
+                            topRight: Radius.circular(28),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.science_outlined,
+                              color:
+                                  Theme.of(dialogCtx).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.manageDosingPresets,
+                                    style: Theme.of(dialogCtx)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                  Text(
+                                    l10n.dosingPresetsCount(
+                                        presets.length),
+                                    style: Theme.of(dialogCtx)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: Theme.of(dialogCtx)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () =>
+                                  Navigator.of(dialogCtx).pop(),
+                              tooltip: l10n.close,
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Content: reorderable preset list
+                      Expanded(
+                        child: ReorderableListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                          ),
+                          itemCount: presets.length,
+                          onReorder: (oldIdx, newIdx) {
+                            dialogRef
+                                .read(dosingPresetsProvider.notifier)
+                                .reorder(oldIdx, newIdx);
+                          },
+                          itemBuilder: (ctx, index) {
+                            final preset = presets[index];
+                            return ListTile(
+                              key: ValueKey(preset.id),
+                              leading: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(ctx)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                                  borderRadius:
+                                      BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  dosingIconFromName(
+                                      preset.iconName),
+                                  color: Theme.of(ctx)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                  size: 22,
+                                ),
+                              ),
+                              title: Text(
+                                preset.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              subtitle: Text(
+                                '${dosingFmtNum(preset.doseAmountGal)} ${preset.unit} / ${dosingFmtNum(preset.perVolumeGal)} gal  •  ${dosingFmtNum(preset.doseAmountLiter)} ${preset.unit} / ${dosingFmtNum(preset.perVolumeLiter)} L',
+                                style: Theme.of(ctx)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(ctx)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                        Icons.edit_outlined,
+                                        size: 20),
+                                    onPressed: () =>
+                                        showDosingPresetEditorDialog(
+                                            dialogCtx,
+                                            dialogRef,
+                                            preset: preset),
+                                    tooltip: l10n.editProduct,
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      size: 20,
+                                      color: Theme.of(ctx)
+                                          .colorScheme
+                                          .error,
+                                    ),
+                                    onPressed: () async {
+                                      final confirm =
+                                          await showDialog<bool>(
+                                        context: dialogCtx,
+                                        builder: (c) => AlertDialog(
+                                          title: Text(l10n.delete),
+                                          content: Text(l10n
+                                              .deleteProductConfirm),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(
+                                                      c, false),
+                                              child:
+                                                  Text(l10n.cancel),
+                                            ),
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(
+                                                      c, true),
+                                              child:
+                                                  Text(l10n.delete),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirm == true) {
+                                        dialogRef
+                                            .read(
+                                                dosingPresetsProvider
+                                                    .notifier)
+                                            .removePreset(preset.id);
+                                      }
+                                    },
+                                    tooltip: l10n.delete,
+                                  ),
+                                  ReorderableDragStartListener(
+                                    index: index,
+                                    child: const Icon(
+                                        Icons.drag_handle),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      // Bottom actions
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Row(
+                          children: [
+                            TextButton.icon(
+                              onPressed: () async {
+                                final confirm =
+                                    await showDialog<bool>(
+                                  context: dialogCtx,
+                                  builder: (c) => AlertDialog(
+                                    title:
+                                        Text(l10n.resetToDefaults),
+                                    content: Text(
+                                        l10n.resetPresetsConfirm),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(
+                                                c, false),
+                                        child:
+                                            Text(l10n.cancel),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(
+                                                c, true),
+                                        child: Text(
+                                            l10n.resetToDefaults),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  dialogRef
+                                      .read(dosingPresetsProvider
+                                          .notifier)
+                                      .resetToDefaults();
+                                }
+                              },
+                              icon: const Icon(
+                                  Icons.restore_outlined,
+                                  size: 18),
+                              label:
+                                  Text(l10n.resetToDefaults),
+                            ),
+                            const Spacer(),
+                            FilledButton.icon(
+                              onPressed: () =>
+                                  showDosingPresetEditorDialog(
+                                      dialogCtx, dialogRef),
+                              icon: const Icon(Icons.add,
+                                  size: 18),
+                              label: Text(l10n.addProduct),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -1038,6 +1314,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           iconColor: Theme.of(context).colorScheme.secondary,
           onTap: () => _showAppSettingsDialog(),
+        ),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: l10n.manageDosingPresets,
+          subtitle: l10n.manageDosingPresetsDesc,
+          icon: Icons.science_outlined,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.primary,
+          onTap: () => _showDosingPresetsDialog(),
         ),
         const SizedBox(height: 16),
         _buildMenuCard(

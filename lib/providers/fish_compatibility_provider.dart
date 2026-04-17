@@ -68,6 +68,8 @@ class FishCompatibilityState {
   final bool isRetryable;
   final bool isApiKeyError;
   final bool isRateLimitError;
+  final bool isQuotaError;
+  final bool isNetworkError;
   final String? lastCategory;
 
   FishCompatibilityState({
@@ -80,6 +82,8 @@ class FishCompatibilityState {
     this.isRetryable = false,
     this.isApiKeyError = false,
     this.isRateLimitError = false,
+    this.isQuotaError = false,
+    this.isNetworkError = false,
     this.lastCategory,
   });
 
@@ -93,6 +97,8 @@ class FishCompatibilityState {
     bool? isRetryable,
     bool? isApiKeyError,
     bool? isRateLimitError,
+    bool? isQuotaError,
+    bool? isNetworkError,
     String? lastCategory,
     bool clearReport = false,
     bool clearLastReport = false,
@@ -109,6 +115,8 @@ class FishCompatibilityState {
       isApiKeyError: clearError ? false : isApiKeyError ?? this.isApiKeyError,
       isRateLimitError:
           clearError ? false : isRateLimitError ?? this.isRateLimitError,
+      isQuotaError: clearError ? false : isQuotaError ?? this.isQuotaError,
+      isNetworkError: clearError ? false : isNetworkError ?? this.isNetworkError,
       lastCategory: lastCategory ?? this.lastCategory,
     );
   }
@@ -339,17 +347,22 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
           );
     } catch (e) {
       if (!(_cancellableCompleter?.isCancelled ?? false)) {
-        final isApiKeyErr = ApiErrorHandler.isApiKeyError(e.toString());
+        final errorStr = e.toString();
+        final isApiKeyErr = ApiErrorHandler.isApiKeyError(errorStr);
+        final isQuotaErr = ApiErrorHandler.isQuotaError(errorStr);
+        final isNetworkErr = ApiErrorHandler.isNetworkError(errorStr);
         // Rollback the rate-limit slot for real AI errors.
         if (!isApiKeyErr && models.usingDeveloperGroqKeyForText) {
           await DevRateLimiter.undoLastRequest();
         }
-        final userFriendlyError = _getFriendlyErrorMessage(e.toString());
+        final userFriendlyError = _getFriendlyErrorMessage(errorStr);
         state = state.copyWith(
           error: userFriendlyError,
           isLoading: false,
-          isRetryable: !isApiKeyErr,
+          isRetryable: !isApiKeyErr && !isQuotaErr,
           isApiKeyError: isApiKeyErr,
+          isQuotaError: isQuotaErr,
+          isNetworkError: isNetworkErr,
         );
       }
     }

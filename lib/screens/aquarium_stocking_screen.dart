@@ -557,6 +557,8 @@ class AquariumStockingScreenState
               isApiKeyError: next.isApiKeyError,
               isRetryable: next.isRetryable,
               isRateLimitError: next.isRateLimitError,
+              isQuotaError: next.isQuotaError,
+              isNetworkError: next.isNetworkError,
             );
             ref.read(aquariumStockingProvider.notifier).cancel();
           }

@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// A centralized error handling widget that provides consistent error UI
+import '../l10n/app_localizations.dart';
+
+/// A centralized error handling widget that provides consistent error UI.
+///
+/// Supports optional [isApiKeyError] and [isRateLimitError] flags to show
+/// relevant call-to-action buttons (e.g. navigate to Settings, upsell to
+/// Founder Aquarist).
 class ErrorHandlerWidget extends ConsumerWidget {
   final String? error;
   final VoidCallback? onRetry;
   final bool showRetry;
   final Widget? child;
   final String? customRetryLabel;
+
+  /// When `true`, the widget shows a "Go to Settings" CTA so the user can
+  /// add or fix their API key.
+  final bool isApiKeyError;
+
+  /// When `true`, indicates the error is a free-tier rate limit. Reserved for
+  /// future use by parent widgets that may display additional upsell UI.
+  final bool isRateLimitError;
 
   const ErrorHandlerWidget({
     super.key,
@@ -16,6 +30,8 @@ class ErrorHandlerWidget extends ConsumerWidget {
     this.showRetry = true,
     this.child,
     this.customRetryLabel,
+    this.isApiKeyError = false,
+    this.isRateLimitError = false,
   });
 
   @override
@@ -25,6 +41,7 @@ class ErrorHandlerWidget extends ConsumerWidget {
     }
 
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Card(
       color: cs.errorContainer.withOpacity(0.1),
@@ -37,7 +54,7 @@ class ErrorHandlerWidget extends ConsumerWidget {
             Icon(Icons.error_outline, color: cs.error, size: 48),
             const SizedBox(height: 16),
             Text(
-              'Something went wrong',
+              l10n.somethingWentWrong,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: cs.error,
                 fontWeight: FontWeight.bold,
@@ -50,18 +67,35 @@ class ErrorHandlerWidget extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
-            if (showRetry && onRetry != null) ...[
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
-                label: Text(customRetryLabel ?? 'Try Again'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: cs.error,
-                  foregroundColor: cs.onError,
-                ),
-              ),
-            ],
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                if (isApiKeyError)
+                  ElevatedButton.icon(
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed('/settings'),
+                    icon: const Icon(Icons.settings_outlined),
+                    label: Text(l10n.goToSettings),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cs.primary,
+                      foregroundColor: cs.onPrimary,
+                    ),
+                  ),
+                if (showRetry && onRetry != null)
+                  ElevatedButton.icon(
+                    onPressed: onRetry,
+                    icon: const Icon(Icons.refresh),
+                    label: Text(customRetryLabel ?? l10n.tryAgain),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: cs.error,
+                      foregroundColor: cs.onError,
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
@@ -109,6 +143,8 @@ class AsyncStatusWidget extends ConsumerWidget {
   final Widget child;
   final String? loadingMessage;
   final String? retryLabel;
+  final bool isApiKeyError;
+  final bool isRateLimitError;
 
   const AsyncStatusWidget({
     super.key,
@@ -118,6 +154,8 @@ class AsyncStatusWidget extends ConsumerWidget {
     required this.child,
     this.loadingMessage,
     this.retryLabel,
+    this.isApiKeyError = false,
+    this.isRateLimitError = false,
   });
 
   @override
@@ -131,6 +169,8 @@ class AsyncStatusWidget extends ConsumerWidget {
         error: error,
         onRetry: onRetry,
         customRetryLabel: retryLabel,
+        isApiKeyError: isApiKeyError,
+        isRateLimitError: isRateLimitError,
       );
     }
 
