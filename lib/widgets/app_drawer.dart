@@ -465,7 +465,6 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       'notifications',
     };
     const communityIds = {'community', 'profile'};
-    const guidesIds = {'information'};
 
     final widgets = <Widget>[];
     var baseDelay = 250;
@@ -480,9 +479,8 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
         section = 'tools';
       } else if (communityIds.contains(id)) {
         section = 'community';
-      } else if (guidesIds.contains(id)) {
-        section = 'guides';
       } else {
+        // guidesIds and any unknown IDs fall into the guides section
         section = 'guides';
       }
 
