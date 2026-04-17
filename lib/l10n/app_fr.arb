@@ -1656,5 +1656,57 @@
     "orderReset": "Ordre réinitialisé par défaut",
     "@orderReset": {
       "description": "Snackbar message when order is reset to default"
+    },
+    "founderPerksScreenTitle": "Avantages Aquariophile Fondateur",
+    "@founderPerksScreenTitle": {
+      "description": "Title for the dedicated Founder Aquarist perks screen"
+    },
+    "founderPerksScreenSubtitle": "Tous les avantages inclus avec votre statut d'Aquariophile Fondateur",
+    "@founderPerksScreenSubtitle": {
+      "description": "Subtitle on the Founder Perks screen for founders"
+    },
+    "founderPerksNonFounderSubtitle": "Devenez Aquariophile Fondateur pour débloquer ces avantages exclusifs",
+    "@founderPerksNonFounderSubtitle": {
+      "description": "Subtitle on the Founder Perks screen for non-founders"
+    },
+    "perkAccessSettings": "Aller dans Paramètres → Paramètres de l'app",
+    "@perkAccessSettings": {
+      "description": "How to access a perk available in settings"
+    },
+    "perkAccessAppearance": "Aller dans Paramètres → Apparence",
+    "@perkAccessAppearance": {
+      "description": "How to access a perk available in the appearance screen"
+    },
+    "perkAccessCommunity": "Visible sur vos publications communautaires",
+    "@perkAccessCommunity": {
+      "description": "How to access the post border perk"
+    },
+    "perkAccessProfile": "Visible sur votre profil et vos publications",
+    "@perkAccessProfile": {
+      "description": "How to access the badge perk"
+    },
+    "perkAccessAutomatic": "Appliqué automatiquement",
+    "@perkAccessAutomatic": {
+      "description": "How to access a perk that is applied automatically"
+    },
+    "perkAccessAITools": "Actif sur tous les outils IA",
+    "@perkAccessAITools": {
+      "description": "How to access AI model and limit perks"
+    },
+    "founderPerkCustomization": "Personnalisation des cartes d'accueil et de la barre latérale",
+    "@founderPerkCustomization": {
+      "description": "Founder perk: customization of welcome cards and sidebar"
+    },
+    "layoutCustomization": "Personnalisation de la disposition",
+    "@layoutCustomization": {
+      "description": "Section header for welcome card and sidebar customization in appearance screen"
+    },
+    "layoutCustomizationDesc": "Réorganiser les cartes d'accueil et les éléments du menu latéral",
+    "@layoutCustomizationDesc": {
+      "description": "Description for layout customization section"
+    },
+    "founderRequiredTooltip": "Aquariophile Fondateur requis",
+    "@founderRequiredTooltip": {
+      "description": "Tooltip shown on locked customization features for non-founders"
     }
   }

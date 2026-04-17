@@ -1656,5 +1656,57 @@
     "orderReset": "Orden restablecido a predeterminado",
     "@orderReset": {
       "description": "Snackbar message when order is reset to default"
+    },
+    "founderPerksScreenTitle": "Ventajas de Acuarista Fundador",
+    "@founderPerksScreenTitle": {
+      "description": "Title for the dedicated Founder Aquarist perks screen"
+    },
+    "founderPerksScreenSubtitle": "Todas las ventajas incluidas con tu estado de Acuarista Fundador",
+    "@founderPerksScreenSubtitle": {
+      "description": "Subtitle on the Founder Perks screen for founders"
+    },
+    "founderPerksNonFounderSubtitle": "Conviértete en Acuarista Fundador para desbloquear estas ventajas exclusivas",
+    "@founderPerksNonFounderSubtitle": {
+      "description": "Subtitle on the Founder Perks screen for non-founders"
+    },
+    "perkAccessSettings": "Ir a Ajustes → Ajustes de la app",
+    "@perkAccessSettings": {
+      "description": "How to access a perk available in settings"
+    },
+    "perkAccessAppearance": "Ir a Ajustes → Apariencia",
+    "@perkAccessAppearance": {
+      "description": "How to access a perk available in the appearance screen"
+    },
+    "perkAccessCommunity": "Visible en tus publicaciones de la comunidad",
+    "@perkAccessCommunity": {
+      "description": "How to access the post border perk"
+    },
+    "perkAccessProfile": "Visible en tu perfil y publicaciones",
+    "@perkAccessProfile": {
+      "description": "How to access the badge perk"
+    },
+    "perkAccessAutomatic": "Aplicado automáticamente",
+    "@perkAccessAutomatic": {
+      "description": "How to access a perk that is applied automatically"
+    },
+    "perkAccessAITools": "Activo en todas las herramientas de IA",
+    "@perkAccessAITools": {
+      "description": "How to access AI model and limit perks"
+    },
+    "founderPerkCustomization": "Personalización de tarjetas de bienvenida y barra lateral",
+    "@founderPerkCustomization": {
+      "description": "Founder perk: customization of welcome cards and sidebar"
+    },
+    "layoutCustomization": "Personalización del diseño",
+    "@layoutCustomization": {
+      "description": "Section header for welcome card and sidebar customization in appearance screen"
+    },
+    "layoutCustomizationDesc": "Reordenar tarjetas de bienvenida y elementos del menú lateral",
+    "@layoutCustomizationDesc": {
+      "description": "Description for layout customization section"
+    },
+    "founderRequiredTooltip": "Se requiere Acuarista Fundador",
+    "@founderRequiredTooltip": {
+      "description": "Tooltip shown on locked customization features for non-founders"
     }
   }

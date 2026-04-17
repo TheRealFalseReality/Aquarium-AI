@@ -1656,5 +1656,57 @@
     "orderReset": "Reihenfolge auf Standard zurückgesetzt",
     "@orderReset": {
       "description": "Snackbar message when order is reset to default"
+    },
+    "founderPerksScreenTitle": "Gründer-Aquarianer Vorteile",
+    "@founderPerksScreenTitle": {
+      "description": "Title for the dedicated Founder Aquarist perks screen"
+    },
+    "founderPerksScreenSubtitle": "Alle Vorteile Ihres Gründer-Aquarianer-Status",
+    "@founderPerksScreenSubtitle": {
+      "description": "Subtitle on the Founder Perks screen for founders"
+    },
+    "founderPerksNonFounderSubtitle": "Werden Sie Gründer-Aquarianer, um diese exklusiven Vorteile freizuschalten",
+    "@founderPerksNonFounderSubtitle": {
+      "description": "Subtitle on the Founder Perks screen for non-founders"
+    },
+    "perkAccessSettings": "Gehe zu Einstellungen → App-Einstellungen",
+    "@perkAccessSettings": {
+      "description": "How to access a perk available in settings"
+    },
+    "perkAccessAppearance": "Gehe zu Einstellungen → Erscheinungsbild",
+    "@perkAccessAppearance": {
+      "description": "How to access a perk available in the appearance screen"
+    },
+    "perkAccessCommunity": "Sichtbar auf Ihren Community-Beiträgen",
+    "@perkAccessCommunity": {
+      "description": "How to access the post border perk"
+    },
+    "perkAccessProfile": "Sichtbar auf Ihrem Profil und Beiträgen",
+    "@perkAccessProfile": {
+      "description": "How to access the badge perk"
+    },
+    "perkAccessAutomatic": "Automatisch angewendet",
+    "@perkAccessAutomatic": {
+      "description": "How to access a perk that is applied automatically"
+    },
+    "perkAccessAITools": "Aktiv bei allen KI-Tools",
+    "@perkAccessAITools": {
+      "description": "How to access AI model and limit perks"
+    },
+    "founderPerkCustomization": "Willkommenskarten- und Seitenleisten-Anpassung",
+    "@founderPerkCustomization": {
+      "description": "Founder perk: customization of welcome cards and sidebar"
+    },
+    "layoutCustomization": "Layout-Anpassung",
+    "@layoutCustomization": {
+      "description": "Section header for welcome card and sidebar customization in appearance screen"
+    },
+    "layoutCustomizationDesc": "Willkommenskarten und Seitenleisten-Menüeinträge neu anordnen",
+    "@layoutCustomizationDesc": {
+      "description": "Description for layout customization section"
+    },
+    "founderRequiredTooltip": "Gründer-Aquarianer erforderlich",
+    "@founderRequiredTooltip": {
+      "description": "Tooltip shown on locked customization features for non-founders"
     }
   }

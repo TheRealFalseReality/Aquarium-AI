@@ -5337,5 +5337,57 @@
     "orderReset": "Order reset to default",
     "@orderReset": {
       "description": "Snackbar message when order is reset to default"
+    },
+    "founderPerksScreenTitle": "Founder Aquarist Perks",
+    "@founderPerksScreenTitle": {
+      "description": "Title for the dedicated Founder Aquarist perks screen"
+    },
+    "founderPerksScreenSubtitle": "All the perks included with your Founder Aquarist status",
+    "@founderPerksScreenSubtitle": {
+      "description": "Subtitle on the Founder Perks screen for founders"
+    },
+    "founderPerksNonFounderSubtitle": "Become a Founder Aquarist to unlock these exclusive perks",
+    "@founderPerksNonFounderSubtitle": {
+      "description": "Subtitle on the Founder Perks screen for non-founders"
+    },
+    "perkAccessSettings": "Go to Settings → App Settings",
+    "@perkAccessSettings": {
+      "description": "How to access a perk available in settings"
+    },
+    "perkAccessAppearance": "Go to Settings → Appearance",
+    "@perkAccessAppearance": {
+      "description": "How to access a perk available in the appearance screen"
+    },
+    "perkAccessCommunity": "Visible on your community posts",
+    "@perkAccessCommunity": {
+      "description": "How to access the post border perk"
+    },
+    "perkAccessProfile": "Visible on your profile and posts",
+    "@perkAccessProfile": {
+      "description": "How to access the badge perk"
+    },
+    "perkAccessAutomatic": "Applied automatically",
+    "@perkAccessAutomatic": {
+      "description": "How to access a perk that is applied automatically"
+    },
+    "perkAccessAITools": "Active on all AI tools",
+    "@perkAccessAITools": {
+      "description": "How to access AI model and limit perks"
+    },
+    "founderPerkCustomization": "Welcome card & sidebar customization",
+    "@founderPerkCustomization": {
+      "description": "Founder perk: customization of welcome cards and sidebar"
+    },
+    "layoutCustomization": "Layout Customization",
+    "@layoutCustomization": {
+      "description": "Section header for welcome card and sidebar customization in appearance screen"
+    },
+    "layoutCustomizationDesc": "Reorder welcome screen cards and sidebar menu items",
+    "@layoutCustomizationDesc": {
+      "description": "Description for layout customization section"
+    },
+    "founderRequiredTooltip": "Founder Aquarist required",
+    "@founderRequiredTooltip": {
+      "description": "Tooltip shown on locked customization features for non-founders"
     }
   }

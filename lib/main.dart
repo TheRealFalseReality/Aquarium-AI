@@ -29,6 +29,7 @@ import './screens/community_screen.dart';
 import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compat_browser_screen.dart';
 import './screens/fish_compatibility_screen.dart';
+import './screens/founder_perks_screen.dart';
 import './screens/information_screen.dart';
 import './screens/onboarding_screen.dart';
 import './screens/photo_analysis_screen.dart';
@@ -630,6 +631,10 @@ class MyApp extends ConsumerWidget {
               case '/appearance':
                 page = const AppearanceScreen();
                 screenName = 'appearance_screen';
+                break;
+              case '/founder-perks':
+                page = const FounderPerksScreen();
+                screenName = 'founder_perks_screen';
                 break;
               case '/tank-management':
                 page = const TankManagementScreen();
