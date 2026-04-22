@@ -191,6 +191,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
       _ref = ref,
       super(ChatState(messages: [])) {
     state = ChatState(messages: _defaultMessages);
+    final now = DateTime.now();
+    final starter = SavedChatConversation(
+      id: const Uuid().v4(),
+      name: 'Current Chat',
+      createdAt: now,
+      updatedAt: now,
+      messages: [],
+    );
+    _conversations = [starter];
+    _activeConversationId = starter.id;
+    _conversationStoreReady = true;
     _initializeProvider();
     unawaited(_loadConversationStore());
   }
@@ -271,8 +282,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
       state = ChatState(messages: _uiMessagesFromPersisted(activeConversation.messages));
       _conversationStoreReady = true;
       await _saveConversationStore();
-    } catch (_) {
-      _conversationStoreReady = false;
+    } catch (e, st) {
+      debugPrint('Failed to load chat conversations: $e');
+      debugPrint('$st');
     }
   }
 

@@ -536,15 +536,27 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
           itemBuilder: (context) => [
             PopupMenuItem(
               value: 'manage',
-              child: Text(l10n.chatbotManageConversations),
+              child: Row(
+                children: [
+                  Flexible(child: Text(l10n.chatbotManageConversations)),
+                ],
+              ),
             ),
             PopupMenuItem(
               value: 'save_copy',
-              child: Text(l10n.chatbotSaveConversationCopy),
+              child: Row(
+                children: [
+                  Flexible(child: Text(l10n.chatbotSaveConversationCopy)),
+                ],
+              ),
             ),
             PopupMenuItem(
               value: 'new_empty',
-              child: Text(l10n.chatbotNewConversation),
+              child: Row(
+                children: [
+                  Flexible(child: Text(l10n.chatbotNewConversation)),
+                ],
+              ),
             ),
           ],
           icon: const Icon(Icons.forum_outlined),
