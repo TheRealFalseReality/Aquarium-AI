@@ -50,6 +50,7 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 }
 
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
+  static const double _litersPerGallon = 3.78541;
   TankSortOption _currentSortOption = TankSortOption.name;
   bool _isSortAscending = true; // Track sort direction (ascending/descending)
   Tank?
@@ -4071,8 +4072,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       },
     );
 
-    final gallons = tankGallons ?? (tankLiters! / 3.78541);
-    final liters = tankLiters ?? (tankGallons! * 3.78541);
+    final gallons = tankGallons ?? (tankLiters! / _litersPerGallon);
+    final liters = tankLiters ?? (tankGallons! * _litersPerGallon);
 
     showDialog(
       context: context,

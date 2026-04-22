@@ -2006,7 +2006,7 @@
   "@waterChangeVolumeResult": {
     "description": "Label for computed water change volume in the water change volume calculator"
   },
-  "waterChangeCalculatorMissingTankSize": "Fügen Sie zuerst eine Tankgröße hinzu, um das Wasserwechselvolumen zu berechnen.",
+  "waterChangeCalculatorMissingTankSize": "Fügen Sie zuerst eine Aquariengröße hinzu, um das Wasserwechselvolumen zu berechnen.",
   "@waterChangeCalculatorMissingTankSize": {
     "description": "Message shown when water change volume calculator is opened for a tank without size data"
   }
