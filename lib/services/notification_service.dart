@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -7,6 +8,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:uuid/uuid.dart';
 
+import '../l10n/app_localizations.dart';
 import '../models/notification_log.dart';
 import '../models/tank.dart';
 import '../models/tank_notification.dart';
@@ -67,22 +69,23 @@ class NotificationService {
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
+    final actionLabels = await _loadNotificationActionLabels();
 
     // iOS initialization settings
-    const iosSettings = DarwinInitializationSettings(
+    final iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
       notificationCategories: {
         DarwinNotificationCategory(_iosNotificationCategory, actions: [
-          DarwinNotificationAction.plain(actionDone, 'Done ✓'),
-          DarwinNotificationAction.plain(actionSnoozeDay, 'Snooze 1 day'),
-          DarwinNotificationAction.plain(actionSnoozeWeek, 'Snooze 1 week'),
+          DarwinNotificationAction.plain(actionDone, actionLabels.$1),
+          DarwinNotificationAction.plain(actionSnoozeDay, actionLabels.$2),
+          DarwinNotificationAction.plain(actionSnoozeWeek, actionLabels.$3),
         ]),
       },
     );
 
-    const initSettings = InitializationSettings(
+    final initSettings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
     );
@@ -178,6 +181,7 @@ class NotificationService {
 
     // Generate unique ID from notification ID hash
     final int notificationId = notification.id.hashCode;
+    final actionLabels = await _loadNotificationActionLabels();
 
     // Create notification details
     final androidDetails = AndroidNotificationDetails(
@@ -190,19 +194,19 @@ class NotificationService {
       actions: <AndroidNotificationAction>[
         AndroidNotificationAction(
           actionDone,
-          'Done ✓',
+          actionLabels.$1,
           cancelNotification: true,
           showsUserInterface: false,
         ),
         AndroidNotificationAction(
           actionSnoozeDay,
-          'Snooze 1 day',
+          actionLabels.$2,
           cancelNotification: true,
           showsUserInterface: false,
         ),
         AndroidNotificationAction(
           actionSnoozeWeek,
-          'Snooze 1 week',
+          actionLabels.$3,
           cancelNotification: true,
           showsUserInterface: false,
         ),
@@ -231,7 +235,7 @@ class NotificationService {
     DateTime? nextDate;
     if (useExactDateTime) {
       // Use the exact next date already stored on the notification model.
-      // This supports explicit snooze actions that update scheduledNextDate.
+      // This supports explicit "use specified time" choices and snooze actions.
       nextDate = notification.getImmediateNextDate();
     } else if (notification.repeatFrequency == RepeatFrequency.none) {
       // Use the exact date/time specified in the notification for:
@@ -429,6 +433,22 @@ class NotificationService {
     return androidEnabled;
   }
 
+  Future<(String, String, String)> _loadNotificationActionLabels() async {
+    final languageCode = PlatformDispatcher.instance.locale.languageCode;
+    final locale = switch (languageCode) {
+      'de' => const Locale('de'),
+      'es' => const Locale('es'),
+      'fr' => const Locale('fr'),
+      _ => const Locale('en'),
+    };
+    final l10n = await AppLocalizations.delegate.load(locale);
+    return (
+      l10n.notificationActionDone,
+      l10n.notificationActionSnooze1Day,
+      l10n.notificationActionSnooze1Week,
+    );
+  }
+
   /// Send a test notification immediately (for debugging)
   Future<void> sendTestNotification({
     required String tankName,
@@ -606,9 +626,8 @@ class NotificationService {
       );
       updatedLogs = [...updatedLogs, log];
 
-      List<TankNotification> rescheduled = [];
       try {
-        rescheduled = await rescheduleMatchingNotifications(
+        final rescheduled = await rescheduleMatchingNotifications(
           tankId: tank.id,
           tankName: tank.name,
           notifications: updatedNotifications,
@@ -616,17 +635,16 @@ class NotificationService {
           activityType: log.type,
           activityCustomCategory: log.customCategory,
         );
+        if (rescheduled.isNotEmpty) {
+          final rescheduledById = {
+            for (final item in rescheduled) item.id: item,
+          };
+          updatedNotifications = updatedNotifications.map((existing) {
+            return rescheduledById[existing.id] ?? existing;
+          }).toList();
+        }
       } catch (e) {
         debugPrint('Failed to reschedule notifications after done action: $e');
-      }
-
-      if (rescheduled.isNotEmpty) {
-        final rescheduledById = {
-          for (final item in rescheduled) item.id: item,
-        };
-        updatedNotifications = updatedNotifications.map((existing) {
-          return rescheduledById[existing.id] ?? existing;
-        }).toList();
       }
     } else {
       final snoozeDays = actionId == actionSnoozeWeek ? 7 : 1;

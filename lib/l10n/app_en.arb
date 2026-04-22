@@ -1037,6 +1037,18 @@
   "@notificationDisabled": {
     "description": "Notification disabled message"
   },
+  "notificationActionDone": "Done ✓",
+  "@notificationActionDone": {
+    "description": "Action button label to mark a notification task as completed"
+  },
+  "notificationActionSnooze1Day": "Snooze 1 day",
+  "@notificationActionSnooze1Day": {
+    "description": "Action button label to snooze a notification by one day"
+  },
+  "notificationActionSnooze1Week": "Snooze 1 week",
+  "@notificationActionSnooze1Week": {
+    "description": "Action button label to snooze a notification by one week"
+  },
   "deleteNotification": "Delete Notification",
   "@deleteNotification": {
     "description": "Delete notification dialog title"
