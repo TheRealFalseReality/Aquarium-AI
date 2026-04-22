@@ -814,7 +814,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 Navigator.of(dialogContext).pop();
                 try {
                   await InAppUpdateService.startFlexibleUpdate();
-                } catch (_) {
+                } catch (e) {
+                  debugPrint('Error starting flexible update from popup: $e');
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     SnackBar(content: Text(l10n.unableToStartUpdate)),
