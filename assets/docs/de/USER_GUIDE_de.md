@@ -164,11 +164,14 @@ AI-Tools:
 
 ### Chat-Tipps
 
-- Die KI merkt sich aktuelle Nachrichten in der aktuellen Sitzung (in den Einstellungen
-  konfigurierbar).
+- Unterhaltungen bleiben jetzt über App-Sitzungen hinweg erhalten.
+- Verwenden Sie das Menü **Unterhaltungen** oben rechts, um benannte Unterhaltungen zu
+  erstellen.
+- Sie können jede Unterhaltung optional einem bestimmten Aquarium zuordnen und später
+  im Unterhaltungs-Manager filtern und laden.
 - Tippen Sie auf das **Teilen**-Symbol bei einer Antwort, um den Text zu teilen oder
   zu kopieren.
-- Verwenden Sie **Chat löschen** (oberes rechtes Menü), um neu zu starten.
+- Erstellen Sie über das Menü eine **neue Unterhaltung**, wenn Sie neu starten möchten.
 
 ---
 

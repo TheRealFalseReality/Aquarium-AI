@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/analysis_history_entry.dart';
 import '../models/analysis_result.dart';
@@ -77,6 +79,103 @@ class ChatState {
   ChatState({required this.messages, this.isLoading = false});
 }
 
+class PersistedChatMessage {
+  final String text;
+  final bool isUser;
+
+  PersistedChatMessage({required this.text, required this.isUser});
+
+  Map<String, dynamic> toJson() => {'text': text, 'isUser': isUser};
+
+  factory PersistedChatMessage.fromJson(Map<String, dynamic> json) {
+    return PersistedChatMessage(
+      text: json['text'] as String? ?? '',
+      isUser: json['isUser'] as bool? ?? false,
+    );
+  }
+}
+
+class SavedChatConversation {
+  final String id;
+  final String name;
+  final String? tankId;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final List<PersistedChatMessage> messages;
+
+  SavedChatConversation({
+    required this.id,
+    required this.name,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.messages,
+    this.tankId,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    if (tankId != null) 'tankId': tankId,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+    'messages': messages.map((m) => m.toJson()).toList(),
+  };
+
+  factory SavedChatConversation.fromJson(Map<String, dynamic> json) {
+    final rawMessages = (json['messages'] as List?) ?? <dynamic>[];
+    return SavedChatConversation(
+      id: json['id'] as String,
+      name: json['name'] as String? ?? 'Conversation',
+      tankId: json['tankId'] as String?,
+      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
+          DateTime.now(),
+      messages: rawMessages
+          .whereType<Map>()
+          .map(
+            (raw) => PersistedChatMessage.fromJson(
+              (raw as Map).cast<String, dynamic>(),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  SavedChatConversation copyWith({
+    String? name,
+    String? tankId,
+    bool clearTankId = false,
+    DateTime? updatedAt,
+    List<PersistedChatMessage>? messages,
+  }) {
+    return SavedChatConversation(
+      id: id,
+      name: name ?? this.name,
+      tankId: clearTankId ? null : (tankId ?? this.tankId),
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      messages: messages ?? this.messages,
+    );
+  }
+}
+
+class ChatConversationSummary {
+  final String id;
+  final String name;
+  final String? tankId;
+  final DateTime updatedAt;
+  final int messageCount;
+
+  ChatConversationSummary({
+    required this.id,
+    required this.name,
+    required this.tankId,
+    required this.updatedAt,
+    required this.messageCount,
+  });
+}
+
 final chatProvider = StateNotifierProvider<ChatNotifier, ChatState>((ref) {
   final modelState = ref.watch(modelProvider);
   return ChatNotifier(modelState: modelState, ref: ref);
@@ -86,21 +185,29 @@ final chatProvider = StateNotifierProvider<ChatNotifier, ChatState>((ref) {
 
 // ====================== Chat Notifier ======================
 class ChatNotifier extends StateNotifier<ChatState> {
+  static const String _conversationsKey = 'chat_conversations_v1';
+  static const String _activeConversationKey = 'active_chat_conversation_v1';
+  static const String _defaultWelcomeText =
+      "# Welcome to Aquarium AI!\n\nAsk aquarium questions, run water analyses, generate automation scripts, or try the **Photo Analyzer** to identify fish and assess tank health.";
+
   ChatNotifier({required ModelState modelState, required Ref ref})
     : _modelState = modelState,
       _ref = ref,
       super(ChatState(messages: [])) {
-    state = ChatState(
-      messages: [
-        ChatMessage(
-          text:
-              "# Welcome to Aquarium AI!\n\nAsk aquarium questions, run water analyses, generate automation scripts, or try the **Photo Analyzer** to identify fish and assess tank health.",
-          isUser: false,
-        ),
-        ChatMessage(text: 'ad', isUser: false, isAd: true),
-      ],
+    state = ChatState(messages: _defaultMessages);
+    final now = DateTime.now();
+    final starter = SavedChatConversation(
+      id: const Uuid().v4(),
+      name: 'Current Chat',
+      createdAt: now,
+      updatedAt: now,
+      messages: [],
     );
+    _conversations = [starter];
+    _activeConversationId = starter.id;
+    _conversationStoreReady = true;
     _initializeProvider();
+    unawaited(_loadConversationStore());
   }
 
   final ModelState _modelState;
@@ -109,6 +216,239 @@ class ChatNotifier extends StateNotifier<ChatState> {
   CancellableCompleter<dynamic>? _cancellable;
   Uint8List? _lastPhotoBytes;
   String? _lastPhotoNote;
+  List<SavedChatConversation> _conversations = [];
+  String? _activeConversationId;
+  bool _conversationStoreReady = false;
+  Timer? _saveConversationDebounce;
+
+  List<ChatMessage> get _defaultMessages => [
+    ChatMessage(
+      text: _defaultWelcomeText,
+      isUser: false,
+    ),
+    ChatMessage(text: 'ad', isUser: false, isAd: true),
+  ];
+
+  List<PersistedChatMessage> _persistableMessagesFromState() {
+    return state.messages
+        .where(
+          (m) =>
+              !m.isAd &&
+              !m.isError &&
+              m.text.trim().isNotEmpty &&
+              m.text != _defaultWelcomeText,
+        )
+        .map((m) => PersistedChatMessage(text: m.text, isUser: m.isUser))
+        .toList();
+  }
+
+  List<ChatMessage> _uiMessagesFromPersisted(List<PersistedChatMessage> messages) {
+    if (messages.isEmpty) {
+      return _defaultMessages;
+    }
+    return [
+      ...messages.map((m) => ChatMessage(text: m.text, isUser: m.isUser)),
+      ChatMessage(text: 'ad', isUser: false, isAd: true),
+    ];
+  }
+
+  Future<void> _loadConversationStore() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_conversationsKey);
+      final activeId = prefs.getString(_activeConversationKey);
+
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = json.decode(raw) as List;
+        _conversations = decoded
+            .whereType<Map>()
+            .map(
+              (item) => SavedChatConversation.fromJson(
+                (item as Map).cast<String, dynamic>(),
+              ),
+            )
+            .toList();
+      }
+
+      if (_conversations.isEmpty) {
+        final now = DateTime.now();
+        final starter = SavedChatConversation(
+          id: const Uuid().v4(),
+          name: 'Current Chat',
+          createdAt: now,
+          updatedAt: now,
+          messages: [],
+        );
+        _conversations = [starter];
+      }
+
+      final existingActive = activeId == null ? null : _findConversationById(activeId);
+      _activeConversationId = existingActive?.id ?? _conversations.first.id;
+      final activeConversation = _conversations.firstWhere(
+        (c) => c.id == _activeConversationId,
+      );
+      state = ChatState(messages: _uiMessagesFromPersisted(activeConversation.messages));
+      _conversationStoreReady = true;
+      await _saveConversationStore();
+    } catch (e, st) {
+      debugPrint('Failed to load chat conversations: $e');
+      debugPrint('$st');
+    }
+  }
+
+  Future<void> _saveConversationStore() async {
+    if (!_conversationStoreReady) return;
+    final prefs = await SharedPreferences.getInstance();
+    final payload = json.encode(_conversations.map((c) => c.toJson()).toList());
+    await prefs.setString(_conversationsKey, payload);
+    if (_activeConversationId != null) {
+      await prefs.setString(_activeConversationKey, _activeConversationId!);
+    }
+  }
+
+  List<ChatConversationSummary> get conversations {
+    final sorted = [..._conversations]
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return sorted
+        .map(
+          (c) => ChatConversationSummary(
+            id: c.id,
+            name: c.name,
+            tankId: c.tankId,
+            updatedAt: c.updatedAt,
+            messageCount: c.messages.length,
+          ),
+        )
+        .toList();
+  }
+
+  String? get activeConversationId => _activeConversationId;
+
+  SavedChatConversation? _findConversationById(String id) {
+    for (final item in _conversations) {
+      if (item.id == id) return item;
+    }
+    return null;
+  }
+
+  ChatConversationSummary? get activeConversation {
+    if (_activeConversationId == null) return null;
+    final conversation = _findConversationById(_activeConversationId!);
+    if (conversation == null) return null;
+    return ChatConversationSummary(
+      id: conversation.id,
+      name: conversation.name,
+      tankId: conversation.tankId,
+      updatedAt: conversation.updatedAt,
+      messageCount: conversation.messages.length,
+    );
+  }
+
+  void schedulePersistActiveConversation() {
+    if (!_conversationStoreReady || _activeConversationId == null) return;
+    _saveConversationDebounce?.cancel();
+    _saveConversationDebounce = Timer(const Duration(milliseconds: 350), () {
+      unawaited(persistActiveConversationNow());
+    });
+  }
+
+  Future<void> persistActiveConversationNow() async {
+    if (!_conversationStoreReady || _activeConversationId == null) return;
+    final index = _conversations.indexWhere((c) => c.id == _activeConversationId);
+    if (index < 0) return;
+
+    final updated = _conversations[index].copyWith(
+      updatedAt: DateTime.now(),
+      messages: _persistableMessagesFromState(),
+    );
+    _conversations[index] = updated;
+    await _saveConversationStore();
+  }
+
+  Future<void> createConversation({
+    required String name,
+    String? tankId,
+    bool copyCurrentMessages = false,
+  }) async {
+    if (!_conversationStoreReady) return;
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) return;
+    final now = DateTime.now();
+    final conversation = SavedChatConversation(
+      id: const Uuid().v4(),
+      name: trimmedName,
+      tankId: tankId,
+      createdAt: now,
+      updatedAt: now,
+      messages: copyCurrentMessages ? _persistableMessagesFromState() : [],
+    );
+    _conversations = [conversation, ..._conversations];
+    _activeConversationId = conversation.id;
+    state = ChatState(messages: _uiMessagesFromPersisted(conversation.messages));
+    await _saveConversationStore();
+  }
+
+  Future<void> updateActiveConversationMetadata({
+    required String name,
+    String? tankId,
+  }) async {
+    if (!_conversationStoreReady || _activeConversationId == null) return;
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) return;
+    final index = _conversations.indexWhere((c) => c.id == _activeConversationId);
+    if (index < 0) return;
+    _conversations[index] = _conversations[index].copyWith(
+      name: trimmedName,
+      tankId: tankId,
+      clearTankId: tankId == null,
+      updatedAt: DateTime.now(),
+    );
+    await _saveConversationStore();
+  }
+
+  Future<void> switchConversation(String conversationId) async {
+    if (!_conversationStoreReady || conversationId == _activeConversationId) return;
+    await persistActiveConversationNow();
+    final conversation = _findConversationById(conversationId);
+    if (conversation == null) return;
+    _activeConversationId = conversation.id;
+    state = ChatState(messages: _uiMessagesFromPersisted(conversation.messages));
+    await _saveConversationStore();
+  }
+
+  Future<void> deleteConversation(String conversationId) async {
+    if (!_conversationStoreReady) return;
+    _conversations.removeWhere((c) => c.id == conversationId);
+
+    if (_conversations.isEmpty) {
+      final now = DateTime.now();
+      _conversations = [
+        SavedChatConversation(
+          id: const Uuid().v4(),
+          name: 'Current Chat',
+          createdAt: now,
+          updatedAt: now,
+          messages: [],
+        ),
+      ];
+    }
+
+    if (!_conversations.any((c) => c.id == _activeConversationId)) {
+      _activeConversationId = _conversations.first.id;
+    }
+
+    final activeConversation = _conversations.firstWhere(
+      (c) => c.id == _activeConversationId,
+    );
+    state = ChatState(messages: _uiMessagesFromPersisted(activeConversation.messages));
+    await _saveConversationStore();
+  }
+
+  @override
+  void dispose() {
+    _saveConversationDebounce?.cancel();
+    super.dispose();
+  }
 
   /// Returns the effective chat history limit.
   /// Users who supply their own API key for the active text provider use their

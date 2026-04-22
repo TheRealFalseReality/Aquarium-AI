@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
+import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/share_utils.dart';
 import '../widgets/ad_component.dart';
@@ -153,11 +154,285 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     }
   }
 
+  Future<void> _showCreateConversationDialog({
+    required bool copyCurrentMessages,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final tanks = ref.read(tankProvider).tanks;
+    final chatNotifier = ref.read(chatProvider.notifier);
+    final active = chatNotifier.activeConversation;
+    final nameController = TextEditingController();
+    String? selectedTankId = active?.tankId;
+
+    final created = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(l10n.chatbotNewConversation),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nameController,
+                      textInputAction: TextInputAction.done,
+                      decoration: InputDecoration(
+                        labelText: l10n.chatbotConversationNameLabel,
+                        hintText: l10n.chatbotConversationNameHint,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: selectedTankId ?? '__none__',
+                      decoration: InputDecoration(
+                        labelText: l10n.chatbotConversationTankLabel,
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: '__none__',
+                          child: Text(l10n.chatbotNoTankOption),
+                        ),
+                        ...tanks.map(
+                          (tank) => DropdownMenuItem(
+                            value: tank.id,
+                            child: Text(tank.name),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setDialogState(() {
+                          selectedTankId = value == '__none__' ? null : value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(l10n.cancel),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    final trimmed = nameController.text.trim();
+                    if (trimmed.isEmpty) return;
+                    await chatNotifier.createConversation(
+                      name: trimmed,
+                      tankId: selectedTankId,
+                      copyCurrentMessages: copyCurrentMessages,
+                    );
+                    if (context.mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
+                  child: Text(l10n.save),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (created == true && mounted) {
+      AnalyticsService.logFeatureUsed(
+        featureName: 'chat_conversation_created',
+        parameters: {
+          'copied_messages': copyCurrentMessages.toString(),
+          'has_tank': (selectedTankId != null).toString(),
+        },
+      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.chatbotConversationSaved)));
+    }
+  }
+
+  Future<void> _openConversationManager() async {
+    final l10n = AppLocalizations.of(context)!;
+    final tanks = ref.read(tankProvider).tanks;
+    final chatNotifier = ref.read(chatProvider.notifier);
+    String selectedFilter = '__all__';
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final activeConversation = chatNotifier.activeConversation;
+            final conversations = chatNotifier.conversations.where((c) {
+              if (selectedFilter == '__all__') return true;
+              if (selectedFilter == '__none__') return c.tankId == null;
+              return c.tankId == selectedFilter;
+            }).toList();
+            final tankNameById = {for (final tank in tanks) tank.id: tank.name};
+
+            String tankNameFor(String? tankId) {
+              if (tankId == null) return l10n.chatbotNoTankOption;
+              final knownName = tankNameById[tankId];
+              if (knownName != null) return knownName;
+              return l10n.chatbotUnknownTank;
+            }
+
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.chatbotConversationsTitle,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: selectedFilter,
+                      decoration: InputDecoration(
+                        labelText: l10n.chatbotConversationFilterTankLabel,
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: '__all__',
+                          child: Text(l10n.chatbotAllTanksOption),
+                        ),
+                        DropdownMenuItem(
+                          value: '__none__',
+                          child: Text(l10n.chatbotNoTankOption),
+                        ),
+                        ...tanks.map(
+                          (tank) => DropdownMenuItem(
+                            value: tank.id,
+                            child: Text(tank.name),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setSheetState(() => selectedFilter = value);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    if (conversations.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Center(
+                          child: Text(
+                            l10n.chatbotNoConversationsForFilter,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    else
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.5,
+                        ),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: conversations.length,
+                          itemBuilder: (context, index) {
+                            final conversation = conversations[index];
+                            final isActive =
+                                activeConversation?.id == conversation.id;
+                            return ListTile(
+                              title: Text(conversation.name),
+                              subtitle: Text(
+                                tankNameFor(conversation.tankId),
+                              ),
+                              leading: Icon(
+                                isActive
+                                    ? Icons.chat_bubble
+                                    : Icons.chat_bubble_outline,
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete_outline),
+                                tooltip: l10n.delete,
+                                onPressed: () async {
+                                  final confirmed = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text(l10n.delete),
+                                      content: Text(
+                                        l10n.chatbotDeleteConversationConfirm,
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: Text(l10n.cancel),
+                                        ),
+                                        FilledButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: Text(l10n.delete),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirmed != true) return;
+                                  await chatNotifier.deleteConversation(
+                                    conversation.id,
+                                  );
+                                  setSheetState(() {});
+                                  if (context.mounted) {
+                                    AnalyticsService.logFeatureUsed(
+                                      featureName: 'chat_conversation_deleted',
+                                      parameters: {
+                                        'had_tank':
+                                            (conversation.tankId != null)
+                                                .toString(),
+                                      },
+                                    );
+                                  }
+                                },
+                              ),
+                              onTap: () async {
+                                await chatNotifier.switchConversation(
+                                  conversation.id,
+                                );
+                                if (context.mounted) {
+                                  AnalyticsService.logFeatureUsed(
+                                    featureName: 'chat_conversation_loaded',
+                                    parameters: {
+                                      'has_tank':
+                                          (conversation.tankId != null)
+                                              .toString(),
+                                    },
+                                  );
+                                  Navigator.pop(context);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(chatProvider);
+    final chatNotifier = ref.read(chatProvider.notifier);
 
     ref.listen(chatProvider, (previous, next) {
+      chatNotifier.schedulePersistActiveConversation();
       final newMessages = next.messages;
       if (newMessages.isNotEmpty) {
         final last = newMessages.last;
@@ -278,6 +553,49 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   originalMessage: item.originalMessage,
                 );
               },
+            ),
+            Positioned(
+              top: 4,
+              right: 4,
+              child: PopupMenuButton<String>(
+                tooltip: l10n.chatbotConversationsTitle,
+                onSelected: (value) {
+                  if (value == 'new_empty') {
+                    _showCreateConversationDialog(copyCurrentMessages: false);
+                  } else if (value == 'save_copy') {
+                    _showCreateConversationDialog(copyCurrentMessages: true);
+                  } else if (value == 'manage') {
+                    _openConversationManager();
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'manage',
+                    child: Row(
+                      children: [
+                        Flexible(child: Text(l10n.chatbotManageConversations)),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'save_copy',
+                    child: Row(
+                      children: [
+                        Flexible(child: Text(l10n.chatbotSaveConversationCopy)),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'new_empty',
+                    child: Row(
+                      children: [
+                        Flexible(child: Text(l10n.chatbotNewConversation)),
+                      ],
+                    ),
+                  ),
+                ],
+                icon: const Icon(Icons.forum_outlined),
+              ),
             ),
             if (_expandedMenu != null)
               Positioned.fill(

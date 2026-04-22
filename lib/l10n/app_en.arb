@@ -3889,6 +3889,62 @@
       }
     }
   },
+  "chatbotConversationsTitle": "Conversations",
+  "@chatbotConversationsTitle": {
+    "description": "Title and tooltip for chatbot conversation manager"
+  },
+  "chatbotManageConversations": "Manage conversations",
+  "@chatbotManageConversations": {
+    "description": "Menu item to open chatbot conversations manager"
+  },
+  "chatbotSaveConversationCopy": "Save current conversation",
+  "@chatbotSaveConversationCopy": {
+    "description": "Menu item to save a copy of the current chatbot conversation"
+  },
+  "chatbotNewConversation": "New conversation",
+  "@chatbotNewConversation": {
+    "description": "Menu item and dialog title for creating a new chatbot conversation"
+  },
+  "chatbotConversationNameLabel": "Conversation name",
+  "@chatbotConversationNameLabel": {
+    "description": "Form label for chatbot conversation name"
+  },
+  "chatbotConversationNameHint": "e.g., Reef algae troubleshooting",
+  "@chatbotConversationNameHint": {
+    "description": "Hint for chatbot conversation name text field"
+  },
+  "chatbotConversationTankLabel": "Tank",
+  "@chatbotConversationTankLabel": {
+    "description": "Form label for selecting tank association on chatbot conversation"
+  },
+  "chatbotConversationFilterTankLabel": "Filter by tank",
+  "@chatbotConversationFilterTankLabel": {
+    "description": "Label for tank filter in chatbot conversation manager"
+  },
+  "chatbotAllTanksOption": "All tanks",
+  "@chatbotAllTanksOption": {
+    "description": "Option to show conversations for all tanks"
+  },
+  "chatbotNoTankOption": "No tank",
+  "@chatbotNoTankOption": {
+    "description": "Option for conversations that are not linked to a specific tank"
+  },
+  "chatbotUnknownTank": "Unknown tank",
+  "@chatbotUnknownTank": {
+    "description": "Fallback label when a linked tank no longer exists"
+  },
+  "chatbotNoConversationsForFilter": "No conversations found for this filter.",
+  "@chatbotNoConversationsForFilter": {
+    "description": "Empty state text when no chatbot conversations match the selected filter"
+  },
+  "chatbotDeleteConversationConfirm": "Delete this conversation?",
+  "@chatbotDeleteConversationConfirm": {
+    "description": "Confirmation prompt when deleting a chatbot conversation"
+  },
+  "chatbotConversationSaved": "Conversation saved.",
+  "@chatbotConversationSaved": {
+    "description": "Snackbar shown when a chatbot conversation is saved"
+  },
   "moreThemeOptions": "More theme options",
   "@moreThemeOptions": {
     "description": "Button label in the app drawer that navigates to the full Appearance screen"

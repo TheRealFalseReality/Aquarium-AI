@@ -163,10 +163,13 @@ herramientas AI especializadas:
 
 ### Consejos de chat
 
-- La IA recuerda los mensajes recientes en la sesión actual (configurable en
-  Configuración).
+- Las conversaciones ahora se conservan entre sesiones de la app.
+- Usa el menú **Conversaciones** en la parte superior derecha para crear
+  conversaciones con nombre.
+- Puedes asignar opcionalmente cada conversación a un acuario específico y luego
+  filtrarla y cargarla desde el gestor de conversaciones.
 - Toca el icono de **compartir** en cualquier respuesta para compartir o copiar el texto.
-- Usa **limpiar chat** (menú superior derecho) para empezar de nuevo.
+- Crea una **nueva conversación** desde el menú cuando quieras empezar de cero.
 
 ---
 

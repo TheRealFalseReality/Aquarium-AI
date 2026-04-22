@@ -145,9 +145,12 @@ At the top of the chat screen you will find quick-launch chips for specialized A
 
 ### Chat Tips
 
-- The AI remembers recent messages in the current session (configurable in Settings).
+- Conversations are now persistent across app sessions.
+- Use the **Conversations** menu in the top-right to create named conversations.
+- You can optionally assign each conversation to a specific tank, then filter and load
+  it later from the conversation manager.
 - Tap the **share** icon on any response to share or copy the text.
-- Use **clear chat** (top-right menu) to start fresh.
+- Create a **new conversation** from the menu whenever you want a fresh start.
 
 ---
 
