@@ -3659,6 +3659,18 @@
   "@unableToCheckUpdates": {
     "description": "Snackbar message shown when the update check fails"
   },
+  "appUpdateAvailableTitle": "Update available",
+  "@appUpdateAvailableTitle": {
+    "description": "Title shown in the popup when a new app version is available"
+  },
+  "appUpdateAvailableMessage": "A new version of Aquarium AI is available. Update now to get the latest improvements and fixes.",
+  "@appUpdateAvailableMessage": {
+    "description": "Message shown in the popup when a new app version is available"
+  },
+  "updateNow": "Update now",
+  "@updateNow": {
+    "description": "Primary action button label in the app update popup"
+  },
   "meetAquaPi": "Meet AquaPi!",
   "@meetAquaPi": {
     "description": "Title of the AquaPi promotion dialog"
