@@ -183,6 +183,8 @@ final chatProvider = StateNotifierProvider<ChatNotifier, ChatState>((ref) {
 class ChatNotifier extends StateNotifier<ChatState> {
   static const String _conversationsKey = 'chat_conversations_v1';
   static const String _activeConversationKey = 'active_chat_conversation_v1';
+  static const String _defaultWelcomeText =
+      "# Welcome to Aquarium AI!\n\nAsk aquarium questions, run water analyses, generate automation scripts, or try the **Photo Analyzer** to identify fish and assess tank health.";
 
   ChatNotifier({required ModelState modelState, required Ref ref})
     : _modelState = modelState,
@@ -206,8 +208,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   List<ChatMessage> get _defaultMessages => [
     ChatMessage(
-      text:
-          "# Welcome to Aquarium AI!\n\nAsk aquarium questions, run water analyses, generate automation scripts, or try the **Photo Analyzer** to identify fish and assess tank health.",
+      text: _defaultWelcomeText,
       isUser: false,
     ),
     ChatMessage(text: 'ad', isUser: false, isAd: true),
@@ -215,7 +216,13 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   List<PersistedChatMessage> _persistableMessagesFromState() {
     return state.messages
-        .where((m) => !m.isAd && !m.isError && m.text.trim().isNotEmpty)
+        .where(
+          (m) =>
+              !m.isAd &&
+              !m.isError &&
+              m.text.trim().isNotEmpty &&
+              m.text != _defaultWelcomeText,
+        )
         .map((m) => PersistedChatMessage(text: m.text, isUser: m.isUser))
         .toList();
   }
