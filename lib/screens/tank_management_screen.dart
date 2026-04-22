@@ -52,6 +52,18 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 }
 
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
+  static const double _marineFishLoadFactor = 1.3;
+  static const double _reefFishLoadFactor = 1.45;
+  static const double _freshwaterFishLoadFactor = 1.0;
+  static const double _speciesDiversityIncrement = 0.05;
+  static const double _maxSpeciesDiversityFactor = 1.35;
+  static const double _freshwaterDensityLowThreshold = 0.40;
+  static const double _freshwaterDensityHighThreshold = 1.00;
+  static const double _marineDensityLowThreshold = 0.25;
+  static const double _marineDensityHighThreshold = 0.60;
+  static const double _reefDensityLowThreshold = 0.20;
+  static const double _reefDensityHighThreshold = 0.50;
+
   TankSortOption _currentSortOption = TankSortOption.name;
   bool _isSortAscending = true; // Track sort direction (ascending/descending)
   Tank?
@@ -4257,18 +4269,20 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     required int fishTypeCount,
   }) {
     final typeComplexityFactor = tank.type == 'marine'
-        ? (tank.isReef ? 1.45 : 1.3)
-        : 1.0;
-    final diversityFactor = (1 + ((fishTypeCount - 1) * 0.05)).clamp(1.0, 1.35);
+        ? (tank.isReef ? _reefFishLoadFactor : _marineFishLoadFactor)
+        : _freshwaterFishLoadFactor;
+    final diversityFactor = (1 +
+            ((fishTypeCount - 1) * _speciesDiversityIncrement))
+        .clamp(_freshwaterFishLoadFactor, _maxSpeciesDiversityFactor);
     final effectiveCount = totalFishCount * typeComplexityFactor * diversityFactor;
     final densityScore = effectiveCount / gallons;
 
     final lowThreshold = tank.type == 'marine'
-        ? (tank.isReef ? 0.20 : 0.25)
-        : 0.40;
+        ? (tank.isReef ? _reefDensityLowThreshold : _marineDensityLowThreshold)
+        : _freshwaterDensityLowThreshold;
     final highThreshold = tank.type == 'marine'
-        ? (tank.isReef ? 0.50 : 0.60)
-        : 1.00;
+        ? (tank.isReef ? _reefDensityHighThreshold : _marineDensityHighThreshold)
+        : _freshwaterDensityHighThreshold;
 
     if (densityScore < lowThreshold) return _StockingDensityStatus.low;
     if (densityScore > highThreshold) return _StockingDensityStatus.high;

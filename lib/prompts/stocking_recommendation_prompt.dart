@@ -65,6 +65,7 @@ String buildStockingRecommendationPrompt(
     - Explicitly consider fish counts, schooling needs, and total stocking load relative to tank size.
     - Avoid overstocking recommendations.
     - Keep quantity guidance realistic for the provided tank size and tank type.
+    - In this standalone planner, quantity guidance represents absolute target counts for the full new setup (not incremental additions).
 
     Return a single JSON object with a key "recommendations" containing a list of these recommendation objects.
     ''';

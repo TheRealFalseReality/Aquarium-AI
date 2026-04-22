@@ -74,6 +74,7 @@ String buildTankStockingRecommendationPrompt(
     4. Consider tank size limitations.
     5. Explicitly account for existing fish quantities and total stocking load/bioload.
     6. Do NOT overstock the tank.
+    7. Any quantity guidance must be for additional fish to add (not the post-addition total tank population).
 
     Tank Information:
     - Tank Name: "${tank.name}"
