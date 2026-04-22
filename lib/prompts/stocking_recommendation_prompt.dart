@@ -10,6 +10,8 @@ String buildStockingRecommendationPrompt(
   List<Fish>? selectedFish,
   Map<String, List<String>>? speciesSelections,
 }) {
+  // Standalone stocking builds a complete plan for a new setup, so quantity
+  // guidance should be interpreted as absolute target counts.
   final fishNames = allFish.map((f) => f.name).toList();
 
   // Build selected fish context if any fish are selected

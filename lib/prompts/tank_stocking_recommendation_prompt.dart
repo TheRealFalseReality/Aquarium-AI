@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:collection';
 
 import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/tank.dart';
@@ -14,7 +15,10 @@ String buildTankStockingRecommendationPrompt(
 
   // Keep this list unique so the prompt does not overemphasize a species simply
   // because it appears multiple times; explicit quantities are provided below.
-  final existingFishNames = existingFish.map((f) => f.name).toSet().toList();
+  // LinkedHashSet preserves insertion order for deterministic prompt context.
+  final existingFishNames = LinkedHashSet<String>.from(
+    existingFish.map((f) => f.name),
+  ).toList();
   final existingFishQuantities = <String, int>{};
   for (final inhabitant in tank.inhabitants) {
     existingFishQuantities.update(

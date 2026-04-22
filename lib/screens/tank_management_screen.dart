@@ -4268,6 +4268,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     required int totalFishCount,
     required int fishTypeCount,
   }) {
+    // The density heuristic combines:
+    // 1) fish load factor by tank type (marine/reef generally heavier bioload),
+    // 2) diversity factor (more fish types typically increases care complexity),
+    // then normalizes by tank volume in gallons to get an effective load score.
+    // Threshold bands map that score to low / just-right / high stocking status.
     final typeComplexityFactor = tank.type == 'marine'
         ? (tank.isReef ? _reefFishLoadFactor : _marineFishLoadFactor)
         : _freshwaterFishLoadFactor;
