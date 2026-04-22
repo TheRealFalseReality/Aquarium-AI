@@ -100,6 +100,7 @@ class _NotificationManagementScreenState
         .tanks
         .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
     final notifications = currentTank.notifications;
+    final smartInsights = _buildSmartScheduleInsights(currentTank, notifications);
 
     return Scaffold(
       appBar: AppBar(
@@ -123,7 +124,10 @@ class _NotificationManagementScreenState
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
-                return _buildNotificationCard(currentTank, notification);
+                return _buildNotificationCard(
+                  notification,
+                  smartInsights[notification.id],
+                );
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
@@ -167,16 +171,13 @@ class _NotificationManagementScreenState
     );
   }
 
-  Widget _buildNotificationCard(Tank tank, TankNotification notification) {
+  Widget _buildNotificationCard(
+    TankNotification notification,
+    String? smartScheduleInsight,
+  ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
-    final l10n = AppLocalizations.of(context)!;
-    final smartScheduleInsight = _buildSmartScheduleInsight(
-      tank,
-      notification,
-      l10n,
-    );
 
     // Use the single source of truth: getImmediateNextDate()
     // This returns scheduledNextDate if set, otherwise notificationDateTime
@@ -392,44 +393,61 @@ class _NotificationManagementScreenState
     }
   }
 
-  /// Builds a "last logged / next suggested" hint for repeating notifications.
+  /// Builds smart "last logged / next suggested" hints for all notifications.
   ///
-  /// Uses the newest matching activity log as the base date and computes the
-  /// next suggested reminder date from the notification repeat settings.
-  /// Returns `null` when the notification is one-time, has no matching logs,
-  /// or no next date can be derived.
-  String? _buildSmartScheduleInsight(
+  /// This precomputes the newest activity per category once per build and then
+  /// maps each repeating notification to a hint string, avoiding repeated
+  /// per-card filtering/sorting work.
+  Map<String, String> _buildSmartScheduleInsights(
     Tank tank,
-    TankNotification notification,
-    AppLocalizations l10n,
+    List<TankNotification> notifications,
   ) {
-    if (notification.repeatFrequency == RepeatFrequency.none) {
-      return null;
-    }
-
-    final matchingLogs = tank.notificationLogs.where((log) {
-      return notification.matchesActivityLog(log.type, log.customCategory);
-    }).toList();
-
-    if (matchingLogs.isEmpty) {
-      return null;
-    }
-
-    matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
-    final lastLog = matchingLogs.first;
-    final suggestedNext = notification.getNextNotificationDateFromBase(
-      lastLog.loggedAt,
-    );
-
-    if (suggestedNext == null) {
-      return null;
-    }
-
+    final l10n = AppLocalizations.of(context)!;
     final dateFormat = DateFormat('MMM d, yyyy');
-    return l10n.lastLoggedNextSuggested(
-      dateFormat.format(lastLog.loggedAt),
-      dateFormat.format(suggestedNext),
-    );
+    final latestLogsByCategory = <String, NotificationLog>{};
+
+    for (final log in tank.notificationLogs) {
+      final key = _categoryKey(log.type, log.customCategory);
+      final existing = latestLogsByCategory[key];
+      if (existing == null || log.loggedAt.isAfter(existing.loggedAt)) {
+        latestLogsByCategory[key] = log;
+      }
+    }
+
+    final insights = <String, String>{};
+    for (final notification in notifications) {
+      if (notification.repeatFrequency == RepeatFrequency.none) {
+        continue;
+      }
+
+      final key = _categoryKey(notification.type, notification.customCategory);
+      final lastLog = latestLogsByCategory[key];
+      if (lastLog == null) {
+        continue;
+      }
+
+      final suggestedNext = notification.getNextNotificationDateFromBase(
+        lastLog.loggedAt,
+      );
+      if (suggestedNext == null) {
+        continue;
+      }
+
+      insights[notification.id] = l10n.lastLoggedNextSuggested(
+        dateFormat.format(lastLog.loggedAt),
+        dateFormat.format(suggestedNext),
+      );
+    }
+
+    return insights;
+  }
+
+  String _categoryKey(NotificationType type, String? customCategory) {
+    if (type == NotificationType.other) {
+      final normalized = (customCategory ?? '').trim().toLowerCase();
+      return '${type.name}:$normalized';
+    }
+    return type.name;
   }
 
   IconData _getNotificationIcon(NotificationType type) {

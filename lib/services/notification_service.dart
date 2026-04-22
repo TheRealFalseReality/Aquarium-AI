@@ -235,7 +235,8 @@ class NotificationService {
     DateTime? nextDate;
     if (useExactDateTime) {
       // Use the exact next date already stored on the notification model.
-      // This supports explicit "use specified time" choices and snooze actions.
+      // This flag is used for both explicit "use specified time" choices
+      // and snooze actions that directly update scheduledNextDate.
       nextDate = notification.getImmediateNextDate();
     } else if (notification.repeatFrequency == RepeatFrequency.none) {
       // Use the exact date/time specified in the notification for:
@@ -255,13 +256,14 @@ class NotificationService {
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
 
-      await _notifications.zonedSchedule(
+        await _notifications.zonedSchedule(
         id: notificationId,
         title: title,
         body: body,
         scheduledDate: scheduledDate,
         notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        // Prefer `::` separator to avoid ambiguity in payload parsing.
         payload: '$tankId::${notification.id}',
       );
     }
