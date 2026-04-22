@@ -871,6 +871,7 @@
   "checkForUpdate": "Rechercher une mise à jour",
   "alreadyLatestVersion": "Vous avez déjà la dernière version !",
   "unableToCheckUpdates": "Impossible de vérifier les mises à jour.",
+  "unableToStartUpdate": "Impossible de démarrer la mise à jour.",
   "appUpdateAvailableTitle": "Mise à jour disponible",
   "appUpdateAvailableMessage": "Une nouvelle version d'Aquarium AI est disponible. Mettez à jour maintenant pour obtenir les dernières améliorations et corrections.",
   "updateNow": "Mettre à jour",

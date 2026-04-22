@@ -871,6 +871,7 @@
   "checkForUpdate": "Nach Updates suchen",
   "alreadyLatestVersion": "Du hast bereits die neueste Version!",
   "unableToCheckUpdates": "Updateprüfung nicht möglich.",
+  "unableToStartUpdate": "Das Update konnte nicht gestartet werden.",
   "appUpdateAvailableTitle": "Update verfügbar",
   "appUpdateAvailableMessage": "Eine neue Version von Aquarium AI ist verfügbar. Aktualisiere jetzt, um die neuesten Verbesserungen und Fehlerbehebungen zu erhalten.",
   "updateNow": "Jetzt aktualisieren",

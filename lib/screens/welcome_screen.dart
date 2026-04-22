@@ -817,7 +817,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                 } catch (_) {
                   if (!ctx.mounted) return;
                   ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text(l10n.unableToCheckUpdates)),
+                    SnackBar(content: Text(l10n.unableToStartUpdate)),
                   );
                 }
               },

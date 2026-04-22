@@ -3659,6 +3659,10 @@
   "@unableToCheckUpdates": {
     "description": "Snackbar message shown when the update check fails"
   },
+  "unableToStartUpdate": "Unable to start the update.",
+  "@unableToStartUpdate": {
+    "description": "Snackbar message shown when starting the app update flow fails"
+  },
   "appUpdateAvailableTitle": "Update available",
   "@appUpdateAvailableTitle": {
     "description": "Title shown in the popup when a new app version is available"
