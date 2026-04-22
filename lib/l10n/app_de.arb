@@ -1846,6 +1846,22 @@
   "@manageNotifications": {
     "description": "Button label to navigate to the notification management screen"
   },
+  "setCareRemindersPrompt": "Erinnerungen für die Pflegeanforderungen dieser Arten einrichten?",
+  "@setCareRemindersPrompt": {
+    "description": "Prompt shown on the compatibility report to offer setting care reminders"
+  },
+  "setCareReminders": "Pflege-Erinnerungen einrichten",
+  "@setCareReminders": {
+    "description": "Button label to open reminder setup from the compatibility report"
+  },
+  "chooseTankForCareRemindersTitle": "Aquarium für Erinnerungen auswählen",
+  "@chooseTankForCareRemindersTitle": {
+    "description": "Bottom sheet title when selecting a tank for care reminders"
+  },
+  "chooseTankForCareRemindersSubtitle": "Wählen Sie, wo Sie Pflege-Erinnerungen für diese Arten einrichten möchten.",
+  "@chooseTankForCareRemindersSubtitle": {
+    "description": "Bottom sheet subtitle when selecting a tank for care reminders"
+  },
   "reschedule": "Neu planen",
   "@reschedule": {
     "description": "Button label for the reschedule action on a notification"

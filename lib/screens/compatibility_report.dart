@@ -6,10 +6,14 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../models/compatibility_report.dart';
 import '../models/fish.dart';
+import '../models/tank.dart';
 import '../providers/fish_compatibility_provider.dart';
+import '../providers/tank_provider.dart';
+import '../services/analytics_service.dart';
 import '../utils/share_utils.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
+import 'notification_management_screen.dart';
 
 // ADDED: New helper function to format AI-generated text with bold headers.
 Widget _formatAIResponse(BuildContext context, String text) {
@@ -170,12 +174,120 @@ void showReportDialog(
                       minimumSize: const Size.fromHeight(44),
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.setCareRemindersPrompt,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  FilledButton.icon(
+                    onPressed: () async {
+                      AnalyticsService.logFeatureUsed(
+                        featureName: 'compatibility_care_reminders_offer_tapped',
+                        parameters: {
+                          'selected_fish_count':
+                              report.selectedFish.length.toString(),
+                        },
+                      );
+                      Navigator.of(context).pop();
+                      if (!fromHistory) {
+                        notifier.clearSelection();
+                      }
+                      await _openCareReminderFlow(context, ref);
+                    },
+                    icon: const Icon(Icons.notifications_active_outlined),
+                    label: Text(l10n.setCareReminders),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(44),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
         );
       },
+    ),
+  );
+}
+
+Future<void> _openCareReminderFlow(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context)!;
+  final tanks = ref.read(tankProvider).tanks;
+
+  if (tanks.isEmpty) {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.noTanksYetTitle),
+        content: Text(l10n.globalNotificationsNoTanksDescription),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.pushNamed(context, '/tank-management');
+            },
+            child: Text(l10n.createTank),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+
+  if (tanks.length == 1) {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => NotificationManagementScreen(tank: tanks.first),
+      ),
+    );
+    return;
+  }
+
+  final selectedTank = await showModalBottomSheet<Tank>(
+    context: context,
+    showDragHandle: true,
+    builder: (context) {
+      return SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(l10n.chooseTankForCareRemindersTitle),
+              subtitle: Text(l10n.chooseTankForCareRemindersSubtitle),
+            ),
+            const Divider(height: 1),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 360),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: tanks.length,
+                itemBuilder: (context, index) {
+                  final tank = tanks[index];
+                  return ListTile(
+                    leading: const Icon(Icons.water),
+                    title: Text(tank.name),
+                    subtitle: tank.type.isEmpty ? null : Text(tank.type),
+                    onTap: () => Navigator.of(context).pop(tank),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+
+  if (selectedTank == null || !context.mounted) return;
+
+  await Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => NotificationManagementScreen(tank: selectedTank),
     ),
   );
 }
