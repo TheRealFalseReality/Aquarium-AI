@@ -227,6 +227,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       _checkShowAquaPiPromotionDialog();
       // Check if we should show the changelog dialog (once per version)
       _checkShowChangelogDialog();
+      // Check if an app update is available and show a dismissible popup.
+      _checkShowAppUpdateDialog();
     });
   }
 
@@ -774,6 +776,59 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       }
     } finally {
       if (mounted) setState(() => _checkingUpdate = false);
+    }
+  }
+
+  Future<void> _checkShowAppUpdateDialog() async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      final info = await InAppUpdateService.checkForUpdate();
+      if (!mounted || info == null) return;
+      if (info.updateAvailability != UpdateAvailability.updateAvailable) return;
+
+      final l10n = AppLocalizations.of(context)!;
+      final ctx = context;
+      if (!ctx.mounted) return;
+      AnalyticsService.logFeatureUsed(featureName: 'app_update_popup_shown');
+
+      showDialog<void>(
+        context: ctx,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.appUpdateAvailableTitle),
+          content: Text(l10n.appUpdateAvailableMessage),
+          actions: [
+            TextButton(
+              onPressed: () {
+                AnalyticsService.logFeatureUsed(
+                  featureName: 'app_update_popup_dismissed',
+                );
+                Navigator.of(dialogContext).pop();
+              },
+              child: Text(l10n.dismiss),
+            ),
+            FilledButton(
+              onPressed: () async {
+                AnalyticsService.logFeatureUsed(
+                  featureName: 'app_update_popup_update_now',
+                );
+                Navigator.of(dialogContext).pop();
+                try {
+                  await InAppUpdateService.startFlexibleUpdate();
+                } catch (e) {
+                  debugPrint('Error starting flexible update from popup: $e');
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text(l10n.unableToStartUpdate)),
+                  );
+                }
+              },
+              child: Text(l10n.updateNow),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error checking app update popup: $e');
     }
   }
 
