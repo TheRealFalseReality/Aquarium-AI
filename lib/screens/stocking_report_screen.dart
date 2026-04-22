@@ -268,14 +268,16 @@ class _StockingReportScreenState
                       ),
                     ),
                     const SizedBox(width: 12),
-                    OutlinedButton(
-                      onPressed: _copyCurrentReport,
-                      tooltip: l10n.copyToClipboard,
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.all(12),
-                        minimumSize: Size.zero,
+                    Tooltip(
+                      message: l10n.copyToClipboard,
+                      child: OutlinedButton(
+                        onPressed: _copyCurrentReport,
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.all(12),
+                          minimumSize: Size.zero,
+                        ),
+                        child: const Icon(Icons.copy_all_outlined),
                       ),
-                      child: const Icon(Icons.copy_all_outlined),
                     ),
                     const SizedBox(width: 12),
                     // Close: compact icon button
