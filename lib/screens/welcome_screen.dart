@@ -788,8 +788,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
 
       final l10n = AppLocalizations.of(context)!;
       final ctx = context;
-      AnalyticsService.logFeatureUsed(featureName: 'app_update_popup_shown');
       if (!ctx.mounted) return;
+      AnalyticsService.logFeatureUsed(featureName: 'app_update_popup_shown');
 
       showDialog<void>(
         context: ctx,
@@ -812,7 +812,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   featureName: 'app_update_popup_update_now',
                 );
                 Navigator.of(dialogContext).pop();
-                await InAppUpdateService.startFlexibleUpdate();
+                try {
+                  await InAppUpdateService.startFlexibleUpdate();
+                } catch (_) {
+                  if (!ctx.mounted) return;
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text(l10n.unableToCheckUpdates)),
+                  );
+                }
               },
               child: Text(l10n.updateNow),
             ),
