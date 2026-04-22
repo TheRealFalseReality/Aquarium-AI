@@ -521,47 +521,6 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
     final l10n = AppLocalizations.of(context)!;
     return MainLayout(
       title: l10n.aiChatbot,
-      actions: [
-        PopupMenuButton<String>(
-          tooltip: l10n.chatbotConversationsTitle,
-          onSelected: (value) {
-            if (value == 'new_empty') {
-              _showCreateConversationDialog(copyCurrentMessages: false);
-            } else if (value == 'save_copy') {
-              _showCreateConversationDialog(copyCurrentMessages: true);
-            } else if (value == 'manage') {
-              _openConversationManager();
-            }
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'manage',
-              child: Row(
-                children: [
-                  Flexible(child: Text(l10n.chatbotManageConversations)),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'save_copy',
-              child: Row(
-                children: [
-                  Flexible(child: Text(l10n.chatbotSaveConversationCopy)),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'new_empty',
-              child: Row(
-                children: [
-                  Flexible(child: Text(l10n.chatbotNewConversation)),
-                ],
-              ),
-            ),
-          ],
-          icon: const Icon(Icons.forum_outlined),
-        ),
-      ],
       bottomNavigationBar: const AdBanner(),
       child: SafeArea(
         child: Stack(
@@ -594,6 +553,49 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   originalMessage: item.originalMessage,
                 );
               },
+            ),
+            Positioned(
+              top: 4,
+              right: 4,
+              child: PopupMenuButton<String>(
+                tooltip: l10n.chatbotConversationsTitle,
+                onSelected: (value) {
+                  if (value == 'new_empty') {
+                    _showCreateConversationDialog(copyCurrentMessages: false);
+                  } else if (value == 'save_copy') {
+                    _showCreateConversationDialog(copyCurrentMessages: true);
+                  } else if (value == 'manage') {
+                    _openConversationManager();
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'manage',
+                    child: Row(
+                      children: [
+                        Flexible(child: Text(l10n.chatbotManageConversations)),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'save_copy',
+                    child: Row(
+                      children: [
+                        Flexible(child: Text(l10n.chatbotSaveConversationCopy)),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'new_empty',
+                    child: Row(
+                      children: [
+                        Flexible(child: Text(l10n.chatbotNewConversation)),
+                      ],
+                    ),
+                  ),
+                ],
+                icon: const Icon(Icons.forum_outlined),
+              ),
             ),
             if (_expandedMenu != null)
               Positioned.fill(
