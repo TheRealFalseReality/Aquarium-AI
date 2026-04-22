@@ -76,6 +76,7 @@ Cada tarjeta muestra:
 - Recuento de habitantes y puntuación de armonía
 - Botones de acción rápida (Añadir habitante, Registro de parámetros, Registro de
   dosificación, Análisis AI)
+- Herramientas del menú de la tarjeta, incluida la **Calculadora de volumen de cambio de agua** (por defecto al 20 % y con porcentaje ajustable para ver galones/litros a reemplazar)
 
 ### Ordenar y filtrar
 

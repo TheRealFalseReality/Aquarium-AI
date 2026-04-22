@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/fish.dart';
@@ -1823,6 +1824,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
           case 'manage_tags':
             _showManageTagsDialog(context, ref, tank);
             break;
+          case 'water_change_calculator':
+            _showWaterChangeVolumeCalculator(context, tank);
+            break;
           case 'notifications':
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -1883,6 +1887,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 const Icon(Icons.label_outline, size: 18),
                 const SizedBox(width: 8),
                 Flexible(child: Text(l10n.manageTags)),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 'water_change_calculator',
+            child: Row(
+              children: [
+                const Icon(Icons.water_drop_outlined, size: 18),
+                const SizedBox(width: 8),
+                Flexible(child: Text(l10n.waterChangeVolumeCalculator)),
               ],
             ),
           ),
@@ -4064,6 +4078,79 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       return '${tank.sizeLiters!.toStringAsFixed(0)} liters';
     }
     return '';
+  }
+
+  void _showWaterChangeVolumeCalculator(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final tankGallons = tank.sizeGallons;
+    final tankLiters = tank.sizeLiters;
+
+    if (tankGallons == null && tankLiters == null) {
+      context.showAccessibleMessage(l10n.waterChangeCalculatorMissingTankSize);
+      return;
+    }
+
+    AnalyticsService.logCalculatorUsed(
+      calculatorType: 'water_change_volume',
+      inputData: {
+        'has_gallons': (tankGallons != null).toString(),
+        'has_liters': (tankLiters != null).toString(),
+      },
+    );
+
+    final gallons = tankGallons ?? (tankLiters! / litersPerGallon);
+    final liters = tankLiters ?? (tankGallons! * litersPerGallon);
+
+    double selectedPercent = 20;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final changeGallons = gallons * (selectedPercent / 100);
+            final changeLiters = liters * (selectedPercent / 100);
+            return AlertDialog(
+              title: Text(l10n.waterChangeVolumeCalculator),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('${l10n.onboardingTankSize}: ${_formatTankSize(tank)}'),
+                  const SizedBox(height: 12),
+                  Text(
+                    '${l10n.waterChangePercentage}: ${selectedPercent.toStringAsFixed(0)}%',
+                  ),
+                  Slider(
+                    value: selectedPercent,
+                    min: 5,
+                    max: 100,
+                    divisions: 95,
+                    label: '${selectedPercent.toStringAsFixed(0)}%',
+                    onChanged: (value) {
+                      setDialogState(() {
+                        selectedPercent = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${l10n.waterChangeVolumeResult}: ${changeGallons.toStringAsFixed(2)} ${l10n.gallons} (${changeLiters.toStringAsFixed(2)} ${l10n.liters})',
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(l10n.close),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   /// Returns a compact age string (e.g. "2y 5m") for the given date.

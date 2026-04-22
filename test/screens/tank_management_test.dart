@@ -3,6 +3,7 @@ import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/utils/tank_harmony_calculator.dart';
 import 'package:fish_ai/screens/tank_management_screen.dart';
 import 'package:fish_ai/screens/tank_creation_screen.dart';
+import 'package:fish_ai/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -369,6 +370,57 @@ void main() {
 
       // The category should change (this will trigger fish data reload)
       // Note: Full test would require mocking the asset loading
+    });
+  });
+
+  group('Water Change Volume Calculator Tests', () {
+    test('water change volume calculation - gallons tank', () {
+      const tankGallons = 55.0;
+      final tankLiters = tankGallons * gallonsToLiters;
+      const percent = 25.0;
+
+      final changeGallons = tankGallons * (percent / 100);
+      final changeLiters = tankLiters * (percent / 100);
+
+      expect(changeGallons, closeTo(13.75, 0.01));
+      expect(changeLiters, closeTo(52.05, 0.01));
+    });
+
+    test('water change volume calculation - liters tank', () {
+      const tankLiters = 200.0;
+      final tankGallons = tankLiters / gallonsToLiters;
+      const percent = 20.0;
+
+      final changeGallons = tankGallons * (percent / 100);
+      final changeLiters = tankLiters * (percent / 100);
+
+      expect(changeLiters, closeTo(40.0, 0.01));
+      expect(changeGallons, closeTo(10.57, 0.01));
+    });
+
+    test('water change volume at 100% equals full tank volume', () {
+      const tankGallons = 75.0;
+      final tankLiters = tankGallons * gallonsToLiters;
+      const percent = 100.0;
+
+      final changeGallons = tankGallons * (percent / 100);
+      final changeLiters = tankLiters * (percent / 100);
+
+      expect(changeGallons, equals(tankGallons));
+      expect(changeLiters, closeTo(tankLiters, 0.001));
+    });
+
+    test('water change volume at 5% (minimum) gives small result', () {
+      const tankGallons = 100.0;
+      const percent = 5.0;
+
+      final changeGallons = tankGallons * (percent / 100);
+      expect(changeGallons, equals(5.0));
+    });
+
+    test('gallonsToLiters and litersPerGallon are equal', () {
+      expect(gallonsToLiters, equals(litersPerGallon));
+      expect(gallonsToLiters, closeTo(3.78541, 0.00001));
     });
   });
 }

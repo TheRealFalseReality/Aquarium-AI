@@ -69,6 +69,7 @@ Each card shows:
 - Name, type, and volume
 - Inhabitant count and harmony score
 - Quick-action buttons (Add Inhabitant, Parameter Log, Dosing Log, AI Analysis)
+- Card menu tools, including **Water Change Volume Calculator** (defaults to 20% and lets you adjust the percentage to see gallons/liters to replace)
 
 ### Sorting & Filtering
 

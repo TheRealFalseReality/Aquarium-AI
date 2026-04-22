@@ -2015,5 +2015,21 @@
   "founderRequiredTooltip": "Aquariophile Fondateur requis",
   "@founderRequiredTooltip": {
     "description": "Tooltip shown on locked customization features for non-founders"
+  },
+  "waterChangeVolumeCalculator": "Calculateur du volume de changement d'eau",
+  "@waterChangeVolumeCalculator": {
+    "description": "Menu action and dialog title for the per-tank water change volume calculator"
+  },
+  "waterChangePercentage": "Pourcentage de changement d'eau",
+  "@waterChangePercentage": {
+    "description": "Label for water change percentage in the water change volume calculator"
+  },
+  "waterChangeVolumeResult": "Volume du changement",
+  "@waterChangeVolumeResult": {
+    "description": "Label for computed water change volume in the water change volume calculator"
+  },
+  "waterChangeCalculatorMissingTankSize": "Ajoutez d'abord la taille du bac pour calculer le volume de changement d'eau.",
+  "@waterChangeCalculatorMissingTankSize": {
+    "description": "Message shown when water change volume calculator is opened for a tank without size data"
   }
 }

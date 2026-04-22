@@ -90,6 +90,15 @@ const String buyMeACoffeeProductId = 'buy_me_a_coffee';
 /// this list will be treated as a Founder Aquarist purchase.
 const List<String> founderProductIds = [earlySupporterLifetimeProductId];
 
+// Unit conversion constants
+// Canonical gallons → liters conversion factor. Use this as the single
+// source of truth for gallon/liter conversions throughout the app.
+const double gallonsToLiters = 3.78541;
+
+// Backwards-compatible alias for existing call sites. Prefer
+// `gallonsToLiters` in new code so the conversion uses a single standard name.
+const double litersPerGallon = gallonsToLiters;
+
 // ---------------------------------------------------------------------------
 // Remote Config in-app fallback defaults
 // These are used when Firebase Remote Config is unreachable (offline / first
