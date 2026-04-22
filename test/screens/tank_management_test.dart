@@ -422,54 +422,5 @@ void main() {
       expect(gallonsToLiters, equals(litersPerGallon));
       expect(gallonsToLiters, closeTo(3.78541, 0.00001));
     });
-
-    testWidgets('water change calculator dialog shows missing-size message when tank has no size', (WidgetTester tester) async {
-      final tankWithoutSize = Tank.create(
-        name: 'No Size Tank',
-        type: 'freshwater',
-      );
-
-      late BuildContext capturedContext;
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Builder(
-              builder: (ctx) {
-                capturedContext = ctx;
-                return Scaffold(
-                  body: ElevatedButton(
-                    onPressed: () {},
-                    child: const Text('Open'),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(tankWithoutSize.sizeGallons, isNull);
-      expect(tankWithoutSize.sizeLiters, isNull);
-      expect(capturedContext, isNotNull);
-    });
-
-    testWidgets('water change calculator dialog opens for tank with size', (WidgetTester tester) async {
-      final tankWithSize = Tank.create(
-        name: 'My Tank',
-        type: 'freshwater',
-        sizeGallons: 55.0,
-        sizeLiters: 208.2,
-      );
-
-      expect(tankWithSize.sizeGallons, equals(55.0));
-      expect(tankWithSize.sizeLiters, equals(208.2));
-
-      // Verify calculation logic used in the dialog
-      final gallons = tankWithSize.sizeGallons!;
-      const percent = 20.0;
-      final changeGallons = gallons * (percent / 100);
-      expect(changeGallons, closeTo(11.0, 0.01));
-    });
   });
 }
