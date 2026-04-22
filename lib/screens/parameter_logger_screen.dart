@@ -802,12 +802,12 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                       color: cs.onSurface.withOpacity(0.7),
                     ),
                   ),
-                   const SizedBox(height: 24),
-                   if (proactiveAlerts.isNotEmpty) ...[
-                     _buildProactiveTrendAlerts(context, proactiveAlerts),
-                     const SizedBox(height: 24),
-                   ],
-                   ...parameterTypes.map((paramType) {
+                  const SizedBox(height: 24),
+                  if (proactiveAlerts.isNotEmpty) ...[
+                    _buildProactiveTrendAlerts(context, proactiveAlerts),
+                    const SizedBox(height: 24),
+                  ],
+                  ...parameterTypes.map((paramType) {
                     final parameters = groupedParameters[paramType] ?? [];
                     if (parameters.isEmpty) return const SizedBox.shrink();
 

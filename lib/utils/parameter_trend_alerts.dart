@@ -59,20 +59,27 @@ ParameterTrendAlert? _buildNitrateRisingAlert(List<WaterParameter> parameters) {
     return null;
   }
 
-  final firstDate = risingStreak.first.dateRecorded;
-  final lastDate = risingStreak.last.dateRecorded;
-  final trendDays = lastDate.difference(firstDate).inDays + 1;
+  // Use distinct calendar days (not 24-hour periods) so multiple readings on
+  // the same date don't incorrectly appear as a multi-day trend.
+  final trendCalendarDays = risingStreak
+      .map(
+        (reading) => DateTime(
+          reading.dateRecorded.year,
+          reading.dateRecorded.month,
+          reading.dateRecorded.day,
+        ),
+      )
+      .toSet()
+      .length;
 
-  // Guard against multiple same-day increasing readings that could meet the
-  // streak-length threshold without representing a multi-day trend.
-  if (trendDays < _minTrendDaysForAlert) {
+  if (trendCalendarDays < _minTrendDaysForAlert) {
     return null;
   }
 
   final latest = risingStreak.last;
   return ParameterTrendAlert(
     parameterType: 'nitrate',
-    trendDays: trendDays,
+    trendDays: trendCalendarDays,
     latestValue: latest.value,
     unit: latest.unit,
   );
