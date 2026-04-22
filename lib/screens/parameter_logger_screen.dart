@@ -94,16 +94,27 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   }
 
   void _analyzeReading(WaterParameter parameter) {
+    final l10n = AppLocalizations.of(context)!;
     final currentTank = _getCurrentTank();
     final parameterLabel = _getParameterLabel(parameter.parameterType, context);
-    final prompt =
-        'Please analyze this aquarium reading and tell me what it means plus what to do next:\n'
-        'Tank Name: ${currentTank.name}\n'
-        'Tank Type: ${currentTank.type}\n'
-        'Parameter: $parameterLabel\n'
-        'Value: ${parameter.value}${parameter.unit ?? ''}\n'
-        'Recorded: ${DateFormat('yyyy-MM-dd HH:mm').format(parameter.dateRecorded)}'
-        '${parameter.notes != null && parameter.notes!.trim().isNotEmpty ? '\nNotes: ${parameter.notes!.trim()}' : ''}';
+    final prompt = parameter.notes != null && parameter.notes!.trim().isNotEmpty
+        ? l10n.analyzeReadingPromptWithNotes(
+            currentTank.name,
+            currentTank.type,
+            parameterLabel,
+            parameter.value.toString(),
+            parameter.unit ?? '',
+            DateFormat('yyyy-MM-dd HH:mm').format(parameter.dateRecorded),
+            parameter.notes!.trim(),
+          )
+        : l10n.analyzeReadingPromptWithoutNotes(
+            currentTank.name,
+            currentTank.type,
+            parameterLabel,
+            parameter.value.toString(),
+            parameter.unit ?? '',
+            DateFormat('yyyy-MM-dd HH:mm').format(parameter.dateRecorded),
+          );
 
     AnalyticsService.logFeatureUsed(
       featureName: 'parameter_reading_analyze_with_ai',
@@ -957,6 +968,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   }
 
   Widget _buildParameterItem(BuildContext context, WaterParameter parameter) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final dateFormat = DateFormat('MMM d, yyyy - h:mm a');
     final thresholdColor = _getThresholdColor(
@@ -982,29 +994,32 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      title: Row(
+      title: Text(
+        dateFormat.format(parameter.dateRecorded),
+        style: const TextStyle(fontSize: 14),
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Text(
-              dateFormat.format(parameter.dateRecorded),
-              style: const TextStyle(fontSize: 14),
-            ),
-          ),
           TextButton(
             onPressed: () => _analyzeReading(parameter),
-            child: Text(AppLocalizations.of(context)!.analyzeThis),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, 32),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(l10n.analyzeThis),
           ),
-        ],
-      ),
-      subtitle: parameter.notes != null
-          ? Text(
+          if (parameter.notes != null)
+            Text(
               parameter.notes!,
               style: TextStyle(
                 fontSize: 12,
                 color: cs.onSurface.withOpacity(0.6),
               ),
-            )
-          : null,
+            ),
+        ],
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

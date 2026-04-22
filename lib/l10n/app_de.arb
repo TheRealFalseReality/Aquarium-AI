@@ -2002,6 +2002,57 @@
   "@analyzeThis": {
     "description": "Quick action label to ask AI to analyze a specific logged reading"
   },
+  "analyzeReadingPromptWithoutNotes": "Bitte analysiere diesen Aquarien-Messwert und erkläre mir, was er bedeutet und was ich als Nächstes tun sollte:\nBeckenname: {tankName}\nBeckentyp: {tankType}\nParameter: {parameterLabel}\nWert: {value}{unit}\nErfasst: {recordedAt}",
+  "@analyzeReadingPromptWithoutNotes": {
+    "description": "Prefilled chatbot prompt used to analyze a logged parameter reading without notes",
+    "placeholders": {
+      "tankName": {
+        "type": "String"
+      },
+      "tankType": {
+        "type": "String"
+      },
+      "parameterLabel": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "recordedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "analyzeReadingPromptWithNotes": "Bitte analysiere diesen Aquarien-Messwert und erkläre mir, was er bedeutet und was ich als Nächstes tun sollte:\nBeckenname: {tankName}\nBeckentyp: {tankType}\nParameter: {parameterLabel}\nWert: {value}{unit}\nErfasst: {recordedAt}\nNotizen: {notes}",
+  "@analyzeReadingPromptWithNotes": {
+    "description": "Prefilled chatbot prompt used to analyze a logged parameter reading with notes",
+    "placeholders": {
+      "tankName": {
+        "type": "String"
+      },
+      "tankType": {
+        "type": "String"
+      },
+      "parameterLabel": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "recordedAt": {
+        "type": "String"
+      },
+      "notes": {
+        "type": "String"
+      }
+    }
+  },
   "founderRequiredTooltip": "Gründer-Aquarianer erforderlich",
   "@founderRequiredTooltip": {
     "description": "Tooltip shown on locked customization features for non-founders"

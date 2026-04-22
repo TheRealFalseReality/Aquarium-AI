@@ -5721,6 +5721,57 @@
   "@analyzeThis": {
     "description": "Quick action label to ask AI to analyze a specific logged reading"
   },
+  "analyzeReadingPromptWithoutNotes": "Please analyze this aquarium reading and tell me what it means plus what to do next:\nTank Name: {tankName}\nTank Type: {tankType}\nParameter: {parameterLabel}\nValue: {value}{unit}\nRecorded: {recordedAt}",
+  "@analyzeReadingPromptWithoutNotes": {
+    "description": "Prefilled chatbot prompt used to analyze a logged parameter reading without notes",
+    "placeholders": {
+      "tankName": {
+        "type": "String"
+      },
+      "tankType": {
+        "type": "String"
+      },
+      "parameterLabel": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "recordedAt": {
+        "type": "String"
+      }
+    }
+  },
+  "analyzeReadingPromptWithNotes": "Please analyze this aquarium reading and tell me what it means plus what to do next:\nTank Name: {tankName}\nTank Type: {tankType}\nParameter: {parameterLabel}\nValue: {value}{unit}\nRecorded: {recordedAt}\nNotes: {notes}",
+  "@analyzeReadingPromptWithNotes": {
+    "description": "Prefilled chatbot prompt used to analyze a logged parameter reading with notes",
+    "placeholders": {
+      "tankName": {
+        "type": "String"
+      },
+      "tankType": {
+        "type": "String"
+      },
+      "parameterLabel": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "recordedAt": {
+        "type": "String"
+      },
+      "notes": {
+        "type": "String"
+      }
+    }
+  },
   "founderRequiredTooltip": "Founder Aquarist required",
   "@founderRequiredTooltip": {
     "description": "Tooltip shown on locked customization features for non-founders"
