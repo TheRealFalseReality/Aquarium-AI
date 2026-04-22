@@ -76,6 +76,7 @@ Chaque carte affiche :
 - Nombre d'habitants et score d'harmonie
 - Boutons d'action rapide (Ajouter un habitant, Journal des paramètres, Journal de
   dosage, Analyse AI)
+- Outils du menu de la carte, dont le **Calculateur du volume de changement d'eau** (20 % par défaut, avec pourcentage ajustable pour voir les gallons/litres à remplacer)
 
 ### Trier et filtrer
 

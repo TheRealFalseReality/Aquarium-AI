@@ -77,6 +77,7 @@ Jede Karte zeigt:
 - Bewohnerzahl und Harmoniebewertung
 - Schnellzugriff-Schaltflächen (Bewohner hinzufügen, Parameter-Log, Dosierungs-Log,
   AI-Analyse)
+- Kartenmenü-Tools, einschließlich **Wasserwechsel-Volumenrechner** (standardmäßig 20 %; der Prozentsatz kann angepasst werden, um zu ersetzende Gallonen/Liter zu sehen)
 
 ### Sortieren & Filtern
 
