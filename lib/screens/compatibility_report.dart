@@ -175,9 +175,12 @@ void showReportDialog(
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    l10n.setCareRemindersPrompt,
-                    textAlign: TextAlign.center,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      l10n.setCareRemindersPrompt,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   FilledButton.icon(
@@ -256,9 +259,22 @@ Future<void> _openCareReminderFlow(BuildContext context, WidgetRef ref) async {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              title: Text(l10n.chooseTankForCareRemindersTitle),
-              subtitle: Text(l10n.chooseTankForCareRemindersSubtitle),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.chooseTankForCareRemindersTitle,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.chooseTankForCareRemindersSubtitle,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
             ),
             const Divider(height: 1),
             ConstrainedBox(
