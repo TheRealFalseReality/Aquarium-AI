@@ -27,7 +27,19 @@
 					<string>fb941109785269057</string>
 				</array>
 			</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLName</key>
+				<string>com.cca.fishai</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>aquariumai</string>
+				</array>
+			</dict>
 		</array>
+		<key>FlutterDeepLinkingEnabled</key>
+		<true/>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>

@@ -178,6 +178,20 @@ const int rcDefaultFounderMaxPhotoAnalysesPerDay = 10;
 const int rcDefaultFounderChatHistoryLimit = 10;
 
 // ---------------------------------------------------------------------------
+// Deep linking constants
+// ---------------------------------------------------------------------------
+
+/// Custom URL scheme for the app (e.g., aquariumai://chatbot).
+/// Used on platforms where Universal Links / App Links are not available or as
+/// a fallback.  Registered in AndroidManifest.xml and Info.plist.
+const String deepLinkScheme = 'aquariumai';
+
+/// Firebase Hosting domain used for HTTPS deep links (Universal Links on iOS
+/// and App Links on Android).  This must match the domain registered in the
+/// Digital Asset Links (assetlinks.json) and Apple App Site Association files.
+const String deepLinkHost = 'fishai-31d40.web.app';
+
+// ---------------------------------------------------------------------------
 // Firebase Remote Config key names
 // These string constants are the exact key names used in the Firebase Console.
 // Update them here if you ever rename a key in the Console.
