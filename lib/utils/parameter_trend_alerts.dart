@@ -1,5 +1,8 @@
 import '../models/water_parameter.dart';
 
+const int _minTrendDaysForAlert = 5;
+const int _maxDayGapForContinuousTrend = 2;
+
 class ParameterTrendAlert {
   final String parameterType;
   final int trendDays;
@@ -31,7 +34,7 @@ ParameterTrendAlert? _buildNitrateRisingAlert(List<WaterParameter> parameters) {
       .toList()
     ..sort((a, b) => a.dateRecorded.compareTo(b.dateRecorded));
 
-  if (nitrateReadings.length < 5) {
+  if (nitrateReadings.length < _minTrendDaysForAlert) {
     return null;
   }
 
@@ -43,7 +46,7 @@ ParameterTrendAlert? _buildNitrateRisingAlert(List<WaterParameter> parameters) {
     final dayGap = newer.dateRecorded.difference(older.dateRecorded).inDays;
 
     final isRising = newer.value > older.value;
-    final isReasonablyContinuous = dayGap <= 2;
+    final isReasonablyContinuous = dayGap <= _maxDayGapForContinuousTrend;
 
     if (isRising && isReasonablyContinuous) {
       risingStreak.insert(0, older);
@@ -52,7 +55,7 @@ ParameterTrendAlert? _buildNitrateRisingAlert(List<WaterParameter> parameters) {
     break;
   }
 
-  if (risingStreak.length < 5) {
+  if (risingStreak.length < _minTrendDaysForAlert) {
     return null;
   }
 
@@ -60,7 +63,7 @@ ParameterTrendAlert? _buildNitrateRisingAlert(List<WaterParameter> parameters) {
   final lastDate = risingStreak.last.dateRecorded;
   final trendDays = lastDate.difference(firstDate).inDays + 1;
 
-  if (trendDays < 5) {
+  if (trendDays < _minTrendDaysForAlert) {
     return null;
   }
 
