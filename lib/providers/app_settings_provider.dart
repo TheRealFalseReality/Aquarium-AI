@@ -41,6 +41,8 @@ class AppSettingsState {
   final bool
   tankHideCardTags; // Hide the tank tag chips on tank cards (default false = show)
   final bool
+  tankHideStockingDensity; // Hide the stocking density chip on tank cards (default false = show)
+  final bool
   tankInhabitantGridView; // Show fish inhabitants as a grid of tiles (default false = list)
   /// Experience level for tailoring AI responses: 'beginner', 'intermediate', 'advanced', 'expert'.
   final String userExperienceLevel;
@@ -64,6 +66,7 @@ class AppSettingsState {
     this.tankHidePhotos = false,
     this.tankHideHarmonyDelta = false, // Default to showing delta
     this.tankHideCardTags = false, // Default to showing tags
+    this.tankHideStockingDensity = false, // Default to showing stocking density
     this.tankInhabitantGridView = false, // Default to list view for fish
     this.userExperienceLevel = 'beginner', // Default to beginner
   });
@@ -115,6 +118,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
         prefs.getBool('tankHideHarmonyDelta') ?? false; // Default to showing
     final tankHideCardTags =
         prefs.getBool('tankHideCardTags') ?? false; // Default to showing
+    final tankHideStockingDensity =
+        prefs.getBool('tankHideStockingDensity') ?? false; // Default to showing
     final tankInhabitantGridView =
         prefs.getBool('tankInhabitantGridView') ?? false; // Default to list
     final userExperienceLevel =
@@ -139,6 +144,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: tankHidePhotos,
       tankHideHarmonyDelta: tankHideHarmonyDelta,
       tankHideCardTags: tankHideCardTags,
+      tankHideStockingDensity: tankHideStockingDensity,
       tankInhabitantGridView: tankInhabitantGridView,
       userExperienceLevel: userExperienceLevel,
     );
@@ -175,6 +181,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -203,6 +210,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -235,6 +243,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -266,6 +275,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -293,6 +303,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -322,6 +333,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -350,6 +362,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -377,6 +390,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -404,6 +418,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -431,6 +446,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -458,6 +474,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -485,6 +502,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -512,6 +530,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -539,6 +558,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: value,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -566,6 +586,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: value,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -592,7 +613,37 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideActivity: state.tankHideActivity,
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
-      tankHideCardTags: value,      tankInhabitantGridView: state.tankInhabitantGridView,
+      tankHideCardTags: value,
+      tankHideStockingDensity: state.tankHideStockingDensity,
+      tankInhabitantGridView: state.tankInhabitantGridView,
+      userExperienceLevel: state.userExperienceLevel,
+    );
+  }
+
+  Future<void> setTankHideStockingDensity(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tankHideStockingDensity', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
+      tankHidePhotos: state.tankHidePhotos,
+      tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: value,
+      tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
   }
@@ -619,6 +670,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: value,
     );
   }
@@ -653,6 +705,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -684,6 +737,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -749,6 +803,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
     );
@@ -776,6 +831,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHidePhotos: state.tankHidePhotos,
       tankHideHarmonyDelta: state.tankHideHarmonyDelta,
       tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: value,
     );

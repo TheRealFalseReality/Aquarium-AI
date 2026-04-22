@@ -4813,6 +4813,22 @@
   "@harmonyDelta": {
     "description": "Label for the harmony score change chip toggle in settings"
   },
+  "stockingDensityLabel": "Stocking Density",
+  "@stockingDensityLabel": {
+    "description": "Label for the stocking density chip visibility toggle in tank card settings"
+  },
+  "stockingDensityLow": "Low",
+  "@stockingDensityLow": {
+    "description": "Stocking density status shown on tank cards when fish load is low for the tank"
+  },
+  "stockingDensityJustRight": "Just Right",
+  "@stockingDensityJustRight": {
+    "description": "Stocking density status shown on tank cards when fish load is in a healthy range"
+  },
+  "stockingDensityHigh": "High",
+  "@stockingDensityHigh": {
+    "description": "Stocking density status shown on tank cards when fish load is high for the tank"
+  },
   "editInhabitant": "Edit Inhabitant",
   "@editInhabitant": {
     "description": "Tooltip / label for the Edit Inhabitant FAB on TankInhabitantScreen"

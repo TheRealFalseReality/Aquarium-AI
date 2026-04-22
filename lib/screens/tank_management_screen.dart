@@ -42,6 +42,8 @@ import 'tank_stocking_report_screen.dart';
 
 enum TankSortOption { name, type, size, date }
 
+enum _StockingDensityStatus { low, justRight, high }
+
 class TankManagementScreen extends ConsumerStatefulWidget {
   const TankManagementScreen({super.key});
 
@@ -50,6 +52,18 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 }
 
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
+  static const double _marineFishLoadFactor = 1.3;
+  static const double _reefFishLoadFactor = 1.45;
+  static const double _freshwaterFishLoadFactor = 1.0;
+  static const double _speciesDiversityIncrement = 0.05;
+  static const double _maxSpeciesDiversityFactor = 1.35;
+  static const double _freshwaterDensityLowThreshold = 0.40;
+  static const double _freshwaterDensityHighThreshold = 1.00;
+  static const double _marineDensityLowThreshold = 0.25;
+  static const double _marineDensityHighThreshold = 0.60;
+  static const double _reefDensityLowThreshold = 0.20;
+  static const double _reefDensityHighThreshold = 0.50;
+
   TankSortOption _currentSortOption = TankSortOption.name;
   bool _isSortAscending = true; // Track sort direction (ascending/descending)
   Tank?
@@ -1587,6 +1601,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                     .read(appSettingsProvider.notifier)
                                     .setTankHideCardTags(v),
                               ),
+                              _buildVisibilityChip(
+                                context,
+                                Icons.scale_outlined,
+                                l10n.stockingDensityLabel,
+                                appSettings.tankHideStockingDensity,
+                                (v) => ref
+                                    .read(appSettingsProvider.notifier)
+                                    .setTankHideStockingDensity(v),
+                              ),
                             ],
                           ),
                         ],
@@ -2292,6 +2315,9 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           _buildTankAgeChip(context, tank),
                           if (tank.inhabitants.isNotEmpty && fishData != null)
                             _buildHarmonyScoreChip(tank),
+                          if (tank.inhabitants.isNotEmpty &&
+                              !appSettings.tankHideStockingDensity)
+                            _buildStockingDensityChip(context, tank),
                         ],
                       ),
                       const SizedBox(height: 14),
@@ -4175,6 +4201,109 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     );
   }
 
+  Widget _buildStockingDensityChip(BuildContext context, Tank tank) {
+    final l10n = AppLocalizations.of(context)!;
+    final gallons = _resolveTankSizeGallons(tank);
+    if (gallons == null || gallons <= 0) return const SizedBox.shrink();
+
+    final totalFishCount = _getTotalInhabitantCount(tank.inhabitants);
+    if (totalFishCount <= 0) return const SizedBox.shrink();
+
+    final fishTypeCount = _groupInhabitantsByFishType(tank.inhabitants).length;
+    final status = _calculateStockingDensityStatus(
+      tank: tank,
+      gallons: gallons,
+      totalFishCount: totalFishCount,
+      fishTypeCount: fishTypeCount,
+    );
+
+    Color chipColor;
+    Color textColor;
+    String statusLabel;
+
+    switch (status) {
+      case _StockingDensityStatus.low:
+        chipColor = Colors.blue.shade100;
+        textColor = Colors.blue.shade800;
+        statusLabel = l10n.stockingDensityLow;
+        break;
+      case _StockingDensityStatus.justRight:
+        chipColor = Colors.green.shade100;
+        textColor = Colors.green.shade800;
+        statusLabel = l10n.stockingDensityJustRight;
+        break;
+      case _StockingDensityStatus.high:
+        chipColor = Colors.red.shade100;
+        textColor = Colors.red.shade800;
+        statusLabel = l10n.stockingDensityHigh;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(color: chipColor, borderRadius: BorderRadius.circular(12)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.scale_outlined, size: 14, color: textColor),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              '${l10n.stockingDensityLabel}: $statusLabel',
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _StockingDensityStatus _calculateStockingDensityStatus({
+    required Tank tank,
+    required double gallons,
+    required int totalFishCount,
+    required int fishTypeCount,
+  }) {
+    // The density heuristic combines:
+    // 1) fish load factor by tank type (marine/reef generally heavier bioload),
+    // 2) diversity factor (more fish types typically increases care complexity),
+    // then normalizes by tank volume in gallons to get an effective load score.
+    // Threshold bands map that score to low / just-right / high stocking status.
+    final typeComplexityFactor = tank.type == 'marine'
+        ? (tank.isReef ? _reefFishLoadFactor : _marineFishLoadFactor)
+        : _freshwaterFishLoadFactor;
+    final diversityFactor = (1 +
+            ((fishTypeCount - 1) * _speciesDiversityIncrement))
+        .clamp(_freshwaterFishLoadFactor, _maxSpeciesDiversityFactor);
+    final effectiveCount = totalFishCount * typeComplexityFactor * diversityFactor;
+    final densityScore = effectiveCount / gallons;
+
+    final lowThreshold = tank.type == 'marine'
+        ? (tank.isReef ? _reefDensityLowThreshold : _marineDensityLowThreshold)
+        : _freshwaterDensityLowThreshold;
+    final highThreshold = tank.type == 'marine'
+        ? (tank.isReef ? _reefDensityHighThreshold : _marineDensityHighThreshold)
+        : _freshwaterDensityHighThreshold;
+
+    if (densityScore < lowThreshold) return _StockingDensityStatus.low;
+    if (densityScore > highThreshold) return _StockingDensityStatus.high;
+    return _StockingDensityStatus.justRight;
+  }
+
+  double? _resolveTankSizeGallons(Tank tank) {
+    if (tank.sizeGallons != null && tank.sizeGallons! > 0) {
+      return tank.sizeGallons;
+    }
+    if (tank.sizeLiters != null && tank.sizeLiters! > 0) {
+      return tank.sizeLiters! / 3.78541;
+    }
+    return null;
+  }
+
   String? _getFishImageUrl(
     String tankType,
     String fishName,
@@ -4584,7 +4713,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       parameters: {
         'tank_type': tank.type,
         'tank_size_gallons': tank.sizeGallons?.toInt() ?? 0,
-        'existing_inhabitants_count': tank.inhabitants.length,
+        'existing_inhabitants_count': _getTotalInhabitantCount(tank.inhabitants),
         'has_notes': tank.notes?.isNotEmpty == true ? 'true' : 'false',
         'source': 'tank_management',
         'has_additional_notes': options.additionalNotes.isNotEmpty
@@ -4772,7 +4901,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       parameters: {
         'tank_type': tank.type,
         'tank_size_gallons': tank.sizeGallons?.toInt() ?? 0,
-        'existing_inhabitants_count': tank.inhabitants.length,
+        'existing_inhabitants_count': _getTotalInhabitantCount(tank.inhabitants),
         'source': 'tank_management',
         'has_additional_notes': options.additionalNotes.isNotEmpty
             ? 'true'

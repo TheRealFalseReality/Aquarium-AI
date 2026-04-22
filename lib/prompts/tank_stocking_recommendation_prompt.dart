@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:collection';
 
 import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/tank.dart';
@@ -12,7 +13,25 @@ String buildTankStockingRecommendationPrompt(
 }) {
   final availableFishNames = allFish.map((f) => f.name).toList();
 
-  final existingFishNames = existingFish.map((f) => f.name).toList();
+  // Keep this list unique so the prompt does not overemphasize a species simply
+  // because it appears multiple times; explicit quantities are provided below.
+  // LinkedHashSet preserves insertion order for deterministic prompt context.
+  final existingFishNames = LinkedHashSet<String>.from(
+    existingFish.map((f) => f.name),
+  ).toList();
+  final existingFishQuantities = <String, int>{};
+  for (final inhabitant in tank.inhabitants) {
+    existingFishQuantities.update(
+      inhabitant.fishUnit,
+      (count) => count + inhabitant.quantity,
+      ifAbsent: () => inhabitant.quantity,
+    );
+  }
+  final totalExistingFishCount = tank.inhabitants.fold<int>(
+    0,
+    (sum, inhabitant) => sum + inhabitant.quantity,
+  );
+  final existingFishTypeCount = existingFishQuantities.length;
   final tankSizeText = _formatTankSize(tank);
   final currentHarmonyPercentage = (currentHarmonyScore * 100).toStringAsFixed(
     1,
@@ -57,6 +76,9 @@ String buildTankStockingRecommendationPrompt(
     2. Recommended fish must be compatible with each other.
     3. Maintain or improve the current harmony score ($currentHarmonyPercentage%).
     4. Consider tank size limitations.
+    5. Explicitly account for existing fish quantities and total stocking load/bioload.
+    6. Do NOT overstock the tank.
+    7. Any quantity guidance must be for additional fish to add (not the post-addition total tank population).
 
     Tank Information:
     - Tank Name: "${tank.name}"
@@ -64,7 +86,10 @@ String buildTankStockingRecommendationPrompt(
     - Tank Type: "${tank.type}"
     - Tank Notes: "${tank.notes ?? 'No specific notes provided'}"
     - Current Harmony Score: $currentHarmonyPercentage%
-    - Current Inhabitants: ${json.encode(existingFishNames)}$speciesTagsInfo$additionalNotesSection
+    - Current Inhabitants (fish types): ${json.encode(existingFishNames)}
+    - Current Inhabitant Quantities: ${json.encode(existingFishQuantities)}
+    - Total Existing Fish Count: $totalExistingFishCount
+    - Existing Fish Type Count: $existingFishTypeCount$speciesTagsInfo$additionalNotesSection
 
     Available Fish Database (choose recommendations only from this list):
     ${json.encode(availableFishNames)}
@@ -73,16 +98,18 @@ String buildTankStockingRecommendationPrompt(
     - Be compatible with ALL existing fish
     - Maintain or improve the $currentHarmonyPercentage% harmony score
     - Fit the tank size and bioload
+    - Respect current fish quantities and total stocking load
     - Complement the existing ecosystem (consider water column usage)
 
     For each recommendation, provide a JSON object with:
     - "title": A creative title describing the addition (e.g., "Bottom Dweller Cleanup Crew")
-    - "summary": 2-3 sentences on how these additions enhance the tank, their behavior, and water column position
+    - "summary": 2-3 sentences on how these additions enhance the tank, their behavior, water column position, and quantity rationale
     - "coreFish": 2-7 fish names from the database compatible with all existing fish
     - "otherDataBasedFish": Other compatible fish from the database that could also be added safely
     - "aiTankMatesSummary": Why these additions work well with the existing community
     - "aiRecommendedTankMates": 3-10 common fish names (not from the database) as additional suggestions
     - "compatibilityNotes": Notes on how these additions interact with existing fish
+    - "quantityGuidance": A JSON object where each key is a fish name from "coreFish" and each value is a short count recommendation for ADDITIONAL fish to add (not the total tank count), for example: "6-8", "pair", "1"
 
     Return a single JSON object with a key "recommendations" containing a list of these recommendation objects.
     ''';
