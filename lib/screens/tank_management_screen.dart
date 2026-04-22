@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../constants.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/fish.dart';
@@ -50,7 +51,6 @@ class TankManagementScreen extends ConsumerStatefulWidget {
 }
 
 class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
-  static const double _litersPerGallon = 3.78541;
   TankSortOption _currentSortOption = TankSortOption.name;
   bool _isSortAscending = true; // Track sort direction (ascending/descending)
   Tank?
@@ -4072,8 +4072,8 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
       },
     );
 
-    final gallons = tankGallons ?? (tankLiters! / _litersPerGallon);
-    final liters = tankLiters ?? (tankGallons! * _litersPerGallon);
+    final gallons = tankGallons ?? (tankLiters! / litersPerGallon);
+    final liters = tankLiters ?? (tankGallons! * litersPerGallon);
 
     showDialog(
       context: context,

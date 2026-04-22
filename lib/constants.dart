@@ -90,6 +90,9 @@ const String buyMeACoffeeProductId = 'buy_me_a_coffee';
 /// this list will be treated as a Founder Aquarist purchase.
 const List<String> founderProductIds = [earlySupporterLifetimeProductId];
 
+// Unit conversion constants
+const double litersPerGallon = 3.78541;
+
 // ---------------------------------------------------------------------------
 // Remote Config in-app fallback defaults
 // These are used when Firebase Remote Config is unreachable (offline / first
