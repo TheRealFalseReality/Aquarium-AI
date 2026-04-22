@@ -282,8 +282,8 @@ class ChatNotifier extends StateNotifier<ChatState> {
         _conversations = [starter];
       }
 
-      _activeConversationId =
-          _conversations.any((c) => c.id == activeId) ? activeId : _conversations.first.id;
+      final existingActive = activeId == null ? null : _findConversationById(activeId);
+      _activeConversationId = existingActive?.id ?? _conversations.first.id;
       final activeConversation = _conversations.firstWhere(
         (c) => c.id == _activeConversationId,
       );
