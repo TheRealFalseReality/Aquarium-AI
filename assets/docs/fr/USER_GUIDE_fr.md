@@ -166,11 +166,15 @@ outils AI spécialisés :
 
 ### Conseils de chat
 
-- L'IA se souvient des messages récents dans la session en cours (configurable dans
-  Paramètres).
+- Les conversations sont désormais conservées entre les sessions de l'application.
+- Utilisez le menu **Conversations** en haut à droite pour créer des conversations
+  nommées.
+- Vous pouvez associer chaque conversation à un aquarium précis, puis la filtrer et la
+  recharger depuis le gestionnaire de conversations.
 - Appuyez sur l'icône **partager** sur n'importe quelle réponse pour partager ou copier
   le texte.
-- Utilisez **effacer le chat** (menu en haut à droite) pour repartir à zéro.
+- Créez une **nouvelle conversation** depuis le menu lorsque vous voulez repartir de
+  zéro.
 
 ---
 
