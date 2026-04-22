@@ -392,6 +392,12 @@ class _NotificationManagementScreenState
     }
   }
 
+  /// Builds a "last logged / next suggested" hint for repeating notifications.
+  ///
+  /// Uses the newest matching activity log as the base date and computes the
+  /// next suggested reminder date from the notification repeat settings.
+  /// Returns `null` when the notification is one-time, has no matching logs,
+  /// or no next date can be derived.
   String? _buildSmartScheduleInsight(
     Tank tank,
     TankNotification notification,

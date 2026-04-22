@@ -479,6 +479,12 @@ class NotificationService {
     );
   }
 
+  /// Handles actionable notification responses.
+  ///
+  /// Returns `true` when this method consumed a supported action
+  /// (`done_action`, `snooze_day_action`, `snooze_week_action`) and persisted
+  /// the corresponding tank update. Returns `false` when the response should be
+  /// treated as a normal tap/navigation event.
   Future<bool> handleNotificationResponse(NotificationResponse response) async {
     final actionId = response.actionId;
     final payload = response.payload;
@@ -509,6 +515,11 @@ class NotificationService {
     return true;
   }
 
+  /// Parses notification payload to `(tankId, notificationId)`.
+  ///
+  /// Preferred format is `tankId::notificationId`.
+  /// Legacy `tankId_notificationId` remains supported for already-scheduled
+  /// notifications created before the separator migration.
   (String, String)? _parseNotificationPayload(String payload) {
     // Preferred payload format uses `tankId::notificationId`.
     // `_` fallback remains for previously scheduled notifications.
@@ -532,6 +543,12 @@ class NotificationService {
     );
   }
 
+  /// Applies a notification action directly to persisted tank data.
+  ///
+  /// This is used by foreground/background action handlers so users can mark
+  /// reminders done or snooze without opening the app UI. The method updates
+  /// SharedPreferences tank storage, appends activity logs for "done", and
+  /// attempts rescheduling for repeating reminders.
   Future<void> _applyActionToStoredTankNotification({
     required String tankId,
     required String notificationId,
