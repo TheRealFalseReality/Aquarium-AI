@@ -49,7 +49,12 @@ class NotificationService {
   /// initialize call may provide navigatorKey so tap navigation works in the UI isolate.
   Future<void> initialize({GlobalKey<NavigatorState>? navigatorKey}) async {
     if (_initialized) {
-      _navigatorKey ??= navigatorKey;
+      if (_navigatorKey == null && navigatorKey != null) {
+        _navigatorKey = navigatorKey;
+        debugPrint(
+          'NotificationService navigatorKey was set after background-first initialization.',
+        );
+      }
       return;
     }
 
@@ -599,11 +604,11 @@ class NotificationService {
       }
 
       if (rescheduled.isNotEmpty) {
+        final rescheduledById = {
+          for (final item in rescheduled) item.id: item,
+        };
         updatedNotifications = updatedNotifications.map((existing) {
-          return rescheduled.firstWhere(
-            (candidate) => candidate.id == existing.id,
-            orElse: () => existing,
-          );
+          return rescheduledById[existing.id] ?? existing;
         }).toList();
       }
     } else {

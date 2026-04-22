@@ -123,7 +123,7 @@ class _NotificationManagementScreenState
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
-                return _buildNotificationCard(notification);
+                return _buildNotificationCard(currentTank, notification);
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
@@ -167,14 +167,13 @@ class _NotificationManagementScreenState
     );
   }
 
-  Widget _buildNotificationCard(TankNotification notification) {
+  Widget _buildNotificationCard(Tank tank, TankNotification notification) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
-    final currentTank = _getCurrentTank();
     final l10n = AppLocalizations.of(context)!;
     final smartScheduleInsight = _buildSmartScheduleInsight(
-      currentTank,
+      tank,
       notification,
       l10n,
     );
