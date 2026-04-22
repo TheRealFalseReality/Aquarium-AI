@@ -4075,10 +4075,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final gallons = tankGallons ?? (tankLiters! / litersPerGallon);
     final liters = tankLiters ?? (tankGallons! * litersPerGallon);
 
+    double selectedPercent = 20;
+
     showDialog(
       context: context,
       builder: (dialogContext) {
-        double selectedPercent = 20;
 
         return StatefulBuilder(
           builder: (context, setDialogState) {
