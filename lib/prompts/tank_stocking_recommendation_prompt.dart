@@ -12,6 +12,8 @@ String buildTankStockingRecommendationPrompt(
 }) {
   final availableFishNames = allFish.map((f) => f.name).toList();
 
+  // Keep this list unique so the prompt does not overemphasize a species simply
+  // because it appears multiple times; explicit quantities are provided below.
   final existingFishNames = existingFish.map((f) => f.name).toSet().toList();
   final existingFishQuantities = <String, int>{};
   for (final inhabitant in tank.inhabitants) {
@@ -102,7 +104,7 @@ String buildTankStockingRecommendationPrompt(
     - "aiTankMatesSummary": Why these additions work well with the existing community
     - "aiRecommendedTankMates": 3-10 common fish names (not from the database) as additional suggestions
     - "compatibilityNotes": Notes on how these additions interact with existing fish
-    - "quantityGuidance": A JSON object where each key is a fish name from "coreFish" and each value is a short count recommendation for additions (example: "6-8", "pair", "1")
+    - "quantityGuidance": A JSON object where each key is a fish name from "coreFish" and each value is a short count recommendation for ADDITIONAL fish to add (not the total tank count), for example: "6-8", "pair", "1"
 
     Return a single JSON object with a key "recommendations" containing a list of these recommendation objects.
     ''';

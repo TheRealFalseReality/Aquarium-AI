@@ -4235,12 +4235,14 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
         children: [
           Icon(Icons.scale_outlined, size: 14, color: textColor),
           const SizedBox(width: 4),
-          Text(
-            '${l10n.stockingDensityLabel}: $statusLabel',
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: textColor,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              '${l10n.stockingDensityLabel}: $statusLabel',
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
