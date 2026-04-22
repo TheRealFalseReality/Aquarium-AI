@@ -5,6 +5,7 @@ import 'package:fish_ai/widgets/accessible_feedback.dart';
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:fish_ai/widgets/modern_chip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -66,6 +67,13 @@ class _StockingReportScreenState
   void _shareCurrentReport() {
     final report = widget.reports[_tabController.index];
     shareStockingReport(report);
+  }
+
+  void _copyCurrentReport() {
+    final l10n = AppLocalizations.of(context)!;
+    final report = widget.reports[_tabController.index];
+    Clipboard.setData(ClipboardData(text: stockingReportToText(report)));
+    context.showAccessibleMessage(l10n.copiedToClipboard);
   }
 
   void _regenerateRecommendations() {
@@ -258,6 +266,16 @@ class _StockingReportScreenState
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                       ),
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton(
+                      onPressed: _copyCurrentReport,
+                      tooltip: l10n.copyToClipboard,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(12),
+                        minimumSize: Size.zero,
+                      ),
+                      child: const Icon(Icons.copy_all_outlined),
                     ),
                     const SizedBox(width: 12),
                     // Close: compact icon button

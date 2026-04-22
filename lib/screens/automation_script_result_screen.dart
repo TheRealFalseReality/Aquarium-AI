@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/automation_script.dart';
+import '../utils/share_utils.dart';
 import '../widgets/common_cards.dart';
 
 class AutomationScriptResultScreen extends StatelessWidget {
@@ -37,9 +38,34 @@ class AutomationScriptResultScreen extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.close),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(
+                      ClipboardData(
+                        text: automationScriptToText(
+                          script.title,
+                          script.explanation,
+                          script.code,
+                        ),
+                      ),
+                    );
+                    context.showAccessibleMessage(l10n.copiedToClipboard);
+                  },
+                  icon: const Icon(Icons.copy_all_outlined),
+                  label: Text(l10n.copyToClipboard),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(l10n.close),
+                ),
+              ),
+            ],
           ),
           const BannerAdWidget(),
         ],
@@ -48,6 +74,7 @@ class AutomationScriptResultScreen extends StatelessWidget {
   }
 
   Widget _buildCodeBlock(BuildContext context, String code) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: 2,
       child: Stack(
@@ -69,7 +96,7 @@ class AutomationScriptResultScreen extends StatelessWidget {
               icon: const Icon(Icons.copy),
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: code));
-                context.showAccessibleMessage('Copied to clipboard!');
+                context.showAccessibleMessage(l10n.copiedToClipboard);
               },
             ),
           ),

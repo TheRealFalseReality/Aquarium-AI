@@ -1990,6 +1990,18 @@
   "@layoutCustomizationDesc": {
     "description": "Description for layout customization section"
   },
+  "copyToClipboard": "Copiar al portapapeles",
+  "@copyToClipboard": {
+    "description": "Button label to copy generated AI result text to clipboard"
+  },
+  "copiedToClipboard": "¡Copiado al portapapeles!",
+  "@copiedToClipboard": {
+    "description": "Snackbar message shown after content is copied to clipboard"
+  },
+  "analyzeThis": "Analizar",
+  "@analyzeThis": {
+    "description": "Quick action label to ask AI to analyze a specific logged reading"
+  },
   "founderRequiredTooltip": "Se requiere Acuarista Fundador",
   "@founderRequiredTooltip": {
     "description": "Tooltip shown on locked customization features for non-founders"

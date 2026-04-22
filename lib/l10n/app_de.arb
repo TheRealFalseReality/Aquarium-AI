@@ -1990,6 +1990,18 @@
   "@layoutCustomizationDesc": {
     "description": "Description for layout customization section"
   },
+  "copyToClipboard": "In Zwischenablage kopieren",
+  "@copyToClipboard": {
+    "description": "Button label to copy generated AI result text to clipboard"
+  },
+  "copiedToClipboard": "In Zwischenablage kopiert!",
+  "@copiedToClipboard": {
+    "description": "Snackbar message shown after content is copied to clipboard"
+  },
+  "analyzeThis": "Analysieren",
+  "@analyzeThis": {
+    "description": "Quick action label to ask AI to analyze a specific logged reading"
+  },
   "founderRequiredTooltip": "Gründer-Aquarianer erforderlich",
   "@founderRequiredTooltip": {
     "description": "Tooltip shown on locked customization features for non-founders"

@@ -1990,6 +1990,18 @@
   "@layoutCustomizationDesc": {
     "description": "Description for layout customization section"
   },
+  "copyToClipboard": "Copier dans le presse-papiers",
+  "@copyToClipboard": {
+    "description": "Button label to copy generated AI result text to clipboard"
+  },
+  "copiedToClipboard": "Copié dans le presse-papiers !",
+  "@copiedToClipboard": {
+    "description": "Snackbar message shown after content is copied to clipboard"
+  },
+  "analyzeThis": "Analyser",
+  "@analyzeThis": {
+    "description": "Quick action label to ask AI to analyze a specific logged reading"
+  },
   "founderRequiredTooltip": "Aquariophile Fondateur requis",
   "@founderRequiredTooltip": {
     "description": "Tooltip shown on locked customization features for non-founders"

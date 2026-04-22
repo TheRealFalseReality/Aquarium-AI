@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -6,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/fish_info_result.dart';
 import '../utils/share_utils.dart';
+import '../widgets/accessible_feedback.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/modern_chip.dart';
@@ -47,6 +49,22 @@ class FishInfoResultScreen extends StatelessWidget {
                         onPressed: () => shareFishInfoResult(result),
                         icon: const Icon(Icons.share),
                         label: const Text('Share'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(
+                            ClipboardData(text: fishInfoResultToText(result)),
+                          );
+                          context.showAccessibleMessage(l10n.copiedToClipboard);
+                        },
+                        icon: const Icon(Icons.copy_all_outlined),
+                        label: Text(l10n.copyToClipboard),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),

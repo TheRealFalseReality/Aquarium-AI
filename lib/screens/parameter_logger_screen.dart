@@ -93,6 +93,34 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     );
   }
 
+  void _analyzeReading(WaterParameter parameter) {
+    final currentTank = _getCurrentTank();
+    final parameterLabel = _getParameterLabel(parameter.parameterType, context);
+    final prompt =
+        'Please analyze this aquarium reading and tell me what it means plus what to do next:\n'
+        'Tank Name: ${currentTank.name}\n'
+        'Tank Type: ${currentTank.type}\n'
+        'Parameter: $parameterLabel\n'
+        'Value: ${parameter.value}${parameter.unit ?? ''}\n'
+        'Recorded: ${DateFormat('yyyy-MM-dd HH:mm').format(parameter.dateRecorded)}'
+        '${parameter.notes != null && parameter.notes!.trim().isNotEmpty ? '\nNotes: ${parameter.notes!.trim()}' : ''}';
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'parameter_reading_analyze_with_ai',
+      parameters: {
+        'parameter_type': parameter.parameterType,
+        'tank_type': currentTank.type,
+        'has_notes': parameter.notes?.trim().isNotEmpty == true ? 'true' : 'false',
+      },
+    );
+
+    Navigator.pushNamed(
+      context,
+      '/chatbot',
+      arguments: {'initialPrompt': prompt},
+    );
+  }
+
   Map<String, List<WaterParameter>> _groupParametersByType(Tank tank) {
     final grouped = <String, List<WaterParameter>>{};
     for (var param in tank.waterParameters) {
@@ -954,9 +982,19 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      title: Text(
-        dateFormat.format(parameter.dateRecorded),
-        style: const TextStyle(fontSize: 14),
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(
+              dateFormat.format(parameter.dateRecorded),
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+          TextButton(
+            onPressed: () => _analyzeReading(parameter),
+            child: Text('🤖 ${AppLocalizations.of(context)!.analyzeThis}'),
+          ),
+        ],
       ),
       subtitle: parameter.notes != null
           ? Text(

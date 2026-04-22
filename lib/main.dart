@@ -627,17 +627,23 @@ class MyApp extends ConsumerWidget {
                 bool autoOpen = false;
                 bool autoOpenWaterAnalysis = false;
                 bool autoOpenFishInfo = false;
+                String? initialPrompt;
                 if (args is Map) {
                   if (args['openPhotoAnalyzer'] == true) autoOpen = true;
                   if (args['openWaterAnalysis'] == true) {
                     autoOpenWaterAnalysis = true;
                   }
                   if (args['openFishInfo'] == true) autoOpenFishInfo = true;
+                  if (args['initialPrompt'] is String &&
+                      (args['initialPrompt'] as String).trim().isNotEmpty) {
+                    initialPrompt = args['initialPrompt'] as String;
+                  }
                 }
                 page = ChatbotScreen(
                   autoOpenPhotoAnalyzer: autoOpen,
                   autoOpenWaterAnalysis: autoOpenWaterAnalysis,
                   autoOpenFishInfo: autoOpenFishInfo,
+                  initialPrompt: initialPrompt,
                 );
                 screenName = 'chatbot_screen';
                 break;

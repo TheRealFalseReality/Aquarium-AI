@@ -1,5 +1,6 @@
 import 'package:fish_ai/widgets/ad_component.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -7,6 +8,7 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../models/analysis_result.dart';
 import '../utils/share_utils.dart';
+import '../widgets/accessible_feedback.dart';
 import '../widgets/common_buttons.dart';
 import '../widgets/common_cards.dart';
 
@@ -52,6 +54,19 @@ class AnalysisResultScreen extends StatelessWidget {
                   onPressed: () => shareWaterAnalysisResult(result),
                   icon: const Icon(Icons.share),
                   label: const Text('Share'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(
+                      ClipboardData(text: waterAnalysisResultToText(result)),
+                    );
+                    context.showAccessibleMessage(l10n.copiedToClipboard);
+                  },
+                  icon: const Icon(Icons.copy_all_outlined),
+                  label: Text(l10n.copyToClipboard),
                 ),
               ),
               const SizedBox(width: 16),
