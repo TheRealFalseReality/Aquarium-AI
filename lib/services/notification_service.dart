@@ -13,7 +13,11 @@ import '../models/tank_notification.dart';
 
 @pragma('vm:entry-point')
 Future<void> notificationTapBackground(NotificationResponse response) async {
-  await NotificationService().handleNotificationResponse(response);
+  try {
+    await NotificationService().handleNotificationResponse(response);
+  } catch (e) {
+    debugPrint('Failed to handle background notification action: $e');
+  }
 }
 
 class NotificationService {
@@ -41,6 +45,8 @@ class NotificationService {
   /// Note: The navigatorKey should be passed on the first call (typically from main.dart).
   /// Subsequent calls (e.g., from requestPermissions()) will return early due to _initialized check,
   /// preserving the originally set navigatorKey.
+  /// When initialization first happens in a background isolate, a later foreground
+  /// initialize call may provide navigatorKey so tap navigation works in the UI isolate.
   Future<void> initialize({GlobalKey<NavigatorState>? navigatorKey}) async {
     if (_initialized) {
       _navigatorKey ??= navigatorKey;
@@ -499,6 +505,8 @@ class NotificationService {
   }
 
   (String, String)? _parseNotificationPayload(String payload) {
+    // Preferred payload format uses `tankId::notificationId`.
+    // `_` fallback remains for previously scheduled notifications.
     if (payload.contains('::')) {
       final parts = payload.split('::');
       if (parts.length == 2 &&
@@ -534,10 +542,16 @@ class NotificationService {
       return;
     }
 
-    final tanksList = json.decode(tanksJson) as List;
-    final tanks = tanksList
-        .map((tankData) => Tank.fromJson(tankData as Map<String, dynamic>))
-        .toList();
+    List<Tank> tanks;
+    try {
+      final tanksList = json.decode(tanksJson) as List;
+      tanks = tanksList
+          .map((tankData) => Tank.fromJson(tankData as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      debugPrint('Failed to decode stored tanks for notification action: $e');
+      return;
+    }
 
     final tankIndex = tanks.indexWhere((tank) => tank.id == tankId);
     if (tankIndex == -1) {
@@ -570,14 +584,19 @@ class NotificationService {
       );
       updatedLogs = [...updatedLogs, log];
 
-      final rescheduled = await rescheduleMatchingNotifications(
-        tankId: tank.id,
-        tankName: tank.name,
-        notifications: updatedNotifications,
-        activityLogs: updatedLogs,
-        activityType: log.type,
-        activityCustomCategory: log.customCategory,
-      );
+      List<TankNotification> rescheduled = [];
+      try {
+        rescheduled = await rescheduleMatchingNotifications(
+          tankId: tank.id,
+          tankName: tank.name,
+          notifications: updatedNotifications,
+          activityLogs: updatedLogs,
+          activityType: log.type,
+          activityCustomCategory: log.customCategory,
+        );
+      } catch (e) {
+        debugPrint('Failed to reschedule notifications after done action: $e');
+      }
 
       if (rescheduled.isNotEmpty) {
         updatedNotifications = updatedNotifications.map((existing) {
@@ -598,12 +617,16 @@ class NotificationService {
         return existing.id == notification.id ? updatedNotification : existing;
       }).toList();
 
-      await scheduleNotification(
-        tankId: tank.id,
-        tankName: tank.name,
-        notification: updatedNotification,
-        useExactDateTime: true,
-      );
+      try {
+        await scheduleNotification(
+          tankId: tank.id,
+          tankName: tank.name,
+          notification: updatedNotification,
+          useExactDateTime: true,
+        );
+      } catch (e) {
+        debugPrint('Failed to schedule snoozed notification: $e');
+      }
     }
 
     final updatedTank = tank.copyWith(
