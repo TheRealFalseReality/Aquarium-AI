@@ -261,6 +261,7 @@
   "totalLogs": "Total de Registros",
   "categories": "Categorías",
   "lastActivity": "Última actividad",
+  "lastLoggedNextSuggested": "Último registro {lastDate} • Siguiente sugerida {nextDate}",
   "entry": "entrada",
   "entries": "entradas",
   "category": "Categoría",

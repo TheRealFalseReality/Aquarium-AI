@@ -1293,6 +1293,18 @@
   "@lastActivity": {
     "description": "Last activity label"
   },
+  "lastLoggedNextSuggested": "Last logged {lastDate} • Next suggested {nextDate}",
+  "@lastLoggedNextSuggested": {
+    "description": "Smart scheduling insight showing the last logged date and the next suggested reminder date.",
+    "placeholders": {
+      "lastDate": {
+        "type": "String"
+      },
+      "nextDate": {
+        "type": "String"
+      }
+    }
+  },
   "entry": "entry",
   "@entry": {
     "description": "Singular form of entry"

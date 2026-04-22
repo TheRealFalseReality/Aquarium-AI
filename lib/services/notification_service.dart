@@ -1,13 +1,28 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:uuid/uuid.dart';
 
 import '../models/notification_log.dart';
+import '../models/tank.dart';
 import '../models/tank_notification.dart';
+
+@pragma('vm:entry-point')
+Future<void> notificationTapBackground(NotificationResponse response) async {
+  await NotificationService().handleNotificationResponse(response);
+}
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
+  static const String _tanksKey = 'user_tanks';
+  static const String _iosNotificationCategory = 'tank_maintenance_actions';
+  static const String actionDone = 'done_action';
+  static const String actionSnoozeDay = 'snooze_day_action';
+  static const String actionSnoozeWeek = 'snooze_week_action';
 
   factory NotificationService() => _instance;
 
@@ -27,7 +42,10 @@ class NotificationService {
   /// Subsequent calls (e.g., from requestPermissions()) will return early due to _initialized check,
   /// preserving the originally set navigatorKey.
   Future<void> initialize({GlobalKey<NavigatorState>? navigatorKey}) async {
-    if (_initialized) return;
+    if (_initialized) {
+      _navigatorKey ??= navigatorKey;
+      return;
+    }
 
     _navigatorKey = navigatorKey;
 
@@ -44,6 +62,13 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
+      notificationCategories: {
+        DarwinNotificationCategory(_iosNotificationCategory, actions: [
+          DarwinNotificationAction.plain(actionDone, 'Done ✓'),
+          DarwinNotificationAction.plain(actionSnoozeDay, 'Snooze 1 day'),
+          DarwinNotificationAction.plain(actionSnoozeWeek, 'Snooze 1 week'),
+        ]),
+      },
     );
 
     const initSettings = InitializationSettings(
@@ -54,13 +79,25 @@ class NotificationService {
     await _notifications.initialize(
       settings: initSettings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
     _initialized = true;
   }
 
   /// Handle notification tap - navigates to tank management screen
-  void _onNotificationTapped(NotificationResponse response) {
+  Future<void> _onNotificationTapped(NotificationResponse response) async {
+    final wasActionHandled = await handleNotificationResponse(response);
+    if (wasActionHandled) {
+      return;
+    }
+
+    // Default tap action opens app UI.
+    if (response.actionId != null &&
+        response.actionId != NotificationResponse.defaultActionId) {
+      return;
+    }
+
     // Navigate to tank management screen when notification is tapped
     try {
       _navigatorKey?.currentState?.pushNamed('/tank-management');
@@ -139,12 +176,33 @@ class NotificationService {
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
+      actions: <AndroidNotificationAction>[
+        AndroidNotificationAction(
+          actionDone,
+          'Done ✓',
+          cancelNotification: true,
+          showsUserInterface: false,
+        ),
+        AndroidNotificationAction(
+          actionSnoozeDay,
+          'Snooze 1 day',
+          cancelNotification: true,
+          showsUserInterface: false,
+        ),
+        AndroidNotificationAction(
+          actionSnoozeWeek,
+          'Snooze 1 week',
+          cancelNotification: true,
+          showsUserInterface: false,
+        ),
+      ],
     );
 
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
+      categoryIdentifier: _iosNotificationCategory,
     );
 
     final details = NotificationDetails(
@@ -160,10 +218,12 @@ class NotificationService {
 
     // Determine the next notification date
     DateTime? nextDate;
-    if (useExactDateTime ||
-        notification.repeatFrequency == RepeatFrequency.none) {
+    if (useExactDateTime) {
+      // Use the exact next date already stored on the notification model.
+      // This supports explicit snooze actions that update scheduledNextDate.
+      nextDate = notification.getImmediateNextDate();
+    } else if (notification.repeatFrequency == RepeatFrequency.none) {
       // Use the exact date/time specified in the notification for:
-      // - useExactDateTime flag (user explicitly chose the specified time)
       // - Non-repeating notifications (getNextNotificationDate returns null for these)
       nextDate = notification.notificationDateTime;
     } else if (activityLogs != null) {
@@ -187,7 +247,7 @@ class NotificationService {
         scheduledDate: scheduledDate,
         notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        payload: '${tankId}_${notification.id}',
+        payload: '$tankId::${notification.id}',
       );
     }
 
@@ -406,5 +466,154 @@ class NotificationService {
       notificationDetails: details,
       payload: 'test_notification',
     );
+  }
+
+  Future<bool> handleNotificationResponse(NotificationResponse response) async {
+    final actionId = response.actionId;
+    final payload = response.payload;
+
+    if (payload == null || payload.isEmpty) {
+      return false;
+    }
+
+    if (actionId != actionDone &&
+        actionId != actionSnoozeDay &&
+        actionId != actionSnoozeWeek) {
+      return false;
+    }
+
+    final payloadData = _parseNotificationPayload(payload);
+    if (payloadData == null) {
+      return false;
+    }
+
+    final tankId = payloadData.$1;
+    final notificationId = payloadData.$2;
+    await _applyActionToStoredTankNotification(
+      tankId: tankId,
+      notificationId: notificationId,
+      actionId: actionId!,
+    );
+
+    return true;
+  }
+
+  (String, String)? _parseNotificationPayload(String payload) {
+    if (payload.contains('::')) {
+      final parts = payload.split('::');
+      if (parts.length == 2 &&
+          parts[0].isNotEmpty &&
+          parts[1].isNotEmpty) {
+        return (parts[0], parts[1]);
+      }
+    }
+
+    final separatorIndex = payload.indexOf('_');
+    if (separatorIndex <= 0 || separatorIndex >= payload.length - 1) {
+      return null;
+    }
+
+    return (
+      payload.substring(0, separatorIndex),
+      payload.substring(separatorIndex + 1),
+    );
+  }
+
+  Future<void> _applyActionToStoredTankNotification({
+    required String tankId,
+    required String notificationId,
+    required String actionId,
+  }) async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final tanksJson = prefs.getString(_tanksKey);
+    if (tanksJson == null) {
+      return;
+    }
+
+    final tanksList = json.decode(tanksJson) as List;
+    final tanks = tanksList
+        .map((tankData) => Tank.fromJson(tankData as Map<String, dynamic>))
+        .toList();
+
+    final tankIndex = tanks.indexWhere((tank) => tank.id == tankId);
+    if (tankIndex == -1) {
+      return;
+    }
+
+    final tank = tanks[tankIndex];
+    final notificationIndex = tank.notifications.indexWhere(
+      (notification) => notification.id == notificationId,
+    );
+    if (notificationIndex == -1) {
+      return;
+    }
+
+    final notification = tank.notifications[notificationIndex];
+    final now = DateTime.now();
+    List<TankNotification> updatedNotifications = List.from(tank.notifications);
+    var updatedLogs = List<NotificationLog>.from(tank.notificationLogs);
+
+    if (actionId == actionDone) {
+      final log = NotificationLog(
+        id: const Uuid().v4(),
+        type: notification.type,
+        customCategory: notification.type == NotificationType.other
+            ? notification.customCategory
+            : null,
+        loggedAt: now,
+        notes: notification.notes,
+        notificationId: notification.id,
+      );
+      updatedLogs = [...updatedLogs, log];
+
+      final rescheduled = await rescheduleMatchingNotifications(
+        tankId: tank.id,
+        tankName: tank.name,
+        notifications: updatedNotifications,
+        activityLogs: updatedLogs,
+        activityType: log.type,
+        activityCustomCategory: log.customCategory,
+      );
+
+      if (rescheduled.isNotEmpty) {
+        updatedNotifications = updatedNotifications.map((existing) {
+          return rescheduled.firstWhere(
+            (candidate) => candidate.id == existing.id,
+            orElse: () => existing,
+          );
+        }).toList();
+      }
+    } else {
+      final snoozeDays = actionId == actionSnoozeWeek ? 7 : 1;
+      final snoozedDate = now.add(Duration(days: snoozeDays));
+      final updatedNotification = notification.copyWith(
+        scheduledNextDate: snoozedDate,
+        updatedAt: now,
+      );
+      updatedNotifications = updatedNotifications.map((existing) {
+        return existing.id == notification.id ? updatedNotification : existing;
+      }).toList();
+
+      await scheduleNotification(
+        tankId: tank.id,
+        tankName: tank.name,
+        notification: updatedNotification,
+        useExactDateTime: true,
+      );
+    }
+
+    final updatedTank = tank.copyWith(
+      notifications: updatedNotifications,
+      notificationLogs: updatedLogs,
+      updatedAt: now,
+    );
+    tanks[tankIndex] = updatedTank;
+
+    final updatedJson = json.encode(tanks.map((item) => item.toJson()).toList());
+    await prefs.setString(_tanksKey, updatedJson);
   }
 }

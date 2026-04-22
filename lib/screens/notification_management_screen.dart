@@ -171,6 +171,13 @@ class _NotificationManagementScreenState
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
+    final currentTank = _getCurrentTank();
+    final l10n = AppLocalizations.of(context)!;
+    final smartScheduleInsight = _buildSmartScheduleInsight(
+      currentTank,
+      notification,
+      l10n,
+    );
 
     // Use the single source of truth: getImmediateNextDate()
     // This returns scheduledNextDate if set, otherwise notificationDateTime
@@ -214,6 +221,16 @@ class _NotificationManagementScreenState
                             color: colorScheme.onSurface.withOpacity(0.6),
                           ),
                         ),
+                        if (smartScheduleInsight != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            smartScheduleInsight,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -374,6 +391,40 @@ class _NotificationManagementScreenState
     } else {
       return l10n.inLessThanAMinute;
     }
+  }
+
+  String? _buildSmartScheduleInsight(
+    Tank tank,
+    TankNotification notification,
+    AppLocalizations l10n,
+  ) {
+    if (notification.repeatFrequency == RepeatFrequency.none) {
+      return null;
+    }
+
+    final matchingLogs = tank.notificationLogs.where((log) {
+      return notification.matchesActivityLog(log.type, log.customCategory);
+    }).toList();
+
+    if (matchingLogs.isEmpty) {
+      return null;
+    }
+
+    matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
+    final lastLog = matchingLogs.first;
+    final suggestedNext = notification.getNextNotificationDateFromBase(
+      lastLog.loggedAt,
+    );
+
+    if (suggestedNext == null) {
+      return null;
+    }
+
+    final dateFormat = DateFormat('MMM d, yyyy');
+    return l10n.lastLoggedNextSuggested(
+      dateFormat.format(lastLog.loggedAt),
+      dateFormat.format(suggestedNext),
+    );
   }
 
   IconData _getNotificationIcon(NotificationType type) {
