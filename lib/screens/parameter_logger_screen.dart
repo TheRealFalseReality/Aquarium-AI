@@ -992,7 +992,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
           ),
           TextButton(
             onPressed: () => _analyzeReading(parameter),
-            child: Text('🤖 ${AppLocalizations.of(context)!.analyzeThis}'),
+            child: Text(AppLocalizations.of(context)!.analyzeThis),
           ),
         ],
       ),

@@ -5717,7 +5717,7 @@
   "@copiedToClipboard": {
     "description": "Snackbar message shown after content is copied to clipboard"
   },
-  "analyzeThis": "Analyze this",
+  "analyzeThis": "🤖 Analyze this",
   "@analyzeThis": {
     "description": "Quick action label to ask AI to analyze a specific logged reading"
   },
