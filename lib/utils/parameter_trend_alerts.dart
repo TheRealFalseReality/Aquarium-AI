@@ -63,6 +63,8 @@ ParameterTrendAlert? _buildNitrateRisingAlert(List<WaterParameter> parameters) {
   final lastDate = risingStreak.last.dateRecorded;
   final trendDays = lastDate.difference(firstDate).inDays + 1;
 
+  // Guard against multiple same-day increasing readings that could meet the
+  // streak-length threshold without representing a multi-day trend.
   if (trendDays < _minTrendDaysForAlert) {
     return null;
   }

@@ -805,7 +805,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                    const SizedBox(height: 24),
                    if (proactiveAlerts.isNotEmpty) ...[
                      _buildProactiveTrendAlerts(context, proactiveAlerts),
-                     const SizedBox(height: 16),
+                     const SizedBox(height: 24),
                    ],
                    ...parameterTypes.map((paramType) {
                     final parameters = groupedParameters[paramType] ?? [];
