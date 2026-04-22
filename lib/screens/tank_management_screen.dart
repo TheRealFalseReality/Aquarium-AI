@@ -4090,7 +4090,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${l10n.tankSize}: ${_formatTankSize(tank)}'),
+                  Text('${l10n.onboardingTankSize}: ${_formatTankSize(tank)}'),
                   const SizedBox(height: 12),
                   Text(
                     '${l10n.waterChangePercentage}: ${selectedPercent.toStringAsFixed(0)}%',
