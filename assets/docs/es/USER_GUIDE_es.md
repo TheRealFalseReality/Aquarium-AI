@@ -315,6 +315,13 @@ Rastrea la calidad del agua a lo largo del tiempo con gráficos y registros.
 Toca la flecha de **expandir** en un grupo de parámetros para ver un gráfico de serie
 temporal. Útil para detectar tendencias y validar el impacto de los cambios de agua.
 
+### Alertas proactivas de tendencia con IA
+
+Cuando se detecta un patrón de riesgo en los registros recientes, el Registro de
+parámetros ahora muestra una tarjeta de **Alertas de tendencia con IA** en la parte
+superior. Por ejemplo, si el nitrato sigue subiendo durante varios días, la app
+sugiere de forma proactiva considerar un cambio de agua.
+
 ---
 
 ## Registro de dosificación

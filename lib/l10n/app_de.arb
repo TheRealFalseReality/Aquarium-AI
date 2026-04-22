@@ -400,6 +400,8 @@
   "calculate": "Berechnen",
   "addReading": "Messwert Hinzufügen",
   "addFirstReading": "Ersten Messwert Hinzufügen",
+  "proactiveTrendFlagsTitle": "KI-Trendwarnungen",
+  "nitrateRisingDaysAlert": "Ihr Nitrat ist seit {days} Tagen gestiegen — erwägen Sie einen Wasserwechsel.",
   "addDose": "Dosis Hinzufügen",
   "addFirstDose": "Erste Dosis Hinzufügen",
   "resetIcon": "Symbol Zurücksetzen",

@@ -327,6 +327,12 @@ Track water quality over time with charts and logs.
 
 Tap the **expand** arrow on a parameter group to view a time-series chart. Useful for spotting trends and validating the impact of water changes.
 
+### Proactive AI Trend Flags
+
+When a risky pattern is detected in recent logs, the Parameter Logger now shows an
+**AI Trend Flags** card at the top of the screen. For example, if nitrate keeps
+rising for multiple days, the app proactively suggests considering a water change.
+
 ---
 
 ## Dosing Logger

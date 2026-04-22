@@ -387,6 +387,8 @@
   "calculate": "Calculer",
   "addReading": "Ajouter une Lecture",
   "addFirstReading": "Ajouter la Première Lecture",
+  "proactiveTrendFlagsTitle": "Alertes de tendance IA",
+  "nitrateRisingDaysAlert": "Votre nitrate augmente depuis {days} jours — envisagez un changement d'eau.",
   "addDose": "Ajouter une Dose",
   "addFirstDose": "Ajouter la Première Dose",
   "resetIcon": "Réinitialiser l'Icône",

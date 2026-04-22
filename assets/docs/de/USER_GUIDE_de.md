@@ -319,6 +319,13 @@ Tippen Sie auf den **Erweitern**-Pfeil einer Parametergruppe, um ein Zeitreihend
 anzuzeigen. Nützlich zum Erkennen von Trends und zur Validierung der Auswirkungen von
 Wasserwechseln.
 
+### Proaktive KI-Trendwarnungen
+
+Wenn in den letzten Messwerten ein risikoreiches Muster erkannt wird, zeigt der
+Parameter-Logger jetzt oben eine Karte mit **KI-Trendwarnungen**. Wenn z. B.
+Nitrat über mehrere Tage weiter ansteigt, empfiehlt die App proaktiv, einen
+Wasserwechsel in Betracht zu ziehen.
+
 ---
 
 ## Dosierungs-Logger

@@ -1953,6 +1953,19 @@
   "@addFirstReading": {
     "description": "Add first reading button label when no readings exist"
   },
+  "proactiveTrendFlagsTitle": "AI Trend Flags",
+  "@proactiveTrendFlagsTitle": {
+    "description": "Title for proactive AI trend alerts on the parameter logger screen"
+  },
+  "nitrateRisingDaysAlert": "Your nitrate has been rising for {days} days — consider a water change.",
+  "@nitrateRisingDaysAlert": {
+    "description": "Proactive warning when nitrate trend is rising for multiple days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "addDose": "Add Dose",
   "@addDose": {
     "description": "Add dose button label"
