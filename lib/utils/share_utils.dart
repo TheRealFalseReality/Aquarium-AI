@@ -12,8 +12,8 @@ String get _appFooter =>
     'Shared via Aquarium AI\n'
     'Get the app: $googlePlayStoreUrl';
 
-/// Converts a [WaterAnalysisResult] to a plain-text summary and shares it.
-Future<void> shareWaterAnalysisResult(WaterAnalysisResult result) async {
+/// Converts a [WaterAnalysisResult] to a plain-text summary.
+String waterAnalysisResultToText(WaterAnalysisResult result) {
   final buffer = StringBuffer();
   buffer.writeln('🐠 Aquarium AI – Water Parameter Analysis');
   buffer.writeln('Status: ${result.summary.status}');
@@ -32,15 +32,19 @@ Future<void> shareWaterAnalysisResult(WaterAnalysisResult result) async {
   buffer.writeln('How AquaPi Can Help:');
   buffer.writeln(result.howAquaPiHelps);
   buffer.write(_appFooter);
+  return buffer.toString();
+}
 
+/// Converts a [WaterAnalysisResult] to a plain-text summary and shares it.
+Future<void> shareWaterAnalysisResult(WaterAnalysisResult result) async {
   await Share.share(
-    buffer.toString(),
+    waterAnalysisResultToText(result),
     subject: 'Aquarium AI – Water Parameter Analysis',
   );
 }
 
-/// Converts a [PhotoAnalysisResult] to a plain-text summary and shares it.
-Future<void> sharePhotoAnalysisResult(PhotoAnalysisResult result) async {
+/// Converts a [PhotoAnalysisResult] to a plain-text summary.
+String photoAnalysisResultToText(PhotoAnalysisResult result) {
   final buffer = StringBuffer();
   buffer.writeln('🐠 Aquarium AI – Aquarium Photo Analysis');
   buffer.writeln();
@@ -93,8 +97,15 @@ Future<void> sharePhotoAnalysisResult(PhotoAnalysisResult result) async {
   buffer.writeln('How AquaPi Can Help:');
   buffer.writeln(result.howAquaPiHelps);
   buffer.write(_appFooter);
+  return buffer.toString();
+}
 
-  await Share.share(buffer.toString(), subject: 'Aquarium AI – Photo Analysis');
+/// Converts a [PhotoAnalysisResult] to a plain-text summary and shares it.
+Future<void> sharePhotoAnalysisResult(PhotoAnalysisResult result) async {
+  await Share.share(
+    photoAnalysisResultToText(result),
+    subject: 'Aquarium AI – Photo Analysis',
+  );
 }
 
 /// Converts a [CompatibilityReport] to a plain-text summary and shares it.
@@ -142,7 +153,7 @@ Future<void> shareCompatibilityReport(CompatibilityReport report) async {
 
 /// Converts a list of [StockingRecommendation] objects (one tab) to plain text
 /// and shares it.
-Future<void> shareStockingReport(StockingRecommendation report) async {
+String stockingReportToText(StockingRecommendation report) {
   final buffer = StringBuffer();
   buffer.writeln('🐠 Aquarium AI – Stocking Recommendation');
   buffer.writeln();
@@ -167,9 +178,12 @@ Future<void> shareStockingReport(StockingRecommendation report) async {
     }
   }
   buffer.write(_appFooter);
+  return buffer.toString();
+}
 
+Future<void> shareStockingReport(StockingRecommendation report) async {
   await Share.share(
-    buffer.toString(),
+    stockingReportToText(report),
     subject: 'Aquarium AI – Stocking Recommendation',
   );
 }
@@ -186,7 +200,7 @@ Future<void> shareChatResponse(String text) async {
 }
 
 /// Converts a [FishInfoResult] to a plain-text summary and shares it.
-Future<void> shareFishInfoResult(FishInfoResult result) async {
+String fishInfoResultToText(FishInfoResult result) {
   final buffer = StringBuffer();
   buffer.writeln('🐠 Aquarium AI – Fish Info Lookup');
 
@@ -249,6 +263,24 @@ Future<void> shareFishInfoResult(FishInfoResult result) async {
     }
   }
   buffer.write(_appFooter);
+  return buffer.toString();
+}
 
-  await Share.share(buffer.toString(), subject: 'Aquarium AI – Fish Info');
+Future<void> shareFishInfoResult(FishInfoResult result) async {
+  await Share.share(fishInfoResultToText(result), subject: 'Aquarium AI – Fish Info');
+}
+
+/// Converts an [AutomationScript] to a plain-text summary.
+String automationScriptToText(String title, String explanation, String code) {
+  final buffer = StringBuffer();
+  buffer.writeln('🐠 Aquarium AI – Automation Script');
+  buffer.writeln();
+  buffer.writeln(title);
+  buffer.writeln();
+  buffer.writeln(explanation);
+  buffer.writeln();
+  buffer.writeln('Code:');
+  buffer.writeln(code);
+  buffer.write(_appFooter);
+  return buffer.toString();
 }

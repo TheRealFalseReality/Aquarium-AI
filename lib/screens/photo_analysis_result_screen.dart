@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
+import 'package:fish_ai/widgets/accessible_feedback.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -134,6 +136,13 @@ class _PhotoAnalysisResultScreenState
             isRegenerating: _regenerating,
             regenerateLabel: 'Regenerate',
             onShare: () => sharePhotoAnalysisResult(widget.result),
+            onCopy: () {
+              Clipboard.setData(
+                ClipboardData(text: photoAnalysisResultToText(widget.result)),
+              );
+              context.showAccessibleMessage(l10n.copiedToClipboard);
+            },
+            copyLabel: l10n.copyToClipboard,
           ),
           const SizedBox(height: 12),
           const TipText(

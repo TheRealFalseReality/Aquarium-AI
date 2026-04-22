@@ -93,6 +93,45 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     );
   }
 
+  void _analyzeReading(WaterParameter parameter) {
+    final l10n = AppLocalizations.of(context)!;
+    final currentTank = _getCurrentTank();
+    final parameterLabel = _getParameterLabel(parameter.parameterType, context);
+    final prompt = parameter.notes != null && parameter.notes!.trim().isNotEmpty
+        ? l10n.analyzeReadingPromptWithNotes(
+            currentTank.name,
+            currentTank.type,
+            parameterLabel,
+            parameter.value.toString(),
+            parameter.unit ?? '',
+            DateFormat('yyyy-MM-dd HH:mm').format(parameter.dateRecorded),
+            parameter.notes!.trim(),
+          )
+        : l10n.analyzeReadingPromptWithoutNotes(
+            currentTank.name,
+            currentTank.type,
+            parameterLabel,
+            parameter.value.toString(),
+            parameter.unit ?? '',
+            DateFormat('yyyy-MM-dd HH:mm').format(parameter.dateRecorded),
+          );
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'parameter_reading_analyze_with_ai',
+      parameters: {
+        'parameter_type': parameter.parameterType,
+        'tank_type': currentTank.type,
+        'has_notes': parameter.notes?.trim().isNotEmpty == true ? 'true' : 'false',
+      },
+    );
+
+    Navigator.pushNamed(
+      context,
+      '/chatbot',
+      arguments: {'initialPrompt': prompt},
+    );
+  }
+
   Map<String, List<WaterParameter>> _groupParametersByType(Tank tank) {
     final grouped = <String, List<WaterParameter>>{};
     for (var param in tank.waterParameters) {
@@ -929,6 +968,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   }
 
   Widget _buildParameterItem(BuildContext context, WaterParameter parameter) {
+    final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final dateFormat = DateFormat('MMM d, yyyy - h:mm a');
     final thresholdColor = _getThresholdColor(
@@ -958,15 +998,28 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
         dateFormat.format(parameter.dateRecorded),
         style: const TextStyle(fontSize: 14),
       ),
-      subtitle: parameter.notes != null
-          ? Text(
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextButton(
+            onPressed: () => _analyzeReading(parameter),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, 32),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(l10n.analyzeThis),
+          ),
+          if (parameter.notes != null)
+            Text(
               parameter.notes!,
               style: TextStyle(
                 fontSize: 12,
                 color: cs.onSurface.withOpacity(0.6),
               ),
-            )
-          : null,
+            ),
+        ],
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

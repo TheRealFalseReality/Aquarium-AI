@@ -77,18 +77,22 @@ class ActionButtonRow extends StatelessWidget {
   final VoidCallback? onRegenerate;
   final VoidCallback? onClose;
   final VoidCallback? onShare;
+  final VoidCallback? onCopy;
   final bool isRegenerating;
   final String? regenerateLabel;
   final String? closeLabel;
+  final String? copyLabel;
 
   const ActionButtonRow({
     super.key,
     this.onRegenerate,
     this.onClose,
     this.onShare,
+    this.onCopy,
     this.isRegenerating = false,
     this.regenerateLabel,
     this.closeLabel,
+    this.copyLabel,
   });
 
   @override
@@ -111,6 +115,16 @@ class ActionButtonRow extends StatelessWidget {
               onPressed: onShare,
               icon: const Icon(Icons.share),
               label: const Text('Share'),
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
+        if (onCopy != null) ...[
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: onCopy,
+              icon: const Icon(Icons.copy_all_outlined),
+              label: Text(copyLabel ?? 'Copy'),
             ),
           ),
           const SizedBox(width: 16),

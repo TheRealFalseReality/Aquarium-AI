@@ -31,12 +31,14 @@ class ChatbotScreen extends ConsumerStatefulWidget {
   final bool autoOpenPhotoAnalyzer;
   final bool autoOpenWaterAnalysis;
   final bool autoOpenFishInfo;
+  final String? initialPrompt;
 
   const ChatbotScreen({
     super.key,
     this.autoOpenPhotoAnalyzer = false,
     this.autoOpenWaterAnalysis = false,
     this.autoOpenFishInfo = false,
+    this.initialPrompt,
   });
 
   @override
@@ -64,6 +66,9 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
       vsync: this,
       duration: const Duration(milliseconds: 380),
     );
+    if (widget.initialPrompt != null && widget.initialPrompt!.trim().isNotEmpty) {
+      _inputController.text = widget.initialPrompt!.trim();
+    }
     // If requested via route arguments, open the appropriate tool after first frame
     if (widget.autoOpenPhotoAnalyzer) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
