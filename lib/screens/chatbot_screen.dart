@@ -269,12 +269,12 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
               if (selectedFilter == '__none__') return c.tankId == null;
               return c.tankId == selectedFilter;
             }).toList();
+            final tankNameById = {for (final tank in tanks) tank.id: tank.name};
 
             String tankNameFor(String? tankId) {
               if (tankId == null) return l10n.chatbotNoTankOption;
-              for (final tank in tanks) {
-                if (tank.id == tankId) return tank.name;
-              }
+              final knownName = tankNameById[tankId];
+              if (knownName != null) return knownName;
               return l10n.chatbotUnknownTank;
             }
 

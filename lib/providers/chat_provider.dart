@@ -122,7 +122,7 @@ class SavedChatConversation {
   };
 
   factory SavedChatConversation.fromJson(Map<String, dynamic> json) {
-    final rawMessages = (json['messages'] as List?) ?? const [];
+    final rawMessages = (json['messages'] as List?) ?? <dynamic>[];
     return SavedChatConversation(
       id: json['id'] as String,
       name: json['name'] as String? ?? 'Conversation',
@@ -133,7 +133,11 @@ class SavedChatConversation {
           DateTime.now(),
       messages: rawMessages
           .whereType<Map>()
-          .map((raw) => PersistedChatMessage.fromJson(Map<String, dynamic>.from(raw)))
+          .map(
+            (raw) => PersistedChatMessage.fromJson(
+              (raw as Map).cast<String, dynamic>(),
+            ),
+          )
           .toList(),
     );
   }
@@ -258,7 +262,11 @@ class ChatNotifier extends StateNotifier<ChatState> {
         final decoded = json.decode(raw) as List;
         _conversations = decoded
             .whereType<Map>()
-            .map((item) => SavedChatConversation.fromJson(Map<String, dynamic>.from(item)))
+            .map(
+              (item) => SavedChatConversation.fromJson(
+                (item as Map).cast<String, dynamic>(),
+              ),
+            )
             .toList();
       }
 
@@ -316,15 +324,16 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
   String? get activeConversationId => _activeConversationId;
 
+  SavedChatConversation? _findConversationById(String id) {
+    for (final item in _conversations) {
+      if (item.id == id) return item;
+    }
+    return null;
+  }
+
   ChatConversationSummary? get activeConversation {
     if (_activeConversationId == null) return null;
-    SavedChatConversation? conversation;
-    for (final item in _conversations) {
-      if (item.id == _activeConversationId) {
-        conversation = item;
-        break;
-      }
-    }
+    final conversation = _findConversationById(_activeConversationId!);
     if (conversation == null) return null;
     return ChatConversationSummary(
       id: conversation.id,
@@ -400,13 +409,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
   Future<void> switchConversation(String conversationId) async {
     if (!_conversationStoreReady || conversationId == _activeConversationId) return;
     await persistActiveConversationNow();
-    SavedChatConversation? conversation;
-    for (final item in _conversations) {
-      if (item.id == conversationId) {
-        conversation = item;
-        break;
-      }
-    }
+    final conversation = _findConversationById(conversationId);
     if (conversation == null) return;
     _activeConversationId = conversation.id;
     state = ChatState(messages: _uiMessagesFromPersisted(conversation.messages));
