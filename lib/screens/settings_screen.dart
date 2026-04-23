@@ -3951,7 +3951,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         stats['lastRestoreTime'] = _formatDateTime(lastRestoreTime);
       }
 
-      // Cloud backup metadata (non-blocking; null if not signed in or no backup)
+      // Cloud backup metadata – fails silently (returns null) if not signed in or no backup exists.
       final cloudInfo = await CloudBackupService.getBackupInfo();
       if (cloudInfo != null) {
         final backedUpAt = cloudInfo['backedUpAt'] as DateTime?;

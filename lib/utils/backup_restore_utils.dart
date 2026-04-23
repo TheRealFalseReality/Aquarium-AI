@@ -675,7 +675,7 @@ class BackupRestoreUtils {
 
     try {
       final payload = await tankNotifier.buildBackupPayload();
-      final jsonString = const JsonEncoder.withIndent('  ').convert(payload);
+      final jsonString = json.encode(payload);
       final tankCount = backupInfo['tankCount'] as int;
       final appVersion = payload['version'] as String? ?? '';
 
