@@ -112,8 +112,15 @@ préchargés avec les données de votre bac :
 
 ### Sauvegarde et restauration
 
-Utilisez **Paramètres → Sauvegarde / Restauration** pour exporter toutes les données
-du bac dans un fichier JSON et les importer sur un autre appareil.
+Utilisez **Paramètres → Sauvegarde / Restauration** pour exporter et importer toutes les données du bac.
+
+#### Sauvegarde et restauration locale
+
+Enregistrez un fichier de sauvegarde JSON complet sur votre appareil et restaurez-le sur n'importe quel appareil.
+
+#### Sauvegarde et restauration en ligne *(Aquariophile Fondateur)*
+
+Sauvegardez vos données en toute sécurité dans le cloud, liées à votre compte. Nécessite une connexion et le statut **Aquariophile Fondateur**. Restaurez depuis le cloud à tout moment — idéal pour changer d'appareil sans gérer de fichiers.
 
 ---
 
@@ -396,7 +403,7 @@ vers un compte nommé plus tard dans **Profil**.
 | **Clés API AI** | Stocker vos clés API personnelles |
 | **Limite d'historique de chat** | Nombre de messages précédents envoyés avec chaque requête |
 | **Affichage du bac** | Afficher/masquer photos, métriques, habitants, notes, etc. |
-| **Sauvegarde / Restauration** | Exporter et importer toutes les données du bac |
+| **Sauvegarde / Restauration** | Exporter et importer toutes les données du bac ; les Aquariophiles Fondateurs peuvent également sauvegarder dans le cloud |
 | **Notifications** | Planifier des rappels pour les changements d'eau, l'alimentation, etc. |
 
 ### Apparence

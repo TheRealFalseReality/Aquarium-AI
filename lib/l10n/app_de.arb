@@ -2094,5 +2094,24 @@
   "waterChangeCalculatorMissingTankSize": "Fügen Sie zuerst eine Aquariengröße hinzu, um das Wasserwechselvolumen zu berechnen.",
   "@waterChangeCalculatorMissingTankSize": {
     "description": "Message shown when water change volume calculator is opened for a tank without size data"
-  }
+  },
+  "backupDataOnline": "Cloud-Sicherung",
+  "backupDataOnlineDesc": "Daten in der Cloud speichern (Gründer-Aquarianer)",
+  "restoreDataOnline": "Cloud-Wiederherstellung",
+  "restoreDataOnlineDesc": "Daten aus der Cloud laden (Gründer-Aquarianer)",
+  "cloudBackupDialogTitle": "Cloud-Sicherung",
+  "cloudBackupDialogContent": "Ihre Aquariumdaten werden sicher in der Cloud gespeichert, verknüpft mit Ihrem Konto.",
+  "cloudBackupSuccess": "Cloud-Sicherung erfolgreich gespeichert",
+  "cloudBackupFailed": "Cloud-Sicherung fehlgeschlagen: {error}",
+  "cloudRestoreDialogTitle": "Cloud-Wiederherstellung",
+  "cloudRestoreDialogContent": "Ihre Cloud-Sicherung vom {date} ({count} Aquarium(en)) ersetzt alle aktuellen Daten.",
+  "cloudRestoreSuccess": "Daten erfolgreich aus der Cloud wiederhergestellt",
+  "cloudRestoreFailed": "Cloud-Wiederherstellung fehlgeschlagen: {error}",
+  "noCloudBackupFound": "Keine Cloud-Sicherung für Ihr Konto gefunden.",
+  "cloudBackupRequiresSignIn": "Melden Sie sich an, um die Cloud-Sicherung zu verwenden.",
+  "cloudBackupButtonLabel": "In Cloud speichern",
+  "cloudRestoreButtonLabel": "Aus Cloud wiederherstellen",
+  "lastCloudBackup": "Letzte Cloud-Sicherung",
+  "founderPerkCloudBackup": "Cloud-Sicherung und -Wiederherstellung",
+  "perkAccessBackupRestore": "Zu Einstellungen → Sicherung/Wiederherstellung"
 }

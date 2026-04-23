@@ -23,6 +23,7 @@ import '../providers/purchase_provider.dart';
 import '../providers/tank_provider.dart';
 import '../screens/dosing_calculator.dart';
 import '../services/analytics_service.dart';
+import '../services/cloud_backup_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/fish_data_service.dart';
 import '../services/in_app_review_service.dart';
@@ -3718,8 +3719,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 Colors.green,
                               ),
                             ],
+                            if (stats['lastCloudBackupTime'] != null) ...[
+                              if (stats['lastBackupTime'] != null ||
+                                  stats['lastRestoreTime'] != null)
+                                const SizedBox(height: 8),
+                              _buildStatRow(
+                                context,
+                                Icons.cloud_done,
+                                l10n.lastCloudBackup,
+                                stats['lastCloudBackupTime'] as String,
+                                Colors.purple,
+                              ),
+                            ],
                             if (stats['lastBackupTime'] == null &&
-                                stats['lastRestoreTime'] == null)
+                                stats['lastRestoreTime'] == null &&
+                                stats['lastCloudBackupTime'] == null)
                               Text(
                                 l10n.noBackupHistory,
                                 style: Theme.of(context).textTheme.bodySmall
@@ -3783,6 +3797,92 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         );
                         // Rebuild to refresh statistics
                         if (mounted) setState(() {});
+                      },
+                    ),
+                    const Divider(height: 16),
+                    // Cloud Backup (Founder only)
+                    Builder(
+                      builder: (context) {
+                        final isFounder = ref.watch(isFounderProvider);
+                        return ListTile(
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.cloud_upload,
+                              color: isFounder
+                                  ? Colors.purple
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          title: Text(l10n.backupDataOnline),
+                          subtitle: Text(l10n.backupDataOnlineDesc),
+                          trailing: isFounder
+                              ? const Icon(Icons.arrow_forward_ios, size: 16)
+                              : Tooltip(
+                                  message: l10n.founderRequiredTooltip,
+                                  child: const Icon(Icons.lock_outline,
+                                      size: 16),
+                                ),
+                          onTap: () async {
+                            await BackupRestoreUtils.exportDataOnline(
+                              context,
+                              ref,
+                              source: 'settings',
+                            );
+                            if (mounted) setState(() {});
+                          },
+                        );
+                      },
+                    ),
+                    const Divider(height: 16),
+                    // Cloud Restore (Founder only)
+                    Builder(
+                      builder: (context) {
+                        final isFounder = ref.watch(isFounderProvider);
+                        return ListTile(
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.deepPurple.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.cloud_download,
+                              color: isFounder
+                                  ? Colors.deepPurple
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          title: Text(l10n.restoreDataOnline),
+                          subtitle: Text(l10n.restoreDataOnlineDesc),
+                          trailing: isFounder
+                              ? const Icon(Icons.arrow_forward_ios, size: 16)
+                              : Tooltip(
+                                  message: l10n.founderRequiredTooltip,
+                                  child: const Icon(Icons.lock_outline,
+                                      size: 16),
+                                ),
+                          onTap: () async {
+                            await BackupRestoreUtils.importDataOnline(
+                              context,
+                              ref,
+                              source: 'settings',
+                            );
+                            if (mounted) setState(() {});
+                          },
+                        );
                       },
                     ),
                   ],
@@ -3849,6 +3949,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (lastRestoreTimeStr != null) {
         final lastRestoreTime = DateTime.parse(lastRestoreTimeStr);
         stats['lastRestoreTime'] = _formatDateTime(lastRestoreTime);
+      }
+
+      // Cloud backup metadata (non-blocking; null if not signed in or no backup)
+      final cloudInfo = await CloudBackupService.getBackupInfo();
+      if (cloudInfo != null) {
+        final backedUpAt = cloudInfo['backedUpAt'] as DateTime?;
+        if (backedUpAt != null) {
+          stats['lastCloudBackupTime'] = _formatDateTime(backedUpAt);
+          stats['lastCloudBackupTankCount'] = cloudInfo['tankCount'] as int? ?? 0;
+        }
       }
 
       return stats;

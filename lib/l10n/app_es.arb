@@ -2094,5 +2094,24 @@
   "waterChangeCalculatorMissingTankSize": "Añade primero el tamaño del acuario para calcular el volumen de cambio de agua.",
   "@waterChangeCalculatorMissingTankSize": {
     "description": "Message shown when water change volume calculator is opened for a tank without size data"
-  }
+  },
+  "backupDataOnline": "Copia en la Nube",
+  "backupDataOnlineDesc": "Guardar datos en la nube (Acuarista Fundador)",
+  "restoreDataOnline": "Restaurar desde la Nube",
+  "restoreDataOnlineDesc": "Cargar datos desde la nube (Acuarista Fundador)",
+  "cloudBackupDialogTitle": "Copia en la Nube",
+  "cloudBackupDialogContent": "Tus datos de acuario se guardarán de forma segura en la nube, vinculados a tu cuenta.",
+  "cloudBackupSuccess": "Copia en la nube guardada exitosamente",
+  "cloudBackupFailed": "Error en la copia en la nube: {error}",
+  "cloudRestoreDialogTitle": "Restaurar desde la Nube",
+  "cloudRestoreDialogContent": "Tu copia en la nube del {date} ({count} acuario(s)) reemplazará todos los datos actuales.",
+  "cloudRestoreSuccess": "Datos restaurados desde la nube exitosamente",
+  "cloudRestoreFailed": "Error al restaurar desde la nube: {error}",
+  "noCloudBackupFound": "No se encontró copia en la nube para tu cuenta.",
+  "cloudBackupRequiresSignIn": "Inicia sesión para usar la copia en la nube.",
+  "cloudBackupButtonLabel": "Guardar en la Nube",
+  "cloudRestoreButtonLabel": "Restaurar desde la Nube",
+  "lastCloudBackup": "Última copia en la nube",
+  "founderPerkCloudBackup": "Copia de seguridad y restauración en la nube",
+  "perkAccessBackupRestore": "Ir a Configuración → Copia de Seguridad/Restaurar"
 }

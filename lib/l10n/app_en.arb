@@ -5879,5 +5879,91 @@
   "waterChangeCalculatorMissingTankSize": "Add a tank size first to calculate water change volume.",
   "@waterChangeCalculatorMissingTankSize": {
     "description": "Message shown when water change volume calculator is opened for a tank without size data"
+  },
+  "backupDataOnline": "Cloud Backup",
+  "@backupDataOnline": {
+    "description": "Label for the cloud backup action in settings"
+  },
+  "backupDataOnlineDesc": "Save your data to the cloud (Founder Aquarist)",
+  "@backupDataOnlineDesc": {
+    "description": "Subtitle for the cloud backup action in settings"
+  },
+  "restoreDataOnline": "Cloud Restore",
+  "@restoreDataOnline": {
+    "description": "Label for the cloud restore action in settings"
+  },
+  "restoreDataOnlineDesc": "Load your data from the cloud (Founder Aquarist)",
+  "@restoreDataOnlineDesc": {
+    "description": "Subtitle for the cloud restore action in settings"
+  },
+  "cloudBackupDialogTitle": "Cloud Backup",
+  "@cloudBackupDialogTitle": {
+    "description": "Title for the cloud backup confirmation dialog"
+  },
+  "cloudBackupDialogContent": "Your aquarium data will be saved securely to the cloud, linked to your account.",
+  "@cloudBackupDialogContent": {
+    "description": "Body text for the cloud backup confirmation dialog"
+  },
+  "cloudBackupSuccess": "Cloud backup saved successfully",
+  "@cloudBackupSuccess": {
+    "description": "Snackbar message after a successful cloud backup"
+  },
+  "cloudBackupFailed": "Cloud backup failed: {error}",
+  "@cloudBackupFailed": {
+    "description": "Snackbar message when cloud backup fails",
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "cloudRestoreDialogTitle": "Cloud Restore",
+  "@cloudRestoreDialogTitle": {
+    "description": "Title for the cloud restore confirmation dialog"
+  },
+  "cloudRestoreDialogContent": "Your cloud backup from {date} ({count} tank(s)) will replace all current data.",
+  "@cloudRestoreDialogContent": {
+    "description": "Body text for the cloud restore confirmation dialog",
+    "placeholders": {
+      "date": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  },
+  "cloudRestoreSuccess": "Data restored from cloud successfully",
+  "@cloudRestoreSuccess": {
+    "description": "Snackbar message after a successful cloud restore"
+  },
+  "cloudRestoreFailed": "Cloud restore failed: {error}",
+  "@cloudRestoreFailed": {
+    "description": "Snackbar message when cloud restore fails",
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "noCloudBackupFound": "No cloud backup found for your account.",
+  "@noCloudBackupFound": {
+    "description": "Message when no cloud backup is available to restore"
+  },
+  "cloudBackupRequiresSignIn": "Sign in to use cloud backup.",
+  "@cloudBackupRequiresSignIn": {
+    "description": "Message shown when user tries cloud backup but is not signed in"
+  },
+  "cloudBackupButtonLabel": "Save to Cloud",
+  "@cloudBackupButtonLabel": {
+    "description": "Button label in the cloud backup confirmation dialog"
+  },
+  "cloudRestoreButtonLabel": "Restore from Cloud",
+  "@cloudRestoreButtonLabel": {
+    "description": "Button label in the cloud restore confirmation dialog"
+  },
+  "lastCloudBackup": "Last cloud backup",
+  "@lastCloudBackup": {
+    "description": "Label for the last cloud backup stat row in settings"
+  },
+  "founderPerkCloudBackup": "Cloud backup & restore",
+  "@founderPerkCloudBackup": {
+    "description": "Founder perk: cloud backup and restore feature"
+  },
+  "perkAccessBackupRestore": "Go to Settings → Backup / Restore",
+  "@perkAccessBackupRestore": {
+    "description": "How to access the cloud backup perk"
   }
 }

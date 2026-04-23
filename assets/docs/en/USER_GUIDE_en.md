@@ -99,7 +99,15 @@ From a tank card or its detail screen you can launch AI tools pre-loaded with yo
 
 ### Backup & Restore
 
-Use **Settings → Backup / Restore** to export all tank data to a JSON file and import it on another device.
+Use **Settings → Backup / Restore** to export and import all tank data.
+
+#### Local Backup & Restore
+
+Save a full JSON backup file to your device and restore from it on any device.
+
+#### Cloud Backup & Restore *(Founder Aquarist)*
+
+Save your data securely to the cloud, linked to your account. Requires sign-in and **Founder Aquarist** status. Restore from the cloud at any time — ideal for switching devices without managing files.
 
 ---
 
@@ -394,7 +402,7 @@ Tap **Sign In** at the top of the Community screen. You can use Google, Facebook
 | **AI API Keys** | Store your personal API keys |
 | **Chat History Limit** | Number of previous messages sent with each request |
 | **Tank Display** | Hide/show photos, metrics, inhabitants, notes, etc. |
-| **Backup / Restore** | Export and import all tank data |
+| **Backup / Restore** | Export and import all tank data; Founder Aquarists can also back up to the cloud |
 | **Notifications** | Schedule reminders for water changes, feeding, etc. |
 
 ### Appearance
