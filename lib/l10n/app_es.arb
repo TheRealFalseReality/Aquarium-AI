@@ -1862,6 +1862,21 @@
   "@chooseTankForCareRemindersSubtitle": {
     "description": "Bottom sheet subtitle when selecting a tank for care reminders"
   },
+  "careRemindersPreviewTitle": "Recordatorios de cuidado sugeridos",
+  "@careRemindersPreviewTitle": {
+    "description": "Title of the bottom sheet that previews care reminder types before navigating to the notification manager"
+  },
+  "careRemindersPreviewSubtitle": "Configura estos recordatorios para mantener condiciones saludables para los peces seleccionados.",
+  "@careRemindersPreviewSubtitle": {
+    "description": "Subtitle in the care-reminders preview sheet"
+  },
+  "careRemindersSetUpForTank": "Configurar para {tankName}",
+  "@careRemindersSetUpForTank": {
+    "description": "Button label to confirm opening the notification manager for a specific tank",
+    "placeholders": {
+      "tankName": {"type": "String"}
+    }
+  },
   "reschedule": "Reprogramar",
   "@reschedule": {
     "description": "Button label for the reschedule action on a notification"

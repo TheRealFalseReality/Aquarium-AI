@@ -263,6 +263,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
             context,
             next.report!,
             fishType: _currentTankForCompatibility!.type,
+            contextTank: _currentTankForCompatibility,
           );
         }
 
