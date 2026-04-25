@@ -468,6 +468,109 @@ class TankNotifier extends StateNotifier<TankState> {
     };
   }
 
+  /// Builds the full backup payload Map without performing any file I/O.
+  ///
+  /// This is the same payload that [exportTanksToFile] writes to disk, exposed
+  /// so that the cloud backup can reuse the exact same format.
+  Future<Map<String, dynamic>> buildBackupPayload() async {
+    final speciesTagsNotifier = _ref.read(speciesTagsProvider.notifier);
+    final speciesTags = speciesTagsNotifier.exportTags();
+
+    final tankTagsNotifier = _ref.read(tankTagsProvider.notifier);
+    final tankTags = tankTagsNotifier.exportTags();
+
+    final appSettingsNotifier = _ref.read(appSettingsProvider.notifier);
+    final reschedulePreferences =
+        await appSettingsNotifier.exportReschedulePreferences();
+
+    final dosingPresetsNotifier = _ref.read(dosingPresetsProvider.notifier);
+    final dosingPresets = dosingPresetsNotifier.exportPresets();
+
+    final packageInfo = await PackageInfo.fromPlatform();
+    final appVersion = packageInfo.version;
+
+    return {
+      'version': appVersion,
+      'appName': 'Aquarium AI',
+      'exportDate': DateTime.now().toIso8601String(),
+      'tankCount': state.tanks.length,
+      'tanks': state.tanks
+          .map((tank) => tank.toJson(includeLocalPaths: false))
+          .toList(),
+      'speciesTags': speciesTags,
+      'tankTags': tankTags,
+      'reschedulePreferences': reschedulePreferences,
+      'dosingPresets': dosingPresets,
+    };
+  }
+
+  /// Applies a parsed backup payload map to local state.
+  ///
+  /// This allows restore flows that already have decoded backup data, such as
+  /// cloud restore, to reuse the same payload format without going through file
+  /// picking. Returns `true` on success, `false` on failure.
+  ///
+  /// Note: [importTanksFromFile] independently performs the same deserialization
+  /// after reading from a file. If these ever diverge, prefer refactoring
+  /// [importTanksFromFile] to delegate here.
+  Future<bool> applyBackupPayload(Map<String, dynamic> backupData) async {
+    try {
+      state = state.copyWith(isLoading: true, clearError: true);
+
+      if (!backupData.containsKey('tanks') ||
+          !backupData.containsKey('version')) {
+        throw const FormatException('Invalid backup format');
+      }
+
+      final tanksList = backupData['tanks'] as List;
+      final importedTanks =
+          tanksList.map((e) => Tank.fromJson(e)).toList();
+
+      if (backupData.containsKey('speciesTags')) {
+        final speciesTagsData =
+            backupData['speciesTags'] as Map<String, dynamic>;
+        final speciesTagsMap = speciesTagsData.map(
+          (key, value) => MapEntry(key, List<String>.from(value)),
+        );
+        await _ref.read(speciesTagsProvider.notifier).importTags(speciesTagsMap);
+      }
+
+      if (backupData.containsKey('tankTags')) {
+        final tankTagsList = backupData['tankTags'] as List;
+        final restoredTankTags =
+            tankTagsList.map((e) => TankTag.fromJson(e)).toList();
+        await _ref.read(tankTagsProvider.notifier).importTags(restoredTankTags);
+      }
+
+      if (backupData.containsKey('reschedulePreferences')) {
+        final rescheduleData =
+            backupData['reschedulePreferences'] as Map<String, dynamic>;
+        final reschedulePreferences =
+            rescheduleData.map((key, value) => MapEntry(key, value as int));
+        await _ref
+            .read(appSettingsProvider.notifier)
+            .importReschedulePreferences(reschedulePreferences);
+      }
+
+      if (backupData.containsKey('dosingPresets')) {
+        final dosingPresetsList = backupData['dosingPresets'] as List;
+        await _ref
+            .read(dosingPresetsProvider.notifier)
+            .importPresets(dosingPresetsList);
+      }
+
+      state = state.copyWith(tanks: importedTanks, isLoading: false);
+      await _saveTanks();
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to apply backup: $e',
+      );
+      return false;
+    }
+  }
+
   /// Export a single tank as a shareable file.
   ///
   /// On mobile this uses the system share sheet so the user can send the file

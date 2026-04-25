@@ -110,8 +110,15 @@ precargadas con los datos de tu acuario:
 
 ### Copia de seguridad y restauración
 
-Usa **Configuración → Copia de seguridad / Restauración** para exportar todos los datos
-del acuario a un archivo JSON e importarlos en otro dispositivo.
+Usa **Configuración → Copia de seguridad / Restauración** para exportar e importar todos los datos del acuario.
+
+#### Copia de seguridad y restauración local
+
+Guarda un archivo de copia de seguridad JSON completo en tu dispositivo y restáuralo en cualquier dispositivo.
+
+#### Copia de seguridad y restauración en la nube *(Acuarista Fundador)*
+
+Guarda tus datos de forma segura en la nube, vinculados a tu cuenta. Requiere inicio de sesión y estado de **Acuarista Fundador**. Restaura desde la nube en cualquier momento — ideal para cambiar de dispositivo sin gestionar archivos.
 
 ---
 
@@ -394,7 +401,7 @@ cuenta con nombre más tarde en **Perfil**.
 | **Claves API de AI** | Almacena tus claves API personales |
 | **Límite de historial de chat** | Número de mensajes anteriores enviados con cada solicitud |
 | **Visualización del acuario** | Mostrar/ocultar fotos, métricas, habitantes, notas, etc. |
-| **Copia de seguridad / Restauración** | Exportar e importar todos los datos del acuario |
+| **Copia de seguridad / Restauración** | Exportar e importar todos los datos del acuario; los Acuaristas Fundadores también pueden hacer copias de seguridad en la nube |
 | **Notificaciones** | Programar recordatorios para cambios de agua, alimentación, etc. |
 
 ### Apariencia

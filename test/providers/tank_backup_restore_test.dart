@@ -6,6 +6,7 @@ import 'package:fish_ai/providers/species_tags_provider.dart';
 import 'package:fish_ai/providers/tank_tags_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -842,6 +843,207 @@ void main() {
       expect(backupData.containsKey('version'), isTrue);
       // tankTags is optional — its absence must not break validation
       expect(backupData.containsKey('tankTags'), isFalse);
+    });
+  });
+
+  group('buildBackupPayload and applyBackupPayload Tests', () {
+    late ProviderContainer container;
+    late TankNotifier tankNotifier;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      PackageInfo.setMockInitialValues(
+        appName: 'Aquarium AI',
+        packageName: 'com.example.fish_ai',
+        version: '3.0.0',
+        buildNumber: '300',
+        buildSignature: '',
+      );
+      container = ProviderContainer();
+      tankNotifier = container.read(tankProvider.notifier);
+      await Future.delayed(const Duration(milliseconds: 100));
+    });
+
+    tearDown(() {
+      container.dispose();
+    });
+
+    test('buildBackupPayload returns correct structure with tanks', () async {
+      final tank1 = Tank.create(name: 'Tank A', type: 'freshwater');
+      final tank2 = Tank.create(name: 'Tank B', type: 'marine');
+      tankNotifier.addTank(tank1);
+      tankNotifier.addTank(tank2);
+
+      final payload = await tankNotifier.buildBackupPayload();
+
+      expect(payload['version'], equals('3.0.0'));
+      expect(payload['appName'], equals('Aquarium AI'));
+      expect(payload['exportDate'], isA<String>());
+      expect(() => DateTime.parse(payload['exportDate'] as String), returnsNormally);
+      expect(payload['tankCount'], equals(2));
+      expect(payload['tanks'], isA<List>());
+      expect((payload['tanks'] as List).length, equals(2));
+      expect(payload.containsKey('speciesTags'), isTrue);
+      expect(payload.containsKey('tankTags'), isTrue);
+      expect(payload.containsKey('reschedulePreferences'), isTrue);
+      expect(payload.containsKey('dosingPresets'), isTrue);
+    });
+
+    test('buildBackupPayload with no tanks returns empty tanks list', () async {
+      final payload = await tankNotifier.buildBackupPayload();
+
+      expect(payload['tankCount'], equals(0));
+      expect((payload['tanks'] as List).isEmpty, isTrue);
+    });
+
+    test('buildBackupPayload payload is JSON-serializable', () async {
+      tankNotifier.addTank(Tank.create(name: 'Reef', type: 'marine'));
+
+      final payload = await tankNotifier.buildBackupPayload();
+
+      expect(() => json.encode(payload), returnsNormally);
+      final jsonString = json.encode(payload);
+      final decoded = json.decode(jsonString) as Map<String, dynamic>;
+      expect(decoded['version'], equals('3.0.0'));
+      expect(decoded['tanks'], isA<List>());
+    });
+
+    test('applyBackupPayload restores tanks from payload', () async {
+      final tank = Tank.create(name: 'Restored Tank', type: 'freshwater', sizeGallons: 55.0);
+      final payload = {
+        'version': '3.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 1,
+        'tanks': [tank.toJson()],
+      };
+
+      final success = await tankNotifier.applyBackupPayload(payload);
+
+      expect(success, isTrue);
+      final tanks = container.read(tankProvider).tanks;
+      expect(tanks.length, equals(1));
+      expect(tanks.first.name, equals('Restored Tank'));
+      expect(tanks.first.type, equals('freshwater'));
+      expect(tanks.first.sizeGallons, equals(55.0));
+    });
+
+    test('applyBackupPayload restores species tags when present', () async {
+      final payload = {
+        'version': '3.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 0,
+        'tanks': [],
+        'speciesTags': {
+          'Tetras': ['Neon Tetra', 'Cardinal Tetra'],
+        },
+      };
+
+      final success = await tankNotifier.applyBackupPayload(payload);
+
+      expect(success, isTrue);
+      final tags = container.read(speciesTagsProvider.notifier).exportTags();
+      expect(tags['Tetras'], equals(['Neon Tetra', 'Cardinal Tetra']));
+    });
+
+    test('applyBackupPayload restores tank tags when present', () async {
+      final payload = {
+        'version': '3.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 0,
+        'tanks': [],
+        'tankTags': [
+          {'name': 'Planted', 'color': null},
+          {'name': 'Reef', 'color': null},
+        ],
+      };
+
+      final success = await tankNotifier.applyBackupPayload(payload);
+
+      expect(success, isTrue);
+      final tankTags = container.read(tankTagsProvider.notifier).exportTags();
+      expect(tankTags.any((t) => t.name == 'Planted'), isTrue);
+      expect(tankTags.any((t) => t.name == 'Reef'), isTrue);
+    });
+
+    test('applyBackupPayload succeeds without optional fields', () async {
+      // Payload without speciesTags, tankTags, reschedulePreferences, dosingPresets
+      final tank = Tank.create(name: 'Basic Tank', type: 'freshwater');
+      final payload = {
+        'version': '2.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 1,
+        'tanks': [tank.toJson()],
+      };
+
+      final success = await tankNotifier.applyBackupPayload(payload);
+
+      expect(success, isTrue);
+      expect(container.read(tankProvider).tanks.length, equals(1));
+    });
+
+    test('applyBackupPayload fails gracefully on missing required fields', () async {
+      final invalidPayloads = [
+        <String, dynamic>{},
+        {'tanks': []},
+        {'version': '1.0.0'},
+        {'version': '1.0.0', 'tanks': 'not-a-list'},
+      ];
+
+      for (final payload in invalidPayloads) {
+        final success = await tankNotifier.applyBackupPayload(payload);
+        expect(success, isFalse, reason: 'Should fail for payload: $payload');
+      }
+    });
+
+    test('applyBackupPayload replaces existing tanks', () async {
+      tankNotifier.addTank(Tank.create(name: 'Old Tank', type: 'freshwater'));
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      final newTank = Tank.create(name: 'New Tank', type: 'marine');
+      final payload = {
+        'version': '3.0.0',
+        'appName': 'Aquarium AI',
+        'exportDate': DateTime.now().toIso8601String(),
+        'tankCount': 1,
+        'tanks': [newTank.toJson()],
+      };
+
+      final success = await tankNotifier.applyBackupPayload(payload);
+
+      expect(success, isTrue);
+      final tanks = container.read(tankProvider).tanks;
+      expect(tanks.length, equals(1));
+      expect(tanks.first.name, equals('New Tank'));
+    });
+
+    test('buildBackupPayload then applyBackupPayload roundtrip', () async {
+      final original = Tank.create(
+        name: 'Roundtrip Tank',
+        type: 'freshwater',
+        sizeGallons: 75.0,
+        notes: 'Test notes',
+      );
+      tankNotifier.addTank(original);
+
+      final payload = await tankNotifier.buildBackupPayload();
+
+      // Clear tanks and restore via applyBackupPayload
+      final container2 = ProviderContainer();
+      addTearDown(container2.dispose);
+      SharedPreferences.setMockInitialValues({});
+      await Future.delayed(const Duration(milliseconds: 100));
+      final success = await container2.read(tankProvider.notifier).applyBackupPayload(payload);
+
+      expect(success, isTrue);
+      final restored = container2.read(tankProvider).tanks;
+      expect(restored.length, equals(1));
+      expect(restored.first.name, equals('Roundtrip Tank'));
+      expect(restored.first.sizeGallons, equals(75.0));
+      expect(restored.first.notes, equals('Test notes'));
     });
   });
 }

@@ -133,6 +133,13 @@ class _FounderPerksScreenState extends ConsumerState<FounderPerksScreen> {
             accentColor: founderColor,
             isActive: isFounder,
           ),
+          _PerkCard(
+            icon: Icons.cloud_done,
+            title: l10n.founderPerkCloudBackup,
+            accessText: l10n.perkAccessBackupRestore,
+            accentColor: founderColor,
+            isActive: isFounder,
+          ),
 
           // CTA for non-founders
           if (!isFounder && !kIsWeb) ...[

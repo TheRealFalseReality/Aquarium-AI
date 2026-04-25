@@ -161,6 +161,11 @@ class RemoveAdsDialog extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 _PerkRow(icon: Icons.diamond, label: l10n.founderPerkBadge),
+                const SizedBox(height: 4),
+                _PerkRow(
+                  icon: Icons.cloud_done,
+                  label: l10n.founderPerkCloudBackup,
+                ),
               ],
             ),
           ),

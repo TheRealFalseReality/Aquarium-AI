@@ -111,8 +111,15 @@ Ihren Tank-Daten vorgeladen sind:
 
 ### Sicherung & Wiederherstellung
 
-Verwenden Sie **Einstellungen → Sicherung / Wiederherstellung**, um alle Tank-Daten
-in eine JSON-Datei zu exportieren und auf einem anderen Gerät zu importieren.
+Verwenden Sie **Einstellungen → Sicherung / Wiederherstellung**, um alle Tank-Daten zu exportieren und zu importieren.
+
+#### Lokale Sicherung & Wiederherstellung
+
+Speichern Sie eine vollständige JSON-Sicherungsdatei auf Ihrem Gerät und stellen Sie sie auf einem beliebigen Gerät wieder her.
+
+#### Cloud-Sicherung & Wiederherstellung *(Gründer-Aquarianer)*
+
+Speichern Sie Ihre Daten sicher in der Cloud, verknüpft mit Ihrem Konto. Erfordert Anmeldung und **Gründer-Aquarianer**-Status. Jederzeit aus der Cloud wiederherstellen — ideal beim Gerätewechsel ohne Dateiverwaltung.
 
 ---
 
@@ -397,7 +404,7 @@ Google, Facebook oder anonym bleiben verwenden. Anonyme Konten können später u
 | **AI-API-Schlüssel** | Persönliche API-Schlüssel speichern |
 | **Chat-Verlaufslimit** | Anzahl der vorherigen Nachrichten, die mit jeder Anfrage gesendet werden |
 | **Tank-Anzeige** | Fotos, Metriken, Bewohner, Notizen usw. ein-/ausblenden |
-| **Sicherung / Wiederherstellung** | Alle Tank-Daten exportieren und importieren |
+| **Sicherung / Wiederherstellung** | Alle Tank-Daten exportieren und importieren; Gründer-Aquarianer können auch in der Cloud sichern |
 | **Benachrichtigungen** | Erinnerungen für Wasserwechsel, Fütterung usw. planen |
 
 ### Erscheinungsbild

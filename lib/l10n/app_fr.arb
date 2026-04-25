@@ -2096,5 +2096,25 @@
   "waterChangeCalculatorMissingTankSize": "Ajoutez d'abord la taille du bac pour calculer le volume de changement d'eau.",
   "@waterChangeCalculatorMissingTankSize": {
     "description": "Message shown when water change volume calculator is opened for a tank without size data"
-  }
+  },
+  "backupDataOnline": "Sauvegarde en Ligne",
+  "backupDataOnlineDesc": "Enregistrer les données dans le cloud (Aquariophile Fondateur)",
+  "restoreDataOnline": "Restauration en Ligne",
+  "restoreDataOnlineDesc": "Charger les données depuis le cloud (Aquariophile Fondateur)",
+  "cloudBackupDialogTitle": "Sauvegarde en Ligne",
+  "cloudBackupDialogContent": "Vos données d'aquarium seront sauvegardées de façon sécurisée dans le cloud, liées à votre compte.",
+  "cloudBackupSuccess": "Sauvegarde en ligne enregistrée avec succès",
+  "cloudBackupFailed": "Sauvegarde en ligne échouée : {error}",
+  "cloudRestoreDialogTitle": "Restauration en Ligne",
+  "cloudRestoreDialogContent": "Votre sauvegarde en ligne du {date} ({count} aquarium(s)) remplacera toutes les données actuelles.",
+  "cloudRestoreSuccess": "Données restaurées depuis le cloud avec succès",
+  "cloudRestoreFailed": "Restauration depuis le cloud échouée : {error}",
+  "noCloudBackupFound": "Aucune sauvegarde en ligne trouvée pour votre compte.",
+  "cloudBackupRequiresSignIn": "Connectez-vous pour utiliser la sauvegarde en ligne.",
+  "cloudRestoreRequiresSignIn": "Connectez-vous pour utiliser la restauration en ligne.",
+  "cloudBackupButtonLabel": "Sauvegarder dans le Cloud",
+  "cloudRestoreButtonLabel": "Restaurer depuis le Cloud",
+  "lastCloudBackup": "Dernière sauvegarde en ligne",
+  "founderPerkCloudBackup": "Sauvegarde et restauration en ligne",
+  "perkAccessBackupRestore": "Aller dans Paramètres → Sauvegarde/Restauration"
 }
