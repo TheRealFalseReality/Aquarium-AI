@@ -327,6 +327,13 @@ Appuyez sur la flèche **développer** d'un groupe de paramètres pour afficher 
 graphique de série temporelle. Utile pour repérer les tendances et valider l'impact
 des changements d'eau.
 
+### Alertes proactives de tendance IA
+
+Lorsqu'un schéma à risque est détecté dans les relevés récents, le Journal des
+paramètres affiche désormais en haut une carte **Alertes de tendance IA**. Par
+exemple, si le nitrate augmente pendant plusieurs jours, l'app suggère de manière
+proactive d'envisager un changement d'eau.
+
 ---
 
 ## Journal de dosage

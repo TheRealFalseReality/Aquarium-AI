@@ -9,6 +9,7 @@ import '../models/tank.dart';
 import '../models/water_parameter.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../utils/parameter_trend_alerts.dart';
 
 class ParameterLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
@@ -770,6 +771,9 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final cs = Theme.of(context).colorScheme;
     final currentTank = _getCurrentTank();
     final groupedParameters = _groupParametersByType(currentTank);
+    final proactiveAlerts = buildProactiveParameterAlerts(
+      currentTank.waterParameters,
+    );
 
     // Only show salinity, calcium, magnesium, and iodine for marine tanks
     final parameterTypes = currentTank.type == 'marine'
@@ -838,6 +842,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  if (proactiveAlerts.isNotEmpty) ...[
+                    _buildProactiveTrendAlerts(context, proactiveAlerts),
+                    const SizedBox(height: 24),
+                  ],
                   ...parameterTypes.map((paramType) {
                     final parameters = groupedParameters[paramType] ?? [];
                     if (parameters.isEmpty) return const SizedBox.shrink();
@@ -914,6 +922,65 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
           onPressed: () => _addParameter(context),
           icon: const Icon(Icons.add),
           label: Text(l10n.addReading),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProactiveTrendAlerts(
+    BuildContext context,
+    List<ParameterTrendAlert> alerts,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      color: cs.primaryContainer.withOpacity(0.45),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.auto_awesome, color: cs.primary),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    l10n.proactiveTrendFlagsTitle,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ...alerts.map((alert) {
+              final message = switch (alert.parameterType) {
+                'nitrate' => l10n.nitrateRisingDaysAlert(alert.trendDays),
+                _ => '',
+              };
+
+              if (message.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('• '),
+                    Expanded(
+                      child: Text(message),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
         ),
       ),
     );
