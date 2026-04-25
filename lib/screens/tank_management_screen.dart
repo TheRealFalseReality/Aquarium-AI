@@ -463,6 +463,24 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => BackupRestoreUtils.importDataOnline(
+                        context,
+                        ref,
+                        source: 'tank_management_empty',
+                      ),
+                      icon: const Icon(Icons.cloud_download, size: 18),
+                      label: Text(l10n.restoreDataOnline),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.deepPurple,
+                        side: const BorderSide(color: Colors.deepPurple),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -1089,6 +1107,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         source: 'tank_management',
                       );
                       break;
+                    case 'restore_cloud':
+                      BackupRestoreUtils.importDataOnline(
+                        context,
+                        ref,
+                        source: 'tank_management',
+                      );
+                      break;
                     case 'import_tank':
                       BackupRestoreUtils.importTankShare(
                         context,
@@ -1116,6 +1141,16 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         const Icon(Icons.restore, color: Colors.green),
                         const SizedBox(width: 8),
                         Flexible(child: Text(l10n.restore)),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'restore_cloud',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.cloud_download, color: Colors.deepPurple),
+                        const SizedBox(width: 8),
+                        Flexible(child: Text(l10n.restoreDataOnline)),
                       ],
                     ),
                   ),
