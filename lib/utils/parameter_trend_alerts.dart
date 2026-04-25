@@ -38,10 +38,28 @@ ParameterTrendAlert? _buildNitrateRisingAlert(List<WaterParameter> parameters) {
     return null;
   }
 
-  final risingStreak = <WaterParameter>[nitrateReadings.last];
+  // Normalize to one reading per calendar day (latest reading for that day) so
+  // intra-day fluctuations do not break day-over-day trend analysis.
+  final dailyReadingsByDate = <DateTime, WaterParameter>{};
+  for (final reading in nitrateReadings) {
+    final calendarDay = DateTime(
+      reading.dateRecorded.year,
+      reading.dateRecorded.month,
+      reading.dateRecorded.day,
+    );
+    final existing = dailyReadingsByDate[calendarDay];
+    if (existing == null || reading.dateRecorded.isAfter(existing.dateRecorded)) {
+      dailyReadingsByDate[calendarDay] = reading;
+    }
+  }
 
-  for (var i = nitrateReadings.length - 2; i >= 0; i--) {
-    final older = nitrateReadings[i];
+  final dailyReadings = dailyReadingsByDate.values.toList()
+    ..sort((a, b) => a.dateRecorded.compareTo(b.dateRecorded));
+
+  final risingStreak = <WaterParameter>[dailyReadings.last];
+
+  for (var i = dailyReadings.length - 2; i >= 0; i--) {
+    final older = dailyReadings[i];
     final newer = risingStreak.first;
     final dayGap = newer.dateRecorded.difference(older.dateRecorded).inDays;
 
@@ -59,27 +77,10 @@ ParameterTrendAlert? _buildNitrateRisingAlert(List<WaterParameter> parameters) {
     return null;
   }
 
-  // Use distinct calendar days (not 24-hour periods) so multiple readings on
-  // the same date don't incorrectly appear as a multi-day trend.
-  final trendCalendarDays = risingStreak
-      .map(
-        (reading) => DateTime(
-          reading.dateRecorded.year,
-          reading.dateRecorded.month,
-          reading.dateRecorded.day,
-        ),
-      )
-      .toSet()
-      .length;
-
-  if (trendCalendarDays < _minTrendDaysForAlert) {
-    return null;
-  }
-
   final latest = risingStreak.last;
   return ParameterTrendAlert(
     parameterType: 'nitrate',
-    trendDays: trendCalendarDays,
+    trendDays: risingStreak.length,
     latestValue: latest.value,
     unit: latest.unit,
   );
