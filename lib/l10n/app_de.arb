@@ -2109,6 +2109,7 @@
   "cloudRestoreFailed": "Cloud-Wiederherstellung fehlgeschlagen: {error}",
   "noCloudBackupFound": "Keine Cloud-Sicherung für Ihr Konto gefunden.",
   "cloudBackupRequiresSignIn": "Melden Sie sich an, um die Cloud-Sicherung zu verwenden.",
+  "cloudRestoreRequiresSignIn": "Melden Sie sich an, um die Cloud-Wiederherstellung zu verwenden.",
   "cloudBackupButtonLabel": "In Cloud speichern",
   "cloudRestoreButtonLabel": "Aus Cloud wiederherstellen",
   "lastCloudBackup": "Letzte Cloud-Sicherung",

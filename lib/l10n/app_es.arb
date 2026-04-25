@@ -2109,6 +2109,7 @@
   "cloudRestoreFailed": "Error al restaurar desde la nube: {error}",
   "noCloudBackupFound": "No se encontró copia en la nube para tu cuenta.",
   "cloudBackupRequiresSignIn": "Inicia sesión para usar la copia en la nube.",
+  "cloudRestoreRequiresSignIn": "Inicia sesión para usar la restauración en la nube.",
   "cloudBackupButtonLabel": "Guardar en la Nube",
   "cloudRestoreButtonLabel": "Restaurar desde la Nube",
   "lastCloudBackup": "Última copia en la nube",

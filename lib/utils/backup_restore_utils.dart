@@ -635,7 +635,7 @@ class BackupRestoreUtils {
           children: [
             const Icon(Icons.cloud_upload, color: Colors.purple),
             const SizedBox(width: 8),
-            Text(l10n.cloudBackupDialogTitle),
+            Flexible(child: Text(l10n.cloudBackupDialogTitle)),
           ],
         ),
         content: Column(
@@ -739,7 +739,7 @@ class BackupRestoreUtils {
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(l10n.cloudRestoreDialogTitle),
-          content: Text(l10n.cloudBackupRequiresSignIn),
+          content: Text(l10n.cloudRestoreRequiresSignIn),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
@@ -787,7 +787,7 @@ class BackupRestoreUtils {
           children: [
             const Icon(Icons.cloud_download, color: Colors.deepPurple),
             const SizedBox(width: 8),
-            Text(l10n.cloudRestoreDialogTitle),
+            Flexible(child: Text(l10n.cloudRestoreDialogTitle)),
           ],
         ),
         content: Column(

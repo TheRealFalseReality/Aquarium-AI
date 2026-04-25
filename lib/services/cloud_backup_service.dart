@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -12,8 +10,8 @@ class CloudBackupService {
   static const String _backupDocId = 'aquarium_backup';
 
   /// Saves [backupJson] (the raw JSON string from the backup payload) to
-  /// Firestore. Returns `true` on success, `false` on failure or when the
-  /// user is not signed in.
+  /// Firestore as a plain string field. Returns `true` on success, `false`
+  /// on failure or when the user is not signed in.
   static Future<bool> saveBackup(
     String backupJson, {
     int tankCount = 0,
@@ -23,16 +21,13 @@ class CloudBackupService {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return false;
 
-      // Base64-encode the JSON so Firestore stores it safely as a string.
-      final encoded = base64Encode(utf8.encode(backupJson));
-
       await FirebaseFirestore.instance
           .collection(_usersCollection)
           .doc(user.uid)
           .collection(_backupsCollection)
           .doc(_backupDocId)
           .set({
-            'backupData': encoded,
+            'backupData': backupJson,
             'backedUpAt': FieldValue.serverTimestamp(),
             'tankCount': tankCount,
             'appVersion': appVersion,
@@ -62,10 +57,10 @@ class CloudBackupService {
       if (!doc.exists) return null;
 
       final data = doc.data();
-      final encoded = data?['backupData'] as String?;
-      if (encoded == null) return null;
+      final backupJson = data?['backupData'] as String?;
+      if (backupJson == null) return null;
 
-      return utf8.decode(base64Decode(encoded));
+      return backupJson;
     } catch (e) {
       if (kDebugMode) debugPrint('CloudBackupService.loadBackup error: $e');
       return null;

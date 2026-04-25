@@ -2109,6 +2109,7 @@
   "cloudRestoreFailed": "Restauration depuis le cloud échouée : {error}",
   "noCloudBackupFound": "Aucune sauvegarde en ligne trouvée pour votre compte.",
   "cloudBackupRequiresSignIn": "Connectez-vous pour utiliser la sauvegarde en ligne.",
+  "cloudRestoreRequiresSignIn": "Connectez-vous pour utiliser la restauration en ligne.",
   "cloudBackupButtonLabel": "Sauvegarder dans le Cloud",
   "cloudRestoreButtonLabel": "Restaurer depuis le Cloud",
   "lastCloudBackup": "Dernière sauvegarde en ligne",

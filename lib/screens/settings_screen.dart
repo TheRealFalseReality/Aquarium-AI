@@ -3957,7 +3957,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         final backedUpAt = cloudInfo['backedUpAt'] as DateTime?;
         if (backedUpAt != null) {
           stats['lastCloudBackupTime'] = _formatDateTime(backedUpAt);
-          stats['lastCloudBackupTankCount'] = cloudInfo['tankCount'] as int? ?? 0;
         }
       }
 

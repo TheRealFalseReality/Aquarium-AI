@@ -5946,6 +5946,10 @@
   "@cloudBackupRequiresSignIn": {
     "description": "Message shown when user tries cloud backup but is not signed in"
   },
+  "cloudRestoreRequiresSignIn": "Sign in to use cloud restore.",
+  "@cloudRestoreRequiresSignIn": {
+    "description": "Message shown when user tries cloud restore but is not signed in"
+  },
   "cloudBackupButtonLabel": "Save to Cloud",
   "@cloudBackupButtonLabel": {
     "description": "Button label in the cloud backup confirmation dialog"

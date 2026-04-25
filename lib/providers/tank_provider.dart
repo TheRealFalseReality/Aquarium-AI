@@ -504,11 +504,15 @@ class TankNotifier extends StateNotifier<TankState> {
     };
   }
 
-  /// Applies a backup payload map to local state.
+  /// Applies a parsed backup payload map to local state.
   ///
-  /// This is the deserialization logic from [importTanksFromFile] extracted so
-  /// that the cloud restore can reuse it without going through file picking.
-  /// Returns `true` on success, `false` on failure.
+  /// This allows restore flows that already have decoded backup data, such as
+  /// cloud restore, to reuse the same payload format without going through file
+  /// picking. Returns `true` on success, `false` on failure.
+  ///
+  /// Note: [importTanksFromFile] independently performs the same deserialization
+  /// after reading from a file. If these ever diverge, prefer refactoring
+  /// [importTanksFromFile] to delegate here.
   Future<bool> applyBackupPayload(Map<String, dynamic> backupData) async {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
