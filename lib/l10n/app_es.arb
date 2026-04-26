@@ -1870,6 +1870,37 @@
   "@manageNotifications": {
     "description": "Button label to navigate to the notification management screen"
   },
+  "setCareRemindersPrompt": "¿Configurar recordatorios para los requisitos de cuidado de estas especies?",
+  "@setCareRemindersPrompt": {
+    "description": "Prompt shown on the compatibility report to offer setting care reminders"
+  },
+  "setCareReminders": "Configurar recordatorios de cuidado",
+  "@setCareReminders": {
+    "description": "Button label to open reminder setup from the compatibility report"
+  },
+  "chooseTankForCareRemindersTitle": "Elige un acuario para los recordatorios",
+  "@chooseTankForCareRemindersTitle": {
+    "description": "Bottom sheet title when selecting a tank for care reminders"
+  },
+  "chooseTankForCareRemindersSubtitle": "Selecciona dónde quieres configurar recordatorios de cuidado para estas especies.",
+  "@chooseTankForCareRemindersSubtitle": {
+    "description": "Bottom sheet subtitle when selecting a tank for care reminders"
+  },
+  "careRemindersPreviewTitle": "Recordatorios de cuidado sugeridos",
+  "@careRemindersPreviewTitle": {
+    "description": "Title of the bottom sheet that previews care reminder types before navigating to the notification manager"
+  },
+  "careRemindersPreviewSubtitle": "Configura estos recordatorios para mantener condiciones saludables para los peces seleccionados.",
+  "@careRemindersPreviewSubtitle": {
+    "description": "Subtitle in the care-reminders preview sheet"
+  },
+  "careRemindersSetUpForTank": "Configurar para {tankName}",
+  "@careRemindersSetUpForTank": {
+    "description": "Button label to confirm opening the notification manager for a specific tank",
+    "placeholders": {
+      "tankName": {"type": "String"}
+    }
+  },
   "reschedule": "Reprogramar",
   "@reschedule": {
     "description": "Button label for the reschedule action on a notification"
