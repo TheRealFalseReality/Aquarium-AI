@@ -260,7 +260,10 @@ class NotificationService {
   ///
   /// If [useScheduledNextDate] is true, the notification will be scheduled for
   /// [notification.scheduledNextDate] (falling back to [notification.notificationDateTime]).
-  /// This is used by snooze actions.
+  /// Use this for snooze actions after [scheduledNextDate] has been updated.
+  ///
+  /// In contrast, [useExactDateTime] schedules at [notification.notificationDateTime]
+  /// (the configured reminder time) without recalculating from activity logs.
   ///
   /// If [useCurrentTime] is true and [activityLogs] is provided, the notification
   /// will use the time from the activity log instead of the original notification
