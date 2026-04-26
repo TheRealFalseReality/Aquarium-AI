@@ -54,8 +54,11 @@ class TankNotifier extends StateNotifier<TankState> {
   TankNotifier(this._ref) : super(TankState(isLoading: true)) {
     _loadTanks();
     _notificationActionSubscription = NotificationService().actionUpdates.listen((
-      _,
+      update,
     ) {
+      // Force a reload so foreground actions reflected in SharedPreferences
+      // immediately propagate to Riverpod state.
+      if (update.tankId.isEmpty) return;
       _loadTanks();
     });
   }

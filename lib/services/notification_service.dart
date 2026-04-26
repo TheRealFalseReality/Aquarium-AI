@@ -635,20 +635,19 @@ class NotificationService {
     }
 
     final payloadData = _parseNotificationPayload(payload!)!;
-
-    final payloadModel = payloadData;
+    final resolvedActionId = actionId!;
     final actionApplier =
         _actionApplierOverride ?? _applyActionToStoredTankNotification;
     await actionApplier(
-      tankId: payloadModel.tankId,
-      notificationId: payloadModel.notificationId,
-      actionId: actionId!,
+      tankId: payloadData.tankId,
+      notificationId: payloadData.notificationId,
+      actionId: resolvedActionId,
     );
     _actionUpdatesController.add(
       NotificationActionUpdate(
-        tankId: payloadModel.tankId,
-        notificationId: payloadModel.notificationId,
-        actionId: actionId!,
+        tankId: payloadData.tankId,
+        notificationId: payloadData.notificationId,
+        actionId: resolvedActionId,
       ),
     );
 
