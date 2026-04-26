@@ -2802,6 +2802,26 @@
   "@rateLimitFounderUpsellBody": {
     "description": "Founder upsell text shown inside the rate-limit error dialog"
   },
+  "rateLimitSignInPerksTitle": "Free Account Benefits",
+  "@rateLimitSignInPerksTitle": {
+    "description": "Title of the sign-in/create-account upsell box shown inside the rate-limit error dialog for anonymous users"
+  },
+  "rateLimitSignInUpsellBody": "Create a free account or sign in to get more free AI requests and sync your aquariums across devices.",
+  "@rateLimitSignInUpsellBody": {
+    "description": "Sign-in upsell text shown inside the rate-limit error dialog for anonymous users"
+  },
+  "rateLimitSignInButton": "Sign In / Create Account",
+  "@rateLimitSignInButton": {
+    "description": "Button label in the rate-limit dialog that takes anonymous users to the sign-in/registration screen"
+  },
+  "rateLimitPerkMoreRequests": "More free AI requests per day",
+  "@rateLimitPerkMoreRequests": {
+    "description": "Perk row label shown in the rate-limit sign-in upsell box: benefit of creating an account"
+  },
+  "rateLimitPerkSyncAquariums": "Sync aquariums across devices",
+  "@rateLimitPerkSyncAquariums": {
+    "description": "Perk row label shown in the rate-limit sign-in upsell box: benefit of creating an account"
+  },
   "aiErrorTitle": "AI Error",
   "@aiErrorTitle": {
     "description": "Default title of the AI error dialog"
