@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +14,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/tank.dart';
 import '../services/analytics_service.dart';
+import '../services/notification_service.dart';
 import 'app_settings_provider.dart';
 import 'dosing_presets_provider.dart';
 import 'species_tags_provider.dart';
@@ -47,9 +49,21 @@ class TankState {
 class TankNotifier extends StateNotifier<TankState> {
   static const String _tanksKey = 'user_tanks';
   final Ref _ref;
+  StreamSubscription<NotificationActionUpdate>? _notificationActionSubscription;
 
   TankNotifier(this._ref) : super(TankState(isLoading: true)) {
     _loadTanks();
+    _notificationActionSubscription = NotificationService().actionUpdates.listen((
+      _,
+    ) {
+      _loadTanks();
+    });
+  }
+
+  @override
+  void dispose() {
+    _notificationActionSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadTanks() async {

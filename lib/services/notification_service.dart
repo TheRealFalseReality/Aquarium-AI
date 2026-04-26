@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -13,9 +14,45 @@ import '../models/notification_log.dart';
 import '../models/tank.dart';
 import '../models/tank_notification.dart';
 
+class NotificationActionLabels {
+  final String done;
+  final String snoozeDay;
+  final String snoozeWeek;
+
+  const NotificationActionLabels({
+    required this.done,
+    required this.snoozeDay,
+    required this.snoozeWeek,
+  });
+}
+
+class NotificationActionUpdate {
+  final String tankId;
+  final String notificationId;
+  final String actionId;
+
+  const NotificationActionUpdate({
+    required this.tankId,
+    required this.notificationId,
+    required this.actionId,
+  });
+}
+
+class NotificationActionPayload {
+  final String tankId;
+  final String notificationId;
+
+  const NotificationActionPayload({
+    required this.tankId,
+    required this.notificationId,
+  });
+}
+
 @pragma('vm:entry-point')
 Future<void> notificationTapBackground(NotificationResponse response) async {
   try {
+    WidgetsFlutterBinding.ensureInitialized();
+    DartPluginRegistrant.ensureInitialized();
     await NotificationService().handleNotificationResponse(response);
   } catch (e) {
     debugPrint('Failed to handle background notification action: $e');
@@ -36,11 +73,65 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
+  final StreamController<NotificationActionUpdate> _actionUpdatesController =
+      StreamController<NotificationActionUpdate>.broadcast();
 
   bool _initialized = false;
+  NotificationActionLabels? _cachedActionLabels;
+  String? _cachedActionLabelsLocale;
+  Future<void> Function({
+    required String tankId,
+    required String notificationId,
+    required String actionId,
+  })?
+  _actionApplierOverride;
 
   /// Navigator key for app-wide navigation from notification taps
   GlobalKey<NavigatorState>? _navigatorKey;
+
+  Stream<NotificationActionUpdate> get actionUpdates =>
+      _actionUpdatesController.stream;
+
+  @visibleForTesting
+  void setActionApplierOverrideForTesting(
+    Future<void> Function({
+      required String tankId,
+      required String notificationId,
+      required String actionId,
+    })
+    actionApplier,
+  ) {
+    _actionApplierOverride = actionApplier;
+  }
+
+  @visibleForTesting
+  void clearActionApplierOverrideForTesting() {
+    _actionApplierOverride = null;
+  }
+
+  bool _isSupportedActionId(String? actionId) {
+    return actionId == actionDone ||
+        actionId == actionSnoozeDay ||
+        actionId == actionSnoozeWeek;
+  }
+
+  @visibleForTesting
+  bool canHandleNotificationActionForTesting({
+    required String? actionId,
+    required String? payload,
+  }) {
+    if (payload == null || payload.isEmpty || !_isSupportedActionId(actionId)) {
+      return false;
+    }
+    return parseNotificationPayloadForTesting(payload) != null;
+  }
+
+  @visibleForTesting
+  NotificationActionPayload? parseNotificationPayloadForTesting(
+    String payload,
+  ) {
+    return _parseNotificationPayload(payload);
+  }
 
   /// Initialize the notification service
   /// [navigatorKey] is optional and used for navigating when notifications are tapped.
@@ -69,7 +160,7 @@ class NotificationService {
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
-    final actionLabels = await _loadNotificationActionLabels();
+    final actionLabels = await _getNotificationActionLabels();
 
     // iOS initialization settings
     final iosSettings = DarwinInitializationSettings(
@@ -78,9 +169,15 @@ class NotificationService {
       requestSoundPermission: true,
       notificationCategories: {
         DarwinNotificationCategory(_iosNotificationCategory, actions: [
-          DarwinNotificationAction.plain(actionDone, actionLabels.$1),
-          DarwinNotificationAction.plain(actionSnoozeDay, actionLabels.$2),
-          DarwinNotificationAction.plain(actionSnoozeWeek, actionLabels.$3),
+          DarwinNotificationAction.plain(actionDone, actionLabels.done),
+          DarwinNotificationAction.plain(
+            actionSnoozeDay,
+            actionLabels.snoozeDay,
+          ),
+          DarwinNotificationAction.plain(
+            actionSnoozeWeek,
+            actionLabels.snoozeWeek,
+          ),
         ]),
       },
     );
@@ -161,6 +258,10 @@ class NotificationService {
   /// or repeat frequency calculations. This is useful when the user explicitly
   /// wants to schedule for a specific date/time.
   ///
+  /// If [useScheduledNextDate] is true, the notification will be scheduled for
+  /// [notification.scheduledNextDate] (falling back to [notification.notificationDateTime]).
+  /// This is used by snooze actions.
+  ///
   /// If [useCurrentTime] is true and [activityLogs] is provided, the notification
   /// will use the time from the activity log instead of the original notification
   /// time. This is used for "Reschedule from Now" to schedule at the current time.
@@ -173,6 +274,7 @@ class NotificationService {
     required TankNotification notification,
     List<NotificationLog>? activityLogs,
     bool useExactDateTime = false,
+    bool useScheduledNextDate = false,
     bool useCurrentTime = false,
   }) async {
     if (!_initialized) {
@@ -181,7 +283,7 @@ class NotificationService {
 
     // Generate unique ID from notification ID hash
     final int notificationId = notification.id.hashCode;
-    final actionLabels = await _loadNotificationActionLabels();
+    final actionLabels = await _getNotificationActionLabels();
 
     // Create notification details
     final androidDetails = AndroidNotificationDetails(
@@ -194,19 +296,19 @@ class NotificationService {
       actions: <AndroidNotificationAction>[
         AndroidNotificationAction(
           actionDone,
-          actionLabels.$1,
+          actionLabels.done,
           cancelNotification: true,
           showsUserInterface: false,
         ),
         AndroidNotificationAction(
           actionSnoozeDay,
-          actionLabels.$2,
+          actionLabels.snoozeDay,
           cancelNotification: true,
           showsUserInterface: false,
         ),
         AndroidNotificationAction(
           actionSnoozeWeek,
-          actionLabels.$3,
+          actionLabels.snoozeWeek,
           cancelNotification: true,
           showsUserInterface: false,
         ),
@@ -233,11 +335,11 @@ class NotificationService {
 
     // Determine the next notification date
     DateTime? nextDate;
-    if (useExactDateTime) {
-      // Use the exact next date already stored on the notification model.
-      // This flag is used for both explicit "use specified time" choices
-      // and snooze actions that directly update scheduledNextDate.
+    if (useScheduledNextDate) {
       nextDate = notification.getImmediateNextDate();
+    } else if (useExactDateTime) {
+      // Schedule exactly at the notification's explicitly configured date/time.
+      nextDate = notification.notificationDateTime;
     } else if (notification.repeatFrequency == RepeatFrequency.none) {
       // Use the exact date/time specified in the notification for:
       // - Non-repeating notifications (getNextNotificationDate returns null for these)
@@ -256,14 +358,13 @@ class NotificationService {
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
 
-        await _notifications.zonedSchedule(
+      await _notifications.zonedSchedule(
         id: notificationId,
         title: title,
         body: body,
         scheduledDate: scheduledDate,
         notificationDetails: details,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        // Prefer `::` separator to avoid ambiguity in payload parsing.
         payload: '$tankId::${notification.id}',
       );
     }
@@ -435,8 +536,12 @@ class NotificationService {
     return androidEnabled;
   }
 
-  Future<(String, String, String)> _loadNotificationActionLabels() async {
+  Future<NotificationActionLabels> _getNotificationActionLabels() async {
     final languageCode = PlatformDispatcher.instance.locale.languageCode;
+    if (_cachedActionLabels != null && _cachedActionLabelsLocale == languageCode) {
+      return _cachedActionLabels!;
+    }
+
     final locale = switch (languageCode) {
       'de' => const Locale('de'),
       'es' => const Locale('es'),
@@ -444,11 +549,14 @@ class NotificationService {
       _ => const Locale('en'),
     };
     final l10n = await AppLocalizations.delegate.load(locale);
-    return (
-      l10n.notificationActionDone,
-      l10n.notificationActionSnooze1Day,
-      l10n.notificationActionSnooze1Week,
+    final labels = NotificationActionLabels(
+      done: l10n.notificationActionDone,
+      snoozeDay: l10n.notificationActionSnooze1Day,
+      snoozeWeek: l10n.notificationActionSnooze1Week,
     );
+    _cachedActionLabels = labels;
+    _cachedActionLabelsLocale = languageCode;
+    return labels;
   }
 
   /// Send a test notification immediately (for debugging)
@@ -508,49 +616,60 @@ class NotificationService {
   /// the corresponding tank update. Returns `false` when the response should be
   /// treated as a normal tap/navigation event.
   Future<bool> handleNotificationResponse(NotificationResponse response) async {
-    final actionId = response.actionId;
-    final payload = response.payload;
+    return handleNotificationActionForTesting(
+      actionId: response.actionId,
+      payload: response.payload,
+    );
+  }
 
-    if (payload == null || payload.isEmpty) {
+  @visibleForTesting
+  Future<bool> handleNotificationActionForTesting({
+    required String? actionId,
+    required String? payload,
+  }) async {
+    if (!canHandleNotificationActionForTesting(
+      actionId: actionId,
+      payload: payload,
+    )) {
       return false;
     }
 
-    if (actionId != actionDone &&
-        actionId != actionSnoozeDay &&
-        actionId != actionSnoozeWeek) {
-      return false;
-    }
+    final payloadData = _parseNotificationPayload(payload!)!;
 
-    final payloadData = _parseNotificationPayload(payload);
-    if (payloadData == null) {
-      return false;
-    }
-
-    final tankId = payloadData.$1;
-    final notificationId = payloadData.$2;
-    await _applyActionToStoredTankNotification(
-      tankId: tankId,
-      notificationId: notificationId,
+    final payloadModel = payloadData;
+    final actionApplier =
+        _actionApplierOverride ?? _applyActionToStoredTankNotification;
+    await actionApplier(
+      tankId: payloadModel.tankId,
+      notificationId: payloadModel.notificationId,
       actionId: actionId!,
+    );
+    _actionUpdatesController.add(
+      NotificationActionUpdate(
+        tankId: payloadModel.tankId,
+        notificationId: payloadModel.notificationId,
+        actionId: actionId!,
+      ),
     );
 
     return true;
   }
 
-  /// Parses notification payload to `(tankId, notificationId)`.
+  /// Parses notification payload to tank and notification IDs.
   ///
   /// Preferred format is `tankId::notificationId`.
   /// Legacy `tankId_notificationId` remains supported for already-scheduled
   /// notifications created before the separator migration.
-  (String, String)? _parseNotificationPayload(String payload) {
-    // Preferred payload format uses `tankId::notificationId`.
-    // `_` fallback remains for previously scheduled notifications.
+  NotificationActionPayload? _parseNotificationPayload(String payload) {
     if (payload.contains('::')) {
       final parts = payload.split('::');
       if (parts.length == 2 &&
           parts[0].isNotEmpty &&
           parts[1].isNotEmpty) {
-        return (parts[0], parts[1]);
+        return NotificationActionPayload(
+          tankId: parts[0],
+          notificationId: parts[1],
+        );
       }
     }
 
@@ -559,9 +678,9 @@ class NotificationService {
       return null;
     }
 
-    return (
-      payload.substring(0, separatorIndex),
-      payload.substring(separatorIndex + 1),
+    return NotificationActionPayload(
+      tankId: payload.substring(0, separatorIndex),
+      notificationId: payload.substring(separatorIndex + 1),
     );
   }
 
@@ -664,7 +783,7 @@ class NotificationService {
           tankId: tank.id,
           tankName: tank.name,
           notification: updatedNotification,
-          useExactDateTime: true,
+          useScheduledNextDate: true,
         );
       } catch (e) {
         debugPrint('Failed to schedule snoozed notification: $e');

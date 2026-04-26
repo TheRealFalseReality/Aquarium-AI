@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fish_ai/models/tank_notification.dart';
 import 'package:fish_ai/services/notification_service.dart';
@@ -151,6 +152,157 @@ void main() {
       // but the actual platform notification won't be scheduled due to the disabled flag
       expect(nextDate, equals(futureDate));
     });
+
+    group('notification action payload handling', () {
+      test('parses preferred payload format tankId::notificationId', () {
+        final service = NotificationService();
+        final payload = service.parseNotificationPayloadForTesting(
+          'tank-1::notif-1',
+        );
+
+        expect(payload, isNotNull);
+        expect(payload!.tankId, equals('tank-1'));
+        expect(payload.notificationId, equals('notif-1'));
+      });
+
+      test('parses legacy payload format tankId_notificationId', () {
+        final service = NotificationService();
+        final payload = service.parseNotificationPayloadForTesting(
+          'tank-legacy_notif-legacy',
+        );
+
+        expect(payload, isNotNull);
+        expect(payload!.tankId, equals('tank-legacy'));
+        expect(payload.notificationId, equals('notif-legacy'));
+      });
+
+      test('returns null for invalid payload formats', () {
+        final service = NotificationService();
+
+        expect(
+          service.parseNotificationPayloadForTesting('missing-separator'),
+          isNull,
+        );
+        expect(
+          service.parseNotificationPayloadForTesting('tank::notification::extra'),
+          isNull,
+        );
+        expect(
+          service.parseNotificationPayloadForTesting('_notification-only'),
+          isNull,
+        );
+      });
+
+      test('supports only known action IDs when payload is valid', () {
+        final service = NotificationService();
+
+        expect(
+          service.canHandleNotificationActionForTesting(
+            actionId: NotificationService.actionDone,
+            payload: 'tank-1::notif-1',
+          ),
+          isTrue,
+        );
+        expect(
+          service.canHandleNotificationActionForTesting(
+            actionId: NotificationService.actionSnoozeDay,
+            payload: 'tank-1::notif-1',
+          ),
+          isTrue,
+        );
+        expect(
+          service.canHandleNotificationActionForTesting(
+            actionId: NotificationService.actionSnoozeWeek,
+            payload: 'tank-1::notif-1',
+          ),
+          isTrue,
+        );
+      });
+
+      test('rejects non-action taps, empty payload, and invalid payload', () {
+        final service = NotificationService();
+
+        expect(
+          service.canHandleNotificationActionForTesting(
+            actionId: null,
+            payload: 'tank-1::notif-1',
+          ),
+          isFalse,
+        );
+        expect(
+          service.canHandleNotificationActionForTesting(
+            actionId: NotificationResponse.defaultActionId,
+            payload: 'tank-1::notif-1',
+          ),
+          isFalse,
+        );
+        expect(
+          service.canHandleNotificationActionForTesting(
+            actionId: 'unsupported-action',
+            payload: 'tank-1::notif-1',
+          ),
+          isFalse,
+        );
+        expect(
+          service.canHandleNotificationActionForTesting(
+            actionId: NotificationService.actionDone,
+            payload: '',
+          ),
+          isFalse,
+        );
+        expect(
+          service.canHandleNotificationActionForTesting(
+            actionId: NotificationService.actionDone,
+            payload: 'invalid-payload',
+          ),
+          isFalse,
+        );
+      });
+
+      test('returns true for supported actions with preferred payload format', () async {
+        final service = NotificationService();
+        service.setActionApplierOverrideForTesting(({
+          required String tankId,
+          required String notificationId,
+          required String actionId,
+        }) async {});
+
+        final handled = await service.handleNotificationActionForTesting(
+          actionId: NotificationService.actionDone,
+          payload: 'tank-1::notif-1',
+        );
+
+        expect(handled, isTrue);
+        service.clearActionApplierOverrideForTesting();
+      });
+
+      test('returns true for supported actions with legacy payload format', () async {
+        final service = NotificationService();
+        service.setActionApplierOverrideForTesting(({
+          required String tankId,
+          required String notificationId,
+          required String actionId,
+        }) async {});
+
+        final handled = await service.handleNotificationActionForTesting(
+          actionId: NotificationService.actionSnoozeDay,
+          payload: 'tank-1_notif-1',
+        );
+
+        expect(handled, isTrue);
+        service.clearActionApplierOverrideForTesting();
+      });
+
+      test('returns false for unsupported action ids', () async {
+        final service = NotificationService();
+
+        final handled = await service.handleNotificationActionForTesting(
+          actionId: 'tap_action',
+          payload: 'tank-1::notif-1',
+        );
+
+        expect(handled, isFalse);
+      });
+    });
   });
 }
-
