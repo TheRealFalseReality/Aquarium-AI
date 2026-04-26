@@ -259,7 +259,9 @@ class NotificationService {
   /// wants to schedule for a specific date/time.
   ///
   /// If [useScheduledNextDate] is true, the notification will be scheduled for
-  /// [notification.scheduledNextDate] (falling back to [notification.notificationDateTime]).
+  /// [notification.getImmediateNextDate()], which resolves to
+  /// [notification.scheduledNextDate] and falls back to
+  /// [notification.notificationDateTime].
   /// Use this for snooze actions after [scheduledNextDate] has been updated.
   ///
   /// In contrast, [useExactDateTime] schedules at [notification.notificationDateTime]
