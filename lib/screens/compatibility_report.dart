@@ -49,10 +49,14 @@ void showReportDialog(
   String? fishType,
   Tank? contextTank,
 }) {
+  // Capture the parent context before the dialog builder so it remains valid
+  // after Navigator.of(dialogContext).pop() disposes the dialog route.
+  final parentContext = context;
   showDialog(
     context: context,
-    builder: (context) => Consumer(
-      builder: (context, ref, child) {
+    builder: (dialogContext) => Consumer(
+      builder: (dialogContext, ref, child) {
+        final context = dialogContext;
         final l10n = AppLocalizations.of(context)!;
         final notifier = ref.read(fishCompatibilityProvider.notifier);
         final sections = [
@@ -190,8 +194,7 @@ void showReportDialog(
                       AnalyticsService.logFeatureUsed(
                         featureName: 'compatibility_care_reminders_offer_tapped',
                         parameters: {
-                          'selected_fish_count':
-                              report.selectedFish.length.toString(),
+                          'selected_fish_count': report.selectedFish.length,
                         },
                       );
                       Navigator.of(context).pop();
@@ -199,7 +202,7 @@ void showReportDialog(
                         notifier.clearSelection();
                       }
                       await _openCareReminderFlow(
-                        context,
+                        parentContext,
                         ref,
                         contextTank: contextTank,
                         selectedFish: report.selectedFish,
@@ -356,65 +359,77 @@ Future<bool> _showCareRemindersPreviewSheet(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                l10n.careRemindersPreviewTitle,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.6,
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                l10n.careRemindersPreviewSubtitle,
-                style: theme.textTheme.bodyMedium,
-              ),
-              if (selectedFish.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: selectedFish
-                      .map(
-                        (f) => Chip(
-                          label: Text(
-                            f.name,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      )
-                      .toList(),
-                ),
-              ],
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 8),
-              ..._reminderPreviewTypes.map((tuple) {
-                final (type, color, icon) = tuple;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(10),
+                      Text(
+                        l10n.careRemindersPreviewTitle,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: Icon(icon, color: color, size: 22),
                       ),
-                      const SizedBox(width: 14),
-                      Flexible(
-                        child: Text(
-                          type.displayName,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
+                      const SizedBox(height: 6),
+                      Text(
+                        l10n.careRemindersPreviewSubtitle,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      if (selectedFish.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: selectedFish
+                              .map(
+                                (f) => Chip(
+                                  label: Text(
+                                    f.name,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      ..._reminderPreviewTypes.map((tuple) {
+                        final (type, color, icon) = tuple;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: color.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(icon, color: color, size: 22),
+                              ),
+                              const SizedBox(width: 14),
+                              Flexible(
+                                child: Text(
+                                  type.displayName,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
+                        );
+                      }),
                     ],
                   ),
-                );
-              }),
+                ),
+              ),
               const SizedBox(height: 8),
               FilledButton.icon(
                 onPressed: () => Navigator.of(context).pop(true),
