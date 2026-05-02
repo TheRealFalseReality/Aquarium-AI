@@ -3249,18 +3249,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.surfaceVariant.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
             ),
           ),
           child: Theme(
-            data: Theme.of(
-              context,
-            ).copyWith(dividerColor: Colors.transparent),
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
               leading: Icon(
                 Icons.tips_and_updates_outlined,
@@ -3284,9 +3280,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Text(
                   l10n.recommendedModelsDescription,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -3306,9 +3300,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         children: [
                           Text(
                             l10n.gemini,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: Colors.blue,
                               fontWeight: FontWeight.bold,
                             ),
@@ -3335,9 +3327,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         children: [
                           Text(
                             l10n.groq,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: Colors.orange,
                               fontWeight: FontWeight.bold,
                             ),
@@ -3368,9 +3358,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         children: [
                           Text(
                             l10n.openAI,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: Colors.green,
                               fontWeight: FontWeight.bold,
                             ),
