@@ -2151,5 +2151,10 @@
   "cloudRestoreButtonLabel": "Aus Cloud wiederherstellen",
   "lastCloudBackup": "Letzte Cloud-Sicherung",
   "founderPerkCloudBackup": "Cloud-Sicherung und -Wiederherstellung",
-  "perkAccessBackupRestore": "Zu Einstellungen → Sicherung/Wiederherstellung"
+  "perkAccessBackupRestore": "Zu Einstellungen → Sicherung/Wiederherstellung",
+  "recommendedModelsTitle": "Empfohlene Modelle",
+  "recommendedModelsDescription": "Nicht sicher, welches Modell Sie verwenden sollen? Hier sind einige Tipps für jeden Anbieter.",
+  "geminiModelTip": "gemini-flash-latest — Schnell & kostenlos-freundlich, ideal für den täglichen Gebrauch.\ngemini-2.0-pro-exp — Höchste Qualität, langsamer und verbraucht mehr Kontingent.",
+  "groqModelTip": "llama-3.3-70b-versatile — Beste Qualität bei Groq mit blitzschneller Inferenz.\nllama-3.1-8b-instant — Schnellste Option, ideal für schnelle Anfragen.",
+  "openAIModelTip": "gpt-4o — Beste Qualität, multimodal, höhere Kosten.\ngpt-4o-mini — Schnell und kostengünstig für die meisten Aufgaben."
 }

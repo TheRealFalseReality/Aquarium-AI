@@ -3245,6 +3245,149 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
         // end if (!_useDevGroqKeyForImage)
         const SizedBox(height: 16),
+        // ─── Recommended Models blurb ─────────────────────────────────────────
+        Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceVariant.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+            ),
+          ),
+          child: Theme(
+            data: Theme.of(
+              context,
+            ).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              leading: Icon(
+                Icons.tips_and_updates_outlined,
+                size: 20,
+                color: Theme.of(context).colorScheme.tertiary,
+              ),
+              title: Text(
+                l10n.recommendedModelsTitle,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.tertiary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              initiallyExpanded: false,
+              tilePadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 4,
+              ),
+              childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              children: [
+                Text(
+                  l10n.recommendedModelsDescription,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                // Gemini
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome,
+                      size: 16,
+                      color: Colors.blue,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.gemini,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelSmall?.copyWith(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            l10n.geminiModelTip,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Groq
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.flash_on, size: 16, color: Colors.orange),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.groq,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelSmall?.copyWith(
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            l10n.groqModelTip,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // OpenAI
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.psychology,
+                      size: 16,
+                      color: Colors.green,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.openAI,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelSmall?.copyWith(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            l10n.openAIModelTip,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
         // ─── Note: calculators work without an AI key ─────────────────────────
         Container(
           padding: const EdgeInsets.all(12),
