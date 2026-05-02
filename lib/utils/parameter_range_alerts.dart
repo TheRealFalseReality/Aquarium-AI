@@ -224,11 +224,15 @@ List<ParameterRangeAlert> buildCurrentOutOfRangeAlerts(
   List<WaterParameter> parameters,
 ) {
   // Keep only the most recent reading per parameter type.
+  // When two readings share the same timestamp, prefer the one with the
+  // lexicographically larger UUID (deterministic tiebreaker).
   final latestByType = <String, WaterParameter>{};
   for (final p in parameters) {
     final existing = latestByType[p.parameterType];
     if (existing == null ||
-        p.dateRecorded.isAfter(existing.dateRecorded)) {
+        p.dateRecorded.isAfter(existing.dateRecorded) ||
+        (p.dateRecorded == existing.dateRecorded &&
+            p.id.compareTo(existing.id) > 0)) {
       latestByType[p.parameterType] = p;
     }
   }
