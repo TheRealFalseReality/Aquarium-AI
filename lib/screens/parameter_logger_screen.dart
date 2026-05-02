@@ -12,6 +12,51 @@ import '../services/analytics_service.dart';
 import '../utils/parameter_range_alerts.dart';
 import '../utils/parameter_trend_alerts.dart';
 
+/// Returns the localized display name for [parameterType].
+/// Module-level so both [ParameterLoggerScreenState] and
+/// [_AddParameterSheetState] can call it without duplication.
+String _parameterLabel(String parameterType, BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  switch (parameterType) {
+    case 'ammonia':
+      return l10n.ammonia;
+    case 'nitrite':
+      return l10n.nitrite;
+    case 'nitrate':
+      return l10n.nitrate;
+    case 'phosphate':
+      return l10n.phosphate;
+    case 'salinity':
+      return l10n.salinity;
+    case 'calcium':
+      return l10n.calcium;
+    case 'magnesium':
+      return l10n.magnesium;
+    case 'kh':
+      return l10n.kh;
+    case 'gh':
+      return l10n.gh;
+    case 'alkalinity':
+      return l10n.alkalinity;
+    case 'orp':
+      return l10n.orp;
+    case 'ph':
+      return l10n.ph;
+    case 'potassium':
+      return l10n.potassium;
+    case 'tds':
+      return l10n.tds;
+    case 'iodine':
+      return l10n.iodine;
+    case 'temperature':
+      return l10n.temperature;
+    default:
+      if (parameterType.isEmpty) return l10n.custom;
+      return parameterType[0].toUpperCase() +
+          (parameterType.length > 1 ? parameterType.substring(1) : '');
+  }
+}
+
 class ParameterLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
   final bool openAddDialog;
@@ -149,50 +194,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     return grouped;
   }
 
-  String _getParameterLabel(String parameterType, BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    switch (parameterType) {
-      case 'ammonia':
-        return l10n.ammonia;
-      case 'nitrite':
-        return l10n.nitrite;
-      case 'nitrate':
-        return l10n.nitrate;
-      case 'phosphate':
-        return l10n.phosphate;
-      case 'salinity':
-        return l10n.salinity;
-      case 'calcium':
-        return l10n.calcium;
-      case 'magnesium':
-        return l10n.magnesium;
-      case 'kh':
-        return l10n.kh;
-      case 'gh':
-        return l10n.gh;
-      case 'alkalinity':
-        return l10n.alkalinity;
-      case 'orp':
-        return l10n.orp;
-      case 'ph':
-        return l10n.ph;
-      case 'potassium':
-        return l10n.potassium;
-      case 'tds':
-        return l10n.tds;
-      case 'iodine':
-        return l10n.iodine;
-      case 'temperature':
-        return l10n.temperature;
-      default:
-        // For custom parameters, capitalize first letter
-        if (parameterType.isEmpty) {
-          return l10n.custom;
-        }
-        return parameterType[0].toUpperCase() +
-            (parameterType.length > 1 ? parameterType.substring(1) : '');
-    }
-  }
+  String _getParameterLabel(String parameterType, BuildContext context) =>
+      _parameterLabel(parameterType, context);
 
   IconData _getParameterIcon(String parameterType) {
     switch (parameterType) {
@@ -1497,16 +1500,19 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
         tankType: widget.tank.type,
       );
 
-      // Show out-of-range alert SnackBar if the saved value is not normal.
-      // Capture the messenger before popping because the context may be
-      // unmounted after Navigator.pop.
+      // Capture messenger and status before popping — the context may be
+      // unmounted once Navigator.pop removes the bottom sheet.
+      final messenger = ScaffoldMessenger.of(context);
       final status = getParameterStatus(
         parameterType,
         parameter.value,
         unit: _selectedUnit,
       );
+
+      Navigator.pop(context);
+
+      // Show out-of-range SnackBar after dismissing the sheet.
       if (status != ParameterStatus.normal) {
-        final messenger = ScaffoldMessenger.of(context);
         final snackBarColor = switch (status) {
           ParameterStatus.critical => Colors.red.shade700,
           ParameterStatus.warning => Colors.orange.shade700,
@@ -1519,12 +1525,6 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
           ParameterStatus.caution => l10n.parameterStatusCaution,
           ParameterStatus.normal => '',
         };
-        // Build a display name: capitalize first letter for custom parameters.
-        final displayName = parameterType.isNotEmpty
-            ? parameterType[0].toUpperCase() +
-                (parameterType.length > 1 ? parameterType.substring(1) : '')
-            : parameterType;
-        Navigator.pop(context);
         messenger.showSnackBar(
           SnackBar(
             content: Row(
@@ -1534,7 +1534,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                 Expanded(
                   child: Text(
                     l10n.outOfRangeSnackBar(
-                      displayName,
+                      _parameterLabel(parameterType, context),
                       parameter.value.toStringAsFixed(2),
                       _selectedUnit,
                       statusLabel,
@@ -1548,10 +1548,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
             duration: const Duration(seconds: 5),
           ),
         );
-        return;
       }
-
-      Navigator.pop(context);
     }
   }
 
