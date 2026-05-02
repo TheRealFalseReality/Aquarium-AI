@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/auto_backup_service.dart';
+
 /// Prefix used to store the remembered reschedule option per notification in SharedPreferences
 const String rememberedRescheduleOptionKeyPrefix =
     'remembered_reschedule_option_';
@@ -74,7 +76,7 @@ class AppSettingsState {
     this.tankInhabitantGridView = false, // Default to list view for fish
     this.userExperienceLevel = 'beginner', // Default to beginner
     this.autoCloudBackupEnabled = false,
-    this.autoCloudBackupFrequency = 'weekly',
+    this.autoCloudBackupFrequency = autoBackupFrequencyWeekly,
   });
 }
 
@@ -131,9 +133,9 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
     final userExperienceLevel =
         prefs.getString('userExperienceLevel') ?? 'beginner';
     final autoCloudBackupEnabled =
-        prefs.getBool('autoCloudBackupEnabled') ?? false;
+        prefs.getBool(autoCloudBackupEnabledKey) ?? false;
     final autoCloudBackupFrequency =
-        prefs.getString('autoCloudBackupFrequency') ?? 'weekly';
+        prefs.getString(autoCloudBackupFrequencyKey) ?? autoBackupFrequencyWeekly;
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
@@ -896,7 +898,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
 
   Future<void> setAutoCloudBackupEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('autoCloudBackupEnabled', value);
+    await prefs.setBool(autoCloudBackupEnabledKey, value);
     state = AppSettingsState(
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,
@@ -926,7 +928,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
 
   Future<void> setAutoCloudBackupFrequency(String value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('autoCloudBackupFrequency', value);
+    await prefs.setString(autoCloudBackupFrequencyKey, value);
     state = AppSettingsState(
       showStockingButton: state.showStockingButton,
       enableAI: state.enableAI,

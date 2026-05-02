@@ -13,6 +13,12 @@ import '../services/cloud_backup_service.dart';
 /// SharedPreferences key for the last auto cloud-backup timestamp.
 const String _lastAutoBackupKey = 'last_auto_cloud_backup_time';
 
+/// SharedPreferences key for the auto-backup enabled flag.
+const String autoCloudBackupEnabledKey = 'autoCloudBackupEnabled';
+
+/// SharedPreferences key for the auto-backup frequency string.
+const String autoCloudBackupFrequencyKey = 'autoCloudBackupFrequency';
+
 /// Auto-backup frequency constants.
 const String autoBackupFrequencyDaily = 'daily';
 const String autoBackupFrequencyWeekly = 'weekly';
@@ -49,7 +55,7 @@ class AutoBackupService {
       final prefs = await SharedPreferences.getInstance();
 
       // Read persisted auto-backup settings.
-      final enabled = prefs.getBool('autoCloudBackupEnabled') ?? false;
+      final enabled = prefs.getBool(autoCloudBackupEnabledKey) ?? false;
       if (!enabled) return;
 
       // Founder gate (same check as manual cloud backup).
@@ -61,7 +67,7 @@ class AutoBackupService {
 
       // Determine frequency and check elapsed time.
       final frequency =
-          prefs.getString('autoCloudBackupFrequency') ?? autoBackupFrequencyWeekly;
+          prefs.getString(autoCloudBackupFrequencyKey) ?? autoBackupFrequencyWeekly;
       final interval = _intervalFor(frequency);
 
       final lastStr = prefs.getString(_lastAutoBackupKey);
