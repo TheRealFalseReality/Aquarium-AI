@@ -653,7 +653,7 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
           context,
         ).showSnackBar(const SnackBar(content: Text('Download started.')));
       } else {
-        final path = await FilePicker.platform.saveFile(
+        final path = await FilePicker.saveFile(
           dialogTitle: 'Save fishcompat.json',
           fileName: fileName,
           type: FileType.custom,
@@ -1749,7 +1749,7 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   }
 
   Future<void> _pickImage() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.image,
       withData: true, // ensures bytes are available on web too
     );
