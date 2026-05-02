@@ -68,6 +68,8 @@ class RemoteConfigService {
             rcDefaultFounderChatHistoryLimit,
         RemoteConfigKeys.fishDataCooldownHours:
             rcDefaultFishDataCooldownHours,
+        RemoteConfigKeys.signedInRateLimitMultiplier:
+            rcDefaultSignedInRateLimitMultiplier,
         RemoteConfigKeys.aquapiStoreUrl: rcDefaultAquapiStoreUrl,
         RemoteConfigKeys.groqProxyUrl: rcDefaultGroqProxyUrl,
         RemoteConfigKeys.ccaWebsiteUrl: rcDefaultCcaWebsiteUrl,
@@ -352,6 +354,13 @@ class RemoteConfigService {
   static int get founderChatHistoryLimit =>
       _instance?.getInt(RemoteConfigKeys.founderChatHistoryLimit) ??
       rcDefaultFounderChatHistoryLimit;
+
+  /// Multiplier applied to the per-minute, per-day, and per-photo limits
+  /// for users who are signed in with a real account (non-anonymous,
+  /// non-founder).  Defaults to 2× the anonymous free-tier baseline.
+  static double get signedInRateLimitMultiplier =>
+      _instance?.getDouble(RemoteConfigKeys.signedInRateLimitMultiplier) ??
+      rcDefaultSignedInRateLimitMultiplier;
 
   // ── Fish compatibility data ─────────────────────────────────────────────
 

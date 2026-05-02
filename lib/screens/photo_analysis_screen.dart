@@ -213,7 +213,7 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                         .asData
                         ?.value
                         ?.isAnonymous ??
-                    true,
+                    false,
               );
             }
           });

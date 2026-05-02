@@ -562,7 +562,7 @@ class AquariumStockingScreenState
               isNetworkError: next.isNetworkError,
               isAnonymousUser:
                   ref.read(authStateProvider).asData?.value?.isAnonymous ??
-                  true,
+                  false,
             );
             ref.read(aquariumStockingProvider.notifier).cancel();
           }

@@ -16,8 +16,10 @@ import 'remove_ads_dialog.dart';
 /// upsell (ad removal + higher limits) instead of the generic error header.
 ///
 /// When [isRateLimitError] and [isAnonymousUser] are both `true`, the dialog
-/// also shows a "Sign In / Create Account" CTA to convert anonymous users into
-/// registered accounts, which unlock higher AI usage limits.
+/// also shows a "Free Account Benefits" card and a "Sign In / Create Account"
+/// button that navigates to `/auth`, letting anonymous users convert to a
+/// registered account which receives a higher rate-limit allowance (2× by
+/// default, configurable via [RemoteConfigService.signedInRateLimitMultiplier]).
 ///
 /// Falls back to a regular toast/snack if the context is no longer valid.
 void showAiErrorDialog(

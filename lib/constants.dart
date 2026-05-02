@@ -186,6 +186,11 @@ const int rcDefaultFounderMaxRequestsPerDay = 150;
 const int rcDefaultFounderMaxPhotoAnalysesPerDay = 10;
 const int rcDefaultFounderChatHistoryLimit = 10;
 
+// Signed-in (non-anonymous, non-founder) user rate-limit multiplier.
+// Applies to per-minute, per-day, and per-photo limits.
+// Defaults to 2× the anonymous free-tier baseline; can be adjusted via RC.
+const double rcDefaultSignedInRateLimitMultiplier = 2.0;
+
 // ---------------------------------------------------------------------------
 // Deep linking constants
 // ---------------------------------------------------------------------------
@@ -369,4 +374,11 @@ class RemoteConfigKeys {
 
   /// Integer — chat-history window for Founder Aquarist users.
   static const String founderChatHistoryLimit = 'founder_chat_history_limit';
+
+  // ── Signed-in user bonus ───────────────────────────────────────────────────
+  /// Double — multiplier applied to the per-minute, per-day, and per-photo
+  /// free-tier limits for users who are signed in (non-anonymous, non-founder).
+  /// Default 2.0 = double the anonymous baseline.
+  static const String signedInRateLimitMultiplier =
+      'signed_in_rate_limit_multiplier';
 }

@@ -397,7 +397,7 @@ class FishCompatibilityScreenState
               isNetworkError: next.isNetworkError,
               isAnonymousUser:
                   ref.read(authStateProvider).asData?.value?.isAnonymous ??
-                  true,
+                  false,
               onRetry: next.isRetryable && !next.isRateLimitError
                   ? () => notifier.retryCompatibilityReport()
                   : null,

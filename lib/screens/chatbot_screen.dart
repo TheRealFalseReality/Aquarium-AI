@@ -476,7 +476,7 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                           .asData
                           ?.value
                           ?.isAnonymous ??
-                      true,
+                      false,
                   onRetry: !last.isRateLimitError ? retryCallback : null,
                 );
               }
