@@ -100,6 +100,7 @@ class _NotificationManagementScreenState
         .tanks
         .firstWhere((t) => t.id == widget.tank.id, orElse: () => widget.tank);
     final notifications = currentTank.notifications;
+    final smartInsights = _buildSmartScheduleInsights(currentTank, notifications);
 
     return Scaffold(
       appBar: AppBar(
@@ -123,7 +124,10 @@ class _NotificationManagementScreenState
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
-                return _buildNotificationCard(notification);
+                return _buildNotificationCard(
+                  notification,
+                  smartInsights[notification.id],
+                );
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
@@ -167,7 +171,10 @@ class _NotificationManagementScreenState
     );
   }
 
-  Widget _buildNotificationCard(TankNotification notification) {
+  Widget _buildNotificationCard(
+    TankNotification notification,
+    String? smartScheduleInsight,
+  ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final dateFormat = DateFormat('MMM d, y h:mm a');
@@ -214,6 +221,16 @@ class _NotificationManagementScreenState
                             color: colorScheme.onSurface.withOpacity(0.6),
                           ),
                         ),
+                        if (smartScheduleInsight != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            smartScheduleInsight,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -374,6 +391,63 @@ class _NotificationManagementScreenState
     } else {
       return l10n.inLessThanAMinute;
     }
+  }
+
+  /// Builds smart "last logged / next suggested" hints for all notifications.
+  ///
+  /// This precomputes the newest activity per category once per build and then
+  /// maps each repeating notification to a hint string, avoiding repeated
+  /// per-card filtering/sorting work.
+  Map<String, String> _buildSmartScheduleInsights(
+    Tank tank,
+    List<TankNotification> notifications,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final dateFormat = DateFormat('MMM d, yyyy');
+    final latestLogsByCategory = <String, NotificationLog>{};
+
+    for (final log in tank.notificationLogs) {
+      final key = _categoryKey(log.type, log.customCategory);
+      final existing = latestLogsByCategory[key];
+      if (existing == null || log.loggedAt.isAfter(existing.loggedAt)) {
+        latestLogsByCategory[key] = log;
+      }
+    }
+
+    final insights = <String, String>{};
+    for (final notification in notifications) {
+      if (notification.repeatFrequency == RepeatFrequency.none) {
+        continue;
+      }
+
+      final key = _categoryKey(notification.type, notification.customCategory);
+      final lastLog = latestLogsByCategory[key];
+      if (lastLog == null) {
+        continue;
+      }
+
+      final suggestedNext = notification.getNextNotificationDateFromBase(
+        lastLog.loggedAt,
+      );
+      if (suggestedNext == null) {
+        continue;
+      }
+
+      insights[notification.id] = l10n.lastLoggedNextSuggested(
+        dateFormat.format(lastLog.loggedAt),
+        dateFormat.format(suggestedNext),
+      );
+    }
+
+    return insights;
+  }
+
+  String _categoryKey(NotificationType type, String? customCategory) {
+    if (type == NotificationType.other) {
+      final normalized = (customCategory ?? '').trim().toLowerCase();
+      return '${type.name}:$normalized';
+    }
+    return type.name;
   }
 
   IconData _getNotificationIcon(NotificationType type) {
