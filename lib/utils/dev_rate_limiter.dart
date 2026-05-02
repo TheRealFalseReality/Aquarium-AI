@@ -25,6 +25,13 @@ enum DevRateLimitResult {
 /// Limits are fetched at runtime from [RemoteConfigService], with
 /// the in-app fallback defaults used when Firebase is unreachable.
 ///
+/// Three tiers are supported:
+///  - **Founder Aquarist** (`isFounder == true`): highest limits.
+///  - **Signed-in** (`isSignedIn == true && isFounder == false`): the
+///    anonymous baseline multiplied by [RemoteConfigService.signedInRateLimitMultiplier]
+///    (default 2×).
+///  - **Anonymous** (both false): the anonymous baseline limits.
+///
 /// All [SharedPreferences] keys are prefixed with a per-device identifier
 /// provided by [DeviceIdService] so that limits are scoped to the device
 /// rather than to a global, easily-guessable key name.
@@ -46,7 +53,11 @@ class DevRateLimiter {
   /// limits.
   ///
   /// When [isFounder] is `true`, Founder Aquarist limits from
-  /// [RemoteConfigService] are used instead of the standard free-tier limits.
+  /// [RemoteConfigService] are used.
+  ///
+  /// When [isSignedIn] is `true` and [isFounder] is `false`, the anonymous
+  /// baseline limits are multiplied by
+  /// [RemoteConfigService.signedInRateLimitMultiplier] (default 2×).
   ///
   /// Checks are applied in this order:
   /// 1. Per-day limit — returns [DevRateLimitResult.dailyLimitReached] if exceeded.
@@ -56,6 +67,7 @@ class DevRateLimiter {
   /// returns [DevRateLimitResult.allowed].
   static Future<DevRateLimitResult> checkAndRecordRequest({
     bool isFounder = false,
+    bool isSignedIn = false,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
@@ -66,12 +78,8 @@ class DevRateLimiter {
     final requestDailyCountKey = _key(deviceId, _requestDailyCountSuffix);
     final requestDailyDateKey = _key(deviceId, _requestDailyDateSuffix);
 
-    final maxPerDay = isFounder
-        ? RemoteConfigService.founderMaxRequestsPerDay
-        : RemoteConfigService.maxRequestsPerDay;
-    final maxPerMinute = isFounder
-        ? RemoteConfigService.founderMaxRequestsPerMinute
-        : RemoteConfigService.maxRequestsPerMinute;
+    final maxPerDay = effectiveMaxPerDay(isFounder: isFounder, isSignedIn: isSignedIn);
+    final maxPerMinute = effectiveMaxPerMinute(isFounder: isFounder, isSignedIn: isSignedIn);
 
     // --- per-day check ---
     final storedDate = prefs.getString(requestDailyDateKey) ?? '';
@@ -111,9 +119,14 @@ class DevRateLimiter {
   /// expires (i.e. how long the user must wait before the next slot opens).
   ///
   /// When [isFounder] is `true`, the Founder per-minute cap is used.
+  /// When [isSignedIn] is `true` and [isFounder] is `false`, the signed-in
+  /// multiplied limit is used.
   ///
   /// Returns 0 if a slot is already available.
-  static Future<int> secondsUntilNextSlot({bool isFounder = false}) async {
+  static Future<int> secondsUntilNextSlot({
+    bool isFounder = false,
+    bool isSignedIn = false,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
     final now = DateTime.now();
@@ -127,9 +140,7 @@ class DevRateLimiter {
         .where((d) => d.isAfter(windowStart))
         .toList();
 
-    final maxPerMinute = isFounder
-        ? RemoteConfigService.founderMaxRequestsPerMinute
-        : RemoteConfigService.maxRequestsPerMinute;
+    final maxPerMinute = effectiveMaxPerMinute(isFounder: isFounder, isSignedIn: isSignedIn);
     if (recent.length < maxPerMinute) return 0;
 
     recent.sort();
@@ -142,7 +153,12 @@ class DevRateLimiter {
   /// Returns the number of AI requests remaining today.
   ///
   /// When [isFounder] is `true`, the Founder daily cap is used.
-  static Future<int> remainingRequestsToday({bool isFounder = false}) async {
+  /// When [isSignedIn] is `true` and [isFounder] is `false`, the signed-in
+  /// multiplied limit is used.
+  static Future<int> remainingRequestsToday({
+    bool isFounder = false,
+    bool isSignedIn = false,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
     final todayStr = _todayString();
@@ -153,9 +169,7 @@ class DevRateLimiter {
         ? (prefs.getInt(_key(deviceId, _requestDailyCountSuffix)) ?? 0)
         : 0;
 
-    final maxPerDay = isFounder
-        ? RemoteConfigService.founderMaxRequestsPerDay
-        : RemoteConfigService.maxRequestsPerDay;
+    final maxPerDay = effectiveMaxPerDay(isFounder: isFounder, isSignedIn: isSignedIn);
     final remaining = maxPerDay - count;
     return remaining > 0 ? remaining : 0;
   }
@@ -167,11 +181,14 @@ class DevRateLimiter {
   /// Checks whether a new photo analysis is within today's daily limit.
   ///
   /// When [isFounder] is `true`, the Founder photo-analyses cap is used.
+  /// When [isSignedIn] is `true` and [isFounder] is `false`, the signed-in
+  /// multiplied limit is used.
   ///
   /// Returns `true` and increments the counter if allowed.
   /// Returns `false` (without incrementing) if the limit is exceeded.
   static Future<bool> checkAndRecordPhotoAnalysis({
     bool isFounder = false,
+    bool isSignedIn = false,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
@@ -185,9 +202,7 @@ class DevRateLimiter {
         ? (prefs.getInt(photoDailyCountKey) ?? 0)
         : 0;
 
-    final maxPhotos = isFounder
-        ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
-        : RemoteConfigService.maxPhotoAnalysesPerDay;
+    final maxPhotos = effectiveMaxPhotos(isFounder: isFounder, isSignedIn: isSignedIn);
     if (count >= maxPhotos) {
       return false;
     }
@@ -200,8 +215,11 @@ class DevRateLimiter {
   /// Returns the number of photo analyses remaining for today.
   ///
   /// When [isFounder] is `true`, the Founder photo-analyses cap is used.
+  /// When [isSignedIn] is `true` and [isFounder] is `false`, the signed-in
+  /// multiplied limit is used.
   static Future<int> remainingPhotoAnalysesToday({
     bool isFounder = false,
+    bool isSignedIn = false,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final deviceId = await DeviceIdService.getDeviceId();
@@ -213,9 +231,7 @@ class DevRateLimiter {
         ? (prefs.getInt(_key(deviceId, _photoDailyCountSuffix)) ?? 0)
         : 0;
 
-    final maxPhotos = isFounder
-        ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
-        : RemoteConfigService.maxPhotoAnalysesPerDay;
+    final maxPhotos = effectiveMaxPhotos(isFounder: isFounder, isSignedIn: isSignedIn);
     final remaining = maxPhotos - count;
     return remaining > 0 ? remaining : 0;
   }
@@ -287,6 +303,48 @@ class DevRateLimiter {
   // ----------------------------------------------------------------
   // Helpers
   // ----------------------------------------------------------------
+
+  /// Effective per-minute request cap for the given user tier.
+  static int effectiveMaxPerMinute({
+    required bool isFounder,
+    required bool isSignedIn,
+  }) {
+    if (isFounder) return RemoteConfigService.founderMaxRequestsPerMinute;
+    if (isSignedIn) {
+      return (RemoteConfigService.maxRequestsPerMinute *
+              RemoteConfigService.signedInRateLimitMultiplier)
+          .round();
+    }
+    return RemoteConfigService.maxRequestsPerMinute;
+  }
+
+  /// Effective per-day request cap for the given user tier.
+  static int effectiveMaxPerDay({
+    required bool isFounder,
+    required bool isSignedIn,
+  }) {
+    if (isFounder) return RemoteConfigService.founderMaxRequestsPerDay;
+    if (isSignedIn) {
+      return (RemoteConfigService.maxRequestsPerDay *
+              RemoteConfigService.signedInRateLimitMultiplier)
+          .round();
+    }
+    return RemoteConfigService.maxRequestsPerDay;
+  }
+
+  /// Effective per-day photo analysis cap for the given user tier.
+  static int effectiveMaxPhotos({
+    required bool isFounder,
+    required bool isSignedIn,
+  }) {
+    if (isFounder) return RemoteConfigService.founderMaxPhotoAnalysesPerDay;
+    if (isSignedIn) {
+      return (RemoteConfigService.maxPhotoAnalysesPerDay *
+              RemoteConfigService.signedInRateLimitMultiplier)
+          .round();
+    }
+    return RemoteConfigService.maxPhotoAnalysesPerDay;
+  }
 
   static String _todayString() {
     final d = DateTime.now().toLocal();

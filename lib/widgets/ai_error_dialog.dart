@@ -15,6 +15,12 @@ import 'remove_ads_dialog.dart';
 /// When [isRateLimitError] is `true`, the dialog shows a Founder Aquarist
 /// upsell (ad removal + higher limits) instead of the generic error header.
 ///
+/// When [isRateLimitError] and [isAnonymousUser] are both `true`, the dialog
+/// also shows a "Free Account Benefits" card and a "Sign In / Create Account"
+/// button that navigates to `/auth`, letting anonymous users convert to a
+/// registered account which receives a higher rate-limit allowance (2× by
+/// default, configurable via [RemoteConfigService.signedInRateLimitMultiplier]).
+///
 /// Falls back to a regular toast/snack if the context is no longer valid.
 void showAiErrorDialog(
   BuildContext context, {
@@ -25,6 +31,7 @@ void showAiErrorDialog(
   bool isRateLimitError = false,
   bool isQuotaError = false,
   bool isNetworkError = false,
+  bool isAnonymousUser = false,
 }) {
   if (!context.mounted) return;
   showDialog<void>(
@@ -37,6 +44,7 @@ void showAiErrorDialog(
       isRateLimitError: isRateLimitError,
       isQuotaError: isQuotaError,
       isNetworkError: isNetworkError,
+      isAnonymousUser: isAnonymousUser,
       parentContext: context,
     ),
   );
@@ -49,6 +57,7 @@ class _AiErrorDialog extends StatelessWidget {
   final bool isRateLimitError;
   final bool isQuotaError;
   final bool isNetworkError;
+  final bool isAnonymousUser;
 
   /// The parent screen's [BuildContext], used to open the Founder dialog after
   /// this dialog is dismissed (the dialog's own context becomes invalid after
@@ -63,6 +72,7 @@ class _AiErrorDialog extends StatelessWidget {
     this.isRateLimitError = false,
     this.isQuotaError = false,
     this.isNetworkError = false,
+    this.isAnonymousUser = false,
   });
 
   /// Whether this error type should show a "Go to Settings" CTA button.
@@ -135,6 +145,66 @@ class _AiErrorDialog extends StatelessWidget {
                   ),
                   if (isRateLimitError) ...[
                     const SizedBox(height: 12),
+                    if (isAnonymousUser) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: cs.primaryContainer.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: cs.primary.withOpacity(0.4),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.person_add_rounded,
+                                  size: 16,
+                                  color: cs.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    l10n.rateLimitSignInPerksTitle,
+                                    style: tt.labelLarge?.copyWith(
+                                      color: cs.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            _PerkRow(
+                              icon: Icons.bolt_rounded,
+                              label: l10n.rateLimitPerkMoreRequests,
+                              color: cs.primary,
+                            ),
+                            const SizedBox(height: 4),
+                            _PerkRow(
+                              icon: Icons.devices_rounded,
+                              label: l10n.rateLimitPerkSyncAquariums,
+                              color: cs.primary,
+                            ),
+                            const SizedBox(height: 8),
+                            MarkdownBody(
+                              data: l10n.rateLimitSignInUpsellBody,
+                              styleSheet: MarkdownStyleSheet.fromTheme(
+                                Theme.of(context),
+                              ).copyWith(
+                                p: tt.bodySmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -209,6 +279,21 @@ class _AiErrorDialog extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(l10n.dismiss),
                 ),
+                if (isRateLimitError && isAnonymousUser)
+                  FilledButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      if (parentContext.mounted) {
+                        Navigator.of(parentContext).pushNamed('/auth');
+                      }
+                    },
+                    icon: const Icon(Icons.person_add_rounded, size: 18),
+                    label: Text(l10n.rateLimitSignInButton),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: cs.primary,
+                      foregroundColor: cs.onPrimary,
+                    ),
+                  ),
                 if (isRateLimitError)
                   FilledButton.icon(
                     onPressed: () {
