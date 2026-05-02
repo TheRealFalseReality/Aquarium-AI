@@ -245,7 +245,7 @@ class TankNotifier extends StateNotifier<TankState> {
         outputPath = fileName;
       } else {
         // On mobile/desktop, use saveFile with all parameters
-        outputPath = await FilePicker.platform.saveFile(
+        outputPath = await FilePicker.saveFile(
           dialogTitle: 'Save Tank Backup',
           fileName: fileName,
           type: FileType.custom,
@@ -320,7 +320,7 @@ class TankNotifier extends StateNotifier<TankState> {
       );
 
       // Pick a file - use FileType.any for better compatibility
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.any,
         allowMultiple: false,
       );
@@ -624,7 +624,7 @@ class TankNotifier extends StateNotifier<TankState> {
       }
 
       // Desktop: save-file dialog.
-      final outputPath = await FilePicker.platform.saveFile(
+      final outputPath = await FilePicker.saveFile(
         dialogTitle: 'Save Tank Share File',
         fileName: fileName,
         type: FileType.custom,
@@ -669,7 +669,7 @@ class TankNotifier extends StateNotifier<TankState> {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.any,
         allowMultiple: false,
       );
