@@ -9,6 +9,7 @@ import '../models/tank.dart';
 import '../models/water_parameter.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../utils/parameter_range_alerts.dart';
 import '../utils/parameter_trend_alerts.dart';
 
 class ParameterLoggerScreen extends ConsumerStatefulWidget {
@@ -774,6 +775,9 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final proactiveAlerts = buildProactiveParameterAlerts(
       currentTank.waterParameters,
     );
+    final outOfRangeAlerts = buildCurrentOutOfRangeAlerts(
+      currentTank.waterParameters,
+    );
 
     // Only show salinity, calcium, magnesium, and iodine for marine tanks
     final parameterTypes = currentTank.type == 'marine'
@@ -842,6 +846,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  if (outOfRangeAlerts.isNotEmpty) ...[
+                    _buildOutOfRangeAlertsBanner(context, outOfRangeAlerts),
+                    const SizedBox(height: 16),
+                  ],
                   if (proactiveAlerts.isNotEmpty) ...[
                     _buildProactiveTrendAlerts(context, proactiveAlerts),
                     const SizedBox(height: 24),
@@ -852,6 +860,13 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
 
                     final isExpanded = _expandedParameter == paramType;
                     final color = _getParameterColor(paramType);
+
+                    // Latest reading for status badge
+                    final latestStatus = getParameterStatus(
+                      paramType,
+                      parameters.first.value,
+                      unit: parameters.first.unit,
+                    );
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -877,8 +892,19 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            subtitle: Text(
-                              '${parameters.length} ${parameters.length == 1 ? l10n.reading : l10n.readings}',
+                            subtitle: Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    '${parameters.length} ${parameters.length == 1 ? l10n.reading : l10n.readings}',
+                                  ),
+                                ),
+                                if (latestStatus !=
+                                    ParameterStatus.normal) ...[
+                                  const SizedBox(width: 6),
+                                  _buildStatusBadge(context, latestStatus),
+                                ],
+                              ],
                             ),
                             trailing: Icon(
                               isExpanded
@@ -922,6 +948,126 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
           onPressed: () => _addParameter(context),
           icon: const Icon(Icons.add),
           label: Text(l10n.addReading),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOutOfRangeAlertsBanner(
+    BuildContext context,
+    List<ParameterRangeAlert> alerts,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    final hasCritical = alerts.any(
+      (a) => a.status == ParameterStatus.critical,
+    );
+
+    return Card(
+      color: hasCritical
+          ? cs.errorContainer.withOpacity(0.55)
+          : Colors.orange.withOpacity(0.12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  hasCritical
+                      ? Icons.warning_amber_rounded
+                      : Icons.info_outline,
+                  color: hasCritical ? cs.error : Colors.orange.shade700,
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    l10n.outOfRangeAlertsTitle(alerts.length),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: hasCritical ? cs.error : Colors.orange.shade800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ...alerts.map((alert) {
+              final statusLabel = switch (alert.status) {
+                ParameterStatus.critical => l10n.parameterStatusCritical,
+                ParameterStatus.warning => l10n.warning,
+                ParameterStatus.caution => l10n.parameterStatusCaution,
+                ParameterStatus.normal => '',
+              };
+              final dotColor = switch (alert.status) {
+                ParameterStatus.critical => Colors.red,
+                ParameterStatus.warning => Colors.orange,
+                ParameterStatus.caution => Colors.amber.shade700,
+                ParameterStatus.normal => Colors.green,
+              };
+              return Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: dotColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        '${_getParameterLabel(alert.parameterType, context)}: '
+                        '${alert.value.toStringAsFixed(2)}${alert.unit ?? ''}'
+                        ' — $statusLabel',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Small coloured badge showing [status] — shown inline in the subtitle of
+  /// each parameter card header when the latest reading is not normal.
+  Widget _buildStatusBadge(BuildContext context, ParameterStatus status) {
+    final l10n = AppLocalizations.of(context)!;
+    final color = switch (status) {
+      ParameterStatus.critical => Colors.red,
+      ParameterStatus.warning => Colors.orange,
+      ParameterStatus.caution => Colors.amber.shade700,
+      ParameterStatus.normal => Colors.green,
+    };
+    final label = switch (status) {
+      ParameterStatus.critical => l10n.parameterStatusCritical,
+      ParameterStatus.warning => l10n.warning,
+      ParameterStatus.caution => l10n.parameterStatusCaution,
+      ParameterStatus.normal => '',
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        border: Border.all(color: color.withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          color: color,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -1350,6 +1496,60 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
         action: isEditing ? 'parameter_updated' : 'parameter_created',
         tankType: widget.tank.type,
       );
+
+      // Show out-of-range alert SnackBar if the saved value is not normal.
+      // Capture the messenger before popping because the context may be
+      // unmounted after Navigator.pop.
+      final status = getParameterStatus(
+        parameterType,
+        parameter.value,
+        unit: _selectedUnit,
+      );
+      if (status != ParameterStatus.normal) {
+        final messenger = ScaffoldMessenger.of(context);
+        final snackBarColor = switch (status) {
+          ParameterStatus.critical => Colors.red.shade700,
+          ParameterStatus.warning => Colors.orange.shade700,
+          ParameterStatus.caution => Colors.amber.shade800,
+          ParameterStatus.normal => Colors.green,
+        };
+        final statusLabel = switch (status) {
+          ParameterStatus.critical => l10n.parameterStatusCritical,
+          ParameterStatus.warning => l10n.warning,
+          ParameterStatus.caution => l10n.parameterStatusCaution,
+          ParameterStatus.normal => '',
+        };
+        // Build a display name: capitalize first letter for custom parameters.
+        final displayName = parameterType.isNotEmpty
+            ? parameterType[0].toUpperCase() +
+                (parameterType.length > 1 ? parameterType.substring(1) : '')
+            : parameterType;
+        Navigator.pop(context);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.warning_amber, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.outOfRangeSnackBar(
+                      displayName,
+                      parameter.value.toStringAsFixed(2),
+                      _selectedUnit,
+                      statusLabel,
+                    ),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: snackBarColor,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+        return;
+      }
 
       Navigator.pop(context);
     }

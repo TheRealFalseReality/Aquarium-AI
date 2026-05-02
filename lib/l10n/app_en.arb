@@ -1990,6 +1990,41 @@
       }
     }
   },
+  "outOfRangeAlertsTitle": "Out-of-Range Parameters ({count})",
+  "@outOfRangeAlertsTitle": {
+    "description": "Title for the out-of-range parameter alerts banner on the parameter logger screen",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "parameterStatusCaution": "Caution",
+  "@parameterStatusCaution": {
+    "description": "Status label for a parameter reading that is slightly outside the ideal range"
+  },
+  "parameterStatusCritical": "Critical",
+  "@parameterStatusCritical": {
+    "description": "Status label for a parameter reading that is critically outside the ideal range"
+  },
+  "outOfRangeSnackBar": "{parameterName} ({value}{unit}) — {status}",
+  "@outOfRangeSnackBar": {
+    "description": "SnackBar message shown after logging a parameter reading that is out of range",
+    "placeholders": {
+      "parameterName": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "addDose": "Add Dose",
   "@addDose": {
     "description": "Add dose button label"
