@@ -28,6 +28,7 @@ import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/auto_backup_service.dart';
 import '../services/in_app_review_service.dart';
 import '../services/in_app_update_service.dart';
 import '../services/remote_config_service.dart';
@@ -214,6 +215,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     InAppReviewService.recordFirstLaunch();
     // Request an in-app review if conditions are met (≥3 days since first launch)
     InAppReviewService.maybeRequestReview();
+    // Check and run automatic cloud backup if due (non-blocking, Founder only).
+    AutoBackupService.checkAndRun(ref);
     // Show onboarding on first launch (before any dialogs); only run the
     // other startup checks if onboarding is not going to be shown.
     _checkShowOnboarding().then((onboardingShowing) {

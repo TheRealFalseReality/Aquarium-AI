@@ -2151,5 +2151,12 @@
   "cloudRestoreButtonLabel": "Restaurer depuis le Cloud",
   "lastCloudBackup": "Dernière sauvegarde en ligne",
   "founderPerkCloudBackup": "Sauvegarde et restauration en ligne",
-  "perkAccessBackupRestore": "Aller dans Paramètres → Sauvegarde/Restauration"
+  "perkAccessBackupRestore": "Aller dans Paramètres → Sauvegarde/Restauration",
+  "autoCloudBackupTitle": "Sauvegarde automatique dans le cloud",
+  "autoCloudBackupSubtitle": "Sauvegardez automatiquement vos données selon un calendrier (Aquariste Fondateur uniquement)",
+  "autoCloudBackupFrequencyLabel": "Fréquence de sauvegarde",
+  "autoCloudBackupFrequencyDaily": "Quotidiennement",
+  "autoCloudBackupFrequencyWeekly": "Hebdomadairement",
+  "autoCloudBackupFrequencyMonthly": "Mensuellement",
+  "lastAutoCloudBackup": "Dernière sauvegarde automatique dans le cloud"
 }

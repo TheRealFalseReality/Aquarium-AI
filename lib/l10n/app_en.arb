@@ -6037,5 +6037,34 @@
   "perkAccessBackupRestore": "Go to Settings → Backup / Restore",
   "@perkAccessBackupRestore": {
     "description": "How to access the cloud backup perk"
+  },
+  "autoCloudBackupTitle": "Auto Cloud Backup",
+  "@autoCloudBackupTitle": {
+    "description": "Section title for the automatic cloud backup setting"
+  },
+  "autoCloudBackupSubtitle": "Automatically back up your data to the cloud on a schedule (Founder Aquarist only)",
+  "@autoCloudBackupSubtitle": {
+    "description": "Subtitle for the automatic cloud backup toggle"
+  },
+  "autoCloudBackupFrequencyLabel": "Backup frequency",
+  "@autoCloudBackupFrequencyLabel": {
+    "description": "Label for the auto backup frequency dropdown"
+  },
+  "autoCloudBackupFrequencyDaily": "Daily",
+  "@autoCloudBackupFrequencyDaily": {
+    "description": "Auto backup frequency option: once per day"
+  },
+  "autoCloudBackupFrequencyWeekly": "Weekly",
+  "@autoCloudBackupFrequencyWeekly": {
+    "description": "Auto backup frequency option: once per week (default)"
+  },
+  "autoCloudBackupFrequencyMonthly": "Monthly",
+  "@autoCloudBackupFrequencyMonthly": {
+    "description": "Auto backup frequency option: once per month"
+  },
+  "lastAutoCloudBackup": "Last auto cloud backup",
+  "@lastAutoCloudBackup": {
+    "description": "Label for the last automatic cloud backup stat row in settings"
   }
+
 }

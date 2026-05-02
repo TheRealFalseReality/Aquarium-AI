@@ -2151,5 +2151,12 @@
   "cloudRestoreButtonLabel": "Aus Cloud wiederherstellen",
   "lastCloudBackup": "Letzte Cloud-Sicherung",
   "founderPerkCloudBackup": "Cloud-Sicherung und -Wiederherstellung",
-  "perkAccessBackupRestore": "Zu Einstellungen → Sicherung/Wiederherstellung"
+  "perkAccessBackupRestore": "Zu Einstellungen → Sicherung/Wiederherstellung",
+  "autoCloudBackupTitle": "Automatisches Cloud-Backup",
+  "autoCloudBackupSubtitle": "Daten werden automatisch nach einem Zeitplan in der Cloud gesichert (nur für Gründer-Aquaristen)",
+  "autoCloudBackupFrequencyLabel": "Backup-Häufigkeit",
+  "autoCloudBackupFrequencyDaily": "Täglich",
+  "autoCloudBackupFrequencyWeekly": "Wöchentlich",
+  "autoCloudBackupFrequencyMonthly": "Monatlich",
+  "lastAutoCloudBackup": "Letztes automatisches Cloud-Backup"
 }

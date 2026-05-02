@@ -46,6 +46,10 @@ class AppSettingsState {
   tankInhabitantGridView; // Show fish inhabitants as a grid of tiles (default false = list)
   /// Experience level for tailoring AI responses: 'beginner', 'intermediate', 'advanced', 'expert'.
   final String userExperienceLevel;
+  /// Whether automatic cloud backup is enabled (Founder Aquarists only).
+  final bool autoCloudBackupEnabled;
+  /// Frequency for automatic cloud backup: 'daily', 'weekly', or 'monthly'.
+  final String autoCloudBackupFrequency;
 
   AppSettingsState({
     required this.showStockingButton,
@@ -69,6 +73,8 @@ class AppSettingsState {
     this.tankHideStockingDensity = false, // Default to showing stocking density
     this.tankInhabitantGridView = false, // Default to list view for fish
     this.userExperienceLevel = 'beginner', // Default to beginner
+    this.autoCloudBackupEnabled = false,
+    this.autoCloudBackupFrequency = 'weekly',
   });
 }
 
@@ -124,6 +130,10 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
         prefs.getBool('tankInhabitantGridView') ?? false; // Default to list
     final userExperienceLevel =
         prefs.getString('userExperienceLevel') ?? 'beginner';
+    final autoCloudBackupEnabled =
+        prefs.getBool('autoCloudBackupEnabled') ?? false;
+    final autoCloudBackupFrequency =
+        prefs.getString('autoCloudBackupFrequency') ?? 'weekly';
 
     state = AppSettingsState(
       showStockingButton: showStockingButton,
@@ -147,6 +157,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: tankHideStockingDensity,
       tankInhabitantGridView: tankInhabitantGridView,
       userExperienceLevel: userExperienceLevel,
+      autoCloudBackupEnabled: autoCloudBackupEnabled,
+      autoCloudBackupFrequency: autoCloudBackupFrequency,
     );
   }
 
@@ -184,6 +196,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -213,6 +227,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -246,6 +262,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -278,6 +296,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -306,6 +326,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -336,6 +358,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -365,6 +389,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -393,6 +419,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -421,6 +449,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -449,6 +479,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -477,6 +509,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -505,6 +539,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -533,6 +569,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -561,6 +599,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -589,6 +629,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -617,6 +659,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -645,6 +689,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: value,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -672,6 +718,9 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideCardTags: state.tankHideCardTags,
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: value,
+      userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -708,6 +757,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -740,6 +791,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -806,6 +859,8 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
     );
   }
 
@@ -834,6 +889,68 @@ class AppSettingsNotifier extends StateNotifier<AppSettingsState> {
       tankHideStockingDensity: state.tankHideStockingDensity,
       tankInhabitantGridView: state.tankInhabitantGridView,
       userExperienceLevel: value,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
+    );
+  }
+
+  Future<void> setAutoCloudBackupEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('autoCloudBackupEnabled', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
+      tankHidePhotos: state.tankHidePhotos,
+      tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
+      tankInhabitantGridView: state.tankInhabitantGridView,
+      userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: value,
+      autoCloudBackupFrequency: state.autoCloudBackupFrequency,
+    );
+  }
+
+  Future<void> setAutoCloudBackupFrequency(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('autoCloudBackupFrequency', value);
+    state = AppSettingsState(
+      showStockingButton: state.showStockingButton,
+      enableAI: state.enableAI,
+      localeCode: state.localeCode,
+      aiResponseLanguage: state.aiResponseLanguage,
+      isLoading: false,
+      hasRememberedRescheduleOptions: state.hasRememberedRescheduleOptions,
+      welcomeGridLayout: state.welcomeGridLayout,
+      tankGridLayout: state.tankGridLayout,
+      debugHideAds: state.debugHideAds,
+      tankHideIcon: state.tankHideIcon,
+      tankHideMetrics: state.tankHideMetrics,
+      tankHideInhabitants: state.tankHideInhabitants,
+      tankHideNotes: state.tankHideNotes,
+      tankHideQuickLogs: state.tankHideQuickLogs,
+      tankHideActivity: state.tankHideActivity,
+      tankHidePhotos: state.tankHidePhotos,
+      tankHideHarmonyDelta: state.tankHideHarmonyDelta,
+      tankHideCardTags: state.tankHideCardTags,
+      tankHideStockingDensity: state.tankHideStockingDensity,
+      tankInhabitantGridView: state.tankInhabitantGridView,
+      userExperienceLevel: state.userExperienceLevel,
+      autoCloudBackupEnabled: state.autoCloudBackupEnabled,
+      autoCloudBackupFrequency: value,
     );
   }
 }

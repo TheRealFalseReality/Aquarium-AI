@@ -2151,5 +2151,12 @@
   "cloudRestoreButtonLabel": "Restaurar desde la Nube",
   "lastCloudBackup": "Última copia en la nube",
   "founderPerkCloudBackup": "Copia de seguridad y restauración en la nube",
-  "perkAccessBackupRestore": "Ir a Configuración → Copia de Seguridad/Restaurar"
+  "perkAccessBackupRestore": "Ir a Configuración → Copia de Seguridad/Restaurar",
+  "autoCloudBackupTitle": "Copia de seguridad automática en la nube",
+  "autoCloudBackupSubtitle": "Realiza copias de seguridad automáticamente según un horario (solo para Aquaristas Fundadores)",
+  "autoCloudBackupFrequencyLabel": "Frecuencia de copia de seguridad",
+  "autoCloudBackupFrequencyDaily": "Diariamente",
+  "autoCloudBackupFrequencyWeekly": "Semanalmente",
+  "autoCloudBackupFrequencyMonthly": "Mensualmente",
+  "lastAutoCloudBackup": "Última copia de seguridad automática en la nube"
 }
