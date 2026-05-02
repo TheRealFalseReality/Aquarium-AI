@@ -204,8 +204,8 @@ class NotificationService {
     }
 
     // Default tap action opens app UI.
-    if (response.actionId != null &&
-        response.actionId!.isNotEmpty) {
+    final actionId = response.actionId;
+    if (actionId != null && actionId.isNotEmpty) {
       return;
     }
 
