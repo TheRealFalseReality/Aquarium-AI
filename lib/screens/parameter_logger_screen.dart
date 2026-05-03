@@ -780,6 +780,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     );
     final outOfRangeAlerts = buildCurrentOutOfRangeAlerts(
       currentTank.waterParameters,
+      tankType: currentTank.type,
     );
 
     // Only show salinity, calcium, magnesium, and iodine for marine tanks

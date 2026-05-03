@@ -215,14 +215,31 @@ ParameterStatus getParameterStatus(
   }
 }
 
+/// Parameter types that are only relevant to marine tanks.
+///
+/// Out-of-range alerts for these types are suppressed when [tankType] is not
+/// `'marine'` so that freshwater-tank users don't receive alerts for
+/// parameters they are unlikely to measure.
+const _marineOnlyParameters = {
+  'salinity',
+  'calcium',
+  'magnesium',
+  'iodine',
+};
+
 /// Inspects [parameters], takes the **latest reading per parameter type**, and
 /// returns [ParameterRangeAlert]s for every type whose latest reading is not
 /// [ParameterStatus.normal].
 ///
+/// Pass [tankType] (e.g. `'freshwater'` or `'marine'`) to suppress alerts for
+/// parameters that are not applicable to that tank type (e.g. salinity,
+/// calcium, magnesium, and iodine are skipped for freshwater tanks).
+///
 /// Results are sorted from most-severe to least-severe.
 List<ParameterRangeAlert> buildCurrentOutOfRangeAlerts(
-  List<WaterParameter> parameters,
-) {
+  List<WaterParameter> parameters, {
+  String? tankType,
+}) {
   // Keep only the most recent reading per parameter type.
   // When two readings share the same timestamp, prefer the one with the
   // lexicographically larger UUID (deterministic tiebreaker).
@@ -239,6 +256,12 @@ List<ParameterRangeAlert> buildCurrentOutOfRangeAlerts(
 
   final alerts = <ParameterRangeAlert>[];
   for (final p in latestByType.values) {
+    // Skip marine-only parameters when the tank is not a marine tank.
+    if (tankType != null &&
+        tankType != 'marine' &&
+        _marineOnlyParameters.contains(p.parameterType)) {
+      continue;
+    }
     final status = getParameterStatus(p.parameterType, p.value, unit: p.unit);
     if (status != ParameterStatus.normal) {
       alerts.add(
