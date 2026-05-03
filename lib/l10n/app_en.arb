@@ -6057,5 +6057,25 @@
   "perkAccessBackupRestore": "Go to Settings → Backup / Restore",
   "@perkAccessBackupRestore": {
     "description": "How to access the cloud backup perk"
+  },
+  "recommendedModelsTitle": "Recommended Models",
+  "@recommendedModelsTitle": {
+    "description": "Title for the recommended models collapsible section in AI settings"
+  },
+  "recommendedModelsDescription": "Not sure which model to use? Here are some tips for each provider.",
+  "@recommendedModelsDescription": {
+    "description": "Subtitle for the recommended models section in AI settings"
+  },
+  "geminiModelTip": "gemini-flash-latest — Fast & free-tier friendly, great for everyday use.\ngemini-2.0-pro-exp — Highest quality, slower and uses more quota.",
+  "@geminiModelTip": {
+    "description": "Model recommendation tip for Gemini in AI settings"
+  },
+  "groqModelTip": "llama-3.3-70b-versatile — Best quality on Groq with blazing-fast inference.\nllama-3.1-8b-instant — Fastest option, ideal for quick queries.",
+  "@groqModelTip": {
+    "description": "Model recommendation tip for Groq in AI settings"
+  },
+  "openAIModelTip": "gpt-4o — Best quality, multimodal support, higher cost.\ngpt-4o-mini — Fast and cost-effective for most tasks.",
+  "@openAIModelTip": {
+    "description": "Model recommendation tip for OpenAI in AI settings"
   }
 }

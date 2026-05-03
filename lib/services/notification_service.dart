@@ -167,7 +167,7 @@ class NotificationService {
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      notificationCategories: {
+      notificationCategories: [
         DarwinNotificationCategory(_iosNotificationCategory, actions: [
           DarwinNotificationAction.plain(actionDone, actionLabels.done),
           DarwinNotificationAction.plain(
@@ -179,7 +179,7 @@ class NotificationService {
             actionLabels.snoozeWeek,
           ),
         ]),
-      },
+      ],
     );
 
     final initSettings = InitializationSettings(
@@ -204,8 +204,7 @@ class NotificationService {
     }
 
     // Default tap action opens app UI.
-    if (response.actionId != null &&
-        response.actionId != NotificationResponse.defaultActionId) {
+    if (response.actionId != null) {
       return;
     }
 
