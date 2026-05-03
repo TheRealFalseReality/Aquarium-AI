@@ -611,12 +611,30 @@ class BackupRestoreUtils {
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(l10n.cloudBackupDialogTitle),
+          title: Row(
+            children: [
+              const Icon(Icons.login, color: Colors.purple),
+              const SizedBox(width: 8),
+              Flexible(child: Text(l10n.cloudBackupDialogTitle)),
+            ],
+          ),
           content: Text(l10n.cloudBackupRequiresSignIn),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(l10n.close),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                Navigator.of(context).pushNamed('/auth');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
+              ),
+              icon: const Icon(Icons.login),
+              label: Text(l10n.authSignIn),
             ),
           ],
         ),
@@ -738,12 +756,30 @@ class BackupRestoreUtils {
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text(l10n.cloudRestoreDialogTitle),
+          title: Row(
+            children: [
+              const Icon(Icons.login, color: Colors.purple),
+              const SizedBox(width: 8),
+              Flexible(child: Text(l10n.cloudRestoreDialogTitle)),
+            ],
+          ),
           content: Text(l10n.cloudRestoreRequiresSignIn),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(l10n.close),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                Navigator.of(context).pushNamed('/auth');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
+              ),
+              icon: const Icon(Icons.login),
+              label: Text(l10n.authSignIn),
             ),
           ],
         ),
