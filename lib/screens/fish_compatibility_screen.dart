@@ -10,6 +10,7 @@ import '../main_layout.dart';
 import '../models/compatibility_report.dart';
 import '../models/fish.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/community_provider.dart' show authStateProvider;
 import '../providers/fish_compatibility_provider.dart';
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
@@ -394,6 +395,9 @@ class FishCompatibilityScreenState
               isRateLimitError: next.isRateLimitError,
               isQuotaError: next.isQuotaError,
               isNetworkError: next.isNetworkError,
+              isAnonymousUser:
+                  ref.read(authStateProvider).asData?.value?.isAnonymous ??
+                  false,
               onRetry: next.isRetryable && !next.isRateLimitError
                   ? () => notifier.retryCompatibilityReport()
                   : null,

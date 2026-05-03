@@ -652,6 +652,11 @@
   "becomeFounderAquarist": "Conviértete en Fundador Acuarista",
   "rateLimitReachedTitle": "Límite del nivel gratuito alcanzado",
   "rateLimitFounderUpsellBody": "Mejora a **Fundador Acuarista** para disfrutar de mayores límites de uso de IA y eliminar los anuncios permanentemente.",
+  "rateLimitSignInPerksTitle": "Ventajas de una cuenta gratuita",
+  "rateLimitSignInUpsellBody": "Crea una cuenta gratuita o inicia sesión para obtener más solicitudes de IA gratuitas y sincronizar tus acuarios entre dispositivos.",
+  "rateLimitSignInButton": "Iniciar sesión / Crear cuenta",
+  "rateLimitPerkMoreRequests": "Más solicitudes de IA gratuitas por día",
+  "rateLimitPerkSyncAquariums": "Sincronizar acuarios entre dispositivos",
   "aiErrorTitle": "Error de IA",
   "apiKeyRequiredTitle": "Se requiere clave API",
   "removeAdsContentDesc": "Apoya Aquarium AI con una compra única para eliminar todos los anuncios de forma permanente.",
@@ -2156,5 +2161,10 @@
   "cloudRestoreButtonLabel": "Restaurar desde la Nube",
   "lastCloudBackup": "Última copia en la nube",
   "founderPerkCloudBackup": "Copia de seguridad y restauración en la nube",
-  "perkAccessBackupRestore": "Ir a Configuración → Copia de Seguridad/Restaurar"
+  "perkAccessBackupRestore": "Ir a Configuración → Copia de Seguridad/Restaurar",
+  "recommendedModelsTitle": "Modelos Recomendados",
+  "recommendedModelsDescription": "¿No sabes qué modelo usar? Aquí tienes algunos consejos para cada proveedor.",
+  "geminiModelTip": "gemini-flash-latest — Rápido y compatible con el nivel gratuito, ideal para uso diario.\ngemini-2.0-pro-exp — Máxima calidad, más lento y consume más cuota.",
+  "groqModelTip": "llama-3.3-70b-versatile — Mejor calidad en Groq con inferencia ultrarrápida.\nllama-3.1-8b-instant — Opción más rápida, ideal para consultas ágiles.",
+  "openAIModelTip": "gpt-4o — Mejor calidad, soporte multimodal, mayor costo.\ngpt-4o-mini — Rápido y económico para la mayoría de tareas."
 }

@@ -20,6 +20,7 @@ import '../prompts/fish_info_prompt.dart';
 import '../prompts/photo_analysis_prompt.dart';
 import '../prompts/water_analysis_prompt.dart';
 import '../services/app_check_service.dart';
+import '../services/auth_service.dart';
 import '../services/groq_proxy_service.dart';
 import '../services/remote_config_service.dart';
 import '../utils/ai_language_utils.dart';
@@ -484,20 +485,27 @@ class ChatNotifier extends StateNotifier<ChatState> {
   /// (real purchase or debug override).
   bool get _isFounder => _ref.read(isFounderProvider);
 
+  /// Returns `true` when the current user is signed in with a real account
+  /// (non-anonymous). Used to apply the signed-in rate-limit multiplier.
+  bool get _isSignedIn => !(AuthService.currentUser?.isAnonymous ?? true);
+
   /// Effective per-minute request cap for the current user tier.
-  int get _effectiveMaxPerMinute => _isFounder
-      ? RemoteConfigService.founderMaxRequestsPerMinute
-      : RemoteConfigService.maxRequestsPerMinute;
+  int get _effectiveMaxPerMinute => DevRateLimiter.effectiveMaxPerMinute(
+    isFounder: _isFounder,
+    isSignedIn: _isSignedIn,
+  );
 
   /// Effective per-day request cap for the current user tier.
-  int get _effectiveMaxPerDay => _isFounder
-      ? RemoteConfigService.founderMaxRequestsPerDay
-      : RemoteConfigService.maxRequestsPerDay;
+  int get _effectiveMaxPerDay => DevRateLimiter.effectiveMaxPerDay(
+    isFounder: _isFounder,
+    isSignedIn: _isSignedIn,
+  );
 
   /// Effective per-day photo analysis cap for the current user tier.
-  int get _effectiveMaxPhotosPerDay => _isFounder
-      ? RemoteConfigService.founderMaxPhotoAnalysesPerDay
-      : RemoteConfigService.maxPhotoAnalysesPerDay;
+  int get _effectiveMaxPhotosPerDay => DevRateLimiter.effectiveMaxPhotos(
+    isFounder: _isFounder,
+    isSignedIn: _isSignedIn,
+  );
 
   void cancel() {
     _cancellable?.cancel();
@@ -545,10 +553,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (_modelState.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest(
         isFounder: _isFounder,
+        isSignedIn: _isSignedIn,
       );
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot(
           isFounder: _isFounder,
+          isSignedIn: _isSignedIn,
         );
         return _handleError(
           '⏱️ Free-tier limit reached ($_effectiveMaxPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
@@ -775,10 +785,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (_modelState.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest(
         isFounder: _isFounder,
+        isSignedIn: _isSignedIn,
       );
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot(
           isFounder: _isFounder,
+          isSignedIn: _isSignedIn,
         );
         final userMsg = 'Please analyze my water parameters.';
         await _handleError(
@@ -868,10 +880,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (_modelState.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest(
         isFounder: _isFounder,
+        isSignedIn: _isSignedIn,
       );
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot(
           isFounder: _isFounder,
+          isSignedIn: _isSignedIn,
         );
         await _handleError(
           '⏱️ Free-tier limit reached ($_effectiveMaxPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
@@ -949,10 +963,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
     if (_modelState.usingDeveloperGroqKeyForText) {
       final result = await DevRateLimiter.checkAndRecordRequest(
         isFounder: _isFounder,
+        isSignedIn: _isSignedIn,
       );
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot(
           isFounder: _isFounder,
+          isSignedIn: _isSignedIn,
         );
         await _handleError(
           '⏱️ Free-tier limit reached ($_effectiveMaxPerMinute requests/min). Please wait $secs second${secs == 1 ? '' : 's'} or add your own Groq API key in Settings.',
@@ -1036,10 +1052,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
       // Per-minute + per-day request limit checked first — no quota consumed if this fails.
       final reqResult = await DevRateLimiter.checkAndRecordRequest(
         isFounder: _isFounder,
+        isSignedIn: _isSignedIn,
       );
       if (reqResult == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot(
           isFounder: _isFounder,
+          isSignedIn: _isSignedIn,
         );
         state = ChatState(
           messages: [
@@ -1078,6 +1096,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
       if (!isRegeneration) {
         final photoAllowed = await DevRateLimiter.checkAndRecordPhotoAnalysis(
           isFounder: _isFounder,
+          isSignedIn: _isSignedIn,
         );
         if (!photoAllowed) {
           // Rollback the per-minute slot we just recorded since the photo won't proceed.

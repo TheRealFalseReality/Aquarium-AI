@@ -399,6 +399,7 @@ cuenta con nombre más tarde en **Perfil**.
 | ------------- | ----------- |
 | **Proveedor de AI** | Elige entre Groq, Gemini y OpenAI |
 | **Claves API de AI** | Almacena tus claves API personales |
+| **Modelos recomendados** | Sección de consejos desplegable con nombres de modelos recomendados para Gemini, Groq y OpenAI |
 | **Límite de historial de chat** | Número de mensajes anteriores enviados con cada solicitud |
 | **Visualización del acuario** | Mostrar/ocultar fotos, métricas, habitantes, notas, etc. |
 | **Copia de seguridad / Restauración** | Exportar e importar todos los datos del acuario; los Acuaristas Fundadores también pueden hacer copias de seguridad en la nube |

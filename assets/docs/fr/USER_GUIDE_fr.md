@@ -408,6 +408,7 @@ vers un compte nommé plus tard dans **Profil**.
 | --------- | ----------- |
 | **Fournisseur AI** | Choisir entre Groq, Gemini et OpenAI |
 | **Clés API AI** | Stocker vos clés API personnelles |
+| **Modèles recommandés** | Section de conseils dépliable listant les noms de modèles recommandés pour Gemini, Groq et OpenAI |
 | **Limite d'historique de chat** | Nombre de messages précédents envoyés avec chaque requête |
 | **Affichage du bac** | Afficher/masquer photos, métriques, habitants, notes, etc. |
 | **Sauvegarde / Restauration** | Exporter et importer toutes les données du bac ; les Aquariophiles Fondateurs peuvent également sauvegarder dans le cloud |

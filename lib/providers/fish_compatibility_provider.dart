@@ -9,9 +9,9 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/analysis_history_entry.dart';
 import '../prompts/fish_compatibility_prompt.dart';
 import '../services/app_check_service.dart';
+import '../services/auth_service.dart';
 import '../services/fish_data_service.dart';
 import '../services/groq_proxy_service.dart';
-import '../services/remote_config_service.dart';
 import '../utils/ai_language_utils.dart';
 import '../utils/api_error_handler.dart';
 import '../utils/cancellable_completer.dart';
@@ -206,18 +206,23 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
     // Check dev rate limit before consuming the API
     if (models.usingDeveloperGroqKeyForText) {
       final isFounder = ref.read(isFounderProvider);
-      final maxPerMin = isFounder
-          ? RemoteConfigService.founderMaxRequestsPerMinute
-          : RemoteConfigService.maxRequestsPerMinute;
-      final maxPerDay = isFounder
-          ? RemoteConfigService.founderMaxRequestsPerDay
-          : RemoteConfigService.maxRequestsPerDay;
+      final isSignedIn = !(AuthService.currentUser?.isAnonymous ?? true);
+      final maxPerMin = DevRateLimiter.effectiveMaxPerMinute(
+        isFounder: isFounder,
+        isSignedIn: isSignedIn,
+      );
+      final maxPerDay = DevRateLimiter.effectiveMaxPerDay(
+        isFounder: isFounder,
+        isSignedIn: isSignedIn,
+      );
       final result = await DevRateLimiter.checkAndRecordRequest(
         isFounder: isFounder,
+        isSignedIn: isSignedIn,
       );
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot(
           isFounder: isFounder,
+          isSignedIn: isSignedIn,
         );
         state = state.copyWith(
           error:

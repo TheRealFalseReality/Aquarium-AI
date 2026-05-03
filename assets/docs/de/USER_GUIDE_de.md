@@ -402,6 +402,7 @@ Google, Facebook oder anonym bleiben verwenden. Anonyme Konten können später u
 | ----------- | ------------ |
 | **AI-Anbieter** | Zwischen Groq, Gemini und OpenAI wählen |
 | **AI-API-Schlüssel** | Persönliche API-Schlüssel speichern |
+| **Empfohlene Modelle** | Aufklappbarer Tipp-Bereich mit empfohlenen Modellnamen für Gemini, Groq und OpenAI |
 | **Chat-Verlaufslimit** | Anzahl der vorherigen Nachrichten, die mit jeder Anfrage gesendet werden |
 | **Tank-Anzeige** | Fotos, Metriken, Bewohner, Notizen usw. ein-/ausblenden |
 | **Sicherung / Wiederherstellung** | Alle Tank-Daten exportieren und importieren; Gründer-Aquarianer können auch in der Cloud sichern |
