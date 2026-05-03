@@ -23,6 +23,7 @@ import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/notification_reschedule_dialog.dart';
+import '../widgets/out_of_range_alerts_banner.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_logger_screen.dart';
 import 'notification_management_screen.dart';
@@ -1387,9 +1388,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
             if (outOfRangeAlerts.isEmpty) return const SizedBox.shrink();
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: _buildOutOfRangeAlertsBanner(
-                context,
-                outOfRangeAlerts,
+              child: OutOfRangeAlertsBanner(
+                alerts: outOfRangeAlerts,
+                parameterLabel: (type) =>
+                    _getParameterLabel(type, context),
               ),
             );
           },
@@ -1421,93 +1423,6 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           },
         ),
       ],
-    );
-  }
-
-  /// Banner card listing every out-of-range latest reading.
-  Widget _buildOutOfRangeAlertsBanner(
-    BuildContext context,
-    List<ParameterRangeAlert> alerts,
-  ) {
-    final l10n = AppLocalizations.of(context)!;
-    final cs = Theme.of(context).colorScheme;
-    final hasCritical = alerts.any(
-      (a) => a.status == ParameterStatus.critical,
-    );
-
-    return Card(
-      color: hasCritical
-          ? cs.errorContainer.withOpacity(0.55)
-          : Colors.orange.withOpacity(0.12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  hasCritical
-                      ? Icons.warning_amber_rounded
-                      : Icons.info_outline,
-                  color: hasCritical ? cs.error : Colors.orange.shade700,
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    l10n.outOfRangeAlertsTitle(alerts.length),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: hasCritical ? cs.error : Colors.orange.shade800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            ...alerts.map((alert) {
-              final statusLabel = switch (alert.status) {
-                ParameterStatus.critical => l10n.parameterStatusCritical,
-                ParameterStatus.warning => l10n.warning,
-                ParameterStatus.caution => l10n.parameterStatusCaution,
-                ParameterStatus.normal => '',
-              };
-              final dotColor = switch (alert.status) {
-                ParameterStatus.critical => Colors.red,
-                ParameterStatus.warning => Colors.orange,
-                ParameterStatus.caution => Colors.amber.shade700,
-                ParameterStatus.normal => Colors.green,
-              };
-              return Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        color: dotColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        '${_getParameterLabel(alert.parameterType, context)}: '
-                        '${alert.value.toStringAsFixed(2)}${alert.unit ?? ''}'
-                        ' — $statusLabel',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ],
-        ),
-      ),
     );
   }
 

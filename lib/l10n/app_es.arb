@@ -406,6 +406,7 @@
   "outOfRangeAlertsTitle": "Parámetros fuera de rango ({count})",
   "parameterStatusCaution": "Precaución",
   "parameterStatusCritical": "Crítico",
+  "outOfRangeAlertRow": "{parameterName}: {value}{unit} — {status}",
   "outOfRangeSnackBar": "{parameterName} ({value}{unit}) — {status}",
   "addDose": "Agregar Dosis",
   "addFirstDose": "Agregar Primera Dosis",
