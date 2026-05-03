@@ -8,7 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/purchase_service.dart';
 
-const String _adsRemovedKey = 'adsRemoved';
+/// SharedPreferences key for the ads-removed (Founder Aquarist) flag.
+const String adsRemovedKey = 'adsRemoved';
+
+// Private alias kept for backward compatibility within this file.
+const String _adsRemovedKey = adsRemovedKey;
 
 /// Sentinel used by [PurchaseState.copyWith] to distinguish between
 /// "errorMessage not provided" and "errorMessage explicitly set to null".

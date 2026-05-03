@@ -403,7 +403,28 @@ cuenta con nombre más tarde en **Perfil**.
 | **Límite de historial de chat** | Número de mensajes anteriores enviados con cada solicitud |
 | **Visualización del acuario** | Mostrar/ocultar fotos, métricas, habitantes, notas, etc. |
 | **Copia de seguridad / Restauración** | Exportar e importar todos los datos del acuario; los Acuaristas Fundadores también pueden hacer copias de seguridad en la nube |
+| **Copia de seguridad automática en la nube** | Subir automáticamente una copia de seguridad en la nube según un horario (solo Acuaristas Fundadores — ver abajo) |
 | **Notificaciones** | Programar recordatorios para cambios de agua, alimentación, etc. |
+
+### Copia de seguridad automática en la nube
+
+**Requisitos:** Estado de Acuarista Fundador + sesión iniciada en Firebase
+
+Cuando está activada, la app sube silenciosamente una copia de seguridad en la nube cada vez que se inicia, siempre que haya transcurrido el intervalo configurado desde la última copia exitosa.
+
+**Configuración:**
+
+| Configuración | Opciones | Descripción |
+| ------------- | -------- | ----------- |
+| **Copia de seguridad automática en la nube** | Activado / Desactivado | Habilita o deshabilita las copias de seguridad automáticas programadas |
+| **Frecuencia de copia de seguridad** | Diariamente / Semanalmente (predeterminado) / Mensualmente | Con qué frecuencia se sube una nueva copia |
+| **Última copia de seguridad automática** | Marca de tiempo | Cuándo se completó la última copia automática |
+
+**Cómo funciona:**
+
+1. En cada inicio de la app, el programador verifica si ha transcurrido el intervalo configurado desde la última copia exitosa.
+2. Si la copia está pendiente y el usuario ha iniciado sesión como Acuarista Fundador, se sube silenciosamente a la nube.
+3. La marca de tiempo «última copia automática» solo se actualiza en caso de éxito; un intento fallido se reintentará en el próximo inicio.
 
 ### Apariencia
 

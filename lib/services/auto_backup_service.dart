@@ -11,7 +11,7 @@ import '../services/analytics_service.dart';
 import '../services/cloud_backup_service.dart';
 
 /// SharedPreferences key for the last auto cloud-backup timestamp.
-const String _lastAutoBackupKey = 'last_auto_cloud_backup_time';
+const String lastAutoBackupKey = 'last_auto_cloud_backup_time';
 
 /// SharedPreferences key for the auto-backup enabled flag.
 const String autoCloudBackupEnabledKey = 'autoCloudBackupEnabled';
@@ -58,8 +58,10 @@ class AutoBackupService {
       final enabled = prefs.getBool(autoCloudBackupEnabledKey) ?? false;
       if (!enabled) return;
 
-      // Founder gate (same check as manual cloud backup).
-      final isFounder = ref.read(isFounderProvider);
+      // Founder gate: read the persisted flag directly from SharedPreferences
+      // to avoid a race condition on cold start where the PurchaseNotifier
+      // async _init() may not have completed yet.
+      final isFounder = prefs.getBool(adsRemovedKey) ?? kDebugMode;
       if (!isFounder) return;
 
       // Sign-in gate.
@@ -70,7 +72,7 @@ class AutoBackupService {
           prefs.getString(autoCloudBackupFrequencyKey) ?? autoBackupFrequencyWeekly;
       final interval = _intervalFor(frequency);
 
-      final lastStr = prefs.getString(_lastAutoBackupKey);
+      final lastStr = prefs.getString(lastAutoBackupKey);
       if (lastStr != null) {
         final lastRun = DateTime.tryParse(lastStr);
         if (lastRun != null) {
@@ -95,7 +97,7 @@ class AutoBackupService {
 
       if (success) {
         await prefs.setString(
-          _lastAutoBackupKey,
+          lastAutoBackupKey,
           DateTime.now().toIso8601String(),
         );
 
@@ -131,7 +133,7 @@ class AutoBackupService {
   static Future<DateTime?> getLastAutoBackupTime() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final str = prefs.getString(_lastAutoBackupKey);
+      final str = prefs.getString(lastAutoBackupKey);
       if (str == null) return null;
       return DateTime.tryParse(str);
     } catch (_) {

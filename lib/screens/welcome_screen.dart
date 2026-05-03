@@ -216,7 +216,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Request an in-app review if conditions are met (≥3 days since first launch)
     InAppReviewService.maybeRequestReview();
     // Check and run automatic cloud backup if due (non-blocking, Founder only).
-    AutoBackupService.checkAndRun(ref);
+    unawaited(AutoBackupService.checkAndRun(ref));
     // Show onboarding on first launch (before any dialogs); only run the
     // other startup checks if onboarding is not going to be shown.
     _checkShowOnboarding().then((onboardingShowing) {
