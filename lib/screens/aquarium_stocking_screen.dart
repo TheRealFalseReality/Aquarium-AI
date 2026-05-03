@@ -9,6 +9,7 @@ import '../main_layout.dart';
 import '../models/fish.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/aquarium_stocking_provider.dart';
+import '../providers/community_provider.dart' show authStateProvider;
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../providers/species_tags_provider.dart';
@@ -559,6 +560,9 @@ class AquariumStockingScreenState
               isRateLimitError: next.isRateLimitError,
               isQuotaError: next.isQuotaError,
               isNetworkError: next.isNetworkError,
+              isAnonymousUser:
+                  ref.read(authStateProvider).asData?.value?.isAnonymous ??
+                  false,
             );
             ref.read(aquariumStockingProvider.notifier).cancel();
           }

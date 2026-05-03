@@ -406,6 +406,7 @@ Tap **Sign In** at the top of the Community screen. You can use Google, Facebook
 
 | **AI Provider** | Choose between Groq, Gemini, and OpenAI |
 | **AI API Keys** | Store your personal API keys |
+| **Recommended Models** | Expandable tips section listing recommended model names for Gemini, Groq, and OpenAI |
 | **Chat History Limit** | Number of previous messages sent with each request |
 | **Tank Display** | Hide/show photos, metrics, inhabitants, notes, etc. |
 | **Backup / Restore** | Export and import all tank data; Founder Aquarists can also back up to the cloud |

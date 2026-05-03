@@ -78,4 +78,26 @@ void main() {
       // Should complete without error
     }
   });
+
+  testWidgets('SettingsScreen Recommended Models expansion tile renders tips', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: SettingsScreen(),
+        ),
+      ),
+    );
+
+    // The tile should be present but collapsed by default
+    expect(find.text('Recommended Models'), findsOneWidget);
+
+    // Expand it
+    await tester.tap(find.text('Recommended Models'));
+    await tester.pumpAndSettle();
+
+    // All three provider tip texts should now be visible
+    expect(find.textContaining('gemini'), findsAtLeastNWidgets(1));
+    expect(find.textContaining('llama'), findsAtLeastNWidgets(1));
+    expect(find.textContaining('gpt-4o'), findsAtLeastNWidgets(1));
+  });
 }

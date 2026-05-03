@@ -12,8 +12,8 @@ import '../models/tank.dart';
 import '../prompts/stocking_recommendation_prompt.dart';
 import '../prompts/tank_stocking_recommendation_prompt.dart';
 import '../services/app_check_service.dart';
+import '../services/auth_service.dart';
 import '../services/groq_proxy_service.dart';
-import '../services/remote_config_service.dart';
 import '../utils/ai_language_utils.dart';
 import '../utils/api_error_handler.dart';
 import '../utils/dev_rate_limiter.dart';
@@ -155,18 +155,23 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     // Check dev rate limit before consuming the API
     if (models.usingDeveloperGroqKeyForText) {
       final isFounder = ref.read(isFounderProvider);
-      final maxPerMin = isFounder
-          ? RemoteConfigService.founderMaxRequestsPerMinute
-          : RemoteConfigService.maxRequestsPerMinute;
-      final maxPerDay = isFounder
-          ? RemoteConfigService.founderMaxRequestsPerDay
-          : RemoteConfigService.maxRequestsPerDay;
+      final isSignedIn = !(AuthService.currentUser?.isAnonymous ?? true);
+      final maxPerMin = DevRateLimiter.effectiveMaxPerMinute(
+        isFounder: isFounder,
+        isSignedIn: isSignedIn,
+      );
+      final maxPerDay = DevRateLimiter.effectiveMaxPerDay(
+        isFounder: isFounder,
+        isSignedIn: isSignedIn,
+      );
       final result = await DevRateLimiter.checkAndRecordRequest(
         isFounder: isFounder,
+        isSignedIn: isSignedIn,
       );
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot(
           isFounder: isFounder,
+          isSignedIn: isSignedIn,
         );
         state = state.copyWith(
           error:
@@ -418,18 +423,23 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
     // Check dev rate limit before consuming the API
     if (models.usingDeveloperGroqKeyForText) {
       final isFounder = ref.read(isFounderProvider);
-      final maxPerMin = isFounder
-          ? RemoteConfigService.founderMaxRequestsPerMinute
-          : RemoteConfigService.maxRequestsPerMinute;
-      final maxPerDay = isFounder
-          ? RemoteConfigService.founderMaxRequestsPerDay
-          : RemoteConfigService.maxRequestsPerDay;
+      final isSignedIn = !(AuthService.currentUser?.isAnonymous ?? true);
+      final maxPerMin = DevRateLimiter.effectiveMaxPerMinute(
+        isFounder: isFounder,
+        isSignedIn: isSignedIn,
+      );
+      final maxPerDay = DevRateLimiter.effectiveMaxPerDay(
+        isFounder: isFounder,
+        isSignedIn: isSignedIn,
+      );
       final result = await DevRateLimiter.checkAndRecordRequest(
         isFounder: isFounder,
+        isSignedIn: isSignedIn,
       );
       if (result == DevRateLimitResult.minuteLimitReached) {
         final secs = await DevRateLimiter.secondsUntilNextSlot(
           isFounder: isFounder,
+          isSignedIn: isSignedIn,
         );
         state = state.copyWith(
           error:

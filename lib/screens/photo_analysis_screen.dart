@@ -8,6 +8,7 @@ import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/chat_provider.dart';
+import '../providers/community_provider.dart' show authStateProvider;
 import '../providers/model_provider.dart';
 import '../providers/purchase_provider.dart';
 import '../services/analytics_service.dart';
@@ -206,6 +207,13 @@ class PhotoAnalysisScreenState extends ConsumerState<PhotoAnalysisScreen> {
                 isRateLimitError: last.isRateLimitError,
                 isQuotaError: last.isQuotaError,
                 isNetworkError: last.isNetworkError,
+                isAnonymousUser:
+                    ref
+                        .read(authStateProvider)
+                        .asData
+                        ?.value
+                        ?.isAnonymous ??
+                    false,
               );
             }
           });

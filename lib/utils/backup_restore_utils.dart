@@ -627,7 +627,9 @@ class BackupRestoreUtils {
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.of(ctx).pop();
-                Navigator.of(context).pushNamed('/auth');
+                if (context.mounted) {
+                  Navigator.of(context).pushNamed('/auth');
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,
@@ -772,7 +774,9 @@ class BackupRestoreUtils {
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.of(ctx).pop();
-                Navigator.of(context).pushNamed('/auth');
+                if (context.mounted) {
+                  Navigator.of(context).pushNamed('/auth');
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,

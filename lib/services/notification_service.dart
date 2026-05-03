@@ -204,6 +204,9 @@ class NotificationService {
     }
 
     // Default tap action opens app UI.
+    // A null actionId means the notification body was tapped (no action button).
+    // Any non-null actionId that was not handled above is an unrecognized action;
+    // do not navigate in that case.
     if (response.actionId != null) {
       return;
     }

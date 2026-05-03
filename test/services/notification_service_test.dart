@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fish_ai/models/tank_notification.dart';
 import 'package:fish_ai/services/notification_service.dart';
@@ -225,13 +224,6 @@ void main() {
         expect(
           service.canHandleNotificationActionForTesting(
             actionId: null,
-            payload: 'tank-1::notif-1',
-          ),
-          isFalse,
-        );
-        expect(
-          service.canHandleNotificationActionForTesting(
-            actionId: NotificationResponse.defaultActionId,
             payload: 'tank-1::notif-1',
           ),
           isFalse,

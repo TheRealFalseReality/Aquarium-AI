@@ -2,6 +2,15 @@
 
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 
+## [3.3.00] - 03/05/2026 • Calculateur de substrat, Sauvegarde cloud, Améliorations de confort
+
+### Ajouts
+- **Sauvegarde cloud** – Ajout de la sauvegarde dans le cloud pour les membres payants.
+- **Calculateur de substrat** – Saisie basée sur le volume, résultats en nombres entiers, cartes colorées indiquant les recommandations ou les plages de valeurs.
+- Sous-types « eau douce plantée » / « eau saumâtre », icônes de type de bac, puce d'information sur le substrat + option de remplacement dans les détails du bac.
+
+**Journal des modifications complet** : https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.2.00...v3.3.00
+
 ## [3.2.00] - 2026-3-10 • Navigateur de compatibilité et intégration des poissons
 
 ### Ajouté

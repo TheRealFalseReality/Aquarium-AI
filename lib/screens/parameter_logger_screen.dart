@@ -9,7 +9,54 @@ import '../models/tank.dart';
 import '../models/water_parameter.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../utils/parameter_range_alerts.dart';
 import '../utils/parameter_trend_alerts.dart';
+import '../widgets/out_of_range_alerts_banner.dart';
+
+/// Returns the localized display name for [parameterType].
+/// Module-level so both [ParameterLoggerScreenState] and
+/// [_AddParameterSheetState] can call it without duplication.
+String _parameterLabel(String parameterType, BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  switch (parameterType) {
+    case 'ammonia':
+      return l10n.ammonia;
+    case 'nitrite':
+      return l10n.nitrite;
+    case 'nitrate':
+      return l10n.nitrate;
+    case 'phosphate':
+      return l10n.phosphate;
+    case 'salinity':
+      return l10n.salinity;
+    case 'calcium':
+      return l10n.calcium;
+    case 'magnesium':
+      return l10n.magnesium;
+    case 'kh':
+      return l10n.kh;
+    case 'gh':
+      return l10n.gh;
+    case 'alkalinity':
+      return l10n.alkalinity;
+    case 'orp':
+      return l10n.orp;
+    case 'ph':
+      return l10n.ph;
+    case 'potassium':
+      return l10n.potassium;
+    case 'tds':
+      return l10n.tds;
+    case 'iodine':
+      return l10n.iodine;
+    case 'temperature':
+      return l10n.temperature;
+    default:
+      if (parameterType.isEmpty) return l10n.custom;
+      return parameterType[0].toUpperCase() +
+          (parameterType.length > 1 ? parameterType.substring(1) : '');
+  }
+}
 
 class ParameterLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
@@ -148,50 +195,8 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     return grouped;
   }
 
-  String _getParameterLabel(String parameterType, BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    switch (parameterType) {
-      case 'ammonia':
-        return l10n.ammonia;
-      case 'nitrite':
-        return l10n.nitrite;
-      case 'nitrate':
-        return l10n.nitrate;
-      case 'phosphate':
-        return l10n.phosphate;
-      case 'salinity':
-        return l10n.salinity;
-      case 'calcium':
-        return l10n.calcium;
-      case 'magnesium':
-        return l10n.magnesium;
-      case 'kh':
-        return l10n.kh;
-      case 'gh':
-        return l10n.gh;
-      case 'alkalinity':
-        return l10n.alkalinity;
-      case 'orp':
-        return l10n.orp;
-      case 'ph':
-        return l10n.ph;
-      case 'potassium':
-        return l10n.potassium;
-      case 'tds':
-        return l10n.tds;
-      case 'iodine':
-        return l10n.iodine;
-      case 'temperature':
-        return l10n.temperature;
-      default:
-        // For custom parameters, capitalize first letter
-        if (parameterType.isEmpty) {
-          return l10n.custom;
-        }
-        return parameterType[0].toUpperCase() +
-            (parameterType.length > 1 ? parameterType.substring(1) : '');
-    }
-  }
+  String _getParameterLabel(String parameterType, BuildContext context) =>
+      _parameterLabel(parameterType, context);
 
   IconData _getParameterIcon(String parameterType) {
     switch (parameterType) {
@@ -774,6 +779,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final proactiveAlerts = buildProactiveParameterAlerts(
       currentTank.waterParameters,
     );
+    final outOfRangeAlerts = buildCurrentOutOfRangeAlerts(
+      currentTank.waterParameters,
+      tankType: currentTank.type,
+    );
 
     // Only show salinity, calcium, magnesium, and iodine for marine tanks
     final parameterTypes = currentTank.type == 'marine'
@@ -842,6 +851,14 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  if (outOfRangeAlerts.isNotEmpty) ...[
+                    OutOfRangeAlertsBanner(
+                      alerts: outOfRangeAlerts,
+                      parameterLabel: (type) =>
+                          _parameterLabel(type, context),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   if (proactiveAlerts.isNotEmpty) ...[
                     _buildProactiveTrendAlerts(context, proactiveAlerts),
                     const SizedBox(height: 24),
@@ -852,6 +869,13 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
 
                     final isExpanded = _expandedParameter == paramType;
                     final color = _getParameterColor(paramType);
+
+                    // Latest reading for status badge
+                    final latestStatus = getParameterStatus(
+                      paramType,
+                      parameters.first.value,
+                      unit: parameters.first.unit,
+                    );
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -877,8 +901,19 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            subtitle: Text(
-                              '${parameters.length} ${parameters.length == 1 ? l10n.reading : l10n.readings}',
+                            subtitle: Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    '${parameters.length} ${parameters.length == 1 ? l10n.reading : l10n.readings}',
+                                  ),
+                                ),
+                                if (latestStatus !=
+                                    ParameterStatus.normal) ...[
+                                  const SizedBox(width: 6),
+                                  _buildStatusBadge(context, latestStatus),
+                                ],
+                              ],
                             ),
                             trailing: Icon(
                               isExpanded
@@ -922,6 +957,40 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
           onPressed: () => _addParameter(context),
           icon: const Icon(Icons.add),
           label: Text(l10n.addReading),
+        ),
+      ),
+    );
+  }
+
+  /// Small coloured badge showing [status] — shown inline in the subtitle of
+  /// each parameter card header when the latest reading is not normal.
+  Widget _buildStatusBadge(BuildContext context, ParameterStatus status) {
+    final l10n = AppLocalizations.of(context)!;
+    final color = switch (status) {
+      ParameterStatus.critical => Colors.red,
+      ParameterStatus.warning => Colors.orange,
+      ParameterStatus.caution => Colors.amber.shade700,
+      ParameterStatus.normal => Colors.green,
+    };
+    final label = switch (status) {
+      ParameterStatus.critical => l10n.parameterStatusCritical,
+      ParameterStatus.warning => l10n.warning,
+      ParameterStatus.caution => l10n.parameterStatusCaution,
+      ParameterStatus.normal => '',
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        border: Border.all(color: color.withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          color: color,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -1351,7 +1420,56 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
         tankType: widget.tank.type,
       );
 
+      // Capture messenger, parameterName, and status before popping — the
+      // context may be unmounted once Navigator.pop removes the bottom sheet.
+      final messenger = ScaffoldMessenger.of(context);
+      final parameterName = _parameterLabel(parameterType, context);
+      final status = getParameterStatus(
+        parameterType,
+        parameter.value,
+        unit: _selectedUnit,
+      );
+
       Navigator.pop(context);
+
+      // Show out-of-range SnackBar after dismissing the sheet.
+      if (status != ParameterStatus.normal) {
+        final snackBarColor = switch (status) {
+          ParameterStatus.critical => Colors.red.shade700,
+          ParameterStatus.warning => Colors.orange.shade700,
+          ParameterStatus.caution => Colors.amber.shade800,
+          ParameterStatus.normal => Colors.green,
+        };
+        final statusLabel = switch (status) {
+          ParameterStatus.critical => l10n.parameterStatusCritical,
+          ParameterStatus.warning => l10n.warning,
+          ParameterStatus.caution => l10n.parameterStatusCaution,
+          ParameterStatus.normal => '',
+        };
+        messenger.showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.warning_amber, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.outOfRangeSnackBar(
+                      parameterName,
+                      parameter.value.toStringAsFixed(2),
+                      _selectedUnit,
+                      statusLabel,
+                    ),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: snackBarColor,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
     }
   }
 

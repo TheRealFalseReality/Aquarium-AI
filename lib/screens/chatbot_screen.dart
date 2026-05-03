@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../providers/chat_provider.dart';
+import '../providers/community_provider.dart' show authStateProvider;
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/share_utils.dart';
@@ -469,6 +470,13 @@ class ChatbotScreenState extends ConsumerState<ChatbotScreen>
                   isRateLimitError: last.isRateLimitError,
                   isQuotaError: last.isQuotaError,
                   isNetworkError: last.isNetworkError,
+                  isAnonymousUser:
+                      ref
+                          .read(authStateProvider)
+                          .asData
+                          ?.value
+                          ?.isAnonymous ??
+                      false,
                   onRetry: !last.isRateLimitError ? retryCallback : null,
                 );
               }
