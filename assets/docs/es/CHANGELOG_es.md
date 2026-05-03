@@ -2,6 +2,15 @@
 
 Todos los cambios notables de este proyecto se documentan en este archivo.
 
+## [3.3.00] - 3 de mayo de 2026 • Calculadora de sustrato, Copia de seguridad en la nube, Mejoras de calidad de vida
+
+### Añadido
+- **Copia de seguridad en la nube** – Se ha añadido la copia de seguridad en la nube para los miembros de pago.
+- **Calculadora de sustrato** – Entrada de datos basada en volumen, resultados en números enteros, tarjetas con códigos de color para recomendaciones y rangos.
+- Subtipos para acuarios plantados de agua dulce y acuarios de agua salobre; iconos para los tipos de acuario; etiqueta de sustrato y opción de anulación manual en los detalles del acuario.
+
+**Registro completo de cambios**: https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.2.00...v3.3.00
+
 ## [3.2.00] - 2026-3-10 • Navegador de compatibilidad con Fish e incorporación
 
 ### Agregado

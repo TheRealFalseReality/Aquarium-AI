@@ -2,6 +2,15 @@
 
 Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
 
+## [3.3.00] – 03.05.2026 • Bodengrund-Rechner, Cloud-Backup, Quality-of-Life-Updates
+
+### Hinzugefügt
+- **Cloud-Backup** – Cloud-Backup für zahlende Mitglieder hinzugefügt.
+- **Bodengrund-Rechner** – Volumen-basierte Eingabe, ganzzahlige Ergebnisse, farblich markierte Karten für Empfehlungen/Bereiche.
+- Untertypen für bepflanzte Süßwasser- und Brackwasserbecken, Symbole für Beckentypen, Bodengrund-Chip + manuelle Überschreibung in den Beckendetails.
+
+**Vollständiges Changelog**: https://github.com/TheRealFalseReality/Aquarium-AI/compare/v3.2.00...v3.3.00
+
 ## [3.2.00] – 2026-3-10 • Fischkompatibilitätsbrowser und Onboarding
 
 ### Hinzugefügt
