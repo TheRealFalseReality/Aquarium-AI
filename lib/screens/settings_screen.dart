@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,6 +25,7 @@ import '../providers/tank_provider.dart';
 import '../screens/dosing_calculator.dart';
 import '../services/analytics_service.dart';
 import '../services/cloud_backup_service.dart';
+import '../services/auto_backup_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/fish_data_service.dart';
 import '../services/in_app_review_service.dart';
@@ -3862,9 +3864,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 Colors.purple,
                               ),
                             ],
+                            if (stats['lastAutoCloudBackupTime'] != null) ...[
+                              const SizedBox(height: 8),
+                              _buildStatRow(
+                                context,
+                                Icons.cloud_sync,
+                                l10n.lastAutoCloudBackup,
+                                stats['lastAutoCloudBackupTime'] as String,
+                                Colors.teal,
+                              ),
+                            ],
                             if (stats['lastBackupTime'] == null &&
                                 stats['lastRestoreTime'] == null &&
-                                stats['lastCloudBackupTime'] == null)
+                                stats['lastCloudBackupTime'] == null &&
+                                stats['lastAutoCloudBackupTime'] == null)
                               Text(
                                 l10n.noBackupHistory,
                                 style: Theme.of(context).textTheme.bodySmall
@@ -4016,6 +4029,148 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         );
                       },
                     ),
+                    const Divider(height: 16),
+                    // Auto Cloud Backup (Founder only)
+                    Builder(
+                      builder: (context) {
+                        final isFounder = ref.watch(isFounderProvider);
+                        final settings = ref.watch(appSettingsProvider);
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SwitchListTile(
+                              secondary: Container(
+                                width: 40,
+                                height: 40,
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.teal.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.cloud_sync,
+                                  color: isFounder
+                                      ? Colors.teal
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              title: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(l10n.autoCloudBackupTitle),
+                                  ),
+                                  if (!isFounder) ...[
+                                    const SizedBox(width: 8),
+                                    Tooltip(
+                                      message: l10n.founderRequiredTooltip,
+                                      child: const Icon(
+                                        Icons.lock_outline,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              subtitle: Text(l10n.autoCloudBackupSubtitle),
+                              value: isFounder &&
+                                  settings.autoCloudBackupEnabled,
+                              onChanged: isFounder
+                                  ? (value) {
+                                      if (value &&
+                                          FirebaseAuth
+                                                  .instance.currentUser ==
+                                              null) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              l10n.cloudBackupRequiresSignIn,
+                                            ),
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                      ref
+                                          .read(appSettingsProvider.notifier)
+                                          .setAutoCloudBackupEnabled(value);
+                                      AnalyticsService.logSettingsChange(
+                                        settingName:
+                                            'auto_cloud_backup_enabled',
+                                        newValue: value.toString(),
+                                      );
+                                    }
+                                  : (_) => showRemoveAdsDialog(context),
+                            ),
+                            if (isFounder &&
+                                settings.autoCloudBackupEnabled) ...[
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    16, 0, 16, 8),
+                                child: Row(
+                                  children: [
+                                    const SizedBox(width: 48),
+                                    Expanded(
+                                      child: Text(
+                                        l10n.autoCloudBackupFrequencyLabel,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium,
+                                      ),
+                                    ),
+                                    DropdownButton<String>(
+                                      value:
+                                          settings.autoCloudBackupFrequency,
+                                      underline: const SizedBox.shrink(),
+                                      items: [
+                                        DropdownMenuItem(
+                                          value:
+                                              autoBackupFrequencyDaily,
+                                          child: Text(
+                                            l10n.autoCloudBackupFrequencyDaily,
+                                          ),
+                                        ),
+                                        DropdownMenuItem(
+                                          value:
+                                              autoBackupFrequencyWeekly,
+                                          child: Text(
+                                            l10n.autoCloudBackupFrequencyWeekly,
+                                          ),
+                                        ),
+                                        DropdownMenuItem(
+                                          value:
+                                              autoBackupFrequencyMonthly,
+                                          child: Text(
+                                            l10n.autoCloudBackupFrequencyMonthly,
+                                          ),
+                                        ),
+                                      ],
+                                      onChanged: (value) {
+                                        if (value == null) return;
+                                        ref
+                                            .read(
+                                              appSettingsProvider.notifier,
+                                            )
+                                            .setAutoCloudBackupFrequency(
+                                              value,
+                                            );
+                                        AnalyticsService.logSettingsChange(
+                                          settingName:
+                                              'auto_cloud_backup_frequency',
+                                          newValue: value,
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -4089,6 +4244,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         if (backedUpAt != null) {
           stats['lastCloudBackupTime'] = _formatDateTime(backedUpAt);
         }
+      }
+
+      // Last automatic cloud backup time.
+      final lastAutoBackupTime = await AutoBackupService.getLastAutoBackupTime();
+      if (lastAutoBackupTime != null) {
+        stats['lastAutoCloudBackupTime'] = _formatDateTime(lastAutoBackupTime);
       }
 
       return stats;

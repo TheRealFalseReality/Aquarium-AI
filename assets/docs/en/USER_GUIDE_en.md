@@ -410,7 +410,28 @@ Tap **Sign In** at the top of the Community screen. You can use Google, Facebook
 | **Chat History Limit** | Number of previous messages sent with each request |
 | **Tank Display** | Hide/show photos, metrics, inhabitants, notes, etc. |
 | **Backup / Restore** | Export and import all tank data; Founder Aquarists can also back up to the cloud |
+| **Auto Cloud Backup** | Automatically upload a cloud backup on a schedule (Founder Aquarists only — see below) |
 | **Notifications** | Schedule reminders for water changes, feeding, etc. |
+
+### Auto Cloud Backup
+
+**Requires:** Founder Aquarist status + signed in to Firebase
+
+When enabled, the app silently uploads a cloud backup each time it starts, provided the configured interval has elapsed since the last successful backup. No manual action is needed after the initial setup.
+
+**Settings:**
+
+| Setting | Options | Description |
+| ------- | ------- | ----------- |
+| **Auto Cloud Backup** | On / Off | Enable or disable automatic scheduled backups |
+| **Backup frequency** | Daily / Weekly (default) / Monthly | How often a new backup is uploaded |
+| **Last auto cloud backup** | Timestamp | When the most recent automatic backup completed |
+
+**How it works:**
+
+1. On every app startup, the scheduler checks whether the configured interval has elapsed since the last successful backup.
+2. If the backup is due and the user is signed in as a Founder Aquarist, it silently uploads to the cloud.
+3. The "last auto backup" timestamp is only updated on success; a failed attempt will retry on the next startup.
 
 ### Appearance
 

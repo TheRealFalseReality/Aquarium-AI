@@ -412,7 +412,28 @@ vers un compte nommé plus tard dans **Profil**.
 | **Limite d'historique de chat** | Nombre de messages précédents envoyés avec chaque requête |
 | **Affichage du bac** | Afficher/masquer photos, métriques, habitants, notes, etc. |
 | **Sauvegarde / Restauration** | Exporter et importer toutes les données du bac ; les Aquariophiles Fondateurs peuvent également sauvegarder dans le cloud |
+| **Sauvegarde automatique dans le cloud** | Uploader automatiquement une sauvegarde dans le cloud selon un calendrier (Aquariophiles Fondateurs uniquement — voir ci-dessous) |
 | **Notifications** | Planifier des rappels pour les changements d'eau, l'alimentation, etc. |
+
+### Sauvegarde automatique dans le cloud
+
+**Conditions requises :** Statut d'Aquariophile Fondateur + connecté à Firebase
+
+Lorsqu'elle est activée, l'application charge silencieusement une sauvegarde dans le cloud à chaque démarrage, à condition que l'intervalle configuré se soit écoulé depuis la dernière sauvegarde réussie.
+
+**Paramètres :**
+
+| Paramètre | Options | Description |
+| --------- | ------- | ----------- |
+| **Sauvegarde automatique dans le cloud** | Activé / Désactivé | Activer ou désactiver les sauvegardes automatiques planifiées |
+| **Fréquence de sauvegarde** | Quotidiennement / Hebdomadairement (défaut) / Mensuellement | À quelle fréquence une nouvelle sauvegarde est envoyée |
+| **Dernière sauvegarde automatique** | Horodatage | Date de la dernière sauvegarde automatique réussie |
+
+**Fonctionnement :**
+
+1. À chaque démarrage de l'application, le planificateur vérifie si l'intervalle configuré s'est écoulé depuis la dernière sauvegarde réussie.
+2. Si une sauvegarde est due et que l'utilisateur est connecté en tant qu'Aquariophile Fondateur, elle est envoyée silencieusement dans le cloud.
+3. L'horodatage « dernière sauvegarde automatique » n'est mis à jour qu'en cas de succès ; une tentative échouée sera réessayée au prochain démarrage.
 
 ### Apparence
 

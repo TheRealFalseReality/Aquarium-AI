@@ -406,7 +406,28 @@ Google, Facebook oder anonym bleiben verwenden. Anonyme Konten können später u
 | **Chat-Verlaufslimit** | Anzahl der vorherigen Nachrichten, die mit jeder Anfrage gesendet werden |
 | **Tank-Anzeige** | Fotos, Metriken, Bewohner, Notizen usw. ein-/ausblenden |
 | **Sicherung / Wiederherstellung** | Alle Tank-Daten exportieren und importieren; Gründer-Aquarianer können auch in der Cloud sichern |
+| **Automatisches Cloud-Backup** | Automatisch nach einem Zeitplan ein Cloud-Backup hochladen (nur Gründer-Aquarianer – siehe unten) |
 | **Benachrichtigungen** | Erinnerungen für Wasserwechsel, Fütterung usw. planen |
+
+### Automatisches Cloud-Backup
+
+**Voraussetzungen:** Gründer-Aquarianer-Status + bei Firebase angemeldet
+
+Wenn aktiviert, lädt die App beim Start automatisch ein Cloud-Backup hoch, sofern das konfigurierte Intervall seit dem letzten erfolgreichen Backup abgelaufen ist.
+
+**Einstellungen:**
+
+| Einstellung | Optionen | Beschreibung |
+| ----------- | -------- | ------------ |
+| **Automatisches Cloud-Backup** | Ein / Aus | Automatische geplante Backups aktivieren oder deaktivieren |
+| **Backup-Häufigkeit** | Täglich / Wöchentlich (Standard) / Monatlich | Wie oft ein neues Backup hochgeladen wird |
+| **Letztes automatisches Cloud-Backup** | Zeitstempel | Wann das letzte automatische Backup abgeschlossen wurde |
+
+**So funktioniert es:**
+
+1. Bei jedem App-Start prüft der Scheduler, ob das konfigurierte Intervall seit dem letzten erfolgreichen Backup abgelaufen ist.
+2. Wenn ein Backup fällig ist und der Benutzer als Gründer-Aquarianer angemeldet ist, wird es automatisch in die Cloud hochgeladen.
+3. Der Zeitstempel „Letztes automatisches Backup" wird nur bei Erfolg aktualisiert; ein fehlgeschlagener Versuch wird beim nächsten Start erneut versucht.
 
 ### Erscheinungsbild
 

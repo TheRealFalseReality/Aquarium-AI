@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [3.3.00] - 2026-5-3 • Substrate Calculator, Cloud Backup, Quality of Life Updates
 
 ### Added
-- ** Cloud Backup** - Added cloud backup for paid members.
+- **Cloud Backup** - Added cloud backup for paid members.
 - **Substrate Calculator** – volume-based input, whole-number results, recommended/range colored cards
 - Freshwater planted/brackish subtypes, tank-type icons, substrate chip + override in tank details
 
