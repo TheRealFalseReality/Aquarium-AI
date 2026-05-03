@@ -18,10 +18,12 @@ import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
 import '../services/notification_service.dart';
 import '../utils/backup_restore_utils.dart';
+import '../utils/parameter_range_alerts.dart';
 import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/notification_reschedule_dialog.dart';
+import '../widgets/out_of_range_alerts_banner.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_logger_screen.dart';
 import 'notification_management_screen.dart';
@@ -1375,6 +1377,25 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           ),
         ),
         const SizedBox(height: 16),
+
+        // Out-of-range alert banner
+        Builder(
+          builder: (context) {
+            final outOfRangeAlerts = buildCurrentOutOfRangeAlerts(
+              tank.waterParameters,
+              tankType: tank.type,
+            );
+            if (outOfRangeAlerts.isEmpty) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: OutOfRangeAlertsBanner(
+                alerts: outOfRangeAlerts,
+                parameterLabel: (type) =>
+                    _getParameterLabel(type, context),
+              ),
+            );
+          },
+        ),
 
         Text(
           l10n.latestReadings,
