@@ -61,6 +61,8 @@ class AutoBackupService {
       // Founder gate: read the persisted flag directly from SharedPreferences
       // to avoid a race condition on cold start where the PurchaseNotifier
       // async _init() may not have completed yet.
+      // The `?? kDebugMode` fallback mirrors PurchaseNotifier._init() so that
+      // debug builds behave identically to the original isFounderProvider path.
       final isFounder = prefs.getBool(adsRemovedKey) ?? kDebugMode;
       if (!isFounder) return;
 
