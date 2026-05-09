@@ -366,6 +366,23 @@ class CommunityService {
         .map((snap) => snap.size);
   }
 
+  /// Fetches the latest total comments for a post with a one-time read.
+  static Future<int> getCommentCount(String postId) async {
+    try {
+      final snap = await _firestore
+          .collection(_postsCollection)
+          .doc(postId)
+          .collection(_commentsCollection)
+          .get();
+      return snap.size;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('CommunityService getCommentCount error for post $postId: $e');
+      }
+      return 0;
+    }
+  }
+
   /// Returns the latest like count for a post from Firestore.
   static Future<int> getPostLikeCount(String postId) async {
     try {

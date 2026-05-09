@@ -43,6 +43,7 @@ class _PostCardState extends State<PostCard> {
   bool _bookmarkLoading = false;
   Future<String>? _resolvedPostImageUrl;
   Future<String>? _resolvedAvatarUrl;
+  Future<int>? _fallbackCommentCountFuture;
 
   @override
   void initState() {
@@ -54,6 +55,9 @@ class _PostCardState extends State<PostCard> {
     } else {
       _loadBookmarkStatus();
     }
+    _fallbackCommentCountFuture = widget.post.commentCount == 0
+        ? CommunityService.getCommentCount(widget.post.id)
+        : null;
     if (widget.post.imageUrl != null) {
       _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
@@ -78,6 +82,12 @@ class _PostCardState extends State<PostCard> {
     if (widget.post.avatarUrl != oldWidget.post.avatarUrl) {
       _resolvedAvatarUrl = widget.post.avatarUrl != null
           ? resolveResizedStorageUrl(widget.post.avatarUrl!)
+          : null;
+    }
+    if (widget.post.id != oldWidget.post.id ||
+        widget.post.commentCount != oldWidget.post.commentCount) {
+      _fallbackCommentCountFuture = widget.post.commentCount == 0
+          ? CommunityService.getCommentCount(widget.post.id)
           : null;
     }
   }
@@ -254,10 +264,8 @@ class _PostCardState extends State<PostCard> {
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
-                      StreamBuilder<int>(
-                        stream: CommunityService.commentCountStream(
-                          widget.post.id,
-                        ),
+                      FutureBuilder<int>(
+                        future: _fallbackCommentCountFuture,
                         builder: (context, snapshot) {
                           final displayedCount =
                               CommunityService.resolvedCommentCount(
