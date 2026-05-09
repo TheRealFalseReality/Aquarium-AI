@@ -960,7 +960,14 @@ class BackupRestoreUtils {
     if (cloudPhotos.isEmpty) return;
 
     final tanks = backupData['tanks'];
-    if (tanks is! List) return;
+    if (tanks is! List) {
+      if (kDebugMode) {
+        debugPrint(
+          'BackupRestoreUtils._attachRestoredCloudTankPhotos invalid payload: "tanks" is not a List',
+        );
+      }
+      return;
+    }
 
     final appDir = await getApplicationDocumentsDirectory();
     final photosDir = Directory(
