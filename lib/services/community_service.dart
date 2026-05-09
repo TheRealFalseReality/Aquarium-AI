@@ -377,7 +377,7 @@ class CommunityService {
       return snap.size;
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('CommunityService getCommentCount error for post $postId: $e');
+        debugPrint('CommunityService.getCommentCount error for post $postId: $e');
       }
       return 0;
     }
@@ -392,7 +392,9 @@ class CommunityService {
       return data['likes'] as int? ?? 0;
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('CommunityService getPostLikeCount error for post $postId: $e');
+        debugPrint(
+          'CommunityService.getPostLikeCount error for post $postId: $e',
+        );
       }
       return 0;
     }
