@@ -375,7 +375,7 @@ class CommunityService {
       return data['likes'] as int? ?? 0;
     } catch (e) {
       if (kDebugMode) {
-        debugPrint('CommunityService getPostLikeCount error: $e');
+        debugPrint('CommunityService getPostLikeCount error for post $postId: $e');
       }
       return 0;
     }

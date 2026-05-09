@@ -31,6 +31,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   int _likes = 0;
   bool _isLiked = false;
   bool _likeLoading = false;
+  bool _likeInteracted = false;
   bool _isBookmarked = false;
   bool _bookmarkLoading = false;
   Future<String>? _resolvedPostImageUrl;
@@ -71,7 +72,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     if (mounted) {
       setState(() {
         _isLiked = liked;
-        _likes = latestLikeCount;
+        if (!_likeInteracted) {
+          _likes = latestLikeCount;
+        }
       });
     }
   }
@@ -81,6 +84,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final wasLiked = _isLiked;
     final prevLikes = _likes;
     setState(() {
+      _likeInteracted = true;
       _likeLoading = true;
       _isLiked = !_isLiked;
       _likes += _isLiked ? 1 : -1;
