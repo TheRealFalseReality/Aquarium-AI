@@ -485,6 +485,30 @@ class TankNotifier extends StateNotifier<TankState> {
     };
   }
 
+  /// Returns local tank photo file paths keyed by tank/photo ids for cloud
+  /// backup upload.
+  ///
+  /// Only tank photos with a non-empty [TankPhoto.imagePath] are included.
+  /// URL-based photos are already part of the regular backup payload.
+  List<Map<String, String>> collectLocalTankPhotoPathsForCloudBackup() {
+    final localPhotoPaths = <Map<String, String>>[];
+
+    for (final tank in state.tanks) {
+      for (final photo in tank.photos) {
+        final imagePath = photo.imagePath;
+        if (imagePath == null || imagePath.isEmpty) continue;
+
+        localPhotoPaths.add({
+          'tankId': tank.id,
+          'photoId': photo.id,
+          'imagePath': imagePath,
+        });
+      }
+    }
+
+    return localPhotoPaths;
+  }
+
   /// Builds the full backup payload Map without performing any file I/O.
   ///
   /// This is the same payload that [exportTanksToFile] writes to disk, exposed

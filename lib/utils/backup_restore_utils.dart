@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
@@ -695,6 +698,8 @@ class BackupRestoreUtils {
 
     try {
       final payload = await tankNotifier.buildBackupPayload();
+      final localTankPhotoPaths = tankNotifier
+          .collectLocalTankPhotoPathsForCloudBackup();
       final jsonString = json.encode(payload);
       final tankCount = backupInfo['tankCount'] as int;
       final appVersion = payload['version'] as String? ?? '';
@@ -703,6 +708,7 @@ class BackupRestoreUtils {
         jsonString,
         tankCount: tankCount,
         appVersion: appVersion,
+        localTankPhotoPaths: localTankPhotoPaths,
       );
 
       if (!context.mounted) return;
@@ -899,6 +905,7 @@ class BackupRestoreUtils {
       }
 
       final backupData = json.decode(jsonString) as Map<String, dynamic>;
+      await _attachRestoredCloudTankPhotos(backupData);
       final success = await ref
           .read(tankProvider.notifier)
           .applyBackupPayload(backupData);
@@ -938,6 +945,60 @@ class BackupRestoreUtils {
         l10n.cloudRestoreFailed(e.toString()),
         duration: const Duration(seconds: 4),
       );
+    }
+  }
+
+  static Future<void> _attachRestoredCloudTankPhotos(
+    Map<String, dynamic> backupData,
+  ) async {
+    if (kIsWeb) return;
+
+    final cloudPhotos = await CloudBackupService.loadBackupPhotos();
+    if (cloudPhotos.isEmpty) return;
+
+    final tanks = backupData['tanks'];
+    if (tanks is! List) return;
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final photosDir = Directory('${appDir.path}/cloud_restored_tank_photos');
+    if (!await photosDir.exists()) {
+      await photosDir.create(recursive: true);
+    }
+
+    for (final tankEntry in tanks) {
+      if (tankEntry is! Map<String, dynamic>) continue;
+      final tankId = tankEntry['id'] as String?;
+      if (tankId == null || tankId.isEmpty) continue;
+
+      final photos = tankEntry['photos'];
+      if (photos is! List) continue;
+
+      for (final photoEntry in photos) {
+        if (photoEntry is! Map<String, dynamic>) continue;
+        final photoId = photoEntry['id'] as String?;
+        if (photoId == null || photoId.isEmpty) continue;
+
+        final key = '$tankId::$photoId';
+        final cloudPhoto = cloudPhotos[key];
+        if (cloudPhoto == null) continue;
+
+        final base64Data = cloudPhoto['base64Data'];
+        if (base64Data == null || base64Data.isEmpty) continue;
+
+        try {
+          final bytes = base64Decode(base64Data);
+          if (bytes.isEmpty) continue;
+
+          final extension = cloudPhoto['fileExtension'] ?? 'jpg';
+          final localPath = '${photosDir.path}/${tankId}_$photoId.$extension';
+          final localFile = File(localPath);
+          await localFile.writeAsBytes(bytes, flush: true);
+
+          photoEntry['imagePath'] = localPath;
+        } catch (_) {
+          // Ignore malformed photo blobs and keep restoring remaining data.
+        }
+      }
     }
   }
 }
