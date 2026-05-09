@@ -1001,7 +1001,7 @@ class BackupRestoreUtils {
             extension,
           );
           final localFile = File(localPath);
-          await localFile.writeAsBytes(bytes, flush: true);
+          await localFile.writeAsBytes(bytes);
 
           photoEntry['imagePath'] = localPath;
         } catch (e) {

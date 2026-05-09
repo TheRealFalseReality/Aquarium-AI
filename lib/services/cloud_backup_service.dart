@@ -33,18 +33,6 @@ class CloudBackupService {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return false;
 
-      await FirebaseFirestore.instance
-          .collection(_usersCollection)
-          .doc(user.uid)
-          .collection(_backupsCollection)
-          .doc(_backupDocId)
-          .set({
-            'backupData': backupJson,
-            'backedUpAt': FieldValue.serverTimestamp(),
-            'tankCount': tankCount,
-            'appVersion': appVersion,
-          });
-
       final uploadedPhotoCount = await _saveBackupPhotos(
         user.uid,
         localTankPhotoPaths,
@@ -56,8 +44,12 @@ class CloudBackupService {
           .collection(_backupsCollection)
           .doc(_backupDocId)
           .set({
+            'backupData': backupJson,
+            'backedUpAt': FieldValue.serverTimestamp(),
+            'tankCount': tankCount,
+            'appVersion': appVersion,
             'backupPhotoCount': uploadedPhotoCount,
-          }, SetOptions(merge: true));
+          });
 
       return true;
     } catch (e) {
