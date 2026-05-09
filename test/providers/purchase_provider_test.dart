@@ -25,7 +25,7 @@ void main() {
       expect(result, isTrue);
     });
 
-    test('returns false when no founder signal in release mode', () {
+    test('ignores debug forced flag in release mode', () {
       final result = computeFounderAccess(
         purchasedFounder: false,
         cloudFounder: false,

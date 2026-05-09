@@ -94,7 +94,9 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   /// Fires after a short timeout to declare "no purchase found" if the
   /// restore stream never delivers our product.
   Timer? _restoreTimer;
-  bool _canSyncFounderToCloud = false;
+  bool _hasPersistedFounderState = false;
+  bool _isHandlingCloudFounderUpdate = false;
+  bool _isSyncingFounderToCloud = false;
 
   PurchaseNotifier({PurchaseService? service})
     : _service = service ?? const PurchaseService(),
@@ -106,7 +108,7 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
     // Load persisted "ads removed" state immediately.
     final prefs = await SharedPreferences.getInstance();
     final adsRemoved = prefs.getBool(_adsRemovedKey) ?? kDebugMode;
-    _canSyncFounderToCloud = prefs.containsKey(_adsRemovedKey) && adsRemoved;
+    _hasPersistedFounderState = prefs.containsKey(_adsRemovedKey);
 
     state = state.copyWith(adsRemoved: adsRemoved, isLoading: false);
 
@@ -133,32 +135,58 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
     _cloudProfileSubscription = null;
     if (user == null) return;
 
-    if (state.adsRemoved && _canSyncFounderToCloud) {
-      await ProfileService.updateFounderEntitlement(
-        true,
-        source: 'local_purchase_sync',
-      );
+    if (state.adsRemoved && _hasPersistedFounderState) {
+      try {
+        await _syncFounderToCloud(source: 'local_purchase_sync');
+      } catch (e) {
+        PurchaseService.log('Initial founder cloud sync failed: $e');
+      }
     }
 
-    _cloudProfileSubscription = ProfileService.currentUserProfileStream().listen((
-      profile,
-    ) async {
-      if (profile == null) return;
+    _cloudProfileSubscription = ProfileService.currentUserProfileStream().listen(
+      (profile) {
+        _handleCloudProfileUpdate(profile);
+      },
+      onError: (Object error) {
+        PurchaseService.log('Cloud founder profile stream error: $error');
+      },
+    );
+  }
 
+  Future<void> _handleCloudProfileUpdate(UserProfile? profile) async {
+    if (profile == null) return;
+    if (_isHandlingCloudFounderUpdate) return;
+    _isHandlingCloudFounderUpdate = true;
+    try {
       if (profile.founderEntitled && !state.adsRemoved) {
         await _persistAdsRemoved(true, syncCloud: false);
         return;
       }
 
+      // Conflict strategy: local purchase state is the source of truth, so if
+      // cloud says non-founder but the local paid state is founder, push
+      // founder=true back to cloud.
       if (!profile.founderEntitled &&
           state.adsRemoved &&
-          _canSyncFounderToCloud) {
-        await ProfileService.updateFounderEntitlement(
-          true,
-          source: 'local_purchase_sync',
-        );
+          _hasPersistedFounderState) {
+        await _syncFounderToCloud(source: 'local_purchase_sync');
+        return;
       }
-    });
+    } catch (e) {
+      PurchaseService.log('Cloud founder update handling error: $e');
+    } finally {
+      _isHandlingCloudFounderUpdate = false;
+    }
+  }
+
+  Future<void> _syncFounderToCloud({required String source}) async {
+    if (_isSyncingFounderToCloud) return;
+    _isSyncingFounderToCloud = true;
+    try {
+      await ProfileService.updateFounderEntitlement(true, source: source);
+    } finally {
+      _isSyncingFounderToCloud = false;
+    }
   }
 
   Future<void> _handlePurchaseUpdates(
@@ -208,14 +236,11 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   Future<void> _persistAdsRemoved(bool value, {bool syncCloud = true}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_adsRemovedKey, value);
-    _canSyncFounderToCloud = value;
+    _hasPersistedFounderState = true;
     state = state.copyWith(adsRemoved: value, isPurchasing: false);
 
     if (syncCloud && value) {
-      await ProfileService.updateFounderEntitlement(
-        true,
-        source: 'purchase',
-      );
+      await _syncFounderToCloud(source: 'purchase');
     }
   }
 
@@ -338,9 +363,12 @@ bool computeFounderAccess({
 /// In release builds, this only reflects the real purchase state.
 final isFounderProvider = Provider<bool>((ref) {
   final purchasedFounder = ref.watch(purchaseProvider).isFounder;
-  final cloudFounder =
-      ref.watch(currentUserProfileProvider).asData?.value?.founderEntitled ??
-      false;
+  final cloudFounderAsync = ref.watch(currentUserProfileProvider);
+  final cloudFounder = cloudFounderAsync.when(
+    data: (profile) => profile?.founderEntitled ?? false,
+    loading: () => purchasedFounder,
+    error: (_, __) => purchasedFounder,
+  );
   final debugForcedFounder = ref.watch(debugForceFounderProvider);
   return computeFounderAccess(
     purchasedFounder: purchasedFounder,
