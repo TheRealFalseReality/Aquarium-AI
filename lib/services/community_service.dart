@@ -352,8 +352,8 @@ class CommunityService {
         .snapshots()
         .map(
           (snap) =>
-                snap.docs.map((d) => CommunityComment.fromFirestore(d)).toList(),
-         );
+              snap.docs.map((d) => CommunityComment.fromFirestore(d)).toList(),
+        );
   }
 
   /// Live stream of total comments for a given post.
@@ -364,6 +364,18 @@ class CommunityService {
         .collection(_commentsCollection)
         .snapshots()
         .map((snap) => snap.size);
+  }
+
+  /// Returns the latest like count for a post from Firestore.
+  static Future<int> getPostLikeCount(String postId) async {
+    try {
+      final snap = await _firestore.collection(_postsCollection).doc(postId).get();
+      final data = snap.data();
+      if (data == null) return 0;
+      return data['likes'] as int? ?? 0;
+    } catch (_) {
+      return 0;
+    }
   }
 
   /// Creates a comment on a post. Returns the created [CommunityComment] or
