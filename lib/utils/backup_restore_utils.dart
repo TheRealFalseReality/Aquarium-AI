@@ -1004,10 +1004,10 @@ class BackupRestoreUtils {
           await localFile.writeAsBytes(bytes, flush: true);
 
           photoEntry['imagePath'] = localPath;
-        } catch (_) {
+        } catch (e) {
           if (kDebugMode) {
             debugPrint(
-              'BackupRestoreUtils._attachRestoredCloudTankPhotos failed for $tankId/$photoId',
+              'BackupRestoreUtils._attachRestoredCloudTankPhotos failed for $tankId/$photoId: $e',
             );
           }
         }
