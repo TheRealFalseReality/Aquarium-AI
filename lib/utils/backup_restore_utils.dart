@@ -18,6 +18,9 @@ import '../widgets/accessible_feedback.dart';
 import '../widgets/remove_ads_dialog.dart';
 
 class BackupRestoreUtils {
+  static const String _restoredCloudTankPhotosDirName =
+      'cloud_restored_tank_photos';
+
   ///
   /// [context] - BuildContext for showing dialogs and messages
   /// [ref] - WidgetRef for accessing providers
@@ -960,7 +963,9 @@ class BackupRestoreUtils {
     if (tanks is! List) return;
 
     final appDir = await getApplicationDocumentsDirectory();
-    final photosDir = Directory('${appDir.path}/cloud_restored_tank_photos');
+    final photosDir = Directory(
+      '${appDir.path}/$_restoredCloudTankPhotosDirName',
+    );
     if (!await photosDir.exists()) {
       await photosDir.create(recursive: true);
     }
@@ -990,7 +995,12 @@ class BackupRestoreUtils {
           if (bytes.isEmpty) continue;
 
           final extension = cloudPhoto['fileExtension'] ?? 'jpg';
-          final localPath = '${photosDir.path}/${tankId}_$photoId.$extension';
+          final localPath = _buildRestoredPhotoPath(
+            photosDir.path,
+            tankId,
+            photoId,
+            extension,
+          );
           final localFile = File(localPath);
           await localFile.writeAsBytes(bytes, flush: true);
 
@@ -1000,5 +1010,14 @@ class BackupRestoreUtils {
         }
       }
     }
+  }
+
+  static String _buildRestoredPhotoPath(
+    String directoryPath,
+    String tankId,
+    String photoId,
+    String extension,
+  ) {
+    return '$directoryPath/${tankId}_$photoId.$extension';
   }
 }

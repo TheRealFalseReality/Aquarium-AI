@@ -149,7 +149,7 @@ class CloudBackupService {
         final base64Data = data['base64Data'] as String?;
         if (tankId == null || photoId == null || base64Data == null) continue;
 
-        final key = '$tankId::$photoId';
+        final key = _photoCompositeKey(tankId, photoId);
         result[key] = {
           'base64Data': base64Data,
           'fileExtension': data['fileExtension'] as String? ?? 'jpg',
@@ -209,7 +209,7 @@ class CloudBackupService {
 
         final base64Data = base64Encode(bytes);
         final extension = _extractFileExtension(imagePath);
-        await photosCollectionRef.doc('${tankId}_$photoId').set({
+        await photosCollectionRef.doc(_photoCompositeKey(tankId, photoId)).set({
           'tankId': tankId,
           'photoId': photoId,
           'base64Data': base64Data,
@@ -231,10 +231,13 @@ class CloudBackupService {
 
   static String _extractFileExtension(String imagePath) {
     final dotIndex = imagePath.lastIndexOf('.');
-    if (dotIndex < 0 || dotIndex == imagePath.length - 1) return 'jpg';
+    if (dotIndex < 0 || dotIndex >= imagePath.length - 1) return 'jpg';
     final extension = imagePath.substring(dotIndex + 1).toLowerCase();
     final sanitized = extension.replaceAll(RegExp('[^a-z0-9]'), '');
     if (sanitized.isEmpty || sanitized.length > 8) return 'jpg';
     return sanitized;
   }
+
+  static String _photoCompositeKey(String tankId, String photoId) =>
+      '$tankId::$photoId';
 }
