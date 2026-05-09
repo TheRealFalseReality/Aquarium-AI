@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
@@ -1006,7 +1006,11 @@ class BackupRestoreUtils {
 
           photoEntry['imagePath'] = localPath;
         } catch (_) {
-          // Ignore malformed photo blobs and keep restoring remaining data.
+          if (kDebugMode) {
+            debugPrint(
+              'BackupRestoreUtils._attachRestoredCloudTankPhotos failed for $tankId/$photoId',
+            );
+          }
         }
       }
     }

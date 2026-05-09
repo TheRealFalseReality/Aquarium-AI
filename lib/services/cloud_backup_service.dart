@@ -205,7 +205,14 @@ class CloudBackupService {
         if (!await file.exists()) continue;
 
         final bytes = await file.readAsBytes();
-        if (bytes.isEmpty || bytes.length > _maxPhotoBytesForBackup) continue;
+        if (bytes.isEmpty || bytes.length > _maxPhotoBytesForBackup) {
+          if (kDebugMode) {
+            debugPrint(
+              'CloudBackupService._saveBackupPhotos skip oversized/empty photo ($tankId/$photoId), bytes=${bytes.length}',
+            );
+          }
+          continue;
+        }
 
         final base64Data = base64Encode(bytes);
         final extension = _extractFileExtension(imagePath);
