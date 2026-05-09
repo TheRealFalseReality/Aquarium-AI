@@ -259,11 +259,11 @@ class _PostCardState extends State<PostCard> {
                           widget.post.id,
                         ),
                         builder: (context, snapshot) {
-                          final liveCount =
-                              snapshot.data ?? widget.post.commentCount;
-                          final displayedCount = liveCount > widget.post.commentCount
-                              ? liveCount
-                              : widget.post.commentCount;
+                          final displayedCount =
+                              CommunityService.resolvedCommentCount(
+                                storedCount: widget.post.commentCount,
+                                liveCount: snapshot.data,
+                              );
                           return Text(
                             '$displayedCount',
                             style: theme.textTheme.labelSmall,

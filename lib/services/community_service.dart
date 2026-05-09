@@ -17,6 +17,16 @@ class CommunityService {
   static const String _postsCollection = 'posts';
   static const String _commentsCollection = 'comments';
 
+  /// Returns a safe UI comment count using a live count when available, while
+  /// never showing less than the stored post count.
+  static int resolvedCommentCount({
+    required int storedCount,
+    int? liveCount,
+  }) {
+    if (liveCount == null) return storedCount;
+    return liveCount > storedCount ? liveCount : storedCount;
+  }
+
   // ─── Posts ──────────────────────────────────────────────────────────────────
 
   /// Returns a stream of community posts ordered by newest first.

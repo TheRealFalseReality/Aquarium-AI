@@ -28,7 +28,7 @@ class CommunityPostScreen extends ConsumerStatefulWidget {
 class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   final TextEditingController _commentController = TextEditingController();
   bool _isSubmitting = false;
-  late int _likes;
+  int _likes = 0;
   bool _isLiked = false;
   bool _likeLoading = false;
   bool _isBookmarked = false;
@@ -953,10 +953,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
         StreamBuilder<int>(
           stream: CommunityService.commentCountStream(widget.post.id),
           builder: (context, snapshot) {
-            final liveCount = snapshot.data ?? widget.post.commentCount;
-            final displayedCount = liveCount > widget.post.commentCount
-                ? liveCount
-                : widget.post.commentCount;
+            final displayedCount = CommunityService.resolvedCommentCount(
+              storedCount: widget.post.commentCount,
+              liveCount: snapshot.data,
+            );
             return Text('$displayedCount', style: theme.textTheme.labelSmall);
           },
         ),
