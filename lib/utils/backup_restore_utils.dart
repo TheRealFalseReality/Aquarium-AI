@@ -992,7 +992,6 @@ class BackupRestoreUtils {
 
         try {
           final bytes = base64Decode(base64Data);
-          if (bytes.isEmpty) continue;
 
           final extension = cloudPhoto['fileExtension'] ?? 'jpg';
           final localPath = _buildRestoredPhotoPath(

@@ -16,6 +16,7 @@ class CloudBackupService {
   // Keep each Firestore photo document safely below the 1 MiB max size.
   // Base64 expands binary by ~33%, so this cap is conservative.
   static const int _maxPhotoBytesForBackup = 700 * 1024;
+  static final RegExp _fileExtensionSanitizer = RegExp('[^a-z0-9]');
 
   /// Saves [backupJson] (the raw JSON string from the backup payload) to
   /// Firestore as a plain string field. Returns `true` on success, `false`
@@ -205,10 +206,10 @@ class CloudBackupService {
         if (!await file.exists()) continue;
 
         final bytes = await file.readAsBytes();
-        if (bytes.isEmpty || bytes.length > _maxPhotoBytesForBackup) {
+        if (bytes.length > _maxPhotoBytesForBackup) {
           if (kDebugMode) {
             debugPrint(
-              'CloudBackupService._saveBackupPhotos skip oversized/empty photo ($tankId/$photoId), bytes=${bytes.length}',
+              'CloudBackupService._saveBackupPhotos skip oversized photo ($tankId/$photoId), bytes=${bytes.length}',
             );
           }
           continue;
@@ -240,7 +241,7 @@ class CloudBackupService {
     final dotIndex = imagePath.lastIndexOf('.');
     if (dotIndex < 0 || dotIndex >= imagePath.length - 1) return 'jpg';
     final extension = imagePath.substring(dotIndex + 1).toLowerCase();
-    final sanitized = extension.replaceAll(RegExp('[^a-z0-9]'), '');
+    final sanitized = extension.replaceAll(_fileExtensionSanitizer, '');
     if (sanitized.isEmpty || sanitized.length > 8) return 'jpg';
     return sanitized;
   }
