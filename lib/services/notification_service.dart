@@ -105,6 +105,7 @@ class NotificationService {
   bool _initialized = false;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
   _communityInteractionSubscription;
+  final Set<int> _usedCommunityNotificationIds = <int>{};
   String? _communityInteractionUserId;
   bool _hasLoadedInitialCommunitySnapshot = false;
   NotificationActionLabels? _cachedActionLabels;
@@ -283,6 +284,7 @@ class NotificationService {
     _communityInteractionSubscription = null;
     _communityInteractionUserId = null;
     _hasLoadedInitialCommunitySnapshot = false;
+    _usedCommunityNotificationIds.clear();
   }
 
   Future<void> _showCommunityInteractionNotification(
@@ -293,7 +295,7 @@ class NotificationService {
     final previewText = (data['previewText'] as String?)?.trim();
 
     final interactionType =
-        (data['interactionType'] as String?)?.trim().toLowerCase() ?? 'like';
+        (data['interactionType'] as String?)?.trim().toLowerCase() ?? 'unknown';
     final actorName = (data['actorDisplayName'] as String?)?.trim();
     final postTitle = (data['postTitle'] as String?)?.trim();
     final resolvedActorName = actorName == null || actorName.isEmpty
@@ -326,9 +328,16 @@ class NotificationService {
       presentBadge: true,
       presentSound: true,
     );
+    final createdAtMillis =
+        (data['createdAt'] as Timestamp?)?.millisecondsSinceEpoch ??
+        DateTime.now().millisecondsSinceEpoch;
+    final notificationId = _buildCommunityNotificationId(
+      doc.id,
+      createdAtMillis,
+    );
 
     await _notifications.show(
-      id: doc.id.hashCode,
+      id: notificationId,
       title: resolvedTitle,
       body: resolvedBody,
       notificationDetails: NotificationDetails(
@@ -337,6 +346,24 @@ class NotificationService {
       ),
       payload: 'community_post',
     );
+  }
+
+  int _buildCommunityNotificationId(String docId, int createdAtMillis) {
+    var hash = 0x811C9DC5;
+    for (final codeUnit in docId.codeUnits) {
+      hash ^= codeUnit;
+      hash = (hash * 0x01000193) & 0x7fffffff;
+    }
+    var candidate = (hash ^ createdAtMillis) & 0x7fffffff;
+    if (candidate == 0) candidate = 1;
+    while (_usedCommunityNotificationIds.contains(candidate)) {
+      candidate = (candidate + 1) & 0x7fffffff;
+      if (candidate == 0) {
+        candidate = 1;
+      }
+    }
+    _usedCommunityNotificationIds.add(candidate);
+    return candidate;
   }
 
   /// Handle notification tap - navigates to tank management screen

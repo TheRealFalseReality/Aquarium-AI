@@ -175,7 +175,12 @@ class CommunityService {
   /// Toggles a like on a post for the current user.
   /// Uses a sub-collection /posts/{postId}/likes/{uid} to track per-user likes.
   /// Returns `true` if the operation succeeded, `false` otherwise.
-  static Future<bool> toggleLike(String postId) async {
+  static Future<bool> toggleLike(
+    String postId, {
+    String? postOwnerId,
+    String? postTitle,
+    PostType? postType,
+  }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
 
@@ -205,6 +210,9 @@ class CommunityService {
           postId: postId,
           interactionType: 'like',
           actor: user,
+          postOwnerId: postOwnerId,
+          postTitle: postTitle,
+          postType: postType,
         );
       }
       return true;
@@ -240,7 +248,12 @@ class CommunityService {
 
   /// Toggles bookmark state for [postId]. Returns `true` when the post is now
   /// bookmarked, `false` when removed, and `null` on error.
-  static Future<bool?> toggleBookmark(String postId) async {
+  static Future<bool?> toggleBookmark(
+    String postId, {
+    String? postOwnerId,
+    String? postTitle,
+    PostType? postType,
+  }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
     final ref = _firestore
@@ -259,6 +272,9 @@ class CommunityService {
           postId: postId,
           interactionType: 'bookmark',
           actor: user,
+          postOwnerId: postOwnerId,
+          postTitle: postTitle,
+          postType: postType,
         );
         return true;
       }
@@ -368,6 +384,9 @@ class CommunityService {
   static Future<CommunityComment?> createComment({
     required String postId,
     required String body,
+    String? postOwnerId,
+    String? postTitle,
+    PostType? postType,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
@@ -404,6 +423,10 @@ class CommunityService {
         interactionType: 'comment',
         actor: user,
         commentBody: body,
+        commentId: comment.id,
+        postOwnerId: postOwnerId,
+        postTitle: postTitle,
+        postType: postType,
       );
 
       return comment;
@@ -481,30 +504,52 @@ class CommunityService {
     required String interactionType,
     required User actor,
     String? commentBody,
+    String? commentId,
+    String? postOwnerId,
+    String? postTitle,
+    PostType? postType,
   }) async {
     try {
-      final postSnap = await _firestore.collection(_postsCollection).doc(postId).get();
-      if (!postSnap.exists) return;
-      final post = CommunityPost.fromFirestore(postSnap);
-      if (post.userId.isEmpty || post.userId == actor.uid) return;
+      var resolvedPostOwnerId = postOwnerId;
+      var resolvedPostTitle = postTitle;
+      var resolvedPostType = postType;
+
+      if (resolvedPostOwnerId == null ||
+          resolvedPostTitle == null ||
+          resolvedPostType == null) {
+        final postSnap = await _firestore
+            .collection(_postsCollection)
+            .doc(postId)
+            .get();
+        if (!postSnap.exists) return;
+        final post = CommunityPost.fromFirestore(postSnap);
+        resolvedPostOwnerId ??= post.userId;
+        resolvedPostTitle ??= post.title;
+        resolvedPostType ??= post.type;
+      }
+
+      if (resolvedPostOwnerId.isEmpty || resolvedPostOwnerId == actor.uid) {
+        return;
+      }
 
       final previewText = switch (interactionType) {
         'comment' => (commentBody == null || commentBody.trim().isEmpty)
-            ? post.title
+            ? resolvedPostTitle
             : commentBody.trim(),
-        _ => post.title,
+        _ => resolvedPostTitle,
       };
 
       await _firestore
           .collection(_usersCollection)
-          .doc(post.userId)
+          .doc(resolvedPostOwnerId)
           .collection(_communityNotificationsCollection)
           .add({
-            'postId': post.id,
-            'postType': post.type.value,
-            'postTitle': post.title,
+            'postId': postId,
+            'postType': resolvedPostType.value,
+            'postTitle': resolvedPostTitle,
             'interactionType': interactionType,
             'previewText': previewText,
+            if (commentId != null) 'commentId': commentId,
             'actorUserId': actor.uid,
             'actorDisplayName': AuthService.getDisplayName(actor),
             'actorAvatarUrl': actor.photoURL,

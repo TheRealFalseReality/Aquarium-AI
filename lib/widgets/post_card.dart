@@ -100,7 +100,12 @@ class _PostCardState extends State<PostCard> {
       _isLiked = !_isLiked;
       _likes += _isLiked ? 1 : -1;
     });
-    final success = await CommunityService.toggleLike(widget.post.id);
+    final success = await CommunityService.toggleLike(
+      widget.post.id,
+      postOwnerId: widget.post.userId,
+      postTitle: widget.post.title,
+      postType: widget.post.type,
+    );
     if (mounted) {
       setState(() {
         _likeLoading = false;
@@ -134,7 +139,12 @@ class _PostCardState extends State<PostCard> {
       _bookmarkLoading = true;
       _isBookmarked = !_isBookmarked;
     });
-    final result = await CommunityService.toggleBookmark(widget.post.id);
+    final result = await CommunityService.toggleBookmark(
+      widget.post.id,
+      postOwnerId: widget.post.userId,
+      postTitle: widget.post.title,
+      postType: widget.post.type,
+    );
     if (mounted) {
       setState(() {
         _bookmarkLoading = false;
