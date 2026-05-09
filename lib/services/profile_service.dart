@@ -70,6 +70,22 @@ class ProfileService {
     return updateProfile(profile.toFirestore());
   }
 
+  /// Persists founder entitlement so paid status can be reused cross-platform.
+  ///
+  /// This writes both `founderEntitled` (new field) and `isFounder` (legacy
+  /// compatibility field) for clients that still read older schemas.
+  static Future<bool> updateFounderEntitlement(
+    bool founderEntitled, {
+    String source = 'unknown',
+  }) async {
+    return updateProfile({
+      'founderEntitled': founderEntitled,
+      'isFounder': founderEntitled,
+      'founderEntitlementSource': source,
+      'founderEntitlementUpdatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   // ─── Tank Sync ───────────────────────────────────────────────────────────────
 
   /// Syncs the user's local tank list into their Firestore profile.

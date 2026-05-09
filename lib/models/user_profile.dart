@@ -158,6 +158,7 @@ class UserProfile {
   final List<String> interests; // e.g. ['planted', 'nano', 'cichlids']
   final bool isPublic;
   final bool isAnonymous;
+  final bool founderEntitled;
 
   // Tank stats synced from local data
   final int tankCount;
@@ -182,6 +183,7 @@ class UserProfile {
     this.interests = const [],
     this.isPublic = true,
     this.isAnonymous = false,
+    this.founderEntitled = false,
     this.tankCount = 0,
     this.totalFishCount = 0,
     this.tanks = const [],
@@ -206,6 +208,7 @@ class UserProfile {
     List<String>? interests,
     bool? isPublic,
     bool? isAnonymous,
+    bool? founderEntitled,
     int? tankCount,
     int? totalFishCount,
     List<ProfileTankSummary>? tanks,
@@ -226,6 +229,7 @@ class UserProfile {
     interests: interests ?? this.interests,
     isPublic: isPublic ?? this.isPublic,
     isAnonymous: isAnonymous ?? this.isAnonymous,
+    founderEntitled: founderEntitled ?? this.founderEntitled,
     tankCount: tankCount ?? this.tankCount,
     totalFishCount: totalFishCount ?? this.totalFishCount,
     tanks: tanks ?? this.tanks,
@@ -252,6 +256,10 @@ class UserProfile {
       interests: (data['interests'] as List?)?.cast<String>() ?? [],
       isPublic: data['isPublic'] as bool? ?? true,
       isAnonymous: data['isAnonymous'] as bool? ?? false,
+      founderEntitled:
+          data['founderEntitled'] as bool? ??
+          data['isFounder'] as bool? ??
+          false,
       tankCount: data['tankCount'] as int? ?? 0,
       totalFishCount: data['totalFishCount'] as int? ?? 0,
       tanks:
@@ -283,6 +291,7 @@ class UserProfile {
     'interests': interests,
     'isPublic': isPublic,
     'isAnonymous': isAnonymous,
+    'founderEntitled': founderEntitled,
     'tankCount': tankCount,
     'totalFishCount': totalFishCount,
     'tanks': tanks.map((t) => t.toMap()).toList(),

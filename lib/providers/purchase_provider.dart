@@ -1,11 +1,15 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/user_profile.dart';
+import 'profile_provider.dart';
+import '../services/profile_service.dart';
 import '../services/purchase_service.dart';
 
 /// SharedPreferences key for the ads-removed (Founder Aquarist) flag.
@@ -81,6 +85,8 @@ class PurchaseState {
 class PurchaseNotifier extends StateNotifier<PurchaseState> {
   final PurchaseService _service;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
+  StreamSubscription<User?>? _authStateSubscription;
+  StreamSubscription<UserProfile?>? _cloudProfileSubscription;
 
   /// True while we are waiting for restore stream events to arrive.
   bool _pendingRestore = false;
@@ -88,6 +94,7 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   /// Fires after a short timeout to declare "no purchase found" if the
   /// restore stream never delivers our product.
   Timer? _restoreTimer;
+  bool _canSyncFounderToCloud = false;
 
   PurchaseNotifier({PurchaseService? service})
     : _service = service ?? const PurchaseService(),
@@ -99,8 +106,14 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
     // Load persisted "ads removed" state immediately.
     final prefs = await SharedPreferences.getInstance();
     final adsRemoved = prefs.getBool(_adsRemovedKey) ?? kDebugMode;
+    _canSyncFounderToCloud = prefs.containsKey(_adsRemovedKey) && adsRemoved;
 
     state = state.copyWith(adsRemoved: adsRemoved, isLoading: false);
+
+    _authStateSubscription = FirebaseAuth.instance.authStateChanges().listen(
+      _handleAuthStateChanged,
+    );
+    await _handleAuthStateChanged(FirebaseAuth.instance.currentUser);
 
     // Start listening to purchase stream updates.
     _purchaseSubscription = _service.purchaseStream.listen(
@@ -113,6 +126,39 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
         );
       },
     );
+  }
+
+  Future<void> _handleAuthStateChanged(User? user) async {
+    await _cloudProfileSubscription?.cancel();
+    _cloudProfileSubscription = null;
+    if (user == null) return;
+
+    if (state.adsRemoved && _canSyncFounderToCloud) {
+      await ProfileService.updateFounderEntitlement(
+        true,
+        source: 'local_purchase_sync',
+      );
+    }
+
+    _cloudProfileSubscription = ProfileService.currentUserProfileStream().listen((
+      profile,
+    ) async {
+      if (profile == null) return;
+
+      if (profile.founderEntitled && !state.adsRemoved) {
+        await _persistAdsRemoved(true, syncCloud: false);
+        return;
+      }
+
+      if (!profile.founderEntitled &&
+          state.adsRemoved &&
+          _canSyncFounderToCloud) {
+        await ProfileService.updateFounderEntitlement(
+          true,
+          source: 'local_purchase_sync',
+        );
+      }
+    });
   }
 
   Future<void> _handlePurchaseUpdates(
@@ -159,10 +205,18 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
     state = state.copyWith(isPurchasing: false);
   }
 
-  Future<void> _persistAdsRemoved(bool value) async {
+  Future<void> _persistAdsRemoved(bool value, {bool syncCloud = true}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_adsRemovedKey, value);
+    _canSyncFounderToCloud = value;
     state = state.copyWith(adsRemoved: value, isPurchasing: false);
+
+    if (syncCloud && value) {
+      await ProfileService.updateFounderEntitlement(
+        true,
+        source: 'purchase',
+      );
+    }
   }
 
   /// Initiates the purchase flow for the "remove ads" product.
@@ -249,6 +303,8 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
   void dispose() {
     _restoreTimer?.cancel();
     _purchaseSubscription?.cancel();
+    _authStateSubscription?.cancel();
+    _cloudProfileSubscription?.cancel();
     super.dispose();
   }
 }
@@ -263,6 +319,17 @@ final purchaseProvider = StateNotifierProvider<PurchaseNotifier, PurchaseState>(
 /// in release builds. Reset on every cold start.
 final debugForceFounderProvider = StateProvider<bool>((ref) => false);
 
+bool computeFounderAccess({
+  required bool purchasedFounder,
+  required bool cloudFounder,
+  required bool debugForcedFounder,
+  required bool debugMode,
+}) {
+  final effectiveFounder = purchasedFounder || cloudFounder;
+  if (debugMode) return effectiveFounder || debugForcedFounder;
+  return effectiveFounder;
+}
+
 /// The effective Founder Aquarist status for the current user.
 ///
 /// In debug builds, this is `true` when either:
@@ -270,10 +337,15 @@ final debugForceFounderProvider = StateProvider<bool>((ref) => false);
 ///   - the [debugForceFounderProvider] override is enabled.
 /// In release builds, this only reflects the real purchase state.
 final isFounderProvider = Provider<bool>((ref) {
-  final purchased = ref.watch(purchaseProvider).isFounder;
-  if (kDebugMode) {
-    final forced = ref.watch(debugForceFounderProvider);
-    return purchased || forced;
-  }
-  return purchased;
+  final purchasedFounder = ref.watch(purchaseProvider).isFounder;
+  final cloudFounder =
+      ref.watch(currentUserProfileProvider).asData?.value?.founderEntitled ??
+      false;
+  final debugForcedFounder = ref.watch(debugForceFounderProvider);
+  return computeFounderAccess(
+    purchasedFounder: purchasedFounder,
+    cloudFounder: cloudFounder,
+    debugForcedFounder: debugForcedFounder,
+    debugMode: kDebugMode,
+  );
 });
