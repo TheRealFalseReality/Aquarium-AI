@@ -20,6 +20,8 @@ import '../widgets/remove_ads_dialog.dart';
 class BackupRestoreUtils {
   static const String _restoredCloudTankPhotosDirName =
       'cloud_restored_tank_photos';
+  static final RegExp _safePathCharPattern = RegExp(r'[^a-zA-Z0-9_-]');
+  static final RegExp _safeExtensionPattern = RegExp(r'[^a-zA-Z0-9]');
 
   ///
   /// [context] - BuildContext for showing dialogs and messages
@@ -1028,6 +1030,20 @@ class BackupRestoreUtils {
     String photoId,
     String extension,
   ) {
-    return '$directoryPath/${tankId}_$photoId.$extension';
+    final safeTankId = _sanitizePathSegment(tankId, fallback: 'tank');
+    final safePhotoId = _sanitizePathSegment(photoId, fallback: 'photo');
+    final safeExtension =
+        extension.toLowerCase().replaceAll(_safeExtensionPattern, '');
+    final normalizedExtension = safeExtension.isEmpty ? 'jpg' : safeExtension;
+    return '$directoryPath/${safeTankId}_$safePhotoId.$normalizedExtension';
+  }
+
+  static String _sanitizePathSegment(
+    String raw, {
+    required String fallback,
+  }) {
+    final sanitized = raw.replaceAll(_safePathCharPattern, '');
+    if (sanitized.isEmpty) return fallback;
+    return sanitized;
   }
 }

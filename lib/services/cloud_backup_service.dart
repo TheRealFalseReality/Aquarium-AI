@@ -17,6 +17,7 @@ class CloudBackupService {
   // Base64 expands binary by ~33%, so 700 KiB raw bytes become ~933 KiB
   // encoded, leaving room for document field names/metadata overhead.
   static const int _maxPhotoBytesForBackup = 700 * 1024;
+  static const int _maxPhotoBase64LengthForBackup = 950 * 1024;
   static const int _maxFileExtensionLength = 8;
   static final RegExp _fileExtensionSanitizer = RegExp('[^a-z0-9]');
 
@@ -210,6 +211,15 @@ class CloudBackupService {
         }
 
         final base64Data = base64Encode(bytes);
+        if (base64Data.length > _maxPhotoBase64LengthForBackup) {
+          if (kDebugMode) {
+            debugPrint(
+              'CloudBackupService._saveBackupPhotos skip oversized encoded photo ($tankId/$photoId), chars=${base64Data.length}',
+            );
+          }
+          continue;
+        }
+
         final extension = _extractFileExtension(imagePath);
         await photosCollectionRef.doc(_photoCompositeKey(tankId, photoId)).set({
           'tankId': tankId,
