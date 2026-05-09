@@ -28,6 +28,11 @@ class CommunityPostScreen extends ConsumerStatefulWidget {
 class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   final TextEditingController _commentController = TextEditingController();
   bool _isSubmitting = false;
+  late int _likes;
+  bool _isLiked = false;
+  bool _likeLoading = false;
+  bool _isBookmarked = false;
+  bool _bookmarkLoading = false;
   Future<String>? _resolvedPostImageUrl;
   Future<String>? _resolvedAvatarUrl;
 
@@ -38,6 +43,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   void initState() {
     super.initState();
     AnalyticsService.logScreenView(screenName: 'community_post_screen');
+    _likes = widget.post.likes;
+    _loadLikeStatus();
+    _loadBookmarkStatus();
     if (widget.post.imageUrl != null) {
       _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
@@ -50,6 +58,75 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   void dispose() {
     _commentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadLikeStatus() async {
+    final authState = ref.read(authStateProvider);
+    final currentUserId = authState.asData?.value?.uid ?? '';
+    if (currentUserId.isEmpty) return;
+    final liked = await CommunityService.hasLiked(widget.post.id);
+    if (mounted) {
+      setState(() => _isLiked = liked);
+    }
+  }
+
+  Future<void> _handleLike(String currentUserId) async {
+    if (_likeLoading || currentUserId.isEmpty) return;
+    final wasLiked = _isLiked;
+    final prevLikes = _likes;
+    setState(() {
+      _likeLoading = true;
+      _isLiked = !_isLiked;
+      _likes += _isLiked ? 1 : -1;
+    });
+    final success = await CommunityService.toggleLike(widget.post.id);
+    if (mounted) {
+      setState(() {
+        _likeLoading = false;
+        if (!success) {
+          _isLiked = wasLiked;
+          _likes = prevLikes;
+        }
+      });
+      if (success) {
+        AnalyticsService.logCommunityAction(
+          action: _isLiked ? 'post_liked' : 'post_unliked',
+          additionalData: {'post_type': widget.post.type.value},
+        );
+      }
+    }
+  }
+
+  Future<void> _loadBookmarkStatus() async {
+    final authState = ref.read(authStateProvider);
+    final currentUserId = authState.asData?.value?.uid ?? '';
+    if (currentUserId.isEmpty) return;
+    final bookmarked = await CommunityService.hasBookmarked(widget.post.id);
+    if (mounted) {
+      setState(() => _isBookmarked = bookmarked);
+    }
+  }
+
+  Future<void> _handleBookmark(String currentUserId) async {
+    if (_bookmarkLoading || currentUserId.isEmpty) return;
+    final prev = _isBookmarked;
+    setState(() {
+      _bookmarkLoading = true;
+      _isBookmarked = !_isBookmarked;
+    });
+    final result = await CommunityService.toggleBookmark(widget.post.id);
+    if (mounted) {
+      setState(() {
+        _bookmarkLoading = false;
+        if (result == null) _isBookmarked = prev;
+      });
+      if (result != null) {
+        AnalyticsService.logCommunityAction(
+          action: result ? 'post_bookmarked' : 'post_unbookmarked',
+          additionalData: {'post_type': widget.post.type.value},
+        );
+      }
+    }
   }
 
   Future<void> _submitComment(AppLocalizations l10n) async {
@@ -182,6 +259,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                       Divider(
                         color: Theme.of(context).colorScheme.outlineVariant,
                       ),
+                      _buildEngagementRow(context, currentUserId),
+                      const SizedBox(height: 16),
                       Text(
                         l10n.communityComments,
                         style: Theme.of(context).textTheme.titleMedium
@@ -838,6 +917,67 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Widget _buildEngagementRow(BuildContext context, String currentUserId) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        InkWell(
+          onTap: () => _handleLike(currentUserId),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            child: Row(
+              children: [
+                Icon(
+                  _isLiked ? Icons.favorite : Icons.favorite_border,
+                  size: 18,
+                  color: _isLiked
+                      ? Colors.red
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Text('$_likes', style: theme.textTheme.labelSmall),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Icon(
+          Icons.comment_outlined,
+          size: 18,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 4),
+        StreamBuilder<int>(
+          stream: CommunityService.commentCountStream(widget.post.id),
+          builder: (context, snapshot) {
+            final liveCount = snapshot.data ?? widget.post.commentCount;
+            final displayedCount = liveCount > widget.post.commentCount
+                ? liveCount
+                : widget.post.commentCount;
+            return Text('$displayedCount', style: theme.textTheme.labelSmall);
+          },
+        ),
+        const Spacer(),
+        if (currentUserId.isNotEmpty)
+          InkWell(
+            onTap: () => _handleBookmark(currentUserId),
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              child: Icon(
+                _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                size: 18,
+                color: _isBookmarked
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }
 

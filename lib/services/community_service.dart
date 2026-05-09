@@ -342,8 +342,18 @@ class CommunityService {
         .snapshots()
         .map(
           (snap) =>
-              snap.docs.map((d) => CommunityComment.fromFirestore(d)).toList(),
-        );
+                snap.docs.map((d) => CommunityComment.fromFirestore(d)).toList(),
+         );
+  }
+
+  /// Live stream of total comments for a given post.
+  static Stream<int> commentCountStream(String postId) {
+    return _firestore
+        .collection(_postsCollection)
+        .doc(postId)
+        .collection(_commentsCollection)
+        .snapshots()
+        .map((snap) => snap.size);
   }
 
   /// Creates a comment on a post. Returns the created [CommunityComment] or

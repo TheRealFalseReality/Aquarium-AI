@@ -254,9 +254,21 @@ class _PostCardState extends State<PostCard> {
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        '${widget.post.commentCount}',
-                        style: theme.textTheme.labelSmall,
+                      StreamBuilder<int>(
+                        stream: CommunityService.commentCountStream(
+                          widget.post.id,
+                        ),
+                        builder: (context, snapshot) {
+                          final liveCount =
+                              snapshot.data ?? widget.post.commentCount;
+                          final displayedCount = liveCount > widget.post.commentCount
+                              ? liveCount
+                              : widget.post.commentCount;
+                          return Text(
+                            '$displayedCount',
+                            style: theme.textTheme.labelSmall,
+                          );
+                        },
                       ),
                       const Spacer(),
                       // Bookmark button
