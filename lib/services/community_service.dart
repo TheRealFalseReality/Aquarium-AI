@@ -373,7 +373,10 @@ class CommunityService {
       final data = snap.data();
       if (data == null) return 0;
       return data['likes'] as int? ?? 0;
-    } catch (_) {
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('CommunityService getPostLikeCount error: $e');
+      }
       return 0;
     }
   }

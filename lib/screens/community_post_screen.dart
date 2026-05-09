@@ -64,12 +64,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final authState = ref.read(authStateProvider);
     final currentUserId = authState.asData?.value?.uid ?? '';
     if (currentUserId.isEmpty) return;
-    final results = await Future.wait<dynamic>([
-      CommunityService.hasLiked(widget.post.id),
-      CommunityService.getPostLikeCount(widget.post.id),
-    ]);
-    final liked = results[0] as bool;
-    final latestLikeCount = results[1] as int;
+    final liked = await CommunityService.hasLiked(widget.post.id);
+    final latestLikeCount = await CommunityService.getPostLikeCount(
+      widget.post.id,
+    );
     if (mounted) {
       setState(() {
         _isLiked = liked;
