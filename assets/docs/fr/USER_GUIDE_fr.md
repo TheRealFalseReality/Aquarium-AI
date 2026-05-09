@@ -398,6 +398,12 @@ Appuyez sur **Se connecter** en haut de l'écran Communauté. Vous pouvez utilis
 Google, Facebook ou rester anonyme. Les comptes anonymes peuvent être mis à niveau
 vers un compte nommé plus tard dans **Profil**.
 
+### Notifications d'interactions communautaires
+
+Lorsque les notifications sont activées sur votre appareil, Aquarium AI envoie des
+alertes locales de type push quand quelqu'un **aime**, **enregistre** ou
+**commente** l'une de vos publications communautaires.
+
 ---
 
 ## Paramètres et apparence

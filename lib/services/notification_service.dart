@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +25,22 @@ class NotificationActionLabels {
     required this.done,
     required this.snoozeDay,
     required this.snoozeWeek,
+  });
+}
+
+class CommunityInteractionLabels {
+  final String titleLike;
+  final String titleBookmark;
+  final String titleComment;
+  final String titleGeneric;
+  final String unknownActor;
+
+  const CommunityInteractionLabels({
+    required this.titleLike,
+    required this.titleBookmark,
+    required this.titleComment,
+    required this.titleGeneric,
+    required this.unknownActor,
   });
 }
 
@@ -63,6 +81,14 @@ class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   static const String _tanksKey = 'user_tanks';
   static const String _iosNotificationCategory = 'tank_maintenance_actions';
+  static const String _communityNotificationsCollection =
+      'community_notifications';
+  static const String _communityInteractionChannelId =
+      'community_interactions';
+  static const String _communityInteractionChannelName =
+      'Community interactions';
+  static const String _communityInteractionChannelDescription =
+      'Notifications when other users interact with your posts';
   static const String actionDone = 'done_action';
   static const String actionSnoozeDay = 'snooze_day_action';
   static const String actionSnoozeWeek = 'snooze_week_action';
@@ -77,8 +103,14 @@ class NotificationService {
       StreamController<NotificationActionUpdate>.broadcast();
 
   bool _initialized = false;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
+  _communityInteractionSubscription;
+  String? _communityInteractionUserId;
+  bool _hasLoadedInitialCommunitySnapshot = false;
   NotificationActionLabels? _cachedActionLabels;
   String? _cachedActionLabelsLocale;
+  CommunityInteractionLabels? _cachedCommunityInteractionLabels;
+  String? _cachedCommunityInteractionLabelsLocale;
   Future<void> Function({
     required String tankId,
     required String notificationId,
@@ -194,6 +226,117 @@ class NotificationService {
     );
 
     _initialized = true;
+  }
+
+  Future<void> syncCommunityInteractionNotificationsForUser(User? user) async {
+    final uid = user?.uid;
+    final shouldListen = uid != null && !(user?.isAnonymous ?? true);
+    if (!shouldListen) {
+      await _stopCommunityInteractionNotifications();
+      return;
+    }
+    if (_communityInteractionUserId == uid &&
+        _communityInteractionSubscription != null) {
+      return;
+    }
+    await _startCommunityInteractionNotifications(uid!);
+  }
+
+  Future<void> _startCommunityInteractionNotifications(String userId) async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    await _stopCommunityInteractionNotifications();
+    _communityInteractionUserId = userId;
+    _hasLoadedInitialCommunitySnapshot = false;
+
+    _communityInteractionSubscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection(_communityNotificationsCollection)
+        .orderBy('createdAt', descending: true)
+        .limit(20)
+        .snapshots()
+        .listen(
+          (snapshot) async {
+            if (!_hasLoadedInitialCommunitySnapshot) {
+              _hasLoadedInitialCommunitySnapshot = true;
+              return;
+            }
+
+            for (final change in snapshot.docChanges) {
+              if (change.type != DocumentChangeType.added) continue;
+              await _showCommunityInteractionNotification(change.doc);
+            }
+          },
+          onError: (error) {
+            debugPrint(
+              'NotificationService community interaction listener error: $error',
+            );
+          },
+        );
+  }
+
+  Future<void> _stopCommunityInteractionNotifications() async {
+    await _communityInteractionSubscription?.cancel();
+    _communityInteractionSubscription = null;
+    _communityInteractionUserId = null;
+    _hasLoadedInitialCommunitySnapshot = false;
+  }
+
+  Future<void> _showCommunityInteractionNotification(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) async {
+    final data = doc.data();
+    final labels = await _getCommunityInteractionLabels();
+    final previewText = (data['previewText'] as String?)?.trim();
+
+    final interactionType =
+        (data['interactionType'] as String?)?.trim().toLowerCase() ?? 'like';
+    final actorName = (data['actorDisplayName'] as String?)?.trim();
+    final postTitle = (data['postTitle'] as String?)?.trim();
+    final resolvedActorName = actorName == null || actorName.isEmpty
+        ? labels.unknownActor
+        : actorName;
+    final resolvedTitleTemplate = switch (interactionType) {
+      'comment' => labels.titleComment,
+      'bookmark' => labels.titleBookmark,
+      'like' => labels.titleLike,
+      _ => labels.titleGeneric,
+    };
+    final resolvedTitle = resolvedTitleTemplate.replaceFirst(
+      '{actorName}',
+      resolvedActorName,
+    );
+    final resolvedBody = previewText != null && previewText.isNotEmpty
+        ? previewText
+        : (postTitle == null || postTitle.isEmpty ? '' : postTitle);
+
+    final androidDetails = AndroidNotificationDetails(
+      _communityInteractionChannelId,
+      _communityInteractionChannelName,
+      channelDescription: _communityInteractionChannelDescription,
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    );
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    await _notifications.show(
+      id: doc.id.hashCode,
+      title: resolvedTitle,
+      body: resolvedBody,
+      notificationDetails: NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      ),
+      payload: 'community_post',
+    );
   }
 
   /// Handle notification tap - navigates to tank management screen
@@ -564,6 +707,38 @@ class NotificationService {
     );
     _cachedActionLabels = labels;
     _cachedActionLabelsLocale = languageCode;
+    return labels;
+  }
+
+  Future<CommunityInteractionLabels> _getCommunityInteractionLabels() async {
+    final languageCode = PlatformDispatcher.instance.locale.languageCode;
+    if (_cachedCommunityInteractionLabels != null &&
+        _cachedCommunityInteractionLabelsLocale == languageCode) {
+      return _cachedCommunityInteractionLabels!;
+    }
+
+    final locale = switch (languageCode) {
+      'de' => const Locale('de'),
+      'es' => const Locale('es'),
+      'fr' => const Locale('fr'),
+      _ => const Locale('en'),
+    };
+    final l10n = await AppLocalizations.delegate.load(locale);
+    final labels = CommunityInteractionLabels(
+      titleLike: l10n.communityInteractionNotificationTitleLike('{actorName}'),
+      titleBookmark: l10n.communityInteractionNotificationTitleBookmark(
+        '{actorName}',
+      ),
+      titleComment: l10n.communityInteractionNotificationTitleComment(
+        '{actorName}',
+      ),
+      titleGeneric: l10n.communityInteractionNotificationTitleGeneric(
+        '{actorName}',
+      ),
+      unknownActor: l10n.communityInteractionUnknownActor,
+    );
+    _cachedCommunityInteractionLabels = labels;
+    _cachedCommunityInteractionLabelsLocale = languageCode;
     return labels;
   }
 

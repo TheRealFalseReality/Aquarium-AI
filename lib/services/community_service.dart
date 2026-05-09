@@ -16,6 +16,8 @@ class CommunityService {
 
   static const String _postsCollection = 'posts';
   static const String _commentsCollection = 'comments';
+  static const String _communityNotificationsCollection =
+      'community_notifications';
 
   // ─── Posts ──────────────────────────────────────────────────────────────────
 
@@ -185,16 +187,26 @@ class CommunityService {
     final postRef = _firestore.collection(_postsCollection).doc(postId);
 
     try {
+      var liked = false;
       await _firestore.runTransaction((tx) async {
         final likeSnap = await tx.get(likeRef);
         if (likeSnap.exists) {
+          liked = false;
           tx.delete(likeRef);
           tx.update(postRef, {'likes': FieldValue.increment(-1)});
         } else {
+          liked = true;
           tx.set(likeRef, {'likedAt': FieldValue.serverTimestamp()});
           tx.update(postRef, {'likes': FieldValue.increment(1)});
         }
       });
+      if (liked) {
+        await _createPostInteractionNotification(
+          postId: postId,
+          interactionType: 'like',
+          actor: user,
+        );
+      }
       return true;
     } catch (e) {
       if (kDebugMode) {
@@ -243,6 +255,11 @@ class CommunityService {
         return false;
       } else {
         await ref.set({'bookmarkedAt': FieldValue.serverTimestamp()});
+        await _createPostInteractionNotification(
+          postId: postId,
+          interactionType: 'bookmark',
+          actor: user,
+        );
         return true;
       }
     } catch (e) {
@@ -382,6 +399,12 @@ class CommunityService {
       await _firestore.collection(_postsCollection).doc(postId).update({
         'commentCount': FieldValue.increment(1),
       });
+      await _createPostInteractionNotification(
+        postId: postId,
+        interactionType: 'comment',
+        actor: user,
+        commentBody: body,
+      );
 
       return comment;
     } catch (e) {
@@ -449,6 +472,48 @@ class CommunityService {
     } catch (e) {
       if (kDebugMode) {
         debugPrint('CommunityService _deleteImageByUrl error: $e');
+      }
+    }
+  }
+
+  static Future<void> _createPostInteractionNotification({
+    required String postId,
+    required String interactionType,
+    required User actor,
+    String? commentBody,
+  }) async {
+    try {
+      final postSnap = await _firestore.collection(_postsCollection).doc(postId).get();
+      if (!postSnap.exists) return;
+      final post = CommunityPost.fromFirestore(postSnap);
+      if (post.userId.isEmpty || post.userId == actor.uid) return;
+
+      final previewText = switch (interactionType) {
+        'comment' => (commentBody == null || commentBody.trim().isEmpty)
+            ? post.title
+            : commentBody.trim(),
+        _ => post.title,
+      };
+
+      await _firestore
+          .collection(_usersCollection)
+          .doc(post.userId)
+          .collection(_communityNotificationsCollection)
+          .add({
+            'postId': post.id,
+            'postType': post.type.value,
+            'postTitle': post.title,
+            'interactionType': interactionType,
+            'previewText': previewText,
+            'actorUserId': actor.uid,
+            'actorDisplayName': AuthService.getDisplayName(actor),
+            'actorAvatarUrl': actor.photoURL,
+            'read': false,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('CommunityService create interaction notification error: $e');
       }
     }
   }

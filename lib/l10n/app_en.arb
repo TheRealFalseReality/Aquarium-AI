@@ -3083,6 +3083,46 @@
   "@communityDeleteCommentConfirm": {
     "description": "Confirmation message shown before deleting a comment"
   },
+  "communityInteractionNotificationTitleLike": "{actorName} liked your post",
+  "@communityInteractionNotificationTitleLike": {
+    "description": "Push notification title when someone likes your community post",
+    "placeholders": {
+      "actorName": {
+        "type": "String"
+      }
+    }
+  },
+  "communityInteractionNotificationTitleBookmark": "{actorName} bookmarked your post",
+  "@communityInteractionNotificationTitleBookmark": {
+    "description": "Push notification title when someone bookmarks your community post",
+    "placeholders": {
+      "actorName": {
+        "type": "String"
+      }
+    }
+  },
+  "communityInteractionNotificationTitleComment": "{actorName} commented on your post",
+  "@communityInteractionNotificationTitleComment": {
+    "description": "Push notification title when someone comments on your community post",
+    "placeholders": {
+      "actorName": {
+        "type": "String"
+      }
+    }
+  },
+  "communityInteractionNotificationTitleGeneric": "{actorName} interacted with your post",
+  "@communityInteractionNotificationTitleGeneric": {
+    "description": "Fallback push notification title for unknown community post interactions",
+    "placeholders": {
+      "actorName": {
+        "type": "String"
+      }
+    }
+  },
+  "communityInteractionUnknownActor": "Someone",
+  "@communityInteractionUnknownActor": {
+    "description": "Fallback actor name in community interaction notifications"
+  },
   "communityTankInfo": "Tank Info",
   "@communityTankInfo": {
     "description": "Section header for attached tank information on a post"
