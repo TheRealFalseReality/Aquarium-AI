@@ -34,10 +34,19 @@ class CloudBackupService {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return false;
 
-      final uploadedPhotoCount = await _saveBackupPhotos(
-        user.uid,
-        localTankPhotoPaths,
-      );
+      var uploadedPhotoCount = 0;
+      try {
+        uploadedPhotoCount = await _saveBackupPhotos(
+          user.uid,
+          localTankPhotoPaths,
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint(
+            'CloudBackupService.saveBackup photo upload skipped after error: $e',
+          );
+        }
+      }
 
       await FirebaseFirestore.instance
           .collection(_usersCollection)
@@ -163,6 +172,8 @@ class CloudBackupService {
     String uid,
     List<Map<String, String>> localTankPhotoPaths,
   ) async {
+    if (localTankPhotoPaths.isEmpty || kIsWeb) return 0;
+
     final photosCollectionRef = FirebaseFirestore.instance
         .collection(_usersCollection)
         .doc(uid)
@@ -178,8 +189,6 @@ class CloudBackupService {
       }
       await deleteBatch.commit();
     }
-
-    if (localTankPhotoPaths.isEmpty || kIsWeb) return 0;
 
     var uploadedCount = 0;
 

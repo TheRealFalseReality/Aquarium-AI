@@ -141,7 +141,6 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
           hasLocalFounderEntitlement:
               state.adsRemoved && _hasPersistedFounderState,
         );
-        await _syncFounderToCloud(source: 'local_purchase_sync');
       } catch (e) {
         PurchaseService.log('Initial founder cloud sync failed: $e');
       }
@@ -368,10 +367,15 @@ bool computeFounderAccess({
 
 /// The effective Founder Aquarist status for the current user.
 ///
-/// In debug builds, this is `true` when either:
-///   - the user has actually purchased a founder product ([PurchaseState.isFounder]), or
-///   - the [debugForceFounderProvider] override is enabled.
-/// In release builds, this only reflects the real purchase state.
+/// The effective state combines:
+///   - local purchase founder entitlement ([PurchaseState.isFounder]), and
+///   - cloud profile founder entitlement (`founderEntitled`).
+///
+/// While the cloud profile is loading or errors, this falls back to local
+/// purchase state to avoid temporary loss of founder access.
+///
+/// In debug builds, [debugForceFounderProvider] can additionally force founder
+/// access.
 final isFounderProvider = Provider<bool>((ref) {
   final purchasedFounder = ref.watch(purchaseProvider).isFounder;
   final cloudFounderAsync = ref.watch(currentUserProfileProvider);

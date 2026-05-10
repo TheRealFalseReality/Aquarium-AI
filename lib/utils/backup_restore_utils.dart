@@ -20,6 +20,8 @@ import '../widgets/remove_ads_dialog.dart';
 class BackupRestoreUtils {
   static const String _restoredCloudTankPhotosDirName =
       'cloud_restored_tank_photos';
+  // Mirrors cloud backup upload limit to avoid large decode allocations.
+  static const int _maxCloudPhotoBase64LengthForRestore = 950 * 1024;
   static final RegExp _safePathCharPattern = RegExp(r'[^a-zA-Z0-9_-]');
   static final RegExp _safeExtensionPattern = RegExp(r'[^a-zA-Z0-9]');
 
@@ -998,6 +1000,14 @@ class BackupRestoreUtils {
 
         final base64Data = cloudPhoto['base64Data'];
         if (base64Data == null || base64Data.isEmpty) continue;
+        if (base64Data.length > _maxCloudPhotoBase64LengthForRestore) {
+          if (kDebugMode) {
+            debugPrint(
+              'BackupRestoreUtils._attachRestoredCloudTankPhotos skip oversized base64 for $tankId/$photoId, chars=${base64Data.length}',
+            );
+          }
+          continue;
+        }
 
         try {
           final bytes = base64Decode(base64Data);
