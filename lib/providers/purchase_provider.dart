@@ -138,7 +138,8 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
     if (state.adsRemoved && _hasPersistedFounderState) {
       try {
         await ProfileService.backfillFounderEntitlementForExistingFounder(
-          hasLocalFounderEntitlement: true,
+          hasLocalFounderEntitlement:
+              state.adsRemoved && _hasPersistedFounderState,
         );
         await _syncFounderToCloud(source: 'local_purchase_sync');
       } catch (e) {
