@@ -421,10 +421,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     }
     if (targetPost == null) return;
     _openedInitialPostFromRoute = true;
+    final postToOpen = targetPost;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _openPost(context, targetPost!);
+      _openPost(context, postToOpen);
     });
   }
 
