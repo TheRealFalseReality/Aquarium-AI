@@ -16,6 +16,8 @@ class CommunityService {
 
   static const String _postsCollection = 'posts';
   static const String _commentsCollection = 'comments';
+  static const String _communityNotificationsCollection =
+      'community_notifications';
   static const Duration _commentCountCacheTtl = Duration(minutes: 2);
   static final Map<String, int> _commentCountCache = <String, int>{};
   static final Map<String, DateTime> _commentCountCacheAt =
@@ -187,7 +189,12 @@ class CommunityService {
   /// Toggles a like on a post for the current user.
   /// Uses a sub-collection /posts/{postId}/likes/{uid} to track per-user likes.
   /// Returns `true` if the operation succeeded, `false` otherwise.
-  static Future<bool> toggleLike(String postId) async {
+  static Future<bool> toggleLike(
+    String postId, {
+    String? postOwnerId,
+    String? postTitle,
+    PostType? postType,
+  }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return false;
 
@@ -199,16 +206,29 @@ class CommunityService {
     final postRef = _firestore.collection(_postsCollection).doc(postId);
 
     try {
+      var liked = false;
       await _firestore.runTransaction((tx) async {
         final likeSnap = await tx.get(likeRef);
         if (likeSnap.exists) {
+          liked = false;
           tx.delete(likeRef);
           tx.update(postRef, {'likes': FieldValue.increment(-1)});
         } else {
+          liked = true;
           tx.set(likeRef, {'likedAt': FieldValue.serverTimestamp()});
           tx.update(postRef, {'likes': FieldValue.increment(1)});
         }
       });
+      if (liked) {
+        await _createPostInteractionNotification(
+          postId: postId,
+          interactionType: 'like',
+          actor: user,
+          postOwnerId: postOwnerId,
+          postTitle: postTitle,
+          postType: postType,
+        );
+      }
       return true;
     } catch (e) {
       if (kDebugMode) {
@@ -242,7 +262,12 @@ class CommunityService {
 
   /// Toggles bookmark state for [postId]. Returns `true` when the post is now
   /// bookmarked, `false` when removed, and `null` on error.
-  static Future<bool?> toggleBookmark(String postId) async {
+  static Future<bool?> toggleBookmark(
+    String postId, {
+    String? postOwnerId,
+    String? postTitle,
+    PostType? postType,
+  }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
     final ref = _firestore
@@ -257,6 +282,14 @@ class CommunityService {
         return false;
       } else {
         await ref.set({'bookmarkedAt': FieldValue.serverTimestamp()});
+        await _createPostInteractionNotification(
+          postId: postId,
+          interactionType: 'bookmark',
+          actor: user,
+          postOwnerId: postOwnerId,
+          postTitle: postTitle,
+          postType: postType,
+        );
         return true;
       }
     } catch (e) {
@@ -376,7 +409,7 @@ class CommunityService {
           .collection(_commentsCollection)
           .count()
           .get();
-      final count = aggregate.count;
+      final count = aggregate.count ?? 0;
       _commentCountCache[postId] = count;
       _commentCountCacheAt[postId] = DateTime.now();
       return count;
@@ -410,6 +443,9 @@ class CommunityService {
   static Future<CommunityComment?> createComment({
     required String postId,
     required String body,
+    String? postOwnerId,
+    String? postTitle,
+    PostType? postType,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
@@ -441,6 +477,16 @@ class CommunityService {
       await _firestore.collection(_postsCollection).doc(postId).update({
         'commentCount': FieldValue.increment(1),
       });
+      await _createPostInteractionNotification(
+        postId: postId,
+        interactionType: 'comment',
+        actor: user,
+        commentBody: body,
+        commentId: comment.id,
+        postOwnerId: postOwnerId,
+        postTitle: postTitle,
+        postType: postType,
+      );
       if (_commentCountCache.containsKey(postId)) {
         _commentCountCache[postId] = (_commentCountCache[postId] ?? 0) + 1;
         _commentCountCacheAt[postId] = DateTime.now();
@@ -517,6 +563,70 @@ class CommunityService {
     } catch (e) {
       if (kDebugMode) {
         debugPrint('CommunityService _deleteImageByUrl error: $e');
+      }
+    }
+  }
+
+  static Future<void> _createPostInteractionNotification({
+    required String postId,
+    required String interactionType,
+    required User actor,
+    String? commentBody,
+    String? commentId,
+    String? postOwnerId,
+    String? postTitle,
+    PostType? postType,
+  }) async {
+    try {
+      var resolvedPostOwnerId = postOwnerId;
+      var resolvedPostTitle = postTitle;
+      var resolvedPostType = postType;
+
+      if (resolvedPostOwnerId == null ||
+          resolvedPostTitle == null ||
+          resolvedPostType == null) {
+        final postSnap = await _firestore
+            .collection(_postsCollection)
+            .doc(postId)
+            .get();
+        if (!postSnap.exists) return;
+        final post = CommunityPost.fromFirestore(postSnap);
+        resolvedPostOwnerId ??= post.userId;
+        resolvedPostTitle ??= post.title;
+        resolvedPostType ??= post.type;
+      }
+
+      if (resolvedPostOwnerId.isEmpty || resolvedPostOwnerId == actor.uid) {
+        return;
+      }
+
+      final previewText = switch (interactionType) {
+        'comment' => (commentBody == null || commentBody.trim().isEmpty)
+            ? resolvedPostTitle
+            : commentBody.trim(),
+        _ => resolvedPostTitle,
+      };
+
+      await _firestore
+          .collection(_usersCollection)
+          .doc(resolvedPostOwnerId)
+          .collection(_communityNotificationsCollection)
+          .add({
+            'postId': postId,
+            'postType': resolvedPostType.value,
+            'postTitle': resolvedPostTitle,
+            'interactionType': interactionType,
+            'previewText': previewText,
+            if (commentId != null) 'commentId': commentId,
+            'actorUserId': actor.uid,
+            'actorDisplayName': AuthService.getDisplayName(actor),
+            'actorAvatarUrl': actor.photoURL,
+            'read': false,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('CommunityService create interaction notification error: $e');
       }
     }
   }

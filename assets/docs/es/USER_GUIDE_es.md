@@ -389,6 +389,12 @@ Toca **Iniciar sesión** en la parte superior de la pantalla de Comunidad. Puede
 Google, Facebook o permanecer anónimo. Las cuentas anónimas pueden actualizarse a una
 cuenta con nombre más tarde en **Perfil**.
 
+### Notificaciones de interacción en la comunidad
+
+Cuando las notificaciones están activadas en tu dispositivo, Aquarium AI envía alertas
+locales tipo push cuando alguien **da me gusta**, **guarda** o **comenta** una de tus
+publicaciones de la comunidad.
+
 ---
 
 ## Configuración y apariencia

@@ -392,6 +392,12 @@ Tippen Sie auf **Anmelden** am oberen Rand des Community-Bildschirms. Sie könne
 Google, Facebook oder anonym bleiben verwenden. Anonyme Konten können später unter
 **Profil** auf ein benanntes Konto aktualisiert werden.
 
+### Community-Interaktionsbenachrichtigungen
+
+Wenn Benachrichtigungen auf Ihrem Gerät aktiviert sind, sendet Aquarium AI lokale
+Push-ähnliche Hinweise, wenn jemand Ihren Community-Beitrag **liked**,
+**speichert** oder **kommentiert**.
+
 ---
 
 ## Einstellungen & Erscheinungsbild

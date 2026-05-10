@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +25,36 @@ class NotificationActionLabels {
     required this.done,
     required this.snoozeDay,
     required this.snoozeWeek,
+  });
+}
+
+class CommunityInteractionLabels {
+  final String titleLike;
+  final String titleBookmark;
+  final String titleComment;
+  final String titleGeneric;
+  final String unknownActor;
+
+  const CommunityInteractionLabels({
+    required this.titleLike,
+    required this.titleBookmark,
+    required this.titleComment,
+    required this.titleGeneric,
+    required this.unknownActor,
+  });
+}
+
+class CommunityNotificationPreview {
+  final int id;
+  final String title;
+  final String body;
+  final String payload;
+
+  const CommunityNotificationPreview({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.payload,
   });
 }
 
@@ -63,6 +95,16 @@ class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   static const String _tanksKey = 'user_tanks';
   static const String _iosNotificationCategory = 'tank_maintenance_actions';
+  static const String _communityNotificationsCollection =
+      'community_notifications';
+  static const String _communityInteractionChannelId =
+      'community_interactions';
+  static const String _communityInteractionChannelName =
+      'Community interactions';
+  static const String _communityInteractionChannelDescription =
+      'Notifications when other users interact with your posts';
+  static const String _communityPostPayload = 'community_post';
+  static const String _communityPostPayloadPrefix = 'community_post::';
   static const String actionDone = 'done_action';
   static const String actionSnoozeDay = 'snooze_day_action';
   static const String actionSnoozeWeek = 'snooze_week_action';
@@ -77,8 +119,18 @@ class NotificationService {
       StreamController<NotificationActionUpdate>.broadcast();
 
   bool _initialized = false;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
+  _communityInteractionSubscription;
+  final Set<int> _usedCommunityNotificationIds = <int>{};
+  final Map<String, int> _communityNotificationIdCache = <String, int>{};
+  Future<void> Function(CommunityNotificationPreview preview)?
+  _communityNotificationPresenterOverride;
+  String? _communityInteractionUserId;
+  bool _hasLoadedInitialCommunitySnapshot = false;
   NotificationActionLabels? _cachedActionLabels;
   String? _cachedActionLabelsLocale;
+  CommunityInteractionLabels? _cachedCommunityInteractionLabels;
+  String? _cachedCommunityInteractionLabelsLocale;
   Future<void> Function({
     required String tankId,
     required String notificationId,
@@ -107,6 +159,18 @@ class NotificationService {
   @visibleForTesting
   void clearActionApplierOverrideForTesting() {
     _actionApplierOverride = null;
+  }
+
+  @visibleForTesting
+  void setCommunityNotificationPresenterOverrideForTesting(
+    Future<void> Function(CommunityNotificationPreview preview) presenter,
+  ) {
+    _communityNotificationPresenterOverride = presenter;
+  }
+
+  @visibleForTesting
+  void clearCommunityNotificationPresenterOverrideForTesting() {
+    _communityNotificationPresenterOverride = null;
   }
 
   bool _isSupportedActionId(String? actionId) {
@@ -196,6 +260,221 @@ class NotificationService {
     _initialized = true;
   }
 
+  Future<void> syncCommunityInteractionNotificationsForUser(User? user) async {
+    final uid = user?.uid;
+    final shouldListen = uid != null && !(user?.isAnonymous ?? true);
+    if (!shouldListen) {
+      await _stopCommunityInteractionNotifications();
+      return;
+    }
+    if (_communityInteractionUserId == uid &&
+        _communityInteractionSubscription != null) {
+      return;
+    }
+    await _startCommunityInteractionNotifications(uid!);
+  }
+
+  Future<void> _startCommunityInteractionNotifications(String userId) async {
+    if (!_initialized) {
+      await initialize();
+    }
+
+    await _stopCommunityInteractionNotifications();
+    _communityInteractionUserId = userId;
+    _hasLoadedInitialCommunitySnapshot = false;
+
+    _communityInteractionSubscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection(_communityNotificationsCollection)
+        .orderBy('createdAt', descending: true)
+        .limit(20)
+        .snapshots()
+        .listen(
+          (snapshot) async {
+            final changes = snapshot.docChanges
+                .map(
+                  (change) => (
+                    id: change.doc.id,
+                    type: change.type.name,
+                    data: change.doc.data(),
+                  ),
+                )
+                .toList();
+            await processCommunitySnapshotChangesForTesting(changes);
+          },
+          onError: (error) {
+            debugPrint(
+              'NotificationService community interaction listener error: $error',
+            );
+          },
+        );
+  }
+
+  Future<void> _stopCommunityInteractionNotifications() async {
+    await _communityInteractionSubscription?.cancel();
+    _communityInteractionSubscription = null;
+    _communityInteractionUserId = null;
+    _hasLoadedInitialCommunitySnapshot = false;
+    _usedCommunityNotificationIds.clear();
+    _communityNotificationIdCache.clear();
+  }
+
+  Future<void> _showCommunityInteractionNotification(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) async {
+    final preview = await _buildCommunityInteractionPreview(
+      docId: doc.id,
+      data: doc.data(),
+    );
+    if (preview == null) {
+      return;
+    }
+    await _presentCommunityInteractionNotification(preview);
+  }
+
+  Future<void> _presentCommunityInteractionNotification(
+    CommunityNotificationPreview preview,
+  ) async {
+    if (_communityNotificationPresenterOverride != null) {
+      await _communityNotificationPresenterOverride!(preview);
+      return;
+    }
+
+    final androidDetails = AndroidNotificationDetails(
+      _communityInteractionChannelId,
+      _communityInteractionChannelName,
+      channelDescription: _communityInteractionChannelDescription,
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    );
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    await _notifications.show(
+      id: preview.id,
+      title: preview.title,
+      body: preview.body,
+      notificationDetails: NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      ),
+      payload: preview.payload,
+    );
+  }
+
+  Future<CommunityNotificationPreview?> _buildCommunityInteractionPreview({
+    required String docId,
+    required Map<String, dynamic> data,
+  }) async {
+    final labels = await _getCommunityInteractionLabels();
+    final previewText = (data['previewText'] as String?)?.trim();
+
+    final interactionType =
+        (data['interactionType'] as String?)?.trim().toLowerCase() ?? 'unknown';
+    final actorName = (data['actorDisplayName'] as String?)?.trim();
+    final postTitle = (data['postTitle'] as String?)?.trim();
+    final resolvedActorName = actorName == null || actorName.isEmpty
+        ? labels.unknownActor
+        : actorName;
+    final resolvedTitleTemplate = switch (interactionType) {
+      'comment' => labels.titleComment,
+      'bookmark' => labels.titleBookmark,
+      'like' => labels.titleLike,
+      _ => labels.titleGeneric,
+    };
+    final resolvedTitle = resolvedTitleTemplate.replaceFirst(
+      '{actorName}',
+      resolvedActorName,
+    );
+    final resolvedBody = previewText != null && previewText.isNotEmpty
+        ? previewText
+        : (postTitle == null || postTitle.isEmpty ? '' : postTitle);
+    final createdAtMillis =
+        (data['createdAt'] as Timestamp?)?.millisecondsSinceEpoch ??
+        DateTime.now().millisecondsSinceEpoch;
+    final notificationId = _buildCommunityNotificationId(
+      docId,
+      createdAtMillis,
+    );
+    final postId = (data['postId'] as String?)?.trim();
+    final payload = (postId != null && postId.isNotEmpty)
+        ? '$_communityPostPayloadPrefix$postId'
+        : _communityPostPayload;
+
+    return CommunityNotificationPreview(
+      id: notificationId,
+      title: resolvedTitle,
+      body: resolvedBody,
+      payload: payload,
+    );
+  }
+
+  @visibleForTesting
+  Future<CommunityNotificationPreview?> buildCommunityNotificationPreviewForTesting({
+    required String docId,
+    required Map<String, dynamic> data,
+  }) async {
+    return _buildCommunityInteractionPreview(docId: docId, data: data);
+  }
+
+  @visibleForTesting
+  bool get hasLoadedInitialCommunitySnapshotForTesting =>
+      _hasLoadedInitialCommunitySnapshot;
+
+  @visibleForTesting
+  Future<int> processCommunitySnapshotChangesForTesting(
+    List<({String id, String type, Map<String, dynamic>? data})> changes,
+  ) async {
+    if (!_hasLoadedInitialCommunitySnapshot) {
+      _hasLoadedInitialCommunitySnapshot = true;
+      return 0;
+    }
+
+    var shown = 0;
+    for (final change in changes) {
+      if (change.type != DocumentChangeType.added.name) continue;
+      final data = change.data;
+      if (data == null) continue;
+      final preview = await _buildCommunityInteractionPreview(
+        docId: change.id,
+        data: data,
+      );
+      if (preview == null) continue;
+      await _presentCommunityInteractionNotification(preview);
+      shown++;
+    }
+    return shown;
+  }
+
+  int _buildCommunityNotificationId(String docId, int createdAtMillis) {
+    final existing = _communityNotificationIdCache[docId];
+    if (existing != null) {
+      return existing;
+    }
+
+    var hash = 0x811C9DC5;
+    for (final codeUnit in docId.codeUnits) {
+      hash ^= codeUnit;
+      hash = (hash * 0x01000193) & 0x7fffffff;
+    }
+    var candidate = (hash ^ createdAtMillis) & 0x7fffffff;
+    if (candidate == 0) candidate = 1;
+    while (_usedCommunityNotificationIds.contains(candidate)) {
+      candidate = (candidate + 1) & 0x7fffffff;
+      if (candidate == 0) {
+        candidate = 1;
+      }
+    }
+    _usedCommunityNotificationIds.add(candidate);
+    _communityNotificationIdCache[docId] = candidate;
+    return candidate;
+  }
+
   /// Handle notification tap - navigates to tank management screen
   Future<void> _onNotificationTapped(NotificationResponse response) async {
     final wasActionHandled = await handleNotificationResponse(response);
@@ -212,6 +491,19 @@ class NotificationService {
       return;
     }
 
+    if (_isCommunityNotificationPayload(response.payload)) {
+      final postId = _extractCommunityPostId(response.payload);
+      try {
+        _navigatorKey?.currentState?.pushNamed(
+          '/community',
+          arguments: postId != null ? {'openPostId': postId} : null,
+        );
+      } catch (e) {
+        debugPrint('Failed to navigate from community notification tap: $e');
+      }
+      return;
+    }
+
     // Navigate to tank management screen when notification is tapped
     try {
       _navigatorKey?.currentState?.pushNamed('/tank-management');
@@ -219,6 +511,30 @@ class NotificationService {
       // Navigation failed - log but don't crash the app
       debugPrint('Failed to navigate from notification tap: $e');
     }
+  }
+
+  bool _isCommunityNotificationPayload(String? payload) {
+    if (payload == null || payload.isEmpty) return false;
+    return payload == _communityPostPayload ||
+        payload.startsWith(_communityPostPayloadPrefix);
+  }
+
+  String? _extractCommunityPostId(String? payload) {
+    if (payload == null || !payload.startsWith(_communityPostPayloadPrefix)) {
+      return null;
+    }
+    final postId = payload.substring(_communityPostPayloadPrefix.length).trim();
+    return postId.isEmpty ? null : postId;
+  }
+
+  @visibleForTesting
+  bool isCommunityNotificationPayloadForTesting(String? payload) {
+    return _isCommunityNotificationPayload(payload);
+  }
+
+  @visibleForTesting
+  String? extractCommunityPostIdForTesting(String? payload) {
+    return _extractCommunityPostId(payload);
   }
 
   /// Request notification permissions (especially important for iOS)
@@ -564,6 +880,38 @@ class NotificationService {
     );
     _cachedActionLabels = labels;
     _cachedActionLabelsLocale = languageCode;
+    return labels;
+  }
+
+  Future<CommunityInteractionLabels> _getCommunityInteractionLabels() async {
+    final languageCode = PlatformDispatcher.instance.locale.languageCode;
+    if (_cachedCommunityInteractionLabels != null &&
+        _cachedCommunityInteractionLabelsLocale == languageCode) {
+      return _cachedCommunityInteractionLabels!;
+    }
+
+    final locale = switch (languageCode) {
+      'de' => const Locale('de'),
+      'es' => const Locale('es'),
+      'fr' => const Locale('fr'),
+      _ => const Locale('en'),
+    };
+    final l10n = await AppLocalizations.delegate.load(locale);
+    final labels = CommunityInteractionLabels(
+      titleLike: l10n.communityInteractionNotificationTitleLike('{actorName}'),
+      titleBookmark: l10n.communityInteractionNotificationTitleBookmark(
+        '{actorName}',
+      ),
+      titleComment: l10n.communityInteractionNotificationTitleComment(
+        '{actorName}',
+      ),
+      titleGeneric: l10n.communityInteractionNotificationTitleGeneric(
+        '{actorName}',
+      ),
+      unknownActor: l10n.communityInteractionUnknownActor,
+    );
+    _cachedCommunityInteractionLabels = labels;
+    _cachedCommunityInteractionLabelsLocale = languageCode;
     return labels;
   }
 

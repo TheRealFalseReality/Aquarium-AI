@@ -395,6 +395,10 @@ Browse and share posts with other Aquarium AI users. Sign in (anonymously or wit
 
 Tap **Sign In** at the top of the Community screen. You can use Google, Facebook, or remain anonymous. Anonymous accounts can be upgraded to a named account later in **Profile**.
 
+### Community Interaction Notifications
+
+When notifications are enabled on your device, Aquarium AI sends local push-style alerts when someone **likes**, **bookmarks**, or **comments on** one of your community posts.
+
 ---
 
 ## Settings & Appearance

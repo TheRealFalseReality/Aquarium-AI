@@ -179,6 +179,9 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final comment = await CommunityService.createComment(
       postId: widget.post.id,
       body: text,
+      postOwnerId: widget.post.userId,
+      postTitle: widget.post.title,
+      postType: widget.post.type,
     );
     if (mounted) {
       setState(() => _isSubmitting = false);

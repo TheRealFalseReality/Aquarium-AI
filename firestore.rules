@@ -1,11 +1,77 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function postDoc(postId) {
+      return get(/databases/$(database)/documents/posts/$(postId));
+    }
+
+    function commentDoc(postId, commentId) {
+      return get(/databases/$(database)/documents/posts/$(postId)/comments/$(commentId));
+    }
+
+    function postMatchesNotificationTarget(postId, ownerUid, postType, postTitle) {
+      return exists(/databases/$(database)/documents/posts/$(postId)) &&
+          postDoc(postId).data.userId == ownerUid &&
+          postDoc(postId).data.type == postType &&
+          postDoc(postId).data.title == postTitle;
+    }
+
+    function commentMatchesActorAndPreview(postId, commentId, actorUid, previewText) {
+      return exists(/databases/$(database)/documents/posts/$(postId)/comments/$(commentId)) &&
+          commentDoc(postId, commentId).data.userId == actorUid &&
+          commentDoc(postId, commentId).data.body == previewText;
+    }
 
     // Users can read/write their own profile
     match /users/{uid} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == uid;
+
+      // Per-user community bookmarks.
+      match /bookmarks/{postId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+
+      // Per-user community interaction notifications.
+      // Only the owner can read/update/delete.
+      // Create is allowed only when the actor can prove the interaction happened.
+      match /community_notifications/{notificationId} {
+        allow read, update, delete: if request.auth != null && request.auth.uid == uid;
+        allow create: if request.auth != null &&
+            request.resource.data.actorUserId == request.auth.uid &&
+            request.resource.data.postId is string &&
+            request.resource.data.postTitle is string &&
+            request.resource.data.interactionType is string &&
+            request.resource.data.postType is string &&
+            request.resource.data.previewText is string &&
+            request.resource.data.read is bool &&
+            request.resource.data.createdAt is timestamp &&
+            exists(/databases/$(database)/documents/posts/$(request.resource.data.postId)) &&
+            postMatchesNotificationTarget(
+              request.resource.data.postId,
+              uid,
+              request.resource.data.postType,
+              request.resource.data.postTitle
+            ) &&
+            request.resource.data.interactionType in ['like', 'bookmark', 'comment'] &&
+            (
+              (request.resource.data.interactionType == 'like' &&
+                request.resource.data.previewText == request.resource.data.postTitle &&
+                exists(/databases/$(database)/documents/posts/$(request.resource.data.postId)/likes/$(request.auth.uid))) ||
+              (request.resource.data.interactionType == 'bookmark' &&
+                request.resource.data.previewText == request.resource.data.postTitle &&
+                exists(/databases/$(database)/documents/users/$(request.auth.uid)/bookmarks/$(request.resource.data.postId))) ||
+              (request.resource.data.interactionType == 'comment' &&
+                request.resource.data.commentId is string &&
+                exists(/databases/$(database)/documents/posts/$(request.resource.data.postId)/comments/$(request.resource.data.commentId)) &&
+                commentMatchesActorAndPreview(
+                  request.resource.data.postId,
+                  request.resource.data.commentId,
+                  request.auth.uid,
+                  request.resource.data.previewText
+                ))
+            );
+      }
     }
 
     // Anyone signed in (including anonymous) can read posts

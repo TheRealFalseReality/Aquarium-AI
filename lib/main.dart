@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_performance/firebase_performance.dart';
@@ -56,6 +57,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// Global flag to track Firebase initialization status
 bool _firebaseInitialized = false;
+StreamSubscription<User?>? _communityNotificationAuthSubscription;
 
 /// Whether the initial pending deep link has been processed.
 bool _deepLinkProcessed = false;
@@ -287,6 +289,21 @@ void main() async {
         fatal: false,
       );
     });
+
+    _communityNotificationAuthSubscription?.cancel();
+    _communityNotificationAuthSubscription = FirebaseAuth.instance
+        .authStateChanges()
+        .listen((user) {
+          NotificationService()
+              .syncCommunityInteractionNotificationsForUser(user)
+              .catchError((error) {
+                if (kDebugMode) {
+                  debugPrint(
+                    'Community interaction notification sync error: $error',
+                  );
+                }
+              });
+        });
 
     // Initialize Analytics session tracking (non-blocking)
     // Don't await this to prevent blocking app startup
@@ -701,7 +718,11 @@ class MyApp extends ConsumerWidget {
                 screenName = 'welcome_screen';
                 break;
               case '/community':
-                page = const CommunityScreen();
+                String? openPostId;
+                if (args is Map) {
+                  openPostId = args['openPostId'] as String?;
+                }
+                page = CommunityScreen(initialPostId: openPostId);
                 screenName = 'community_screen';
                 break;
               case '/auth':
