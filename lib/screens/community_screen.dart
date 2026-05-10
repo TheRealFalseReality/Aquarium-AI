@@ -19,13 +19,17 @@ import 'community_post_screen.dart';
 import 'create_post_screen.dart';
 
 class CommunityScreen extends ConsumerStatefulWidget {
-  const CommunityScreen({super.key});
+  final String? initialPostId;
+
+  const CommunityScreen({super.key, this.initialPostId});
 
   @override
   ConsumerState<CommunityScreen> createState() => _CommunityScreenState();
 }
 
 class _CommunityScreenState extends ConsumerState<CommunityScreen> {
+  bool _openedInitialPostFromRoute = false;
+
   @override
   void initState() {
     super.initState();
@@ -103,6 +107,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                 ),
               ),
               data: (posts) {
+                _maybeOpenInitialPostFromRoute(posts);
                 if (posts.isEmpty) {
                   return _buildEmptyState(
                     context,
@@ -400,6 +405,27 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       context,
       MaterialPageRoute(builder: (_) => CommunityPostScreen(post: post)),
     );
+  }
+
+  void _maybeOpenInitialPostFromRoute(List<CommunityPost> posts) {
+    if (_openedInitialPostFromRoute) return;
+    final initialPostId = widget.initialPostId;
+    if (initialPostId == null || initialPostId.isEmpty) return;
+
+    CommunityPost? targetPost;
+    for (final post in posts) {
+      if (post.id == initialPostId) {
+        targetPost = post;
+        break;
+      }
+    }
+    if (targetPost == null) return;
+    _openedInitialPostFromRoute = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _openPost(context, targetPost);
+    });
   }
 
   void _navigateToCreate(BuildContext context, PostType? initialType) {

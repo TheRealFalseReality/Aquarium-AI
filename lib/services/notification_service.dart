@@ -399,7 +399,10 @@ class NotificationService {
       docId,
       createdAtMillis,
     );
-    final payload = 'community_post::${data['postId'] as String? ?? ''}';
+    final postId = (data['postId'] as String?)?.trim();
+    final payload = (postId != null && postId.isNotEmpty)
+        ? 'community_post::$postId'
+        : 'community_post';
 
     return CommunityNotificationPreview(
       id: notificationId,
@@ -487,8 +490,12 @@ class NotificationService {
     }
 
     if (_isCommunityNotificationPayload(response.payload)) {
+      final postId = _extractCommunityPostId(response.payload);
       try {
-        _navigatorKey?.currentState?.pushNamed('/community');
+        _navigatorKey?.currentState?.pushNamed(
+          '/community',
+          arguments: postId != null ? {'openPostId': postId} : null,
+        );
       } catch (e) {
         debugPrint('Failed to navigate from community notification tap: $e');
       }
@@ -509,9 +516,22 @@ class NotificationService {
     return payload == 'community_post' || payload.startsWith('community_post::');
   }
 
+  String? _extractCommunityPostId(String? payload) {
+    if (payload == null || !payload.startsWith('community_post::')) {
+      return null;
+    }
+    final postId = payload.substring('community_post::'.length).trim();
+    return postId.isEmpty ? null : postId;
+  }
+
   @visibleForTesting
   bool isCommunityNotificationPayloadForTesting(String? payload) {
     return _isCommunityNotificationPayload(payload);
+  }
+
+  @visibleForTesting
+  String? extractCommunityPostIdForTesting(String? payload) {
+    return _extractCommunityPostId(payload);
   }
 
   /// Request notification permissions (especially important for iOS)

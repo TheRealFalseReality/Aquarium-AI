@@ -10,16 +10,16 @@ service cloud.firestore {
     }
 
     function postMatchesNotificationTarget(postId, ownerUid, postType, postTitle) {
-      let post = postDoc(postId);
-      return post.data.userId == ownerUid &&
-          post.data.type == postType &&
-          post.data.title == postTitle;
+      return exists(/databases/$(database)/documents/posts/$(postId)) &&
+          postDoc(postId).data.userId == ownerUid &&
+          postDoc(postId).data.type == postType &&
+          postDoc(postId).data.title == postTitle;
     }
 
     function commentMatchesActorAndPreview(postId, commentId, actorUid, previewText) {
-      let comment = commentDoc(postId, commentId);
-      return comment.data.userId == actorUid &&
-          comment.data.body == previewText;
+      return exists(/databases/$(database)/documents/posts/$(postId)/comments/$(commentId)) &&
+          commentDoc(postId, commentId).data.userId == actorUid &&
+          commentDoc(postId, commentId).data.body == previewText;
     }
 
     // Users can read/write their own profile

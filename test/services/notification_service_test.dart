@@ -424,6 +424,28 @@ void main() {
           service.isCommunityNotificationPayloadForTesting('tank-123::notif-456'),
           isFalse,
         );
+        expect(
+          service.extractCommunityPostIdForTesting('community_post::post-123'),
+          equals('post-123'),
+        );
+        expect(
+          service.extractCommunityPostIdForTesting('community_post::'),
+          isNull,
+        );
+      });
+
+      test('falls back to legacy community payload when postId is missing', () async {
+        final service = NotificationService();
+        final preview = await service.buildCommunityNotificationPreviewForTesting(
+          docId: 'doc-no-post',
+          data: {
+            ...baseData(interactionType: 'like'),
+            'postId': '',
+          },
+        );
+
+        expect(preview, isNotNull);
+        expect(preview!.payload, equals('community_post'));
       });
     });
   });

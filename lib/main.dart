@@ -718,7 +718,11 @@ class MyApp extends ConsumerWidget {
                 screenName = 'welcome_screen';
                 break;
               case '/community':
-                page = const CommunityScreen();
+                String? openPostId;
+                if (args is Map) {
+                  openPostId = args['openPostId'] as String?;
+                }
+                page = CommunityScreen(initialPostId: openPostId);
                 screenName = 'community_screen';
                 break;
               case '/auth':
