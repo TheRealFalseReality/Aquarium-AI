@@ -86,6 +86,41 @@ class ProfileService {
     });
   }
 
+  /// Backfills founder entitlement for already-paid users on older profiles.
+  ///
+  /// If the current user's profile does not yet have `founderEntitled`/`isFounder`
+  /// set, this marks it as founder so entitlement is available cross-platform.
+  static Future<bool> backfillFounderEntitlementForExistingFounder({
+    required bool hasLocalFounderEntitlement,
+  }) async {
+    if (!hasLocalFounderEntitlement) return false;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+
+    try {
+      final snapshot = await _firestore
+          .collection(_usersCollection)
+          .doc(user.uid)
+          .get();
+
+      final data = snapshot.data() ?? const <String, dynamic>{};
+      final alreadyFounder =
+          data['founderEntitled'] == true || data['isFounder'] == true;
+
+      if (alreadyFounder) return true;
+
+      return updateFounderEntitlement(
+        true,
+        source: 'founder_backfill',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('ProfileService backfillFounderEntitlement error: $e');
+      }
+      return false;
+    }
+  }
+
   // ─── Tank Sync ───────────────────────────────────────────────────────────────
 
   /// Syncs the user's local tank list into their Firestore profile.

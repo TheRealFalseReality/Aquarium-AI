@@ -137,6 +137,9 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
 
     if (state.adsRemoved && _hasPersistedFounderState) {
       try {
+        await ProfileService.backfillFounderEntitlementForExistingFounder(
+          hasLocalFounderEntitlement: true,
+        );
         await _syncFounderToCloud(source: 'local_purchase_sync');
       } catch (e) {
         PurchaseService.log('Initial founder cloud sync failed: $e');
@@ -166,8 +169,10 @@ class PurchaseNotifier extends StateNotifier<PurchaseState> {
       // Conflict strategy: local purchase state is the source of truth, so if
       // cloud says non-founder but the local paid state is founder, push
       // founder=true back to cloud.
-      if (!profile.founderEntitled &&
-          state.adsRemoved &&
+      if (shouldBackfillFounderProfile(
+            localFounder: state.adsRemoved,
+            cloudFounder: profile.founderEntitled,
+          ) &&
           _hasPersistedFounderState) {
         await _syncFounderToCloud(source: 'local_purchase_sync');
         return;
@@ -343,6 +348,11 @@ final purchaseProvider = StateNotifierProvider<PurchaseNotifier, PurchaseState>(
 /// purchase. Only meaningful in debug builds ([kDebugMode]); always `false`
 /// in release builds. Reset on every cold start.
 final debugForceFounderProvider = StateProvider<bool>((ref) => false);
+
+bool shouldBackfillFounderProfile({
+  required bool localFounder,
+  required bool cloudFounder,
+}) => localFounder && !cloudFounder;
 
 bool computeFounderAccess({
   required bool purchasedFounder,

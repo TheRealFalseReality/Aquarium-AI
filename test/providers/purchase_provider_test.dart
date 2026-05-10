@@ -2,6 +2,26 @@ import 'package:fish_ai/providers/purchase_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('shouldBackfillFounderProfile', () {
+    test('returns true when local founder is true and cloud founder is false', () {
+      final result = shouldBackfillFounderProfile(
+        localFounder: true,
+        cloudFounder: false,
+      );
+
+      expect(result, isTrue);
+    });
+
+    test('returns false when cloud founder is already true', () {
+      final result = shouldBackfillFounderProfile(
+        localFounder: true,
+        cloudFounder: true,
+      );
+
+      expect(result, isFalse);
+    });
+  });
+
   group('computeFounderAccess', () {
     test('returns true when purchased founder in release mode', () {
       final result = computeFounderAccess(
