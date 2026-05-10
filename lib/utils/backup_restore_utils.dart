@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
@@ -15,6 +18,13 @@ import '../widgets/accessible_feedback.dart';
 import '../widgets/remove_ads_dialog.dart';
 
 class BackupRestoreUtils {
+  static const String _restoredCloudTankPhotosDirName =
+      'cloud_restored_tank_photos';
+  // Mirrors cloud backup upload limit to avoid large decode allocations.
+  static const int _maxCloudPhotoBase64LengthForRestore = 950 * 1024;
+  static final RegExp _safePathCharPattern = RegExp(r'[^a-zA-Z0-9_-]');
+  static final RegExp _safeExtensionPattern = RegExp(r'[^a-zA-Z0-9]');
+
   ///
   /// [context] - BuildContext for showing dialogs and messages
   /// [ref] - WidgetRef for accessing providers
@@ -695,6 +705,8 @@ class BackupRestoreUtils {
 
     try {
       final payload = await tankNotifier.buildBackupPayload();
+      final localTankPhotoPaths = tankNotifier
+          .collectLocalTankPhotoPathsForCloudBackup();
       final jsonString = json.encode(payload);
       final tankCount = backupInfo['tankCount'] as int;
       final appVersion = payload['version'] as String? ?? '';
@@ -703,6 +715,7 @@ class BackupRestoreUtils {
         jsonString,
         tankCount: tankCount,
         appVersion: appVersion,
+        localTankPhotoPaths: localTankPhotoPaths,
       );
 
       if (!context.mounted) return;
@@ -899,6 +912,7 @@ class BackupRestoreUtils {
       }
 
       final backupData = json.decode(jsonString) as Map<String, dynamic>;
+      await _attachRestoredCloudTankPhotos(backupData);
       final success = await ref
           .read(tankProvider.notifier)
           .applyBackupPayload(backupData);
@@ -939,5 +953,107 @@ class BackupRestoreUtils {
         duration: const Duration(seconds: 4),
       );
     }
+  }
+
+  static Future<void> _attachRestoredCloudTankPhotos(
+    Map<String, dynamic> backupData,
+  ) async {
+    if (kIsWeb) return;
+
+    final cloudPhotos = await CloudBackupService.loadBackupPhotos();
+    if (cloudPhotos.isEmpty) return;
+
+    final tanks = backupData['tanks'];
+    if (tanks is! List) {
+      if (kDebugMode) {
+        debugPrint(
+          'BackupRestoreUtils._attachRestoredCloudTankPhotos invalid payload: "tanks" is not a List',
+        );
+      }
+      return;
+    }
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final photosDir = Directory(
+      '${appDir.path}/$_restoredCloudTankPhotosDirName',
+    );
+    if (!await photosDir.exists()) {
+      await photosDir.create(recursive: true);
+    }
+
+    for (final tankEntry in tanks) {
+      if (tankEntry is! Map<String, dynamic>) continue;
+      final tankId = tankEntry['id'] as String?;
+      if (tankId == null || tankId.isEmpty) continue;
+
+      final photos = tankEntry['photos'];
+      if (photos is! List) continue;
+
+      for (final photoEntry in photos) {
+        if (photoEntry is! Map<String, dynamic>) continue;
+        final photoId = photoEntry['id'] as String?;
+        if (photoId == null || photoId.isEmpty) continue;
+
+        final key = '$tankId::$photoId';
+        final cloudPhoto = cloudPhotos[key];
+        if (cloudPhoto == null) continue;
+
+        final base64Data = cloudPhoto['base64Data'];
+        if (base64Data == null || base64Data.isEmpty) continue;
+        if (base64Data.length > _maxCloudPhotoBase64LengthForRestore) {
+          if (kDebugMode) {
+            debugPrint(
+              'BackupRestoreUtils._attachRestoredCloudTankPhotos skip oversized base64 for $tankId/$photoId, chars=${base64Data.length}',
+            );
+          }
+          continue;
+        }
+
+        try {
+          final bytes = base64Decode(base64Data);
+
+          final extension = cloudPhoto['fileExtension'] ?? 'jpg';
+          final localPath = _buildRestoredPhotoPath(
+            photosDir.path,
+            tankId,
+            photoId,
+            extension,
+          );
+          final localFile = File(localPath);
+          await localFile.writeAsBytes(bytes);
+
+          photoEntry['imagePath'] = localPath;
+        } catch (e) {
+          if (kDebugMode) {
+            debugPrint(
+              'BackupRestoreUtils._attachRestoredCloudTankPhotos failed for $tankId/$photoId: $e',
+            );
+          }
+        }
+      }
+    }
+  }
+
+  static String _buildRestoredPhotoPath(
+    String directoryPath,
+    String tankId,
+    String photoId,
+    String extension,
+  ) {
+    final safeTankId = _sanitizePathSegment(tankId, fallback: 'tank');
+    final safePhotoId = _sanitizePathSegment(photoId, fallback: 'photo');
+    final safeExtension =
+        extension.toLowerCase().replaceAll(_safeExtensionPattern, '');
+    final normalizedExtension = safeExtension.isEmpty ? 'jpg' : safeExtension;
+    return '$directoryPath/${safeTankId}_$safePhotoId.$normalizedExtension';
+  }
+
+  static String _sanitizePathSegment(
+    String raw, {
+    required String fallback,
+  }) {
+    final sanitized = raw.replaceAll(_safePathCharPattern, '');
+    if (sanitized.isEmpty) return fallback;
+    return sanitized;
   }
 }

@@ -896,6 +896,36 @@ void main() {
       expect((payload['tanks'] as List).isEmpty, isTrue);
     });
 
+    test('collectLocalTankPhotoPathsForCloudBackup includes only local tank photos', () async {
+      final localPhotoTank = Tank.create(
+        name: 'Photo Tank',
+        type: 'freshwater',
+        photos: [
+          TankPhoto(
+            id: 'local-photo-1',
+            imagePath: '/tmp/local-photo.jpg',
+            dateTaken: DateTime(2025, 1, 1),
+          ),
+          TankPhoto(
+            id: 'url-photo-1',
+            imageUrl: 'https://example.com/photo.jpg',
+            dateTaken: DateTime(2025, 1, 2),
+          ),
+        ],
+      );
+
+      final noPhotoTank = Tank.create(name: 'No Photo Tank', type: 'marine');
+      await tankNotifier.addTank(localPhotoTank);
+      await tankNotifier.addTank(noPhotoTank);
+
+      final localPaths = tankNotifier.collectLocalTankPhotoPathsForCloudBackup();
+
+      expect(localPaths.length, equals(1));
+      expect(localPaths.first['tankId'], equals(localPhotoTank.id));
+      expect(localPaths.first['photoId'], equals('local-photo-1'));
+      expect(localPaths.first['imagePath'], equals('/tmp/local-photo.jpg'));
+    });
+
     test('buildBackupPayload payload is JSON-serializable', () async {
       tankNotifier.addTank(Tank.create(name: 'Reef', type: 'marine'));
 
