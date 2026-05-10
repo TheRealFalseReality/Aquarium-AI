@@ -16,6 +16,7 @@ class CommunityService {
 
   static const String _postsCollection = 'posts';
   static const String _commentsCollection = 'comments';
+  static final Map<String, int> _commentCountCache = <String, int>{};
 
   /// Returns a safe UI comment count using a live count when available, while
   /// never showing less than the stored post count.
@@ -356,25 +357,20 @@ class CommunityService {
         );
   }
 
-  /// Live stream of total comments for a given post.
-  static Stream<int> commentCountStream(String postId) {
-    return _firestore
-        .collection(_postsCollection)
-        .doc(postId)
-        .collection(_commentsCollection)
-        .snapshots()
-        .map((snap) => snap.size);
-  }
-
   /// Fetches the latest total comments for a post with a one-time read.
   static Future<int> getCommentCount(String postId) async {
+    final cached = _commentCountCache[postId];
+    if (cached != null) return cached;
     try {
-      final snap = await _firestore
+      final aggregate = await _firestore
           .collection(_postsCollection)
           .doc(postId)
           .collection(_commentsCollection)
+          .count()
           .get();
-      return snap.size;
+      final count = aggregate.count;
+      _commentCountCache[postId] = count;
+      return count;
     } catch (e) {
       if (kDebugMode) {
         debugPrint('CommunityService.getCommentCount error for post $postId: $e');
@@ -436,6 +432,9 @@ class CommunityService {
       await _firestore.collection(_postsCollection).doc(postId).update({
         'commentCount': FieldValue.increment(1),
       });
+      if (_commentCountCache.containsKey(postId)) {
+        _commentCountCache[postId] = (_commentCountCache[postId] ?? 0) + 1;
+      }
 
       return comment;
     } catch (e) {
@@ -465,6 +464,10 @@ class CommunityService {
       await _firestore.collection(_postsCollection).doc(postId).update({
         'commentCount': FieldValue.increment(-1),
       });
+      if (_commentCountCache.containsKey(postId)) {
+        final next = (_commentCountCache[postId] ?? 0) - 1;
+        _commentCountCache[postId] = next < 0 ? 0 : next;
+      }
 
       return true;
     } catch (e) {

@@ -45,8 +45,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     super.initState();
     AnalyticsService.logScreenView(screenName: 'community_post_screen');
     _likes = widget.post.likes;
-    _loadLikeStatus();
-    _loadBookmarkStatus();
+    final currentUserId = ref.read(authStateProvider).asData?.value?.uid ?? '';
+    if (currentUserId.isNotEmpty) {
+      _loadLikeStatus(currentUserId);
+      _loadBookmarkStatus(currentUserId);
+    }
     if (widget.post.imageUrl != null) {
       _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
@@ -61,14 +64,16 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     super.dispose();
   }
 
-  Future<void> _loadLikeStatus() async {
-    final authState = ref.read(authStateProvider);
-    final currentUserId = authState.asData?.value?.uid ?? '';
+  Future<void> _loadLikeStatus([String? userId]) async {
+    final currentUserId =
+        userId ?? ref.read(authStateProvider).asData?.value?.uid ?? '';
     if (currentUserId.isEmpty) return;
     final liked = await CommunityService.hasLiked(widget.post.id);
     final latestLikeCount = await CommunityService.getPostLikeCount(
       widget.post.id,
     );
+    final activeUserId = ref.read(authStateProvider).asData?.value?.uid ?? '';
+    if (activeUserId != currentUserId) return;
     if (mounted) {
       setState(() {
         _isLiked = liked;
@@ -87,7 +92,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
       _likeInteracted = true;
       _likeLoading = true;
       _isLiked = !_isLiked;
-      _likes += _isLiked ? 1 : -1;
+      final delta = _isLiked ? 1 : -1;
+      _likes = (_likes + delta).clamp(0, 2147483647);
     });
     final success = await CommunityService.toggleLike(widget.post.id);
     if (mounted) {
@@ -107,11 +113,13 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     }
   }
 
-  Future<void> _loadBookmarkStatus() async {
-    final authState = ref.read(authStateProvider);
-    final currentUserId = authState.asData?.value?.uid ?? '';
+  Future<void> _loadBookmarkStatus([String? userId]) async {
+    final currentUserId =
+        userId ?? ref.read(authStateProvider).asData?.value?.uid ?? '';
     if (currentUserId.isEmpty) return;
     final bookmarked = await CommunityService.hasBookmarked(widget.post.id);
+    final activeUserId = ref.read(authStateProvider).asData?.value?.uid ?? '';
+    if (activeUserId != currentUserId) return;
     if (mounted) {
       setState(() => _isBookmarked = bookmarked);
     }
@@ -210,12 +218,30 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authStateProvider, (previous, next) {
+      final previousUserId = previous?.asData?.value?.uid ?? '';
+      final nextUserId = next.asData?.value?.uid ?? '';
+      if (previousUserId == nextUserId) return;
+      if (!mounted) return;
+      if (nextUserId.isEmpty) {
+        setState(() {
+          _isLiked = false;
+          _isBookmarked = false;
+          _likeInteracted = false;
+          _likes = widget.post.likes;
+        });
+        return;
+      }
+      _loadLikeStatus(nextUserId);
+      _loadBookmarkStatus(nextUserId);
+    });
     final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authStateProvider);
     final currentUserId = authState.asData?.value?.uid ?? '';
     final commentsAsync = ref.watch(
       communityCommentsStreamProvider(widget.post.id),
     );
+    final liveCommentCount = commentsAsync.asData?.value.length;
     final isFounder = widget.post.isFounderPost;
     final isTankShowcase = widget.post.type == PostType.tankShowcase;
 
@@ -269,7 +295,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                       Divider(
                         color: Theme.of(context).colorScheme.outlineVariant,
                       ),
-                      _buildEngagementRow(context, currentUserId),
+                      _buildEngagementRow(
+                        context,
+                        currentUserId,
+                        liveCommentCount,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         l10n.communityComments,
@@ -929,7 +959,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     return '${date.day}/${date.month}/${date.year}';
   }
 
-  Widget _buildEngagementRow(BuildContext context, String currentUserId) {
+  Widget _buildEngagementRow(
+    BuildContext context,
+    String currentUserId,
+    int? liveCommentCount,
+  ) {
     final theme = Theme.of(context);
     return Row(
       children: [
@@ -960,15 +994,12 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
           color: theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(width: 4),
-        StreamBuilder<int>(
-          stream: CommunityService.commentCountStream(widget.post.id),
-          builder: (context, snapshot) {
-            final displayedCount = CommunityService.resolvedCommentCount(
-              storedCount: widget.post.commentCount,
-              liveCount: snapshot.data,
-            );
-            return Text('$displayedCount', style: theme.textTheme.labelSmall);
-          },
+        Text(
+          '${CommunityService.resolvedCommentCount(
+            storedCount: widget.post.commentCount,
+            liveCount: liveCommentCount,
+          )}',
+          style: theme.textTheme.labelSmall,
         ),
         const Spacer(),
         if (currentUserId.isNotEmpty)

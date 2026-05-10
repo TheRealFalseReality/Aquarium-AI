@@ -108,7 +108,8 @@ class _PostCardState extends State<PostCard> {
     setState(() {
       _likeLoading = true;
       _isLiked = !_isLiked;
-      _likes += _isLiked ? 1 : -1;
+      final delta = _isLiked ? 1 : -1;
+      _likes = (_likes + delta).clamp(0, 2147483647);
     });
     final success = await CommunityService.toggleLike(widget.post.id);
     if (mounted) {
