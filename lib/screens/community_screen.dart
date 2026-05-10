@@ -424,7 +424,7 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _openPost(context, targetPost);
+      _openPost(context, targetPost!);
     });
   }
 

@@ -409,7 +409,7 @@ class CommunityService {
           .collection(_commentsCollection)
           .count()
           .get();
-      final count = aggregate.count;
+      final count = aggregate.count ?? 0;
       _commentCountCache[postId] = count;
       _commentCountCacheAt[postId] = DateTime.now();
       return count;
