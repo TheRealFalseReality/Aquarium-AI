@@ -120,7 +120,7 @@ class NotificationService {
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
   _communityInteractionSubscription;
   final Set<int> _usedCommunityNotificationIds = <int>{};
-  final Map<String, int> _communityNotificationIdByDoc = <String, int>{};
+  final Map<String, int> _communityNotificationIdCache = <String, int>{};
   Future<void> Function(CommunityNotificationPreview preview)?
   _communityNotificationPresenterOverride;
   String? _communityInteractionUserId;
@@ -315,7 +315,7 @@ class NotificationService {
     _communityInteractionUserId = null;
     _hasLoadedInitialCommunitySnapshot = false;
     _usedCommunityNotificationIds.clear();
-    _communityNotificationIdByDoc.clear();
+    _communityNotificationIdCache.clear();
   }
 
   Future<void> _showCommunityInteractionNotification(
@@ -447,8 +447,8 @@ class NotificationService {
   }
 
   int _buildCommunityNotificationId(String docId, int createdAtMillis) {
-    final existing = _communityNotificationIdByDoc[docId];
-    if (existing != null && existing > 0) {
+    final existing = _communityNotificationIdCache[docId];
+    if (existing != null) {
       return existing;
     }
 
@@ -466,7 +466,7 @@ class NotificationService {
       }
     }
     _usedCommunityNotificationIds.add(candidate);
-    _communityNotificationIdByDoc[docId] = candidate;
+    _communityNotificationIdCache[docId] = candidate;
     return candidate;
   }
 

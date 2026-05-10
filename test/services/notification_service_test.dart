@@ -299,7 +299,7 @@ void main() {
     });
 
     group('community interaction listener behavior', () {
-      Map<String, dynamic> _baseData({
+      Map<String, dynamic> baseData({
         required String interactionType,
         String actorDisplayName = 'Alex',
         String previewText = 'Preview text',
@@ -318,7 +318,7 @@ void main() {
       test('ignores initial snapshot and marks listener as initialized', () async {
         final service = NotificationService();
         final shown = await service.processCommunitySnapshotChangesForTesting([
-          (id: 'doc-1', type: 'added', data: _baseData(interactionType: 'like')),
+          (id: 'doc-1', type: 'added', data: baseData(interactionType: 'like')),
         ]);
 
         expect(shown, equals(0));
@@ -334,9 +334,9 @@ void main() {
 
         await service.processCommunitySnapshotChangesForTesting([]);
         final shown = await service.processCommunitySnapshotChangesForTesting([
-          (id: 'doc-mod', type: 'modified', data: _baseData(interactionType: 'like')),
-          (id: 'doc-del', type: 'removed', data: _baseData(interactionType: 'bookmark')),
-          (id: 'doc-add', type: 'added', data: _baseData(interactionType: 'comment')),
+          (id: 'doc-mod', type: 'modified', data: baseData(interactionType: 'like')),
+          (id: 'doc-del', type: 'removed', data: baseData(interactionType: 'bookmark')),
+          (id: 'doc-add', type: 'added', data: baseData(interactionType: 'comment')),
         ]);
 
         expect(shown, equals(1));
@@ -351,19 +351,19 @@ void main() {
 
         final like = await service.buildCommunityNotificationPreviewForTesting(
           docId: 'doc-like',
-          data: _baseData(interactionType: 'like'),
+          data: baseData(interactionType: 'like'),
         );
         final bookmark = await service.buildCommunityNotificationPreviewForTesting(
           docId: 'doc-bookmark',
-          data: _baseData(interactionType: 'bookmark'),
+          data: baseData(interactionType: 'bookmark'),
         );
         final comment = await service.buildCommunityNotificationPreviewForTesting(
           docId: 'doc-comment',
-          data: _baseData(interactionType: 'comment', previewText: 'Nice tank!'),
+          data: baseData(interactionType: 'comment', previewText: 'Nice tank!'),
         );
         final unknownActor = await service.buildCommunityNotificationPreviewForTesting(
           docId: 'doc-unknown',
-          data: _baseData(
+          data: baseData(
             interactionType: 'mystery',
             actorDisplayName: '',
             previewText: '',
@@ -388,7 +388,7 @@ void main() {
 
       test('notification id is non-zero and stable for same doc/timestamp', () async {
         final service = NotificationService();
-        final data = _baseData(interactionType: 'like');
+        final data = baseData(interactionType: 'like');
         final first = await service.buildCommunityNotificationPreviewForTesting(
           docId: 'stable-doc',
           data: data,
@@ -396,7 +396,7 @@ void main() {
 
         await service.processCommunitySnapshotChangesForTesting([]);
         await service.processCommunitySnapshotChangesForTesting([
-          (id: 'other-doc', type: 'added', data: _baseData(interactionType: 'comment')),
+          (id: 'other-doc', type: 'added', data: baseData(interactionType: 'comment')),
         ]);
 
         final second = await service.buildCommunityNotificationPreviewForTesting(

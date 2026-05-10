@@ -1,6 +1,26 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function postDoc(postId) {
+      return get(/databases/$(database)/documents/posts/$(postId));
+    }
+
+    function commentDoc(postId, commentId) {
+      return get(/databases/$(database)/documents/posts/$(postId)/comments/$(commentId));
+    }
+
+    function postMatchesNotificationTarget(postId, ownerUid, postType, postTitle) {
+      let post = postDoc(postId);
+      return post.data.userId == ownerUid &&
+          post.data.type == postType &&
+          post.data.title == postTitle;
+    }
+
+    function commentMatchesActorAndPreview(postId, commentId, actorUid, previewText) {
+      let comment = commentDoc(postId, commentId);
+      return comment.data.userId == actorUid &&
+          comment.data.body == previewText;
+    }
 
     // Users can read/write their own profile
     match /users/{uid} {
@@ -27,22 +47,29 @@ service cloud.firestore {
             request.resource.data.read is bool &&
             request.resource.data.createdAt is timestamp &&
             exists(/databases/$(database)/documents/posts/$(request.resource.data.postId)) &&
-            get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.userId == uid &&
-            get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.title == request.resource.data.postTitle &&
-            get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.type == request.resource.data.postType &&
+            postMatchesNotificationTarget(
+              request.resource.data.postId,
+              uid,
+              request.resource.data.postType,
+              request.resource.data.postTitle
+            ) &&
             request.resource.data.interactionType in ['like', 'bookmark', 'comment'] &&
             (
               (request.resource.data.interactionType == 'like' &&
-                request.resource.data.previewText == get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.title &&
+                request.resource.data.previewText == request.resource.data.postTitle &&
                 exists(/databases/$(database)/documents/posts/$(request.resource.data.postId)/likes/$(request.auth.uid))) ||
               (request.resource.data.interactionType == 'bookmark' &&
-                request.resource.data.previewText == get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.title &&
+                request.resource.data.previewText == request.resource.data.postTitle &&
                 exists(/databases/$(database)/documents/users/$(request.auth.uid)/bookmarks/$(request.resource.data.postId))) ||
               (request.resource.data.interactionType == 'comment' &&
                 request.resource.data.commentId is string &&
                 exists(/databases/$(database)/documents/posts/$(request.resource.data.postId)/comments/$(request.resource.data.commentId)) &&
-                request.resource.data.previewText == get(/databases/$(database)/documents/posts/$(request.resource.data.postId)/comments/$(request.resource.data.commentId)).data.body &&
-                get(/databases/$(database)/documents/posts/$(request.resource.data.postId)/comments/$(request.resource.data.commentId)).data.userId == request.auth.uid)
+                commentMatchesActorAndPreview(
+                  request.resource.data.postId,
+                  request.resource.data.commentId,
+                  request.auth.uid,
+                  request.resource.data.previewText
+                ))
             );
       }
     }
