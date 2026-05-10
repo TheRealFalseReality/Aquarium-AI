@@ -43,6 +43,7 @@ class _PostCardState extends State<PostCard> {
   bool _bookmarkLoading = false;
   Future<String>? _resolvedPostImageUrl;
   Future<String>? _resolvedAvatarUrl;
+  Future<int>? _fallbackCommentCountFuture;
 
   @override
   void initState() {
@@ -54,6 +55,9 @@ class _PostCardState extends State<PostCard> {
     } else {
       _loadBookmarkStatus();
     }
+    _fallbackCommentCountFuture = widget.post.commentCount == 0
+        ? CommunityService.getCommentCount(widget.post.id)
+        : null;
     if (widget.post.imageUrl != null) {
       _resolvedPostImageUrl = resolveResizedStorageUrl(widget.post.imageUrl!);
     }
@@ -80,6 +84,12 @@ class _PostCardState extends State<PostCard> {
           ? resolveResizedStorageUrl(widget.post.avatarUrl!)
           : null;
     }
+    if (widget.post.id != oldWidget.post.id ||
+        widget.post.commentCount != oldWidget.post.commentCount) {
+      _fallbackCommentCountFuture = widget.post.commentCount == 0
+          ? CommunityService.getCommentCount(widget.post.id)
+          : null;
+    }
   }
 
   Future<void> _loadLikeStatus() async {
@@ -98,7 +108,8 @@ class _PostCardState extends State<PostCard> {
     setState(() {
       _likeLoading = true;
       _isLiked = !_isLiked;
-      _likes += _isLiked ? 1 : -1;
+      final delta = _isLiked ? 1 : -1;
+      _likes = (_likes + delta).clamp(0, 2147483647);
     });
     final success = await CommunityService.toggleLike(widget.post.id);
     if (mounted) {
@@ -254,9 +265,19 @@ class _PostCardState extends State<PostCard> {
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        '${widget.post.commentCount}',
-                        style: theme.textTheme.labelSmall,
+                      FutureBuilder<int>(
+                        future: _fallbackCommentCountFuture,
+                        builder: (context, snapshot) {
+                          final displayedCount =
+                              CommunityService.resolvedCommentCount(
+                                storedCount: widget.post.commentCount,
+                                liveCount: snapshot.data,
+                              );
+                          return Text(
+                            '$displayedCount',
+                            style: theme.textTheme.labelSmall,
+                          );
+                        },
                       ),
                       const Spacer(),
                       // Bookmark button
