@@ -18,6 +18,20 @@ class CommunityService {
   static const String _commentsCollection = 'comments';
   static const String _communityNotificationsCollection =
       'community_notifications';
+  static const Duration _commentCountCacheTtl = Duration(minutes: 2);
+  static final Map<String, int> _commentCountCache = <String, int>{};
+  static final Map<String, DateTime> _commentCountCacheAt =
+      <String, DateTime>{};
+
+  /// Returns a safe UI comment count using a live count when available, while
+  /// never showing less than the stored post count.
+  static int resolvedCommentCount({
+    required int storedCount,
+    int? liveCount,
+  }) {
+    if (liveCount == null) return storedCount;
+    return liveCount > storedCount ? liveCount : storedCount;
+  }
 
   // ─── Posts ──────────────────────────────────────────────────────────────────
 
@@ -379,6 +393,51 @@ class CommunityService {
         );
   }
 
+  /// Fetches the latest total comments for a post with a one-time read.
+  static Future<int> getCommentCount(String postId) async {
+    final cached = _commentCountCache[postId];
+    final cachedAt = _commentCountCacheAt[postId];
+    if (cached != null &&
+        cachedAt != null &&
+        DateTime.now().difference(cachedAt) <= _commentCountCacheTtl) {
+      return cached;
+    }
+    try {
+      final aggregate = await _firestore
+          .collection(_postsCollection)
+          .doc(postId)
+          .collection(_commentsCollection)
+          .count()
+          .get();
+      final count = aggregate.count;
+      _commentCountCache[postId] = count;
+      _commentCountCacheAt[postId] = DateTime.now();
+      return count;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('CommunityService.getCommentCount error for post $postId: $e');
+      }
+      return 0;
+    }
+  }
+
+  /// Returns the latest like count for a post from Firestore.
+  static Future<int> getPostLikeCount(String postId) async {
+    try {
+      final snap = await _firestore.collection(_postsCollection).doc(postId).get();
+      final data = snap.data();
+      if (data == null) return 0;
+      return data['likes'] as int? ?? 0;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          'CommunityService.getPostLikeCount error for post $postId: $e',
+        );
+      }
+      return 0;
+    }
+  }
+
   /// Creates a comment on a post. Returns the created [CommunityComment] or
   /// null on failure.
   static Future<CommunityComment?> createComment({
@@ -428,6 +487,10 @@ class CommunityService {
         postTitle: postTitle,
         postType: postType,
       );
+      if (_commentCountCache.containsKey(postId)) {
+        _commentCountCache[postId] = (_commentCountCache[postId] ?? 0) + 1;
+        _commentCountCacheAt[postId] = DateTime.now();
+      }
 
       return comment;
     } catch (e) {
@@ -457,6 +520,11 @@ class CommunityService {
       await _firestore.collection(_postsCollection).doc(postId).update({
         'commentCount': FieldValue.increment(-1),
       });
+      if (_commentCountCache.containsKey(postId)) {
+        final next = (_commentCountCache[postId] ?? 0) - 1;
+        _commentCountCache[postId] = next < 0 ? 0 : next;
+        _commentCountCacheAt[postId] = DateTime.now();
+      }
 
       return true;
     } catch (e) {
