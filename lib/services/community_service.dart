@@ -16,7 +16,10 @@ class CommunityService {
 
   static const String _postsCollection = 'posts';
   static const String _commentsCollection = 'comments';
+  static const Duration _commentCountCacheTtl = Duration(minutes: 2);
   static final Map<String, int> _commentCountCache = <String, int>{};
+  static final Map<String, DateTime> _commentCountCacheAt =
+      <String, DateTime>{};
 
   /// Returns a safe UI comment count using a live count when available, while
   /// never showing less than the stored post count.
@@ -360,7 +363,12 @@ class CommunityService {
   /// Fetches the latest total comments for a post with a one-time read.
   static Future<int> getCommentCount(String postId) async {
     final cached = _commentCountCache[postId];
-    if (cached != null) return cached;
+    final cachedAt = _commentCountCacheAt[postId];
+    if (cached != null &&
+        cachedAt != null &&
+        DateTime.now().difference(cachedAt) <= _commentCountCacheTtl) {
+      return cached;
+    }
     try {
       final aggregate = await _firestore
           .collection(_postsCollection)
@@ -370,6 +378,7 @@ class CommunityService {
           .get();
       final count = aggregate.count;
       _commentCountCache[postId] = count;
+      _commentCountCacheAt[postId] = DateTime.now();
       return count;
     } catch (e) {
       if (kDebugMode) {
@@ -434,6 +443,7 @@ class CommunityService {
       });
       if (_commentCountCache.containsKey(postId)) {
         _commentCountCache[postId] = (_commentCountCache[postId] ?? 0) + 1;
+        _commentCountCacheAt[postId] = DateTime.now();
       }
 
       return comment;
@@ -467,6 +477,7 @@ class CommunityService {
       if (_commentCountCache.containsKey(postId)) {
         final next = (_commentCountCache[postId] ?? 0) - 1;
         _commentCountCache[postId] = next < 0 ? 0 : next;
+        _commentCountCacheAt[postId] = DateTime.now();
       }
 
       return true;

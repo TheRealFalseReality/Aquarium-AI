@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,6 +35,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   bool _likeInteracted = false;
   bool _isBookmarked = false;
   bool _bookmarkLoading = false;
+  ProviderSubscription<AsyncValue<User?>>? _authStateSub;
+  String _activeAuthUserId = '';
   Future<String>? _resolvedPostImageUrl;
   Future<String>? _resolvedAvatarUrl;
 
@@ -46,6 +49,28 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     AnalyticsService.logScreenView(screenName: 'community_post_screen');
     _likes = widget.post.likes;
     final currentUserId = ref.read(authStateProvider).asData?.value?.uid ?? '';
+    _activeAuthUserId = currentUserId;
+    _authStateSub = ref.listenManual<AsyncValue<User?>>(
+      authStateProvider,
+      (previous, next) {
+        final previousUserId = previous?.asData?.value?.uid ?? '';
+        final nextUserId = next.asData?.value?.uid ?? '';
+        if (previousUserId == nextUserId) return;
+        _activeAuthUserId = nextUserId;
+        if (!mounted) return;
+        if (nextUserId.isEmpty) {
+          setState(() {
+            _isLiked = false;
+            _isBookmarked = false;
+            _likeInteracted = false;
+            _likes = widget.post.likes;
+          });
+          return;
+        }
+        _loadLikeStatus(nextUserId);
+        _loadBookmarkStatus(nextUserId);
+      },
+    );
     if (currentUserId.isNotEmpty) {
       _loadLikeStatus(currentUserId);
       _loadBookmarkStatus(currentUserId);
@@ -60,6 +85,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
 
   @override
   void dispose() {
+    _authStateSub?.close();
     _commentController.dispose();
     super.dispose();
   }
@@ -72,8 +98,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final latestLikeCount = await CommunityService.getPostLikeCount(
       widget.post.id,
     );
-    final activeUserId = ref.read(authStateProvider).asData?.value?.uid ?? '';
-    if (activeUserId != currentUserId) return;
+    if (_activeAuthUserId != currentUserId) return;
     if (mounted) {
       setState(() {
         _isLiked = liked;
@@ -118,8 +143,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
         userId ?? ref.read(authStateProvider).asData?.value?.uid ?? '';
     if (currentUserId.isEmpty) return;
     final bookmarked = await CommunityService.hasBookmarked(widget.post.id);
-    final activeUserId = ref.read(authStateProvider).asData?.value?.uid ?? '';
-    if (activeUserId != currentUserId) return;
+    if (_activeAuthUserId != currentUserId) return;
     if (mounted) {
       setState(() => _isBookmarked = bookmarked);
     }
@@ -218,23 +242,6 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(authStateProvider, (previous, next) {
-      final previousUserId = previous?.asData?.value?.uid ?? '';
-      final nextUserId = next.asData?.value?.uid ?? '';
-      if (previousUserId == nextUserId) return;
-      if (!mounted) return;
-      if (nextUserId.isEmpty) {
-        setState(() {
-          _isLiked = false;
-          _isBookmarked = false;
-          _likeInteracted = false;
-          _likes = widget.post.likes;
-        });
-        return;
-      }
-      _loadLikeStatus(nextUserId);
-      _loadBookmarkStatus(nextUserId);
-    });
     final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authStateProvider);
     final currentUserId = authState.asData?.value?.uid ?? '';
