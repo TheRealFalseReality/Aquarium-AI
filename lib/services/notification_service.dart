@@ -44,6 +44,20 @@ class CommunityInteractionLabels {
   });
 }
 
+class CommunityNotificationPreview {
+  final int id;
+  final String title;
+  final String body;
+  final String payload;
+
+  const CommunityNotificationPreview({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.payload,
+  });
+}
+
 class NotificationActionUpdate {
   final String tankId;
   final String notificationId;
@@ -106,6 +120,9 @@ class NotificationService {
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
   _communityInteractionSubscription;
   final Set<int> _usedCommunityNotificationIds = <int>{};
+  final Map<String, int> _communityNotificationIdByDoc = <String, int>{};
+  Future<void> Function(CommunityNotificationPreview preview)?
+  _communityNotificationPresenterOverride;
   String? _communityInteractionUserId;
   bool _hasLoadedInitialCommunitySnapshot = false;
   NotificationActionLabels? _cachedActionLabels;
@@ -140,6 +157,18 @@ class NotificationService {
   @visibleForTesting
   void clearActionApplierOverrideForTesting() {
     _actionApplierOverride = null;
+  }
+
+  @visibleForTesting
+  void setCommunityNotificationPresenterOverrideForTesting(
+    Future<void> Function(CommunityNotificationPreview preview) presenter,
+  ) {
+    _communityNotificationPresenterOverride = presenter;
+  }
+
+  @visibleForTesting
+  void clearCommunityNotificationPresenterOverrideForTesting() {
+    _communityNotificationPresenterOverride = null;
   }
 
   bool _isSupportedActionId(String? actionId) {
@@ -261,15 +290,16 @@ class NotificationService {
         .snapshots()
         .listen(
           (snapshot) async {
-            if (!_hasLoadedInitialCommunitySnapshot) {
-              _hasLoadedInitialCommunitySnapshot = true;
-              return;
-            }
-
-            for (final change in snapshot.docChanges) {
-              if (change.type != DocumentChangeType.added) continue;
-              await _showCommunityInteractionNotification(change.doc);
-            }
+            final changes = snapshot.docChanges
+                .map(
+                  (change) => (
+                    id: change.doc.id,
+                    type: change.type.name,
+                    data: change.doc.data(),
+                  ),
+                )
+                .toList();
+            await processCommunitySnapshotChangesForTesting(changes);
           },
           onError: (error) {
             debugPrint(
@@ -285,12 +315,60 @@ class NotificationService {
     _communityInteractionUserId = null;
     _hasLoadedInitialCommunitySnapshot = false;
     _usedCommunityNotificationIds.clear();
+    _communityNotificationIdByDoc.clear();
   }
 
   Future<void> _showCommunityInteractionNotification(
     QueryDocumentSnapshot<Map<String, dynamic>> doc,
   ) async {
-    final data = doc.data();
+    final preview = await _buildCommunityInteractionPreview(
+      docId: doc.id,
+      data: doc.data(),
+    );
+    if (preview == null) {
+      return;
+    }
+    await _presentCommunityInteractionNotification(preview);
+  }
+
+  Future<void> _presentCommunityInteractionNotification(
+    CommunityNotificationPreview preview,
+  ) async {
+    if (_communityNotificationPresenterOverride != null) {
+      await _communityNotificationPresenterOverride!(preview);
+      return;
+    }
+
+    final androidDetails = AndroidNotificationDetails(
+      _communityInteractionChannelId,
+      _communityInteractionChannelName,
+      channelDescription: _communityInteractionChannelDescription,
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    );
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    await _notifications.show(
+      id: preview.id,
+      title: preview.title,
+      body: preview.body,
+      notificationDetails: NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      ),
+      payload: preview.payload,
+    );
+  }
+
+  Future<CommunityNotificationPreview?> _buildCommunityInteractionPreview({
+    required String docId,
+    required Map<String, dynamic> data,
+  }) async {
     final labels = await _getCommunityInteractionLabels();
     final previewText = (data['previewText'] as String?)?.trim();
 
@@ -314,41 +392,66 @@ class NotificationService {
     final resolvedBody = previewText != null && previewText.isNotEmpty
         ? previewText
         : (postTitle == null || postTitle.isEmpty ? '' : postTitle);
-
-    final androidDetails = AndroidNotificationDetails(
-      _communityInteractionChannelId,
-      _communityInteractionChannelName,
-      channelDescription: _communityInteractionChannelDescription,
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-    );
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
     final createdAtMillis =
         (data['createdAt'] as Timestamp?)?.millisecondsSinceEpoch ??
         DateTime.now().millisecondsSinceEpoch;
     final notificationId = _buildCommunityNotificationId(
-      doc.id,
+      docId,
       createdAtMillis,
     );
+    final payload = 'community_post::${data['postId'] as String? ?? ''}';
 
-    await _notifications.show(
+    return CommunityNotificationPreview(
       id: notificationId,
       title: resolvedTitle,
       body: resolvedBody,
-      notificationDetails: NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      ),
-      payload: 'community_post',
+      payload: payload,
     );
   }
 
+  @visibleForTesting
+  Future<CommunityNotificationPreview?> buildCommunityNotificationPreviewForTesting({
+    required String docId,
+    required Map<String, dynamic> data,
+  }) async {
+    return _buildCommunityInteractionPreview(docId: docId, data: data);
+  }
+
+  @visibleForTesting
+  bool get hasLoadedInitialCommunitySnapshotForTesting =>
+      _hasLoadedInitialCommunitySnapshot;
+
+  @visibleForTesting
+  Future<int> processCommunitySnapshotChangesForTesting(
+    List<({String id, String type, Map<String, dynamic>? data})> changes,
+  ) async {
+    if (!_hasLoadedInitialCommunitySnapshot) {
+      _hasLoadedInitialCommunitySnapshot = true;
+      return 0;
+    }
+
+    var shown = 0;
+    for (final change in changes) {
+      if (change.type != DocumentChangeType.added.name) continue;
+      final data = change.data;
+      if (data == null) continue;
+      final preview = await _buildCommunityInteractionPreview(
+        docId: change.id,
+        data: data,
+      );
+      if (preview == null) continue;
+      await _presentCommunityInteractionNotification(preview);
+      shown++;
+    }
+    return shown;
+  }
+
   int _buildCommunityNotificationId(String docId, int createdAtMillis) {
+    final existing = _communityNotificationIdByDoc[docId];
+    if (existing != null && existing > 0) {
+      return existing;
+    }
+
     var hash = 0x811C9DC5;
     for (final codeUnit in docId.codeUnits) {
       hash ^= codeUnit;
@@ -363,6 +466,7 @@ class NotificationService {
       }
     }
     _usedCommunityNotificationIds.add(candidate);
+    _communityNotificationIdByDoc[docId] = candidate;
     return candidate;
   }
 
@@ -382,6 +486,15 @@ class NotificationService {
       return;
     }
 
+    if (_isCommunityNotificationPayload(response.payload)) {
+      try {
+        _navigatorKey?.currentState?.pushNamed('/community');
+      } catch (e) {
+        debugPrint('Failed to navigate from community notification tap: $e');
+      }
+      return;
+    }
+
     // Navigate to tank management screen when notification is tapped
     try {
       _navigatorKey?.currentState?.pushNamed('/tank-management');
@@ -389,6 +502,16 @@ class NotificationService {
       // Navigation failed - log but don't crash the app
       debugPrint('Failed to navigate from notification tap: $e');
     }
+  }
+
+  bool _isCommunityNotificationPayload(String? payload) {
+    if (payload == null || payload.isEmpty) return false;
+    return payload == 'community_post' || payload.startsWith('community_post::');
+  }
+
+  @visibleForTesting
+  bool isCommunityNotificationPayloadForTesting(String? payload) {
+    return _isCommunityNotificationPayload(payload);
   }
 
   /// Request notification permissions (especially important for iOS)

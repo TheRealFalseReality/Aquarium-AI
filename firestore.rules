@@ -28,16 +28,20 @@ service cloud.firestore {
             request.resource.data.createdAt is timestamp &&
             exists(/databases/$(database)/documents/posts/$(request.resource.data.postId)) &&
             get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.userId == uid &&
+            get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.title == request.resource.data.postTitle &&
             get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.type == request.resource.data.postType &&
             request.resource.data.interactionType in ['like', 'bookmark', 'comment'] &&
             (
               (request.resource.data.interactionType == 'like' &&
+                request.resource.data.previewText == get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.title &&
                 exists(/databases/$(database)/documents/posts/$(request.resource.data.postId)/likes/$(request.auth.uid))) ||
               (request.resource.data.interactionType == 'bookmark' &&
+                request.resource.data.previewText == get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.title &&
                 exists(/databases/$(database)/documents/users/$(request.auth.uid)/bookmarks/$(request.resource.data.postId))) ||
               (request.resource.data.interactionType == 'comment' &&
                 request.resource.data.commentId is string &&
                 exists(/databases/$(database)/documents/posts/$(request.resource.data.postId)/comments/$(request.resource.data.commentId)) &&
+                request.resource.data.previewText == get(/databases/$(database)/documents/posts/$(request.resource.data.postId)/comments/$(request.resource.data.commentId)).data.body &&
                 get(/databases/$(database)/documents/posts/$(request.resource.data.postId)/comments/$(request.resource.data.commentId)).data.userId == request.auth.uid)
             );
       }

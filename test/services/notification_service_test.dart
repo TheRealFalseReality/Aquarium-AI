@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fish_ai/models/tank_notification.dart';
@@ -297,5 +298,133 @@ void main() {
       });
     });
 
+    group('community interaction listener behavior', () {
+      Map<String, dynamic> _baseData({
+        required String interactionType,
+        String actorDisplayName = 'Alex',
+        String previewText = 'Preview text',
+        String postTitle = 'My Post Title',
+      }) {
+        return {
+          'interactionType': interactionType,
+          'actorDisplayName': actorDisplayName,
+          'previewText': previewText,
+          'postTitle': postTitle,
+          'postId': 'post-1',
+          'createdAt': Timestamp.fromMillisecondsSinceEpoch(1730000000000),
+        };
+      }
+
+      test('ignores initial snapshot and marks listener as initialized', () async {
+        final service = NotificationService();
+        final shown = await service.processCommunitySnapshotChangesForTesting([
+          (id: 'doc-1', type: 'added', data: _baseData(interactionType: 'like')),
+        ]);
+
+        expect(shown, equals(0));
+        expect(service.hasLoadedInitialCommunitySnapshotForTesting, isTrue);
+      });
+
+      test('processes only added changes after initial snapshot', () async {
+        final service = NotificationService();
+        final shownPreviews = <CommunityNotificationPreview>[];
+        service.setCommunityNotificationPresenterOverrideForTesting((preview) async {
+          shownPreviews.add(preview);
+        });
+
+        await service.processCommunitySnapshotChangesForTesting([]);
+        final shown = await service.processCommunitySnapshotChangesForTesting([
+          (id: 'doc-mod', type: 'modified', data: _baseData(interactionType: 'like')),
+          (id: 'doc-del', type: 'removed', data: _baseData(interactionType: 'bookmark')),
+          (id: 'doc-add', type: 'added', data: _baseData(interactionType: 'comment')),
+        ]);
+
+        expect(shown, equals(1));
+        expect(shownPreviews.length, equals(1));
+        expect(shownPreviews.single.title, contains('Alex'));
+        expect(shownPreviews.single.title, isNotEmpty);
+        service.clearCommunityNotificationPresenterOverrideForTesting();
+      });
+
+      test('builds titles and body for like, bookmark, comment, and unknown actor', () async {
+        final service = NotificationService();
+
+        final like = await service.buildCommunityNotificationPreviewForTesting(
+          docId: 'doc-like',
+          data: _baseData(interactionType: 'like'),
+        );
+        final bookmark = await service.buildCommunityNotificationPreviewForTesting(
+          docId: 'doc-bookmark',
+          data: _baseData(interactionType: 'bookmark'),
+        );
+        final comment = await service.buildCommunityNotificationPreviewForTesting(
+          docId: 'doc-comment',
+          data: _baseData(interactionType: 'comment', previewText: 'Nice tank!'),
+        );
+        final unknownActor = await service.buildCommunityNotificationPreviewForTesting(
+          docId: 'doc-unknown',
+          data: _baseData(
+            interactionType: 'mystery',
+            actorDisplayName: '',
+            previewText: '',
+            postTitle: 'Fallback Post',
+          ),
+        );
+
+        expect(like, isNotNull);
+        expect(bookmark, isNotNull);
+        expect(comment, isNotNull);
+        expect(unknownActor, isNotNull);
+        expect(like!.title, contains('Alex'));
+        expect(bookmark!.title, contains('Alex'));
+        expect(comment!.title, contains('Alex'));
+        expect(like.title, isNot(equals(bookmark.title)));
+        expect(bookmark.title, isNot(equals(comment.title)));
+        expect(comment.body, equals('Nice tank!'));
+        expect(unknownActor!.title, isNot(contains('Alex')));
+        expect(unknownActor.title, isNot(contains('{actorName}')));
+        expect(unknownActor.body, equals('Fallback Post'));
+      });
+
+      test('notification id is non-zero and stable for same doc/timestamp', () async {
+        final service = NotificationService();
+        final data = _baseData(interactionType: 'like');
+        final first = await service.buildCommunityNotificationPreviewForTesting(
+          docId: 'stable-doc',
+          data: data,
+        );
+
+        await service.processCommunitySnapshotChangesForTesting([]);
+        await service.processCommunitySnapshotChangesForTesting([
+          (id: 'other-doc', type: 'added', data: _baseData(interactionType: 'comment')),
+        ]);
+
+        final second = await service.buildCommunityNotificationPreviewForTesting(
+          docId: 'stable-doc',
+          data: data,
+        );
+
+        expect(first, isNotNull);
+        expect(second, isNotNull);
+        expect(first!.id, isNot(equals(0)));
+        expect(first.id, equals(second!.id));
+      });
+
+      test('community payload detection supports post-specific payloads', () {
+        final service = NotificationService();
+        expect(
+          service.isCommunityNotificationPayloadForTesting('community_post::post-123'),
+          isTrue,
+        );
+        expect(
+          service.isCommunityNotificationPayloadForTesting('community_post'),
+          isTrue,
+        );
+        expect(
+          service.isCommunityNotificationPayloadForTesting('tank-123::notif-456'),
+          isFalse,
+        );
+      });
+    });
   });
 }
