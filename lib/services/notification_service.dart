@@ -103,6 +103,8 @@ class NotificationService {
       'Community interactions';
   static const String _communityInteractionChannelDescription =
       'Notifications when other users interact with your posts';
+  static const String _communityPostPayload = 'community_post';
+  static const String _communityPostPayloadPrefix = 'community_post::';
   static const String actionDone = 'done_action';
   static const String actionSnoozeDay = 'snooze_day_action';
   static const String actionSnoozeWeek = 'snooze_week_action';
@@ -401,8 +403,8 @@ class NotificationService {
     );
     final postId = (data['postId'] as String?)?.trim();
     final payload = (postId != null && postId.isNotEmpty)
-        ? 'community_post::$postId'
-        : 'community_post';
+        ? '$_communityPostPayloadPrefix$postId'
+        : _communityPostPayload;
 
     return CommunityNotificationPreview(
       id: notificationId,
@@ -513,14 +515,15 @@ class NotificationService {
 
   bool _isCommunityNotificationPayload(String? payload) {
     if (payload == null || payload.isEmpty) return false;
-    return payload == 'community_post' || payload.startsWith('community_post::');
+    return payload == _communityPostPayload ||
+        payload.startsWith(_communityPostPayloadPrefix);
   }
 
   String? _extractCommunityPostId(String? payload) {
-    if (payload == null || !payload.startsWith('community_post::')) {
+    if (payload == null || !payload.startsWith(_communityPostPayloadPrefix)) {
       return null;
     }
-    final postId = payload.substring('community_post::'.length).trim();
+    final postId = payload.substring(_communityPostPayloadPrefix.length).trim();
     return postId.isEmpty ? null : postId;
   }
 
