@@ -597,10 +597,11 @@ class BackupRestoreUtils {
     }
   }
 
-  /// Backs up all aquarium data to Firebase Firestore (Founder Aquarist only).
+  /// Backs up all aquarium data to Firebase Firestore.
   ///
-  /// If the user is not a Founder, shows the purchase dialog. If the user is
-  /// not signed in, shows an informational dialog.
+  /// On web, this is available to all signed-in users. On other platforms,
+  /// Founder Aquarist status is required. If the user is not signed in, shows
+  /// an informational dialog.
   static Future<void> exportDataOnline(
     BuildContext context,
     WidgetRef ref, {
@@ -608,9 +609,9 @@ class BackupRestoreUtils {
   }) async {
     final l10n = AppLocalizations.of(context)!;
 
-    // Founder gate
+    // Founder gate (non-web platforms only)
     final isFounder = ref.read(isFounderProvider);
-    if (!isFounder) {
+    if (!kIsWeb && !isFounder) {
       showRemoveAdsDialog(context);
       return;
     }
@@ -747,10 +748,11 @@ class BackupRestoreUtils {
     }
   }
 
-  /// Restores all aquarium data from Firebase Firestore (Founder Aquarist only).
+  /// Restores all aquarium data from Firebase Firestore.
   ///
-  /// If the user is not a Founder, shows the purchase dialog. If the user is
-  /// not signed in, shows an informational dialog.
+  /// On web, this is available to all signed-in users. On other platforms,
+  /// Founder Aquarist status is required. If the user is not signed in, shows
+  /// an informational dialog.
   static Future<void> importDataOnline(
     BuildContext context,
     WidgetRef ref, {
@@ -758,9 +760,9 @@ class BackupRestoreUtils {
   }) async {
     final l10n = AppLocalizations.of(context)!;
 
-    // Founder gate
+    // Founder gate (non-web platforms only)
     final isFounder = ref.read(isFounderProvider);
-    if (!isFounder) {
+    if (!kIsWeb && !isFounder) {
       showRemoveAdsDialog(context);
       return;
     }

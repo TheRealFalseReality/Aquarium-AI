@@ -118,9 +118,9 @@ Utilisez **Paramètres → Sauvegarde / Restauration** pour exporter et importer
 
 Enregistrez un fichier de sauvegarde JSON complet sur votre appareil et restaurez-le sur n'importe quel appareil.
 
-#### Sauvegarde et restauration en ligne *(Aquariophile Fondateur)*
+#### Sauvegarde et restauration en ligne *(Aquariophile Fondateur sur mobile/desktop ; tous les utilisateurs sur le web)*
 
-Sauvegardez vos données en toute sécurité dans le cloud, liées à votre compte. Nécessite une connexion et le statut **Aquariophile Fondateur**. Restaurez depuis le cloud à tout moment — idéal pour changer d'appareil sans gérer de fichiers.
+Sauvegardez vos données en toute sécurité dans le cloud, liées à votre compte. Nécessite une connexion. Sur mobile/desktop, cela demande le statut **Aquariophile Fondateur** ; sur le web, c'est disponible pour tous les utilisateurs connectés. Restaurez depuis le cloud à tout moment — idéal pour changer d'appareil sans gérer de fichiers.
 
 ---
 
@@ -417,7 +417,7 @@ alertes locales de type push quand quelqu'un **aime**, **enregistre** ou
 | **Modèles recommandés** | Section de conseils dépliable listant les noms de modèles recommandés pour Gemini, Groq et OpenAI |
 | **Limite d'historique de chat** | Nombre de messages précédents envoyés avec chaque requête |
 | **Affichage du bac** | Afficher/masquer photos, métriques, habitants, notes, etc. |
-| **Sauvegarde / Restauration** | Exporter et importer toutes les données du bac ; les Aquariophiles Fondateurs peuvent également sauvegarder dans le cloud |
+| **Sauvegarde / Restauration** | Exporter et importer toutes les données du bac ; la sauvegarde/restauration cloud est réservée aux Aquariophiles Fondateurs sur mobile/desktop et ouverte à tous les utilisateurs connectés sur le web |
 | **Sauvegarde automatique dans le cloud** | Uploader automatiquement une sauvegarde dans le cloud selon un calendrier (Aquariophiles Fondateurs uniquement — voir ci-dessous) |
 | **Notifications** | Planifier des rappels pour les changements d'eau, l'alimentation, etc. |
 

@@ -105,9 +105,9 @@ Use **Settings → Backup / Restore** to export and import all tank data.
 
 Save a full JSON backup file to your device and restore from it on any device.
 
-#### Cloud Backup & Restore *(Founder Aquarist)*
+#### Cloud Backup & Restore *(Founder Aquarist on mobile/desktop; all users on web)*
 
-Save your data securely to the cloud, linked to your account. Requires sign-in and **Founder Aquarist** status. Restore from the cloud at any time — ideal for switching devices without managing files.
+Save your data securely to the cloud, linked to your account. Requires sign-in. On mobile/desktop this requires **Founder Aquarist** status; on web it is available to all signed-in users. Restore from the cloud at any time — ideal for switching devices without managing files.
 
 ---
 
@@ -413,7 +413,7 @@ When notifications are enabled on your device, Aquarium AI sends local push-styl
 | **Recommended Models** | Expandable tips section listing recommended model names for Gemini, Groq, and OpenAI |
 | **Chat History Limit** | Number of previous messages sent with each request |
 | **Tank Display** | Hide/show photos, metrics, inhabitants, notes, etc. |
-| **Backup / Restore** | Export and import all tank data; Founder Aquarists can also back up to the cloud |
+| **Backup / Restore** | Export and import all tank data; cloud backup/restore is for Founder Aquarists on mobile/desktop and all signed-in users on web |
 | **Auto Cloud Backup** | Automatically upload a cloud backup on a schedule (Founder Aquarists only — see below) |
 | **Notifications** | Schedule reminders for water changes, feeding, etc. |
 
