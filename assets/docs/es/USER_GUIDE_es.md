@@ -116,9 +116,9 @@ Usa **Configuración → Copia de seguridad / Restauración** para exportar e im
 
 Guarda un archivo de copia de seguridad JSON completo en tu dispositivo y restáuralo en cualquier dispositivo.
 
-#### Copia de seguridad y restauración en la nube *(Acuarista Fundador)*
+#### Copia de seguridad y restauración en la nube *(Acuarista Fundador en móvil/escritorio; todos los usuarios en web)*
 
-Guarda tus datos de forma segura en la nube, vinculados a tu cuenta. Requiere inicio de sesión y estado de **Acuarista Fundador**. Restaura desde la nube en cualquier momento — ideal para cambiar de dispositivo sin gestionar archivos.
+Guarda tus datos de forma segura en la nube, vinculados a tu cuenta. Requiere inicio de sesión. En móvil/escritorio requiere estado de **Acuarista Fundador**; en web está disponible para todos los usuarios con sesión iniciada. Restaura desde la nube en cualquier momento — ideal para cambiar de dispositivo sin gestionar archivos.
 
 ---
 
@@ -408,7 +408,7 @@ publicaciones de la comunidad.
 | **Modelos recomendados** | Sección de consejos desplegable con nombres de modelos recomendados para Gemini, Groq y OpenAI |
 | **Límite de historial de chat** | Número de mensajes anteriores enviados con cada solicitud |
 | **Visualización del acuario** | Mostrar/ocultar fotos, métricas, habitantes, notas, etc. |
-| **Copia de seguridad / Restauración** | Exportar e importar todos los datos del acuario; los Acuaristas Fundadores también pueden hacer copias de seguridad en la nube |
+| **Copia de seguridad / Restauración** | Exportar e importar todos los datos del acuario; la copia/restauración en la nube es para Acuaristas Fundadores en móvil/escritorio y para todos los usuarios con sesión iniciada en web |
 | **Copia de seguridad automática en la nube** | Subir automáticamente una copia de seguridad en la nube según un horario (solo Acuaristas Fundadores — ver abajo) |
 | **Notificaciones** | Programar recordatorios para cambios de agua, alimentación, etc. |
 

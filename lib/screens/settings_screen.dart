@@ -3944,10 +3944,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       },
                     ),
                     const Divider(height: 16),
-                    // Cloud Backup (Founder only)
+                    // Cloud Backup (Founder only on non-web platforms)
                     Builder(
                       builder: (context) {
                         final isFounder = ref.watch(isFounderProvider);
+                        final hasCloudBackupRestoreAccess = kIsWeb || isFounder;
                         return ListTile(
                           leading: Container(
                             width: 40,
@@ -3959,7 +3960,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                             child: Icon(
                               Icons.cloud_upload,
-                              color: isFounder
+                              color: hasCloudBackupRestoreAccess
                                   ? Colors.purple
                                   : Theme.of(
                                       context,
@@ -3968,7 +3969,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           title: Text(l10n.backupDataOnline),
                           subtitle: Text(l10n.backupDataOnlineDesc),
-                          trailing: isFounder
+                          trailing: hasCloudBackupRestoreAccess
                               ? const Icon(Icons.arrow_forward_ios, size: 16)
                               : Tooltip(
                                   message: l10n.founderRequiredTooltip,
@@ -3987,10 +3988,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       },
                     ),
                     const Divider(height: 16),
-                    // Cloud Restore (Founder only)
+                    // Cloud Restore (Founder only on non-web platforms)
                     Builder(
                       builder: (context) {
                         final isFounder = ref.watch(isFounderProvider);
+                        final hasCloudBackupRestoreAccess = kIsWeb || isFounder;
                         return ListTile(
                           leading: Container(
                             width: 40,
@@ -4002,7 +4004,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                             child: Icon(
                               Icons.cloud_download,
-                              color: isFounder
+                              color: hasCloudBackupRestoreAccess
                                   ? Colors.deepPurple
                                   : Theme.of(
                                       context,
@@ -4011,7 +4013,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           title: Text(l10n.restoreDataOnline),
                           subtitle: Text(l10n.restoreDataOnlineDesc),
-                          trailing: isFounder
+                          trailing: hasCloudBackupRestoreAccess
                               ? const Icon(Icons.arrow_forward_ios, size: 16)
                               : Tooltip(
                                   message: l10n.founderRequiredTooltip,

@@ -117,9 +117,9 @@ Verwenden Sie **Einstellungen → Sicherung / Wiederherstellung**, um alle Tank-
 
 Speichern Sie eine vollständige JSON-Sicherungsdatei auf Ihrem Gerät und stellen Sie sie auf einem beliebigen Gerät wieder her.
 
-#### Cloud-Sicherung & Wiederherstellung *(Gründer-Aquarianer)*
+#### Cloud-Sicherung & Wiederherstellung *(Gründer-Aquarianer auf Mobil/Desktop; alle Nutzer im Web)*
 
-Speichern Sie Ihre Daten sicher in der Cloud, verknüpft mit Ihrem Konto. Erfordert Anmeldung und **Gründer-Aquarianer**-Status. Jederzeit aus der Cloud wiederherstellen — ideal beim Gerätewechsel ohne Dateiverwaltung.
+Speichern Sie Ihre Daten sicher in der Cloud, verknüpft mit Ihrem Konto. Erfordert eine Anmeldung. Auf Mobil/Desktop ist dafür der **Gründer-Aquarianer**-Status erforderlich; im Web steht es allen angemeldeten Nutzern zur Verfügung. Jederzeit aus der Cloud wiederherstellen — ideal beim Gerätewechsel ohne Dateiverwaltung.
 
 ---
 
@@ -411,7 +411,7 @@ Push-ähnliche Hinweise, wenn jemand Ihren Community-Beitrag **liked**,
 | **Empfohlene Modelle** | Aufklappbarer Tipp-Bereich mit empfohlenen Modellnamen für Gemini, Groq und OpenAI |
 | **Chat-Verlaufslimit** | Anzahl der vorherigen Nachrichten, die mit jeder Anfrage gesendet werden |
 | **Tank-Anzeige** | Fotos, Metriken, Bewohner, Notizen usw. ein-/ausblenden |
-| **Sicherung / Wiederherstellung** | Alle Tank-Daten exportieren und importieren; Gründer-Aquarianer können auch in der Cloud sichern |
+| **Sicherung / Wiederherstellung** | Alle Tank-Daten exportieren und importieren; Cloud-Sicherung/-Wiederherstellung ist auf Mobil/Desktop für Gründer-Aquarianer und im Web für alle angemeldeten Nutzer verfügbar |
 | **Automatisches Cloud-Backup** | Automatisch nach einem Zeitplan ein Cloud-Backup hochladen (nur Gründer-Aquarianer – siehe unten) |
 | **Benachrichtigungen** | Erinnerungen für Wasserwechsel, Fütterung usw. planen |
 
