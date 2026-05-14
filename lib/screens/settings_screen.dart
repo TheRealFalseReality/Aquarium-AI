@@ -3948,7 +3948,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Builder(
                       builder: (context) {
                         final isFounder = ref.watch(isFounderProvider);
-                        final hasCloudBackupAccess = kIsWeb || isFounder;
+                        final hasCloudBackupRestoreAccess = kIsWeb || isFounder;
                         return ListTile(
                           leading: Container(
                             width: 40,
@@ -3960,7 +3960,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                             child: Icon(
                               Icons.cloud_upload,
-                              color: hasCloudBackupAccess
+                              color: hasCloudBackupRestoreAccess
                                   ? Colors.purple
                                   : Theme.of(
                                       context,
@@ -3969,7 +3969,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           title: Text(l10n.backupDataOnline),
                           subtitle: Text(l10n.backupDataOnlineDesc),
-                          trailing: hasCloudBackupAccess
+                          trailing: hasCloudBackupRestoreAccess
                               ? const Icon(Icons.arrow_forward_ios, size: 16)
                               : Tooltip(
                                   message: l10n.founderRequiredTooltip,
@@ -3992,7 +3992,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Builder(
                       builder: (context) {
                         final isFounder = ref.watch(isFounderProvider);
-                        final hasCloudBackupAccess = kIsWeb || isFounder;
+                        final hasCloudBackupRestoreAccess = kIsWeb || isFounder;
                         return ListTile(
                           leading: Container(
                             width: 40,
@@ -4004,7 +4004,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                             child: Icon(
                               Icons.cloud_download,
-                              color: hasCloudBackupAccess
+                              color: hasCloudBackupRestoreAccess
                                   ? Colors.deepPurple
                                   : Theme.of(
                                       context,
@@ -4013,7 +4013,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           title: Text(l10n.restoreDataOnline),
                           subtitle: Text(l10n.restoreDataOnlineDesc),
-                          trailing: hasCloudBackupAccess
+                          trailing: hasCloudBackupRestoreAccess
                               ? const Icon(Icons.arrow_forward_ios, size: 16)
                               : Tooltip(
                                   message: l10n.founderRequiredTooltip,
