@@ -32,7 +32,7 @@ dependencies:
   firebase_remote_config: ^6.4.0
   firebase_auth: ^6.4.0
   cloud_firestore: ^6.3.0
-  firebase_storage: ^13.3.0
+  firebase_storage: ^13.4.1
   google_sign_in: ^6.2.1
   flutter_facebook_auth: ^7.1.6
   dart_openai: ^6.1.0
