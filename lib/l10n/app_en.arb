@@ -1361,6 +1361,10 @@
   "@activityLogged": {
     "description": "Message shown when activity is logged"
   },
+  "activityLoggedWithRescheduleWarning": "Activity logged, but one or more reminders could not be rescheduled. Please review notification times.",
+  "@activityLoggedWithRescheduleWarning": {
+    "description": "Message shown when quick log succeeds but reminder rescheduling fails"
+  },
   "backupDialogTitle": "Backup Data",
   "@backupDialogTitle": {
     "description": "Backup dialog title"

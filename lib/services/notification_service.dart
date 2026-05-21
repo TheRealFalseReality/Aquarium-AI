@@ -108,6 +108,8 @@ class NotificationService {
   static const String actionDone = 'done_action';
   static const String actionSnoozeDay = 'snooze_day_action';
   static const String actionSnoozeWeek = 'snooze_week_action';
+  // Guard to prevent infinite loops if legacy/corrupt data cannot move forward.
+  static const int _maxFutureCoercionIterations = 500;
 
   factory NotificationService() => _instance;
 
@@ -730,7 +732,10 @@ class NotificationService {
     var adjusted = candidate;
     var guard = 0;
 
-    while (!adjusted.isAfter(now) && guard < 500) {
+    while (
+      !adjusted.isAfter(now) &&
+      guard < _maxFutureCoercionIterations
+    ) {
       adjusted = _addRepeatInterval(
         base: adjusted,
         frequency: notification.repeatFrequency,

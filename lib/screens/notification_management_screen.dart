@@ -594,7 +594,7 @@ class _NotificationManagementScreenState
       final l10n = AppLocalizations.of(context)!;
       context.showAccessibleMessage(
         hadRescheduleIssue
-            ? '${l10n.activityLogged}. ${l10n.dateTimeInPast}'
+            ? l10n.activityLoggedWithRescheduleWarning
             : l10n.activityLogged,
       );
     }

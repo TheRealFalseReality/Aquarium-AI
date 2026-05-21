@@ -273,6 +273,7 @@
   "saveLogEntry": "Eintrag Speichern",
   "quickLog": "Schnellprotokoll",
   "activityLogged": "Aktivität erfolgreich protokolliert",
+  "activityLoggedWithRescheduleWarning": "Aktivität protokolliert, aber eine oder mehrere Erinnerungen konnten nicht neu geplant werden. Bitte überprüfen Sie die Benachrichtigungszeiten.",
   "backupDialogTitle": "Daten Sichern",
   "backupDialogContent": "Dies erstellt eine Sicherungsdatei mit:",
   "tanksCount": "{count} Aquarium(en)",
