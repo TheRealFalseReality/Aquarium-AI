@@ -108,8 +108,8 @@ class NotificationService {
   static const String actionDone = 'done_action';
   static const String actionSnoozeDay = 'snooze_day_action';
   static const String actionSnoozeWeek = 'snooze_week_action';
-  // Guard to limit iterations if legacy/corrupt data requires excessive
-  // advancement to reach a future date.
+  // Guard to keep corrupt schedules from spending unbounded time advancing
+  // interval-by-interval before falling back to a known-future timestamp.
   static const int _maxFutureCoercionIterations = 500;
   // Extra buffer to keep the fallback schedule safely in the future even if
   // there is minor delay before the platform notification is queued.
@@ -731,7 +731,7 @@ class NotificationService {
 
     if (notification.repeatFrequency == RepeatFrequency.none) {
       debugPrint(
-        'Skipping non-repeating notification ${notification.id}: date is in the past or present ($candidate).',
+        'Skipping non-repeating notification ${notification.id}: date is not strictly after now ($candidate).',
       );
       return null;
     }
@@ -752,7 +752,7 @@ class NotificationService {
     }
 
     if (!adjusted.isAfter(now)) {
-      final fallbackDate = DateTime.now().add(_futureCoercionFallbackDelay);
+      final fallbackDate = now.add(_futureCoercionFallbackDelay);
       debugPrint(
         'Failed to coerce future schedule for notification ${notification.id}; using +5 second fallback.',
       );
