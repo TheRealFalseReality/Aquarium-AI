@@ -3457,7 +3457,71 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                           ),
                         ),
                       )
-                    : Image.file(File(imageUrl), fit: BoxFit.contain),
+                    : Builder(
+                        builder: (context) {
+                          final file = File(imageUrl);
+                          if (!file.existsSync()) {
+                            final missingFileError = FileSystemException(
+                              '',
+                              imageUrl,
+                            );
+                            return Container(
+                              color: Colors.black,
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline,
+                                      color: Colors.white,
+                                      size: 48,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      l10n.failedToLoadImage(
+                                        missingFileError.toString(),
+                                      ),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Image.file(
+                            file,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  color: Colors.black,
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.error_outline,
+                                          color: Colors.white,
+                                          size: 48,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          l10n.failedToLoadImage(
+                                            error.toString(),
+                                          ),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                          );
+                        },
+                      ),
               ),
             ),
             Positioned(
@@ -3511,8 +3575,24 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       } else {
                         // Read local file
                         final file = File(imageUrl);
+                        if (!await file.exists()) {
+                          throw FileSystemException('', imageUrl);
+                        }
                         imageBytes = await file.readAsBytes();
+                        if (imageBytes.isEmpty) {
+                          throw FileSystemException('', imageUrl);
+                        }
                       }
+                    } on FileSystemException catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.failedToLoadImage(e.toString())),
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                      return;
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
