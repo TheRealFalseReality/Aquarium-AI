@@ -111,6 +111,9 @@ class NotificationService {
   // Guard to limit iterations if legacy/corrupt data requires excessive
   // advancement to reach a future date.
   static const int _maxFutureCoercionIterations = 500;
+  // Extra buffer to keep the fallback schedule safely in the future even if
+  // there is minor delay before the platform notification is queued.
+  static const Duration _futureCoercionFallbackDelay = Duration(seconds: 5);
 
   factory NotificationService() => _instance;
 
@@ -749,7 +752,7 @@ class NotificationService {
     }
 
     if (!adjusted.isAfter(now)) {
-      final fallbackDate = DateTime.now().add(const Duration(seconds: 5));
+      final fallbackDate = DateTime.now().add(_futureCoercionFallbackDelay);
       debugPrint(
         'Failed to coerce future schedule for notification ${notification.id}; using +5 second fallback.',
       );
