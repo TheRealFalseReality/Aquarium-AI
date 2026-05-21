@@ -3420,6 +3420,35 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final l10n = AppLocalizations.of(context)!;
     final imageUrl = photo.imageUrl ?? photo.imagePath;
     if (imageUrl == null) return;
+    Widget buildImageErrorWidget(String errorMessage) {
+      return Container(
+        color: Colors.black,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 320),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.white,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.failedToLoadImage(errorMessage),
+                    style: const TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     showDialog(
       context: context,
@@ -3436,28 +3465,15 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ? CachedNetworkImage(
                         imageUrl: imageUrl,
                         fit: BoxFit.contain,
-                        errorWidget: (context, url, error) => Container(
-                          color: Colors.black,
-                          child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: Colors.white,
-                                  size: 48,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  l10n.failedToLoadImage(error.toString()),
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        errorWidget: (context, url, error) =>
+                            buildImageErrorWidget(error.toString()),
                       )
-                    : Image.file(File(imageUrl), fit: BoxFit.contain),
+                    : Image.file(
+                        File(imageUrl),
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            buildImageErrorWidget(error.toString()),
+                      ),
               ),
             ),
             Positioned(
@@ -3511,8 +3527,30 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                       } else {
                         // Read local file
                         final file = File(imageUrl);
+                        if (!await file.exists()) {
+                          throw FileSystemException(
+                            'Image file not found',
+                            imageUrl,
+                          );
+                        }
                         imageBytes = await file.readAsBytes();
+                        if (imageBytes.isEmpty) {
+                          throw FileSystemException(
+                            'Image file is empty',
+                            imageUrl,
+                          );
+                        }
                       }
+                    } on FileSystemException catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.failedToLoadImage(e.toString())),
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                      return;
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
