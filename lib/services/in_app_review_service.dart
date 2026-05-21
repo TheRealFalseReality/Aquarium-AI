@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,6 +20,12 @@ class InAppReviewService {
   static const int _minDaysSinceFirstLaunch = 3;
   static const int _minDaysSinceReviewBanner = 7;
   static const int _msPerDay = 86400000; // 1000 * 60 * 60 * 24
+
+  /// The Play Core in-app review flow requires a resumed foreground activity.
+  static bool _canSafelyRequestInAppReview() {
+    if (kIsWeb || !Platform.isAndroid) return false;
+    return WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+  }
 
   /// Records the first launch timestamp the very first time it is called.
   /// Subsequent calls are no-ops.
@@ -43,6 +50,13 @@ class InAppReviewService {
   /// - The review has not been requested before.
   static Future<void> maybeRequestReview() async {
     try {
+      if (!_canSafelyRequestInAppReview()) {
+        debugPrint(
+          'InAppReviewService: app not in resumed Android foreground, skipping',
+        );
+        return;
+      }
+
       final prefs = await SharedPreferences.getInstance();
 
       // Only request once per install
@@ -153,6 +167,15 @@ class InAppReviewService {
   /// activity), falls back to [openStoreListing].
   static Future<void> forceRequestReview() async {
     try {
+      if (!_canSafelyRequestInAppReview()) {
+        debugPrint(
+          'InAppReviewService: app not in resumed Android foreground, '
+          'opening store listing',
+        );
+        await openStoreListing();
+        return;
+      }
+
       final inAppReview = InAppReview.instance;
       if (await inAppReview.isAvailable()) {
         try {

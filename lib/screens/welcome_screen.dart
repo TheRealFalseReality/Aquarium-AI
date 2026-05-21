@@ -214,7 +214,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     // Record the first launch timestamp (no-op after the very first call)
     InAppReviewService.recordFirstLaunch();
     // Request an in-app review if conditions are met (≥3 days since first launch)
-    InAppReviewService.maybeRequestReview();
+    // after the first frame so Android activity/lifecycle is fully ready.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(InAppReviewService.maybeRequestReview());
+    });
     // Check and run automatic cloud backup if due (non-blocking, Founder only).
     unawaited(AutoBackupService.checkAndRun(ref));
     // Show onboarding on first launch (before any dialogs); only run the
