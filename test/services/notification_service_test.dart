@@ -178,7 +178,8 @@ void main() {
       'coerceStrictlyFutureDateForTesting advances repeating notifications to strict future',
       () {
         final service = NotificationService();
-        final pastDate = DateTime.now().subtract(const Duration(minutes: 1));
+        final baselineNow = DateTime.now();
+        final pastDate = baselineNow.subtract(const Duration(minutes: 1));
         final notification = TankNotification.create(
           type: NotificationType.feeding,
           notificationDateTime: pastDate,
@@ -193,7 +194,7 @@ void main() {
         );
 
         expect(coerced, isNotNull);
-        expect(coerced!.isAfter(DateTime.now()), isTrue);
+        expect(coerced!.isAfter(baselineNow), isTrue);
       },
     );
 

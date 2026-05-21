@@ -733,7 +733,7 @@ class NotificationService {
     var guard = 0;
 
     while (
-      !adjusted.isAfter(now) &&
+      (adjusted.isBefore(now) || adjusted.isAtSameMomentAs(now)) &&
       guard < _maxFutureCoercionIterations
     ) {
       adjusted = _addRepeatInterval(
@@ -780,7 +780,9 @@ class NotificationService {
       case RepeatFrequency.yearly:
         return _addYearsSafely(base: base, years: interval);
       case RepeatFrequency.none:
-        return base.add(const Duration(seconds: 1));
+        throw StateError(
+          'RepeatFrequency.none is unsupported for repeat interval advancement.',
+        );
     }
   }
 
