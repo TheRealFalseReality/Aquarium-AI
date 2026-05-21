@@ -153,6 +153,50 @@ void main() {
       expect(nextDate, equals(futureDate));
     });
 
+    test(
+      'coerceStrictlyFutureDateForTesting returns null for past non-repeating enabled notifications',
+      () {
+        final service = NotificationService();
+        final pastDate = DateTime.now().subtract(const Duration(minutes: 1));
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: pastDate,
+          repeatFrequency: RepeatFrequency.none,
+          enabled: true,
+        );
+
+        final coerced = service.coerceStrictlyFutureDateForTesting(
+          candidate: pastDate,
+          notification: notification,
+        );
+
+        expect(coerced, isNull);
+      },
+    );
+
+    test(
+      'coerceStrictlyFutureDateForTesting advances repeating notifications to strict future',
+      () {
+        final service = NotificationService();
+        final pastDate = DateTime.now().subtract(const Duration(minutes: 1));
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: pastDate,
+          repeatFrequency: RepeatFrequency.daily,
+          repeatInterval: 0,
+          enabled: true,
+        );
+
+        final coerced = service.coerceStrictlyFutureDateForTesting(
+          candidate: pastDate,
+          notification: notification,
+        );
+
+        expect(coerced, isNotNull);
+        expect(coerced!.isAfter(DateTime.now()), isTrue);
+      },
+    );
+
     group('notification action payload handling', () {
       test('parses preferred payload format tankId::notificationId', () {
         final service = NotificationService();

@@ -679,6 +679,13 @@ class NotificationService {
       nextDate = notification.getNextNotificationDate();
     }
 
+    if (nextDate != null) {
+      nextDate = _coerceStrictlyFutureDate(
+        candidate: nextDate,
+        notification: notification,
+      );
+    }
+
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
 
@@ -695,6 +702,99 @@ class NotificationService {
 
     // Return the calculated next date so callers can update the model
     return nextDate;
+  }
+
+  DateTime? _coerceStrictlyFutureDate({
+    required DateTime candidate,
+    required TankNotification notification,
+  }) {
+    final now = DateTime.now();
+    if (candidate.isAfter(now)) {
+      return candidate;
+    }
+
+    if (!notification.enabled) {
+      return candidate;
+    }
+
+    if (notification.repeatFrequency == RepeatFrequency.none) {
+      debugPrint(
+        'Skipping non-repeating notification ${notification.id}: date is not in the future ($candidate).',
+      );
+      return null;
+    }
+
+    final interval = notification.repeatInterval > 0
+        ? notification.repeatInterval
+        : 1;
+    var adjusted = candidate;
+    var guard = 0;
+
+    while (!adjusted.isAfter(now) && guard < 500) {
+      adjusted = _addRepeatInterval(
+        base: adjusted,
+        frequency: notification.repeatFrequency,
+        interval: interval,
+      );
+      guard++;
+    }
+
+    if (!adjusted.isAfter(now)) {
+      debugPrint(
+        'Failed to coerce future schedule for notification ${notification.id}; using +1 second fallback.',
+      );
+      return now.add(const Duration(seconds: 1));
+    }
+
+    return adjusted;
+  }
+
+  @visibleForTesting
+  DateTime? coerceStrictlyFutureDateForTesting({
+    required DateTime candidate,
+    required TankNotification notification,
+  }) {
+    return _coerceStrictlyFutureDate(
+      candidate: candidate,
+      notification: notification,
+    );
+  }
+
+  DateTime _addRepeatInterval({
+    required DateTime base,
+    required RepeatFrequency frequency,
+    required int interval,
+  }) {
+    switch (frequency) {
+      case RepeatFrequency.daily:
+        return base.add(Duration(days: interval));
+      case RepeatFrequency.weekly:
+        return base.add(Duration(days: 7 * interval));
+      case RepeatFrequency.monthly:
+        return DateTime(
+          base.year,
+          base.month + interval,
+          base.day,
+          base.hour,
+          base.minute,
+          base.second,
+          base.millisecond,
+          base.microsecond,
+        );
+      case RepeatFrequency.yearly:
+        return DateTime(
+          base.year + interval,
+          base.month,
+          base.day,
+          base.hour,
+          base.minute,
+          base.second,
+          base.millisecond,
+          base.microsecond,
+        );
+      case RepeatFrequency.none:
+        return base.add(const Duration(seconds: 1));
+    }
   }
 
   /// Cancel a scheduled notification
