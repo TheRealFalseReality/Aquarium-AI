@@ -273,6 +273,7 @@
   "saveLogEntry": "Guardar Entrada",
   "quickLog": "Registro Rápido",
   "activityLogged": "Actividad registrada correctamente",
+  "activityLoggedWithRescheduleWarning": "Actividad registrada, pero no se pudieron reprogramar uno o más recordatorios. Revisa los horarios de notificación.",
   "backupDialogTitle": "Copia de Seguridad",
   "backupDialogContent": "Esto creará un archivo de respaldo que contiene:",
   "tanksCount": "{count} acuario(s)",

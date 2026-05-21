@@ -8,6 +8,7 @@ import '../models/tank.dart';
 import '../models/tank_notification.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/crashlytics_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/notification_schedule_option_dialog.dart';
@@ -535,6 +536,7 @@ class _NotificationManagementScreenState
   /// Quick log an activity based on a notification
   Future<void> _quickLogActivity(TankNotification notification) async {
     final currentTank = _getCurrentTank();
+    var rescheduleIssueOccurred = false;
 
     // Create a new log entry based on the notification type and custom category
     final log = NotificationLog.create(
@@ -548,40 +550,59 @@ class _NotificationManagementScreenState
 
     final updatedLogs = [...currentTank.notificationLogs, log];
 
-    // Reschedule matching notifications based on the new activity
-    final updatedNotifications = await _notificationService
-        .rescheduleMatchingNotifications(
-          tankId: currentTank.id,
-          tankName: currentTank.name,
-          notifications: currentTank.notifications,
-          activityLogs: updatedLogs,
-          activityType: log.type,
-          activityCustomCategory: log.customCategory,
-        );
-
-    // Update the tank with new activity logs and updated notifications
+    // Persist the activity log first so quick-log still succeeds if scheduling fails.
     var updatedTank = currentTank.copyWith(
       notificationLogs: updatedLogs,
       updatedAt: DateTime.now(),
     );
-
-    // Apply the updated notifications with new scheduledNextDate
-    if (updatedNotifications.isNotEmpty) {
-      final notificationsList = updatedTank.notifications.map((n) {
-        final updated = updatedNotifications.firstWhere(
-          (u) => u.id == n.id,
-          orElse: () => n,
-        );
-        return updated;
-      }).toList();
-      updatedTank = updatedTank.copyWith(notifications: notificationsList);
-    }
-
     await ref.read(tankProvider.notifier).updateTank(updatedTank);
+
+    try {
+      // Reschedule matching notifications based on the new activity
+      final updatedNotifications = await _notificationService
+          .rescheduleMatchingNotifications(
+            tankId: currentTank.id,
+            tankName: currentTank.name,
+            notifications: currentTank.notifications,
+            activityLogs: updatedLogs,
+            activityType: log.type,
+            activityCustomCategory: log.customCategory,
+          );
+
+      // Apply the updated notifications with new scheduledNextDate
+      if (updatedNotifications.isNotEmpty) {
+        final notificationsList = updatedTank.notifications.map((n) {
+          final updated = updatedNotifications.firstWhere(
+            (u) => u.id == n.id,
+            orElse: () => n,
+          );
+          return updated;
+        }).toList();
+        updatedTank = updatedTank.copyWith(notifications: notificationsList);
+        await ref.read(tankProvider.notifier).updateTank(updatedTank);
+      }
+    } catch (e, st) {
+      rescheduleIssueOccurred = true;
+      debugPrintStack(label: 'Quick-log reschedule failed: $e', stackTrace: st);
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'quick_log_reschedule_failed',
+      );
+      await AnalyticsService.logError(
+        errorType: 'quick_log_reschedule_failed',
+        errorMessage: e.toString(),
+        screen: 'notification_management_screen',
+      );
+    }
 
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
-      context.showAccessibleMessage(l10n.activityLogged);
+      context.showAccessibleMessage(
+        rescheduleIssueOccurred
+            ? l10n.activityLoggedWithRescheduleWarning
+            : l10n.activityLogged,
+      );
     }
 
     AnalyticsService.logFeatureUsed(

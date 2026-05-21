@@ -128,6 +128,33 @@ void main() {
       expect(nextDate!.isAfter(DateTime.now()), isTrue);
     });
 
+    test(
+      'should sanitize invalid repeat interval values when scheduling repeating notifications',
+      () async {
+        final service = NotificationService();
+        await service.initialize();
+
+        final baselineNow = DateTime.now();
+        final pastDate = baselineNow.subtract(const Duration(days: 1));
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: pastDate,
+          repeatFrequency: RepeatFrequency.daily,
+          repeatInterval: 0,
+          enabled: true,
+        );
+
+        final nextDate = await service.scheduleNotification(
+          tankId: 'test-tank-id',
+          tankName: 'Test Tank',
+          notification: notification,
+        );
+
+        expect(nextDate, isNotNull);
+        expect(nextDate!.isAfter(baselineNow), isTrue);
+      },
+    );
+
     test('should not schedule disabled non-repeating notifications', () async {
       final service = NotificationService();
       await service.initialize();
@@ -152,6 +179,51 @@ void main() {
       // but the actual platform notification won't be scheduled due to the disabled flag
       expect(nextDate, equals(futureDate));
     });
+
+    test(
+      'coerceStrictlyFutureDateForTesting returns null for past non-repeating enabled notifications',
+      () {
+        final service = NotificationService();
+        final pastDate = DateTime.now().subtract(const Duration(minutes: 1));
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: pastDate,
+          repeatFrequency: RepeatFrequency.none,
+          enabled: true,
+        );
+
+        final coerced = service.coerceStrictlyFutureDateForTesting(
+          candidate: pastDate,
+          notification: notification,
+        );
+
+        expect(coerced, isNull);
+      },
+    );
+
+    test(
+      'coerceStrictlyFutureDateForTesting advances repeating notifications to strict future',
+      () {
+        final service = NotificationService();
+        final baselineNow = DateTime.now();
+        final pastDate = baselineNow.subtract(const Duration(minutes: 1));
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: pastDate,
+          repeatFrequency: RepeatFrequency.daily,
+          repeatInterval: 0,
+          enabled: true,
+        );
+
+        final coerced = service.coerceStrictlyFutureDateForTesting(
+          candidate: pastDate,
+          notification: notification,
+        );
+
+        expect(coerced, isNotNull);
+        expect(coerced!.isAfter(baselineNow), isTrue);
+      },
+    );
 
     group('notification action payload handling', () {
       test('parses preferred payload format tankId::notificationId', () {

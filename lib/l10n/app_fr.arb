@@ -273,6 +273,7 @@
   "saveLogEntry": "Enregistrer l'Entrée",
   "quickLog": "Journal Rapide",
   "activityLogged": "Activité enregistrée avec succès",
+  "activityLoggedWithRescheduleWarning": "Activité enregistrée, mais un ou plusieurs rappels n'ont pas pu être reprogrammés. Veuillez vérifier les horaires des notifications.",
   "backupDialogTitle": "Sauvegarder les Données",
   "backupDialogContent": "Cela créera un fichier de sauvegarde contenant:",
   "activityLogs": "Journaux d'Activité",

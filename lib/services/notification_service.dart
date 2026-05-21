@@ -108,6 +108,12 @@ class NotificationService {
   static const String actionDone = 'done_action';
   static const String actionSnoozeDay = 'snooze_day_action';
   static const String actionSnoozeWeek = 'snooze_week_action';
+  // Guard to keep corrupt schedules from spending unbounded time advancing
+  // interval-by-interval before falling back to a known-future timestamp.
+  static const int _maxFutureCoercionIterations = 500;
+  // Extra buffer to keep the fallback schedule safely in the future even if
+  // there is minor delay before the platform notification is queued.
+  static const Duration _futureCoercionFallbackDelay = Duration(seconds: 5);
 
   factory NotificationService() => _instance;
 
@@ -590,8 +596,14 @@ class NotificationService {
   /// will use the time from the activity log instead of the original notification
   /// time. This is used for "Reschedule from Now" to schedule at the current time.
   ///
-  /// Returns the calculated next notification date, or null if the notification
-  /// is disabled. This can be used to update the notification model's scheduledNextDate field.
+  /// Returns the calculated next notification date if one can be determined.
+  ///
+  /// Returns null when no scheduleable future date is available, such as
+  /// when the repeating-date calculation yields no result or when an enabled,
+  /// non-repeating notification resolves to a past/present time after strict
+  /// future-date coercion. Disabled notifications may still return their
+  /// calculated next date so callers can update the model without scheduling a
+  /// platform notification.
   Future<DateTime?> scheduleNotification({
     required String tankId,
     required String tankName,
@@ -679,6 +691,13 @@ class NotificationService {
       nextDate = notification.getNextNotificationDate();
     }
 
+    if (nextDate != null) {
+      nextDate = _coerceStrictlyFutureDate(
+        candidate: nextDate,
+        notification: notification,
+      );
+    }
+
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
 
@@ -695,6 +714,120 @@ class NotificationService {
 
     // Return the calculated next date so callers can update the model
     return nextDate;
+  }
+
+  DateTime? _coerceStrictlyFutureDate({
+    required DateTime candidate,
+    required TankNotification notification,
+  }) {
+    final now = DateTime.now();
+    if (candidate.isAfter(now)) {
+      return candidate;
+    }
+
+    if (!notification.enabled) {
+      return candidate;
+    }
+
+    if (notification.repeatFrequency == RepeatFrequency.none) {
+      debugPrint(
+        'Skipping non-repeating notification ${notification.id}: date is not strictly after now ($candidate).',
+      );
+      return null;
+    }
+
+    final interval = notification.repeatInterval > 0
+        ? notification.repeatInterval
+        : 1;
+    var adjusted = candidate;
+    var guard = 0;
+
+    while (!adjusted.isAfter(now) && guard < _maxFutureCoercionIterations) {
+      adjusted = _addRepeatInterval(
+        base: adjusted,
+        frequency: notification.repeatFrequency,
+        interval: interval,
+      );
+      guard++;
+    }
+
+    if (!adjusted.isAfter(now)) {
+      final fallbackDate = now.add(_futureCoercionFallbackDelay);
+      debugPrint(
+        'Failed to coerce future schedule for notification ${notification.id}; using +5 second fallback.',
+      );
+      return fallbackDate;
+    }
+
+    return adjusted;
+  }
+
+  @visibleForTesting
+  DateTime? coerceStrictlyFutureDateForTesting({
+    required DateTime candidate,
+    required TankNotification notification,
+  }) {
+    return _coerceStrictlyFutureDate(
+      candidate: candidate,
+      notification: notification,
+    );
+  }
+
+  DateTime _addRepeatInterval({
+    required DateTime base,
+    required RepeatFrequency frequency,
+    required int interval,
+  }) {
+    switch (frequency) {
+      case RepeatFrequency.daily:
+        return base.add(Duration(days: interval));
+      case RepeatFrequency.weekly:
+        return base.add(Duration(days: 7 * interval));
+      case RepeatFrequency.monthly:
+        return _addMonthsSafely(base: base, months: interval);
+      case RepeatFrequency.yearly:
+        return _addYearsSafely(base: base, years: interval);
+      case RepeatFrequency.none:
+        throw StateError(
+          'RepeatFrequency.none is unsupported for repeat interval advancement.',
+        );
+    }
+  }
+
+  DateTime _addMonthsSafely({required DateTime base, required int months}) {
+    final normalizedMonth = base.month - 1 + months;
+    final targetYear = base.year + (normalizedMonth ~/ 12);
+    final targetMonth = (normalizedMonth % 12) + 1;
+    final maxDay = DateTime(targetYear, targetMonth + 1, 0).day;
+    final targetDay = base.day <= maxDay ? base.day : maxDay;
+
+    return DateTime(
+      targetYear,
+      targetMonth,
+      targetDay,
+      base.hour,
+      base.minute,
+      base.second,
+      base.millisecond,
+      base.microsecond,
+    );
+  }
+
+  DateTime _addYearsSafely({required DateTime base, required int years}) {
+    final targetYear = base.year + years;
+    final maxDay = DateTime(targetYear, base.month + 1, 0).day;
+    final targetDay = base.day <= maxDay ? base.day : maxDay;
+
+    return DateTime(
+      targetYear,
+      base.month,
+      targetDay,
+      base.hour,
+      base.minute,
+      base.second,
+      base.millisecond,
+      base.microsecond,
+    );
   }
 
   /// Cancel a scheduled notification

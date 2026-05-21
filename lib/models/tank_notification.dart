@@ -77,6 +77,10 @@ class TankNotification {
     this.scheduledNextDate,
   });
 
+  /// Sanitizes invalid repeat intervals to 1 so date math always makes
+  /// forward progress and never divides by zero.
+  int get _effectiveRepeatInterval => repeatInterval > 0 ? repeatInterval : 1;
+
   /// Get the immediate next notification date.
   /// This is the single source of truth for when the notification will fire.
   /// Returns scheduledNextDate if set, otherwise falls back to notificationDateTime.
@@ -273,16 +277,18 @@ class TankNotification {
       );
     }
 
+    final interval = _effectiveRepeatInterval;
+
     // Calculate the next occurrence from the base date
     switch (repeatFrequency) {
       case RepeatFrequency.daily:
-        return baseWithTime.add(Duration(days: repeatInterval));
+        return baseWithTime.add(Duration(days: interval));
       case RepeatFrequency.weekly:
-        return baseWithTime.add(Duration(days: 7 * repeatInterval));
+        return baseWithTime.add(Duration(days: 7 * interval));
       case RepeatFrequency.monthly:
-        return _addMonths(baseWithTime, repeatInterval);
+        return _addMonths(baseWithTime, interval);
       case RepeatFrequency.yearly:
-        return _addYears(baseWithTime, repeatInterval);
+        return _addYears(baseWithTime, interval);
       case RepeatFrequency.none:
         return null;
     }
@@ -370,44 +376,43 @@ class TankNotification {
 
   /// Calculate next daily occurrence using optimized math
   DateTime _getNextDailyDate(DateTime now) {
+    final interval = _effectiveRepeatInterval;
     final daysSinceStart = now.difference(notificationDateTime).inDays;
-    final intervalsPassed = (daysSinceStart / repeatInterval).floor();
+    final intervalsPassed = (daysSinceStart / interval).floor();
     final nextInterval = intervalsPassed + 1;
-    return notificationDateTime.add(
-      Duration(days: repeatInterval * nextInterval),
-    );
+    return notificationDateTime.add(Duration(days: interval * nextInterval));
   }
 
   /// Calculate next weekly occurrence using optimized math
   DateTime _getNextWeeklyDate(DateTime now) {
+    final interval = _effectiveRepeatInterval;
     final daysSinceStart = now.difference(notificationDateTime).inDays;
     final weeksSinceStart = (daysSinceStart / 7).floor();
-    final intervalsPassed = (weeksSinceStart / repeatInterval).floor();
+    final intervalsPassed = (weeksSinceStart / interval).floor();
     final nextInterval = intervalsPassed + 1;
-    return notificationDateTime.add(
-      Duration(days: 7 * repeatInterval * nextInterval),
-    );
+    return notificationDateTime.add(Duration(days: 7 * interval * nextInterval));
   }
 
   /// Calculate next monthly occurrence
   DateTime _getNextMonthlyDate(DateTime now) {
+    final interval = _effectiveRepeatInterval;
     // Calculate how many months have passed
     int monthsSinceStart =
         (now.year - notificationDateTime.year) * 12 +
         (now.month - notificationDateTime.month);
 
     // Calculate the next interval
-    int intervalsPassed = (monthsSinceStart / repeatInterval).floor();
+    int intervalsPassed = (monthsSinceStart / interval).floor();
     DateTime candidate = _addMonths(
       notificationDateTime,
-      repeatInterval * intervalsPassed,
+      interval * intervalsPassed,
     );
 
     // If candidate is still before now, add one more interval
     if (candidate.isBefore(now)) {
       candidate = _addMonths(
         notificationDateTime,
-        repeatInterval * (intervalsPassed + 1),
+        interval * (intervalsPassed + 1),
       );
     }
 
@@ -416,21 +421,22 @@ class TankNotification {
 
   /// Calculate next yearly occurrence
   DateTime _getNextYearlyDate(DateTime now) {
+    final interval = _effectiveRepeatInterval;
     // Calculate how many years have passed
     int yearsSinceStart = now.year - notificationDateTime.year;
 
     // Calculate the next interval
-    int intervalsPassed = (yearsSinceStart / repeatInterval).floor();
+    int intervalsPassed = (yearsSinceStart / interval).floor();
     DateTime candidate = _addYears(
       notificationDateTime,
-      repeatInterval * intervalsPassed,
+      interval * intervalsPassed,
     );
 
     // If candidate is still before now, add one more interval
     if (candidate.isBefore(now)) {
       candidate = _addYears(
         notificationDateTime,
-        repeatInterval * (intervalsPassed + 1),
+        interval * (intervalsPassed + 1),
       );
     }
 
@@ -443,6 +449,7 @@ class TankNotification {
     if (!enabled) return false;
 
     final now = referenceTime ?? DateTime.now();
+    final interval = _effectiveRepeatInterval;
 
     // For non-repeating notifications, just check if time has passed
     if (repeatFrequency == RepeatFrequency.none) {
@@ -460,9 +467,9 @@ class TankNotification {
     switch (repeatFrequency) {
       case RepeatFrequency.daily:
         final daysSinceStart = now.difference(notificationDateTime).inDays;
-        final intervalsPassed = (daysSinceStart / repeatInterval).floor();
+        final intervalsPassed = (daysSinceStart / interval).floor();
         final lastOccurrence = notificationDateTime.add(
-          Duration(days: repeatInterval * intervalsPassed),
+          Duration(days: interval * intervalsPassed),
         );
         // Trigger if we're at or past the last occurrence time
         return !now.isBefore(lastOccurrence);
@@ -470,9 +477,9 @@ class TankNotification {
       case RepeatFrequency.weekly:
         final daysSinceStart = now.difference(notificationDateTime).inDays;
         final weeksSinceStart = (daysSinceStart / 7).floor();
-        final intervalsPassed = (weeksSinceStart / repeatInterval).floor();
+        final intervalsPassed = (weeksSinceStart / interval).floor();
         final lastOccurrence = notificationDateTime.add(
-          Duration(days: 7 * repeatInterval * intervalsPassed),
+          Duration(days: 7 * interval * intervalsPassed),
         );
         return !now.isBefore(lastOccurrence);
 
@@ -481,7 +488,7 @@ class TankNotification {
         int monthsSinceStart =
             (now.year - notificationDateTime.year) * 12 +
             (now.month - notificationDateTime.month);
-        if (monthsSinceStart >= 0 && (monthsSinceStart % repeatInterval == 0)) {
+        if (monthsSinceStart >= 0 && (monthsSinceStart % interval == 0)) {
           // We're in a trigger month, check if we've passed the trigger day
           if (now.day > notificationDateTime.day) {
             return true;
@@ -496,7 +503,7 @@ class TankNotification {
       case RepeatFrequency.yearly:
         // For yearly, check if we've reached the month and day
         int yearsSinceStart = now.year - notificationDateTime.year;
-        if (yearsSinceStart >= 0 && (yearsSinceStart % repeatInterval == 0)) {
+        if (yearsSinceStart >= 0 && (yearsSinceStart % interval == 0)) {
           // We're in a trigger year, check month and day
           if (now.month > notificationDateTime.month) {
             return true;
