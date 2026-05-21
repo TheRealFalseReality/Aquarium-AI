@@ -776,30 +776,48 @@ class NotificationService {
       case RepeatFrequency.weekly:
         return base.add(Duration(days: 7 * interval));
       case RepeatFrequency.monthly:
-        return DateTime(
-          base.year,
-          base.month + interval,
-          base.day,
-          base.hour,
-          base.minute,
-          base.second,
-          base.millisecond,
-          base.microsecond,
-        );
+        return _addMonthsSafely(base: base, months: interval);
       case RepeatFrequency.yearly:
-        return DateTime(
-          base.year + interval,
-          base.month,
-          base.day,
-          base.hour,
-          base.minute,
-          base.second,
-          base.millisecond,
-          base.microsecond,
-        );
+        return _addYearsSafely(base: base, years: interval);
       case RepeatFrequency.none:
         return base.add(const Duration(seconds: 1));
     }
+  }
+
+  DateTime _addMonthsSafely({required DateTime base, required int months}) {
+    final normalizedMonth = base.month - 1 + months;
+    final targetYear = base.year + (normalizedMonth ~/ 12);
+    final targetMonth = (normalizedMonth % 12) + 1;
+    final maxDay = DateTime(targetYear, targetMonth + 1, 0).day;
+    final targetDay = base.day <= maxDay ? base.day : maxDay;
+
+    return DateTime(
+      targetYear,
+      targetMonth,
+      targetDay,
+      base.hour,
+      base.minute,
+      base.second,
+      base.millisecond,
+      base.microsecond,
+    );
+  }
+
+  DateTime _addYearsSafely({required DateTime base, required int years}) {
+    final targetYear = base.year + years;
+    final maxDay = DateTime(targetYear, base.month + 1, 0).day;
+    final targetDay = base.day <= maxDay ? base.day : maxDay;
+
+    return DateTime(
+      targetYear,
+      base.month,
+      targetDay,
+      base.hour,
+      base.minute,
+      base.second,
+      base.millisecond,
+      base.microsecond,
+    );
   }
 
   /// Cancel a scheduled notification

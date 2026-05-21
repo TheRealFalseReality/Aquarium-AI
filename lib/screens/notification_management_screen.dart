@@ -535,7 +535,7 @@ class _NotificationManagementScreenState
   /// Quick log an activity based on a notification
   Future<void> _quickLogActivity(TankNotification notification) async {
     final currentTank = _getCurrentTank();
-    var hadRescheduleIssue = false;
+    var rescheduleIssueOccurred = false;
 
     // Create a new log entry based on the notification type and custom category
     final log = NotificationLog.create(
@@ -581,7 +581,7 @@ class _NotificationManagementScreenState
         await ref.read(tankProvider.notifier).updateTank(updatedTank);
       }
     } catch (e) {
-      hadRescheduleIssue = true;
+      rescheduleIssueOccurred = true;
       debugPrint('Quick-log reschedule failed: $e');
       await AnalyticsService.logError(
         errorType: 'quick_log_reschedule_failed',
@@ -593,7 +593,7 @@ class _NotificationManagementScreenState
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
       context.showAccessibleMessage(
-        hadRescheduleIssue
+        rescheduleIssueOccurred
             ? l10n.activityLoggedWithRescheduleWarning
             : l10n.activityLogged,
       );
