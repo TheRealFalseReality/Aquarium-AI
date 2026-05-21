@@ -3468,26 +3468,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         errorWidget: (context, url, error) =>
                             buildImageErrorWidget(error.toString()),
                       )
-                    : Builder(
-                        builder: (context) {
-                          final file = File(imageUrl);
-                          if (!file.existsSync()) {
-                            final missingFileError = FileSystemException(
-                              'Image file not found',
-                              imageUrl,
-                            );
-                            return buildImageErrorWidget(
-                              missingFileError.toString(),
-                            );
-                          }
-
-                          return Image.file(
-                            file,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                buildImageErrorWidget(error.toString()),
-                          );
-                        },
+                    : Image.file(
+                        File(imageUrl),
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            buildImageErrorWidget(error.toString()),
                       ),
               ),
             ),
