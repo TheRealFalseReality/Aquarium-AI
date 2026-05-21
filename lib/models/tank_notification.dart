@@ -77,6 +77,8 @@ class TankNotification {
     this.scheduledNextDate,
   });
 
+  /// Sanitizes invalid repeat intervals to 1 so date math always makes
+  /// forward progress and never divides by zero.
   int get _effectiveRepeatInterval => repeatInterval > 0 ? repeatInterval : 1;
 
   /// Get the immediate next notification date.

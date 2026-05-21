@@ -583,7 +583,9 @@ class _NotificationManagementScreenState
       }
     } catch (e, st) {
       rescheduleIssueOccurred = true;
-      debugPrintStack(label: 'Quick-log reschedule failed: $e', stackTrace: st);
+      if (kDebugMode) {
+        debugPrintStack(label: 'Quick-log reschedule failed: $e', stackTrace: st);
+      }
       await CrashlyticsService.recordError(
         e,
         st,
