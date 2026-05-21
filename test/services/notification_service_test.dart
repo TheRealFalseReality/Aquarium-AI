@@ -128,6 +128,33 @@ void main() {
       expect(nextDate!.isAfter(DateTime.now()), isTrue);
     });
 
+    test(
+      'should sanitize invalid repeat interval values when scheduling repeating notifications',
+      () async {
+        final service = NotificationService();
+        await service.initialize();
+
+        final baselineNow = DateTime.now();
+        final pastDate = baselineNow.subtract(const Duration(days: 1));
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: pastDate,
+          repeatFrequency: RepeatFrequency.daily,
+          repeatInterval: 0,
+          enabled: true,
+        );
+
+        final nextDate = await service.scheduleNotification(
+          tankId: 'test-tank-id',
+          tankName: 'Test Tank',
+          notification: notification,
+        );
+
+        expect(nextDate, isNotNull);
+        expect(nextDate!.isAfter(baselineNow), isTrue);
+      },
+    );
+
     test('should not schedule disabled non-repeating notifications', () async {
       final service = NotificationService();
       await service.initialize();

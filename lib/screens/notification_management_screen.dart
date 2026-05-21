@@ -8,6 +8,7 @@ import '../models/tank.dart';
 import '../models/tank_notification.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../services/crashlytics_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/notification_schedule_option_dialog.dart';
@@ -580,9 +581,14 @@ class _NotificationManagementScreenState
         updatedTank = updatedTank.copyWith(notifications: notificationsList);
         await ref.read(tankProvider.notifier).updateTank(updatedTank);
       }
-    } catch (e) {
+    } catch (e, st) {
       rescheduleIssueOccurred = true;
-      debugPrint('Quick-log reschedule failed: $e');
+      debugPrintStack(label: 'Quick-log reschedule failed: $e', stackTrace: st);
+      await CrashlyticsService.recordError(
+        e,
+        st,
+        reason: 'quick_log_reschedule_failed',
+      );
       await AnalyticsService.logError(
         errorType: 'quick_log_reschedule_failed',
         errorMessage: e.toString(),
