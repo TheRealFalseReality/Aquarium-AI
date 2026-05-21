@@ -592,9 +592,9 @@ class NotificationService {
   /// will use the time from the activity log instead of the original notification
   /// time. This is used for "Reschedule from Now" to schedule at the current time.
   ///
-  /// Returns the calculated next notification date when one can be determined.
+  /// Returns the calculated next notification date if one can be determined.
   ///
-  /// This may return null when no scheduleable future date is available, such as
+  /// Returns null when no scheduleable future date is available, such as
   /// when the repeating-date calculation yields no result or when an enabled,
   /// non-repeating notification resolves to a past/present time after strict
   /// future-date coercion. Disabled notifications may still return their
@@ -738,10 +738,7 @@ class NotificationService {
     var adjusted = candidate;
     var guard = 0;
 
-    while (
-      (adjusted.isBefore(now) || adjusted.isAtSameMomentAs(now)) &&
-      guard < _maxFutureCoercionIterations
-    ) {
+    while (!adjusted.isAfter(now) && guard < _maxFutureCoercionIterations) {
       adjusted = _addRepeatInterval(
         base: adjusted,
         frequency: notification.repeatFrequency,
