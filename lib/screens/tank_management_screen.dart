@@ -3420,6 +3420,35 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
     final l10n = AppLocalizations.of(context)!;
     final imageUrl = photo.imageUrl ?? photo.imagePath;
     if (imageUrl == null) return;
+    Widget buildImageErrorWidget(String errorMessage) {
+      return Container(
+        color: Colors.black,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 320),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.white,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.failedToLoadImage(errorMessage),
+                    style: const TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     showDialog(
       context: context,
@@ -3436,58 +3465,19 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ? CachedNetworkImage(
                         imageUrl: imageUrl,
                         fit: BoxFit.contain,
-                        errorWidget: (context, url, error) => Container(
-                          color: Colors.black,
-                          child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.error_outline,
-                                  color: Colors.white,
-                                  size: 48,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  l10n.failedToLoadImage(error.toString()),
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        errorWidget: (context, url, error) =>
+                            buildImageErrorWidget(error.toString()),
                       )
                     : Builder(
                         builder: (context) {
                           final file = File(imageUrl);
                           if (!file.existsSync()) {
                             final missingFileError = FileSystemException(
-                              '',
+                              'Image file not found',
                               imageUrl,
                             );
-                            return Container(
-                              color: Colors.black,
-                              child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.error_outline,
-                                      color: Colors.white,
-                                      size: 48,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      l10n.failedToLoadImage(
-                                        missingFileError.toString(),
-                                      ),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                            return buildImageErrorWidget(
+                              missingFileError.toString(),
                             );
                           }
 
@@ -3495,30 +3485,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                             file,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) =>
-                                Container(
-                                  color: Colors.black,
-                                  child: Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.error_outline,
-                                          color: Colors.white,
-                                          size: 48,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          l10n.failedToLoadImage(
-                                            error.toString(),
-                                          ),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                buildImageErrorWidget(error.toString()),
                           );
                         },
                       ),
@@ -3576,11 +3543,17 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                         // Read local file
                         final file = File(imageUrl);
                         if (!await file.exists()) {
-                          throw FileSystemException('', imageUrl);
+                          throw FileSystemException(
+                            'Image file not found',
+                            imageUrl,
+                          );
                         }
                         imageBytes = await file.readAsBytes();
                         if (imageBytes.isEmpty) {
-                          throw FileSystemException('', imageUrl);
+                          throw FileSystemException(
+                            'Image file is empty',
+                            imageUrl,
+                          );
                         }
                       }
                     } on FileSystemException catch (e) {
