@@ -883,7 +883,7 @@ class NotificationService {
   }
 
   int _getMissedTaskReminderId(TankNotification notification) {
-    return '${notification.id}$_missedTaskReminderSuffix'.hashCode;
+    return Object.hash(notification.id, _missedTaskReminderSuffix);
   }
 
   @visibleForTesting
