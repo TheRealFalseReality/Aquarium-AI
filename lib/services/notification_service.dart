@@ -732,46 +732,40 @@ class NotificationService {
         payload: '$tankId::${notification.id}',
       );
 
-      final reminderDate = _getMissedTaskReminderDate(
-        scheduledDate: nextDate,
-        notification: notification,
-      );
-      if (reminderDate != null) {
-        final overdueReminderSchedules = <Future<void>>[];
-        for (
-          var overdueDays = 1;
-          overdueDays <= _maxOverdueReminderDays;
-          overdueDays++
-        ) {
-          final overdueReminderDate = _getMissedTaskReminderDate(
-            scheduledDate: nextDate,
-            notification: notification,
-            overdueDays: overdueDays,
-          );
-          if (overdueReminderDate == null) {
-            continue;
-          }
-          overdueReminderSchedules.add(
-            _notifications.zonedSchedule(
-              id: _getMissedTaskReminderId(
-                notification,
-                overdueDays: overdueDays,
-              ),
-              title: '${missedTaskReminderLabels.overdueTitlePrefix}$title',
-              body: _buildMissedTaskReminderBody(
-                body: body,
-                overdueDays: overdueDays,
-                labels: missedTaskReminderLabels,
-              ),
-              scheduledDate: tz.TZDateTime.from(overdueReminderDate, tz.local),
-              notificationDetails: details,
-              androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-              payload: '$tankId::${notification.id}',
-            ),
-          );
+      final overdueReminderSchedules = <Future<void>>[];
+      for (
+        var overdueDays = 1;
+        overdueDays <= _maxOverdueReminderDays;
+        overdueDays++
+      ) {
+        final overdueReminderDate = _getMissedTaskReminderDate(
+          scheduledDate: nextDate,
+          notification: notification,
+          overdueDays: overdueDays,
+        );
+        if (overdueReminderDate == null) {
+          continue;
         }
-        await Future.wait(overdueReminderSchedules);
+        overdueReminderSchedules.add(
+          _notifications.zonedSchedule(
+            id: _getMissedTaskReminderId(
+              notification,
+              overdueDays: overdueDays,
+            ),
+            title: '${missedTaskReminderLabels.overdueTitlePrefix}$title',
+            body: _buildMissedTaskReminderBody(
+              body: body,
+              overdueDays: overdueDays,
+              labels: missedTaskReminderLabels,
+            ),
+            scheduledDate: tz.TZDateTime.from(overdueReminderDate, tz.local),
+            notificationDetails: details,
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            payload: '$tankId::${notification.id}',
+          ),
+        );
       }
+      await Future.wait(overdueReminderSchedules);
     }
 
     // Return the calculated next date so callers can update the model
