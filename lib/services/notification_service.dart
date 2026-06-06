@@ -31,10 +31,12 @@ class NotificationActionLabels {
 class MissedTaskReminderLabels {
   final String overdueTitlePrefix;
   final String overdueBodySuffix;
+  final String Function(int overdueDays) overdueDaysLabel;
 
   const MissedTaskReminderLabels({
     required this.overdueTitlePrefix,
     required this.overdueBodySuffix,
+    required this.overdueDaysLabel,
   });
 }
 
@@ -928,8 +930,7 @@ class NotificationService {
     required int overdueDays,
     required MissedTaskReminderLabels labels,
   }) {
-    final dayLabel = overdueDays == 1 ? 'day' : 'days';
-    return '$body (${overdueDays.toString()} $dayLabel overdue)${labels.overdueBodySuffix}';
+    return '$body ${labels.overdueDaysLabel(overdueDays)}${labels.overdueBodySuffix}';
   }
 
   /// Generates a stable secondary notification ID for each missed-task reminder.
@@ -1162,6 +1163,7 @@ class NotificationService {
     final labels = MissedTaskReminderLabels(
       overdueTitlePrefix: l10n.notificationMissedTaskTitlePrefix,
       overdueBodySuffix: l10n.notificationMissedTaskBodySuffix,
+      overdueDaysLabel: l10n.notificationMissedTaskOverdueDays,
     );
     _cachedMissedTaskReminderLabels = labels;
     _cachedMissedTaskReminderLabelsLocale = languageCode;

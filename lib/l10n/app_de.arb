@@ -550,6 +550,7 @@
   "notificationActionSnooze1Week": "1 Woche schlummern",
   "notificationMissedTaskTitlePrefix": "Überfällig: ",
   "notificationMissedTaskBodySuffix": " Bitte protokolliere diese Aufgabe, wenn sie bereits erledigt wurde.",
+  "notificationMissedTaskOverdueDays": "({count, plural, =1{1 Tag überfällig} other{{count} Tage überfällig}})",
   "notificationEnabled": "Benachrichtigung aktiviert",
   "notificationPermissionMessage": "Um Erinnerungen zur Aquariumwartung zu erhalten, aktivieren Sie bitte Benachrichtigungen für diese App in Ihren Geräteeinstellungen.",
   "notificationTitleDosing": "💧 Dosierungserinnerung - {tankName}",
