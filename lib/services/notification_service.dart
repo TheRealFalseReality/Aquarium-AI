@@ -737,6 +737,7 @@ class NotificationService {
         notification: notification,
       );
       if (reminderDate != null) {
+        final overdueReminderSchedules = <Future<void>>[];
         for (
           var overdueDays = 1;
           overdueDays <= _maxOverdueReminderDays;
@@ -750,23 +751,26 @@ class NotificationService {
           if (overdueReminderDate == null) {
             continue;
           }
-          await _notifications.zonedSchedule(
-            id: _getMissedTaskReminderId(
-              notification,
-              overdueDays: overdueDays,
+          overdueReminderSchedules.add(
+            _notifications.zonedSchedule(
+              id: _getMissedTaskReminderId(
+                notification,
+                overdueDays: overdueDays,
+              ),
+              title: '${missedTaskReminderLabels.overdueTitlePrefix}$title',
+              body: _buildMissedTaskReminderBody(
+                body: body,
+                overdueDays: overdueDays,
+                labels: missedTaskReminderLabels,
+              ),
+              scheduledDate: tz.TZDateTime.from(overdueReminderDate, tz.local),
+              notificationDetails: details,
+              androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+              payload: '$tankId::${notification.id}',
             ),
-            title: '${missedTaskReminderLabels.overdueTitlePrefix}$title',
-            body: _buildMissedTaskReminderBody(
-              body: body,
-              overdueDays: overdueDays,
-              labels: missedTaskReminderLabels,
-            ),
-            scheduledDate: tz.TZDateTime.from(overdueReminderDate, tz.local),
-            notificationDetails: details,
-            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-            payload: '$tankId::${notification.id}',
           );
         }
+        await Future.wait(overdueReminderSchedules);
       }
     }
 
@@ -896,15 +900,19 @@ class NotificationService {
   }
 
   Future<void> _cancelMissedTaskReminders(TankNotification notification) async {
+    final overdueReminderCancellations = <Future<void>>[];
     for (
       var overdueDays = 1;
       overdueDays <= _maxOverdueReminderDays;
       overdueDays++
     ) {
-      await _notifications.cancel(
-        id: _getMissedTaskReminderId(notification, overdueDays: overdueDays),
+      overdueReminderCancellations.add(
+        _notifications.cancel(
+          id: _getMissedTaskReminderId(notification, overdueDays: overdueDays),
+        ),
       );
     }
+    await Future.wait(overdueReminderCancellations);
   }
 
   DateTime? _getMissedTaskReminderDate({
@@ -1380,7 +1388,9 @@ class NotificationService {
       try {
         await cancelNotification(notification);
       } catch (e) {
-        debugPrint('Failed to cancel notification after done action: $e');
+        debugPrint(
+          'Failed to cancel notification ${notification.id} after done action: $e',
+        );
       }
 
       final log = NotificationLog(
