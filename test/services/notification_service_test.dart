@@ -225,6 +225,64 @@ void main() {
       },
     );
 
+    test(
+      'getMissedTaskReminderDateForTesting returns one day later at the original scheduled time',
+      () {
+        final service = NotificationService();
+        final scheduledDate = DateTime(2026, 6, 6, 9, 30);
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: scheduledDate,
+          repeatFrequency: RepeatFrequency.daily,
+          enabled: true,
+        );
+
+        final reminderDate = service.getMissedTaskReminderDateForTesting(
+          scheduledDate: scheduledDate,
+          notification: notification,
+        );
+
+        expect(reminderDate, equals(DateTime(2026, 6, 7, 9, 30)));
+      },
+    );
+
+    test(
+      'getMissedTaskReminderDateForTesting skips disabled notifications',
+      () {
+        final service = NotificationService();
+        final scheduledDate = DateTime(2026, 6, 6, 9, 30);
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: scheduledDate,
+          enabled: false,
+        );
+
+        final reminderDate = service.getMissedTaskReminderDateForTesting(
+          scheduledDate: scheduledDate,
+          notification: notification,
+        );
+
+        expect(reminderDate, isNull);
+      },
+    );
+
+    test('missed-task reminder uses a stable secondary notification id', () {
+      final service = NotificationService();
+      final notification = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2026, 6, 6, 9, 30),
+      );
+
+      final primaryId = notification.id.hashCode;
+      final reminderId = service.getMissedTaskReminderIdForTesting(notification);
+
+      expect(reminderId, isNot(equals(primaryId)));
+      expect(
+        reminderId,
+        equals(service.getMissedTaskReminderIdForTesting(notification)),
+      );
+    });
+
     group('notification action payload handling', () {
       test('parses preferred payload format tankId::notificationId', () {
         final service = NotificationService();

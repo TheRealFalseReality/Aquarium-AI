@@ -108,6 +108,8 @@ class NotificationService {
   static const String actionDone = 'done_action';
   static const String actionSnoozeDay = 'snooze_day_action';
   static const String actionSnoozeWeek = 'snooze_week_action';
+  static const String _missedTaskReminderSuffix = '::missed';
+  static const Duration _missedTaskReminderDelay = Duration(days: 1);
   // Guard to keep corrupt schedules from spending unbounded time advancing
   // interval-by-interval before falling back to a known-future timestamp.
   static const int _maxFutureCoercionIterations = 500;
@@ -701,6 +703,9 @@ class NotificationService {
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
 
+      // Replace any previously scheduled primary or missed-task reminder.
+      await cancelNotification(notification);
+
       await _notifications.zonedSchedule(
         id: notificationId,
         title: title,
@@ -710,6 +715,22 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         payload: '$tankId::${notification.id}',
       );
+
+      final missedTaskReminderDate = _getMissedTaskReminderDate(
+        scheduledDate: nextDate,
+        notification: notification,
+      );
+      if (missedTaskReminderDate != null) {
+        await _notifications.zonedSchedule(
+          id: _getMissedTaskReminderId(notification),
+          title: 'Overdue: $title',
+          body: '$body Please log this task if it has already been completed.',
+          scheduledDate: tz.TZDateTime.from(missedTaskReminderDate, tz.local),
+          notificationDetails: details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          payload: '$tankId::${notification.id}',
+        );
+      }
     }
 
     // Return the calculated next date so callers can update the model
@@ -834,6 +855,38 @@ class NotificationService {
   Future<void> cancelNotification(TankNotification notification) async {
     final int notificationId = notification.id.hashCode;
     await _notifications.cancel(id: notificationId);
+    await _notifications.cancel(id: _getMissedTaskReminderId(notification));
+  }
+
+  DateTime? _getMissedTaskReminderDate({
+    required DateTime scheduledDate,
+    required TankNotification notification,
+  }) {
+    if (!notification.enabled) {
+      return null;
+    }
+
+    return scheduledDate.add(_missedTaskReminderDelay);
+  }
+
+  int _getMissedTaskReminderId(TankNotification notification) {
+    return '${notification.id}$_missedTaskReminderSuffix'.hashCode;
+  }
+
+  @visibleForTesting
+  DateTime? getMissedTaskReminderDateForTesting({
+    required DateTime scheduledDate,
+    required TankNotification notification,
+  }) {
+    return _getMissedTaskReminderDate(
+      scheduledDate: scheduledDate,
+      notification: notification,
+    );
+  }
+
+  @visibleForTesting
+  int getMissedTaskReminderIdForTesting(TankNotification notification) {
+    return _getMissedTaskReminderId(notification);
   }
 
   /// Cancel all notifications for a tank
