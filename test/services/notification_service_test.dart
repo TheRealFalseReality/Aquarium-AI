@@ -247,6 +247,28 @@ void main() {
     );
 
     test(
+      'getMissedTaskReminderDateForTesting offsets by overdue day count',
+      () {
+        final service = NotificationService();
+        final scheduledDate = DateTime(2026, 6, 6, 9, 30);
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: scheduledDate,
+          repeatFrequency: RepeatFrequency.daily,
+          enabled: true,
+        );
+
+        final reminderDate = service.getMissedTaskReminderDateForTesting(
+          scheduledDate: scheduledDate,
+          notification: notification,
+          overdueDays: 3,
+        );
+
+        expect(reminderDate, equals(DateTime(2026, 6, 9, 9, 30)));
+      },
+    );
+
+    test(
       'getMissedTaskReminderDateForTesting skips disabled notifications',
       () {
         final service = NotificationService();
@@ -266,7 +288,7 @@ void main() {
       },
     );
 
-    test('missed-task reminder uses a stable secondary notification id', () {
+    test('missed-task reminder uses a stable per-day secondary notification id', () {
       final service = NotificationService();
       final notification = TankNotification.create(
         type: NotificationType.feeding,
@@ -274,12 +296,26 @@ void main() {
       );
 
       final primaryId = notification.id.hashCode;
-      final reminderId = service.getMissedTaskReminderIdForTesting(notification);
+      final reminderDayOneId = service.getMissedTaskReminderIdForTesting(
+        notification,
+        overdueDays: 1,
+      );
+      final reminderDayTwoId = service.getMissedTaskReminderIdForTesting(
+        notification,
+        overdueDays: 2,
+      );
 
-      expect(reminderId, isNot(equals(primaryId)));
+      expect(reminderDayOneId, isNot(equals(primaryId)));
+      expect(reminderDayTwoId, isNot(equals(primaryId)));
+      expect(reminderDayOneId, isNot(equals(reminderDayTwoId)));
       expect(
-        reminderId,
-        equals(service.getMissedTaskReminderIdForTesting(notification)),
+        reminderDayOneId,
+        equals(
+          service.getMissedTaskReminderIdForTesting(
+            notification,
+            overdueDays: 1,
+          ),
+        ),
       );
     });
 
