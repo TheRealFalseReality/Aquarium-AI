@@ -28,6 +28,16 @@ class NotificationActionLabels {
   });
 }
 
+class MissedTaskReminderLabels {
+  final String overdueTitlePrefix;
+  final String overdueBodySuffix;
+
+  const MissedTaskReminderLabels({
+    required this.overdueTitlePrefix,
+    required this.overdueBodySuffix,
+  });
+}
+
 class CommunityInteractionLabels {
   final String titleLike;
   final String titleBookmark;
@@ -137,6 +147,8 @@ class NotificationService {
   bool _hasLoadedInitialCommunitySnapshot = false;
   NotificationActionLabels? _cachedActionLabels;
   String? _cachedActionLabelsLocale;
+  MissedTaskReminderLabels? _cachedMissedTaskReminderLabels;
+  String? _cachedMissedTaskReminderLabelsLocale;
   CommunityInteractionLabels? _cachedCommunityInteractionLabels;
   String? _cachedCommunityInteractionLabelsLocale;
   Future<void> Function({
@@ -622,6 +634,7 @@ class NotificationService {
     // Generate unique ID from notification ID hash
     final int notificationId = notification.id.hashCode;
     final actionLabels = await _getNotificationActionLabels();
+    final missedTaskReminderLabels = await _getMissedTaskReminderLabels();
 
     // Create notification details
     final androidDetails = AndroidNotificationDetails(
@@ -723,8 +736,9 @@ class NotificationService {
       if (missedTaskReminderDate != null) {
         await _notifications.zonedSchedule(
           id: _getMissedTaskReminderId(notification),
-          title: 'Overdue: $title',
-          body: '$body Please log this task if it has already been completed.',
+          title:
+              '${missedTaskReminderLabels.overdueTitlePrefix}: $title',
+          body: '$body ${missedTaskReminderLabels.overdueBodySuffix}',
           scheduledDate: tz.TZDateTime.from(missedTaskReminderDate, tz.local),
           notificationDetails: details,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -1066,6 +1080,29 @@ class NotificationService {
     );
     _cachedActionLabels = labels;
     _cachedActionLabelsLocale = languageCode;
+    return labels;
+  }
+
+  Future<MissedTaskReminderLabels> _getMissedTaskReminderLabels() async {
+    final languageCode = PlatformDispatcher.instance.locale.languageCode;
+    if (_cachedMissedTaskReminderLabels != null &&
+        _cachedMissedTaskReminderLabelsLocale == languageCode) {
+      return _cachedMissedTaskReminderLabels!;
+    }
+
+    final locale = switch (languageCode) {
+      'de' => const Locale('de'),
+      'es' => const Locale('es'),
+      'fr' => const Locale('fr'),
+      _ => const Locale('en'),
+    };
+    final l10n = await AppLocalizations.delegate.load(locale);
+    final labels = MissedTaskReminderLabels(
+      overdueTitlePrefix: l10n.notificationMissedTaskTitlePrefix,
+      overdueBodySuffix: l10n.notificationMissedTaskBodySuffix,
+    );
+    _cachedMissedTaskReminderLabels = labels;
+    _cachedMissedTaskReminderLabelsLocale = languageCode;
     return labels;
   }
 
