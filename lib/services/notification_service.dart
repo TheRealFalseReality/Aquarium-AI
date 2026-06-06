@@ -729,16 +729,16 @@ class NotificationService {
         payload: '$tankId::${notification.id}',
       );
 
-      final missedTaskReminderDate = _getMissedTaskReminderDate(
+      final reminderDate = _getMissedTaskReminderDate(
         scheduledDate: nextDate,
         notification: notification,
       );
-      if (missedTaskReminderDate != null) {
+      if (reminderDate != null) {
         await _notifications.zonedSchedule(
           id: _getMissedTaskReminderId(notification),
           title: '${missedTaskReminderLabels.overdueTitlePrefix}$title',
           body: '$body${missedTaskReminderLabels.overdueBodySuffix}',
-          scheduledDate: tz.TZDateTime.from(missedTaskReminderDate, tz.local),
+          scheduledDate: tz.TZDateTime.from(reminderDate, tz.local),
           notificationDetails: details,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           payload: '$tankId::${notification.id}',
@@ -882,6 +882,7 @@ class NotificationService {
     return scheduledDate.add(_missedTaskReminderDelay);
   }
 
+  /// Generates a stable secondary notification ID for the missed-task reminder.
   int _getMissedTaskReminderId(TankNotification notification) {
     return Object.hash(notification.id, _missedTaskReminderSuffix);
   }
