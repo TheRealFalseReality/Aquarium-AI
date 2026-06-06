@@ -736,9 +736,8 @@ class NotificationService {
       if (missedTaskReminderDate != null) {
         await _notifications.zonedSchedule(
           id: _getMissedTaskReminderId(notification),
-          title:
-              '${missedTaskReminderLabels.overdueTitlePrefix}: $title',
-          body: '$body ${missedTaskReminderLabels.overdueBodySuffix}',
+          title: '${missedTaskReminderLabels.overdueTitlePrefix}$title',
+          body: '$body${missedTaskReminderLabels.overdueBodySuffix}',
           scheduledDate: tz.TZDateTime.from(missedTaskReminderDate, tz.local),
           notificationDetails: details,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
