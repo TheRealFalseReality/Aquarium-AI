@@ -123,6 +123,8 @@ class NotificationService {
   static const String _missedTaskReminderSuffix = '::missed';
   static const Duration _missedTaskReminderDelay = Duration(days: 1);
   static const int _maxOverdueReminderDays = 30;
+  // Apple platforms enforce lower limits for pending local notifications.
+  static const int _maxAppleOverdueReminderDays = 7;
   // Guard to keep corrupt schedules from spending unbounded time advancing
   // interval-by-interval before falling back to a known-future timestamp.
   static const int _maxFutureCoercionIterations = 500;
@@ -719,9 +721,6 @@ class NotificationService {
     if (nextDate != null && notification.enabled) {
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
 
-      // Replace any previously scheduled primary or missed-task reminder.
-      await cancelNotification(notification);
-
       await _notifications.zonedSchedule(
         id: notificationId,
         title: title,
@@ -732,10 +731,15 @@ class NotificationService {
         payload: '$tankId::${notification.id}',
       );
 
+      // Clear previously scheduled missed-task reminders before queuing new ones.
+      await _cancelMissedTaskReminders(notification);
+
       final overdueReminderSchedules = <Future<void>>[];
+      final maxScheduledOverdueReminderDays =
+          _getMaxScheduledOverdueReminderDays();
       for (
         var overdueDays = 1;
-        overdueDays <= _maxOverdueReminderDays;
+        overdueDays <= maxScheduledOverdueReminderDays;
         overdueDays++
       ) {
         final overdueReminderDate = nextDate.add(
@@ -904,6 +908,15 @@ class NotificationService {
     await Future.wait(overdueReminderCancellations);
   }
 
+  int _getMaxScheduledOverdueReminderDays({TargetPlatform? platform}) {
+    final effectivePlatform = platform ?? defaultTargetPlatform;
+    if (effectivePlatform == TargetPlatform.iOS ||
+        effectivePlatform == TargetPlatform.macOS) {
+      return _maxAppleOverdueReminderDays;
+    }
+    return _maxOverdueReminderDays;
+  }
+
   DateTime? _getMissedTaskReminderDate({
     required DateTime scheduledDate,
     required TankNotification notification,
@@ -961,6 +974,13 @@ class NotificationService {
     int overdueDays = 1,
   }) {
     return _getMissedTaskReminderId(notification, overdueDays: overdueDays);
+  }
+
+  @visibleForTesting
+  int getMaxScheduledOverdueReminderDaysForTesting({
+    TargetPlatform? platform,
+  }) {
+    return _getMaxScheduledOverdueReminderDays(platform: platform);
   }
 
   /// Cancel all notifications for a tank

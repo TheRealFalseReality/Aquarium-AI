@@ -288,7 +288,7 @@ void main() {
       },
     );
 
-    test('missed-task reminder uses a stable per-day secondary notification id', () {
+    test('missed-task reminder uses a stable per-day secondary notification ID', () {
       final service = NotificationService();
       final notification = TankNotification.create(
         type: NotificationType.feeding,
@@ -318,6 +318,32 @@ void main() {
         ),
       );
     });
+
+    test(
+      'caps scheduled overdue reminder days on Apple platforms',
+      () {
+        final service = NotificationService();
+
+        expect(
+          service.getMaxScheduledOverdueReminderDaysForTesting(
+            platform: TargetPlatform.iOS,
+          ),
+          equals(7),
+        );
+        expect(
+          service.getMaxScheduledOverdueReminderDaysForTesting(
+            platform: TargetPlatform.macOS,
+          ),
+          equals(7),
+        );
+        expect(
+          service.getMaxScheduledOverdueReminderDaysForTesting(
+            platform: TargetPlatform.android,
+          ),
+          equals(30),
+        );
+      },
+    );
 
     group('notification action payload handling', () {
       test('parses preferred payload format tankId::notificationId', () {
