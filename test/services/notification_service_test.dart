@@ -225,6 +225,126 @@ void main() {
       },
     );
 
+    test(
+      'getMissedTaskReminderDateForTesting returns one day later at the original scheduled time',
+      () {
+        final service = NotificationService();
+        final scheduledDate = DateTime(2026, 6, 6, 9, 30);
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: scheduledDate,
+          repeatFrequency: RepeatFrequency.daily,
+          enabled: true,
+        );
+
+        final reminderDate = service.getMissedTaskReminderDateForTesting(
+          scheduledDate: scheduledDate,
+          notification: notification,
+        );
+
+        expect(reminderDate, equals(DateTime(2026, 6, 7, 9, 30)));
+      },
+    );
+
+    test(
+      'getMissedTaskReminderDateForTesting offsets by overdue day count',
+      () {
+        final service = NotificationService();
+        final scheduledDate = DateTime(2026, 6, 6, 9, 30);
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: scheduledDate,
+          repeatFrequency: RepeatFrequency.daily,
+          enabled: true,
+        );
+
+        final reminderDate = service.getMissedTaskReminderDateForTesting(
+          scheduledDate: scheduledDate,
+          notification: notification,
+          overdueDays: 3,
+        );
+
+        expect(reminderDate, equals(DateTime(2026, 6, 9, 9, 30)));
+      },
+    );
+
+    test(
+      'getMissedTaskReminderDateForTesting skips disabled notifications',
+      () {
+        final service = NotificationService();
+        final scheduledDate = DateTime(2026, 6, 6, 9, 30);
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: scheduledDate,
+          enabled: false,
+        );
+
+        final reminderDate = service.getMissedTaskReminderDateForTesting(
+          scheduledDate: scheduledDate,
+          notification: notification,
+        );
+
+        expect(reminderDate, isNull);
+      },
+    );
+
+    test('missed-task reminder uses a stable per-day secondary notification ID', () {
+      final service = NotificationService();
+      final notification = TankNotification.create(
+        type: NotificationType.feeding,
+        notificationDateTime: DateTime(2026, 6, 6, 9, 30),
+      );
+
+      final primaryId = notification.id.hashCode;
+      final reminderDayOneId = service.getMissedTaskReminderIdForTesting(
+        notification,
+        overdueDays: 1,
+      );
+      final reminderDayTwoId = service.getMissedTaskReminderIdForTesting(
+        notification,
+        overdueDays: 2,
+      );
+
+      expect(reminderDayOneId, isNot(equals(primaryId)));
+      expect(reminderDayTwoId, isNot(equals(primaryId)));
+      expect(reminderDayOneId, isNot(equals(reminderDayTwoId)));
+      expect(
+        reminderDayOneId,
+        equals(
+          service.getMissedTaskReminderIdForTesting(
+            notification,
+            overdueDays: 1,
+          ),
+        ),
+      );
+    });
+
+    test(
+      'caps scheduled overdue reminder days on Apple platforms',
+      () {
+        final service = NotificationService();
+
+        expect(
+          service.getMaxScheduledOverdueReminderDaysForTesting(
+            platform: TargetPlatform.iOS,
+          ),
+          equals(7),
+        );
+        expect(
+          service.getMaxScheduledOverdueReminderDaysForTesting(
+            platform: TargetPlatform.macOS,
+          ),
+          equals(7),
+        );
+        expect(
+          service.getMaxScheduledOverdueReminderDaysForTesting(
+            platform: TargetPlatform.android,
+          ),
+          equals(30),
+        );
+      },
+    );
+
     group('notification action payload handling', () {
       test('parses preferred payload format tankId::notificationId', () {
         final service = NotificationService();

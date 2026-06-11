@@ -1049,6 +1049,23 @@
   "@notificationActionSnooze1Week": {
     "description": "Action button label to snooze a notification by one week"
   },
+  "notificationMissedTaskTitlePrefix": "Overdue: ",
+  "@notificationMissedTaskTitlePrefix": {
+    "description": "Prefix including punctuation/spacing added before the original title of a follow-up reminder for a missed task notification"
+  },
+  "notificationMissedTaskBodySuffix": " Please log this task if it has already been completed.",
+  "@notificationMissedTaskBodySuffix": {
+    "description": "Suffix including any required spacing appended to the original body of a follow-up reminder for a missed task notification"
+  },
+  "notificationMissedTaskOverdueDays": "({count, plural, =1{1 day overdue} other{{count} days overdue}})",
+  "@notificationMissedTaskOverdueDays": {
+    "description": "Overdue day count shown in a missed task reminder body",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "deleteNotification": "Delete Notification",
   "@deleteNotification": {
     "description": "Delete notification dialog title"

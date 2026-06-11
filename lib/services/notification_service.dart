@@ -10,11 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:uuid/uuid.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 
 import '../l10n/app_localizations.dart';
 import '../models/notification_log.dart';
 import '../models/tank.dart';
 import '../models/tank_notification.dart';
+
 
 class NotificationActionLabels {
   final String done;
@@ -25,6 +27,18 @@ class NotificationActionLabels {
     required this.done,
     required this.snoozeDay,
     required this.snoozeWeek,
+  });
+}
+
+class MissedTaskReminderLabels {
+  final String overdueTitlePrefix;
+  final String overdueBodySuffix;
+  final String Function(int overdueDays) overdueDaysFormatter;
+
+  const MissedTaskReminderLabels({
+    required this.overdueTitlePrefix,
+    required this.overdueBodySuffix,
+    required this.overdueDaysFormatter,
   });
 }
 
@@ -108,6 +122,11 @@ class NotificationService {
   static const String actionDone = 'done_action';
   static const String actionSnoozeDay = 'snooze_day_action';
   static const String actionSnoozeWeek = 'snooze_week_action';
+  static const String _missedTaskReminderSuffix = '::missed';
+  static const Duration _missedTaskReminderDelay = Duration(days: 1);
+  static const int _maxOverdueReminderDays = 30;
+  // Apple platforms enforce lower limits for pending local notifications.
+  static const int _maxAppleOverdueReminderDays = 7;
   // Guard to keep corrupt schedules from spending unbounded time advancing
   // interval-by-interval before falling back to a known-future timestamp.
   static const int _maxFutureCoercionIterations = 500;
@@ -135,6 +154,8 @@ class NotificationService {
   bool _hasLoadedInitialCommunitySnapshot = false;
   NotificationActionLabels? _cachedActionLabels;
   String? _cachedActionLabelsLocale;
+  MissedTaskReminderLabels? _cachedMissedTaskReminderLabels;
+  String? _cachedMissedTaskReminderLabelsLocale;
   CommunityInteractionLabels? _cachedCommunityInteractionLabels;
   String? _cachedCommunityInteractionLabelsLocale;
   Future<void> Function({
@@ -620,6 +641,7 @@ class NotificationService {
     // Generate unique ID from notification ID hash
     final int notificationId = notification.id.hashCode;
     final actionLabels = await _getNotificationActionLabels();
+    final missedTaskReminderLabels = await _getMissedTaskReminderLabels();
 
     // Create notification details
     final androidDetails = AndroidNotificationDetails(
@@ -710,6 +732,41 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         payload: '$tankId::${notification.id}',
       );
+
+      // Clear previously scheduled missed-task reminders before queuing new ones.
+      await _cancelMissedTaskReminders(notification);
+
+      final overdueReminderSchedules = <Future<void>>[];
+      final maxScheduledOverdueReminderDays =
+          _getMaxScheduledOverdueReminderDays();
+      for (
+        var overdueDays = 1;
+        overdueDays <= maxScheduledOverdueReminderDays;
+        overdueDays++
+      ) {
+        final overdueReminderDate = nextDate.add(
+          Duration(days: _missedTaskReminderDelay.inDays * overdueDays),
+        );
+        overdueReminderSchedules.add(
+          _notifications.zonedSchedule(
+            id: _getMissedTaskReminderId(
+              notification,
+              overdueDays: overdueDays,
+            ),
+            title: '${missedTaskReminderLabels.overdueTitlePrefix}$title',
+            body: _buildMissedTaskReminderBody(
+              body: body,
+              overdueDays: overdueDays,
+              labels: missedTaskReminderLabels,
+            ),
+            scheduledDate: tz.TZDateTime.from(overdueReminderDate, tz.local),
+            notificationDetails: details,
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            payload: '$tankId::${notification.id}',
+          ),
+        );
+      }
+      await Future.wait(overdueReminderSchedules);
     }
 
     // Return the calculated next date so callers can update the model
@@ -834,6 +891,98 @@ class NotificationService {
   Future<void> cancelNotification(TankNotification notification) async {
     final int notificationId = notification.id.hashCode;
     await _notifications.cancel(id: notificationId);
+    await _cancelMissedTaskReminders(notification);
+  }
+
+  Future<void> _cancelMissedTaskReminders(TankNotification notification) async {
+    final overdueReminderCancellations = <Future<void>>[];
+    for (
+      var overdueDays = 1;
+      overdueDays <= _maxOverdueReminderDays;
+      overdueDays++
+    ) {
+      overdueReminderCancellations.add(
+        _notifications.cancel(
+          id: _getMissedTaskReminderId(notification, overdueDays: overdueDays),
+        ),
+      );
+    }
+    await Future.wait(overdueReminderCancellations);
+  }
+
+  int _getMaxScheduledOverdueReminderDays({TargetPlatform? platform}) {
+    final effectivePlatform = platform ?? defaultTargetPlatform;
+    if (effectivePlatform == TargetPlatform.iOS ||
+        effectivePlatform == TargetPlatform.macOS) {
+      return _maxAppleOverdueReminderDays;
+    }
+    return _maxOverdueReminderDays;
+  }
+
+  DateTime? _getMissedTaskReminderDate({
+    required DateTime scheduledDate,
+    required TankNotification notification,
+    int overdueDays = 1,
+  }) {
+    if (!notification.enabled) {
+      return null;
+    }
+
+    if (overdueDays < 1) {
+      return null;
+    }
+
+    return scheduledDate.add(
+      Duration(days: _missedTaskReminderDelay.inDays * overdueDays),
+    );
+  }
+
+  String _buildMissedTaskReminderBody({
+    required String body,
+    required int overdueDays,
+    required MissedTaskReminderLabels labels,
+  }) {
+    return '$body ${labels.overdueDaysFormatter(overdueDays)}${labels.overdueBodySuffix}';
+  }
+
+  /// Generates a stable secondary notification ID for each missed-task reminder.
+  int _getMissedTaskReminderId(
+    TankNotification notification, {
+    int overdueDays = 1,
+  }) {
+    return Object.hash(
+      notification.id,
+      _missedTaskReminderSuffix,
+      overdueDays,
+    );
+  }
+
+  @visibleForTesting
+  DateTime? getMissedTaskReminderDateForTesting({
+    required DateTime scheduledDate,
+    required TankNotification notification,
+    int overdueDays = 1,
+  }) {
+    return _getMissedTaskReminderDate(
+      scheduledDate: scheduledDate,
+      notification: notification,
+      overdueDays: overdueDays,
+    );
+  }
+
+  @visibleForTesting
+  int getMissedTaskReminderIdForTesting(
+    TankNotification notification, {
+    int overdueDays = 1,
+  }) {
+    return _getMissedTaskReminderId(notification, overdueDays: overdueDays);
+  }
+
+  @visibleForTesting
+  int getMaxScheduledOverdueReminderDaysForTesting({
+    TargetPlatform? platform,
+  }) {
+    return _getMaxScheduledOverdueReminderDays(platform: platform);
   }
 
   /// Cancel all notifications for a tank
@@ -1013,6 +1162,30 @@ class NotificationService {
     );
     _cachedActionLabels = labels;
     _cachedActionLabelsLocale = languageCode;
+    return labels;
+  }
+
+  Future<MissedTaskReminderLabels> _getMissedTaskReminderLabels() async {
+    final languageCode = PlatformDispatcher.instance.locale.languageCode;
+    if (_cachedMissedTaskReminderLabels != null &&
+        _cachedMissedTaskReminderLabelsLocale == languageCode) {
+      return _cachedMissedTaskReminderLabels!;
+    }
+
+    final locale = switch (languageCode) {
+      'de' => const Locale('de'),
+      'es' => const Locale('es'),
+      'fr' => const Locale('fr'),
+      _ => const Locale('en'),
+    };
+    final l10n = await AppLocalizations.delegate.load(locale);
+    final labels = MissedTaskReminderLabels(
+      overdueTitlePrefix: l10n.notificationMissedTaskTitlePrefix,
+      overdueBodySuffix: l10n.notificationMissedTaskBodySuffix,
+      overdueDaysFormatter: l10n.notificationMissedTaskOverdueDays,
+    );
+    _cachedMissedTaskReminderLabels = labels;
+    _cachedMissedTaskReminderLabelsLocale = languageCode;
     return labels;
   }
 
@@ -1223,6 +1396,14 @@ class NotificationService {
     var updatedLogs = List<NotificationLog>.from(tank.notificationLogs);
 
     if (actionId == actionDone) {
+      try {
+        await cancelNotification(notification);
+      } catch (e) {
+        debugPrint(
+          'Failed to cancel notification ${notification.id} after done action: $e',
+        );
+      }
+
       final log = NotificationLog(
         id: const Uuid().v4(),
         type: notification.type,
