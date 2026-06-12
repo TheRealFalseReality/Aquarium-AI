@@ -1,4 +1,9 @@
 allprojects {
+    buildscript {
+        configurations.all {
+            resolutionStrategy.force("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.0")
+        }
+    }
     repositories {
         google()
         mavenCentral()
