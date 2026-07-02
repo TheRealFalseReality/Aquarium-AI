@@ -320,6 +320,57 @@ void main() {
     });
 
     test(
+      'rescheduling a task clears previously queued overdue reminders for that task',
+      () async {
+        final service = NotificationService();
+        await service.initialize();
+        await service.cancelAllNotifications();
+
+        final baseDate = DateTime.now().add(const Duration(minutes: 5));
+        final notification = TankNotification.create(
+          type: NotificationType.feeding,
+          notificationDateTime: baseDate,
+          repeatFrequency: RepeatFrequency.daily,
+          enabled: true,
+        );
+
+        await service.scheduleNotification(
+          tankId: 'tank-1',
+          tankName: 'Tank One',
+          notification: notification,
+        );
+
+        final rescheduledDate = DateTime.now().add(const Duration(days: 1));
+        final updatedNotification = notification.copyWith(
+          scheduledNextDate: rescheduledDate,
+          updatedAt: DateTime.now(),
+        );
+
+        await service.scheduleNotification(
+          tankId: 'tank-1',
+          tankName: 'Tank One',
+          notification: updatedNotification,
+          useScheduledNextDate: true,
+        );
+
+        final pending = await service.pendingNotificationRequestsForTesting();
+        final matching = pending.where((request) {
+          final payload = request.payload;
+          if (payload == null || payload.isEmpty) {
+            return false;
+          }
+          final parsed = service.parseNotificationPayloadForTesting(payload);
+          return parsed?.notificationId == notification.id;
+        }).toList();
+
+        expect(
+          matching.length,
+          equals(1 + service.getMaxScheduledOverdueReminderDaysForTesting()),
+        );
+      },
+    );
+
+    test(
       'caps scheduled overdue reminder days on Apple platforms',
       () {
         final service = NotificationService();

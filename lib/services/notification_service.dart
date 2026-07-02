@@ -218,6 +218,12 @@ class NotificationService {
   }
 
   @visibleForTesting
+  Future<List<PendingNotificationRequest>>
+  pendingNotificationRequestsForTesting() {
+    return _notifications.pendingNotificationRequests();
+  }
+
+  @visibleForTesting
   NotificationActionPayload? parseNotificationPayloadForTesting(
     String payload,
   ) {
@@ -691,6 +697,10 @@ class NotificationService {
         _getNotificationTitle(notification.type, tankName);
     final body = notification.notes ?? _getDefaultBody(notification.type);
 
+    // Ensure stale scheduled notifications for this task (including overdue
+    // reminders from previous schedules) are cleared before scheduling again.
+    await _cancelNotificationsByNotificationId(notification.id);
+
     // Determine the next notification date
     DateTime? nextDate;
     if (useScheduledNextDate) {
@@ -889,9 +899,33 @@ class NotificationService {
 
   /// Cancel a scheduled notification
   Future<void> cancelNotification(TankNotification notification) async {
+    await _cancelNotificationsByNotificationId(notification.id);
     final int notificationId = notification.id.hashCode;
     await _notifications.cancel(id: notificationId);
     await _cancelMissedTaskReminders(notification);
+  }
+
+  Future<void> _cancelNotificationsByNotificationId(
+    String notificationId,
+  ) async {
+    final pending = await _notifications.pendingNotificationRequests();
+    final cancellations = <Future<void>>[];
+
+    for (final request in pending) {
+      final payload = request.payload;
+      if (payload == null || payload.isEmpty) {
+        continue;
+      }
+
+      final parsedPayload = _parseNotificationPayload(payload);
+      if (parsedPayload?.notificationId == notificationId) {
+        cancellations.add(_notifications.cancel(id: request.id));
+      }
+    }
+
+    if (cancellations.isNotEmpty) {
+      await Future.wait(cancellations);
+    }
   }
 
   Future<void> _cancelMissedTaskReminders(TankNotification notification) async {
