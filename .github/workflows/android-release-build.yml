@@ -1,79 +1,79 @@
-name: Build Android Release
+# name: Build Android Release
 
-on:
-  release:
-    types: [created]
+# on:
+#   release:
+#     types: [created]
 
-jobs:
-  build-android:
-    runs-on: ubuntu-latest
+# jobs:
+#   build-android:
+#     runs-on: ubuntu-latest
     
-    permissions:
-      contents: write
+#     permissions:
+#       contents: write
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
       
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+#       - name: Setup Java
+#         uses: actions/setup-java@v4
+#         with:
+#           distribution: 'temurin'
+#           java-version: '17'
       
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
+#       - name: Setup Flutter
+#         uses: subosito/flutter-action@v2
+#         with:
+#           channel: 'stable'
       
-      - name: Install dependencies
-        run: flutter pub get
+#       - name: Install dependencies
+#         run: flutter pub get
       
-      - name: Decode and create key.properties
-        env:
-          KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
-        run: |
-          printf '%s\n' "$KEY_PROPERTIES" > android/key.properties
+#       - name: Decode and create key.properties
+#         env:
+#           KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
+#         run: |
+#           printf '%s\n' "$KEY_PROPERTIES" > android/key.properties
       
-      - name: Decode and create keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/fishai-release-key.jks
+#       - name: Decode and create keystore
+#         env:
+#           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+#         run: |
+#           echo "$KEYSTORE_BASE64" | base64 -d > android/app/fishai-release-key.jks
       
-      - name: Build Production AAB
-        run: flutter build appbundle --flavor production --release
-        env:
-          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
+#       - name: Build Production AAB
+#         run: flutter build appbundle --flavor production --release
+#         env:
+#           FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
       
-      - name: Build Production APK
-        run: flutter build apk --flavor production --release
-        env:
-          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
+#       - name: Build Production APK
+#         run: flutter build apk --flavor production --release
+#         env:
+#           FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
       
-      - name: Build Staging AAB
-        run: flutter build appbundle --flavor staging --release
-        env:
-          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
+#       - name: Build Staging AAB
+#         run: flutter build appbundle --flavor staging --release
+#         env:
+#           FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
       
-      - name: Build Staging APK
-        run: flutter build apk --flavor staging --release
-        env:
-          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
+#       - name: Build Staging APK
+#         run: flutter build apk --flavor staging --release
+#         env:
+#           FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
       
-      - name: Upload Release Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            build/app/outputs/bundle/productionRelease/app-production-release.aab
-            build/app/outputs/flutter-apk/app-production-release.apk
-            build/app/outputs/bundle/stagingRelease/app-staging-release.aab
-            build/app/outputs/flutter-apk/app-staging-release.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Upload Release Assets
+#         uses: softprops/action-gh-release@v2
+#         with:
+#           files: |
+#             build/app/outputs/bundle/productionRelease/app-production-release.aab
+#             build/app/outputs/flutter-apk/app-production-release.apk
+#             build/app/outputs/bundle/stagingRelease/app-staging-release.aab
+#             build/app/outputs/flutter-apk/app-staging-release.apk
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Cleanup sensitive files
-        if: always()
-        run: |
-          rm -f android/key.properties
-          rm -f android/app/fishai-release-key.jks
+#       - name: Cleanup sensitive files
+#         if: always()
+#         run: |
+#           rm -f android/key.properties
+#           rm -f android/app/fishai-release-key.jks
