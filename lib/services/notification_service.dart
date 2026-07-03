@@ -697,10 +697,6 @@ class NotificationService {
         _getNotificationTitle(notification.type, tankName);
     final body = notification.notes ?? _getDefaultBody(notification.type);
 
-    // Ensure stale scheduled notifications for this task (including overdue
-    // reminders from previous schedules) are cleared before scheduling again.
-    await _cancelNotificationsByNotificationId(notification.id);
-
     // Determine the next notification date
     DateTime? nextDate;
     if (useScheduledNextDate) {
@@ -731,6 +727,10 @@ class NotificationService {
     }
 
     if (nextDate != null && notification.enabled) {
+      // Ensure stale scheduled notifications for this task (including overdue
+      // reminders from previous schedules) are cleared before scheduling again.
+      await _cancelNotificationsByNotificationId(notification.id);
+
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
 
       await _notifications.zonedSchedule(
@@ -908,23 +908,30 @@ class NotificationService {
   Future<void> _cancelNotificationsByNotificationId(
     String notificationId,
   ) async {
-    final pending = await _notifications.pendingNotificationRequests();
-    final cancellations = <Future<void>>[];
+    try {
+      final pending = await _notifications.pendingNotificationRequests();
+      final cancellations = <Future<void>>[];
 
-    for (final request in pending) {
-      final payload = request.payload;
-      if (payload == null || payload.isEmpty) {
-        continue;
+      for (final request in pending) {
+        final payload = request.payload;
+        if (payload == null || payload.isEmpty) {
+          continue;
+        }
+
+        final parsedPayload = _parseNotificationPayload(payload);
+        if (parsedPayload?.notificationId == notificationId) {
+          cancellations.add(_notifications.cancel(id: request.id));
+        }
       }
 
-      final parsedPayload = _parseNotificationPayload(payload);
-      if (parsedPayload?.notificationId == notificationId) {
-        cancellations.add(_notifications.cancel(id: request.id));
+      if (cancellations.isNotEmpty) {
+        await Future.wait(cancellations);
       }
-    }
-
-    if (cancellations.isNotEmpty) {
-      await Future.wait(cancellations);
+    } catch (e) {
+      debugPrint(
+        '[NotificationService] Best-effort cancellation failed for '
+        'notificationId=$notificationId: $e',
+      );
     }
   }
 
