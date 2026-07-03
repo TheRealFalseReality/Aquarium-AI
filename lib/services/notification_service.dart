@@ -16,6 +16,7 @@ import '../l10n/app_localizations.dart';
 import '../models/notification_log.dart';
 import '../models/tank.dart';
 import '../models/tank_notification.dart';
+import 'crashlytics_service.dart';
 
 
 class NotificationActionLabels {
@@ -927,10 +928,15 @@ class NotificationService {
       if (cancellations.isNotEmpty) {
         await Future.wait(cancellations);
       }
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint(
         '[NotificationService] Best-effort cancellation failed for '
         'notificationId=$notificationId: $e',
+      );
+      CrashlyticsService.recordError(
+        e,
+        stack,
+        reason: 'Best-effort notification cancellation failed',
       );
     }
   }
