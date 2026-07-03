@@ -16,6 +16,7 @@ import '../l10n/app_localizations.dart';
 import '../models/notification_log.dart';
 import '../models/tank.dart';
 import '../models/tank_notification.dart';
+import 'crashlytics_service.dart';
 
 
 class NotificationActionLabels {
@@ -215,6 +216,12 @@ class NotificationService {
       return false;
     }
     return parseNotificationPayloadForTesting(payload) != null;
+  }
+
+  @visibleForTesting
+  Future<List<PendingNotificationRequest>>
+  pendingNotificationRequestsForTesting() {
+    return _notifications.pendingNotificationRequests();
   }
 
   @visibleForTesting
@@ -721,6 +728,10 @@ class NotificationService {
     }
 
     if (nextDate != null && notification.enabled) {
+      // Ensure stale scheduled notifications for this task (including overdue
+      // reminders from previous schedules) are cleared before scheduling again.
+      await _cancelNotificationsByNotificationId(notification.id);
+
       final scheduledDate = tz.TZDateTime.from(nextDate, tz.local);
 
       await _notifications.zonedSchedule(
@@ -889,9 +900,45 @@ class NotificationService {
 
   /// Cancel a scheduled notification
   Future<void> cancelNotification(TankNotification notification) async {
+    await _cancelNotificationsByNotificationId(notification.id);
     final int notificationId = notification.id.hashCode;
     await _notifications.cancel(id: notificationId);
     await _cancelMissedTaskReminders(notification);
+  }
+
+  Future<void> _cancelNotificationsByNotificationId(
+    String notificationId,
+  ) async {
+    try {
+      final pending = await _notifications.pendingNotificationRequests();
+      final cancellations = <Future<void>>[];
+
+      for (final request in pending) {
+        final payload = request.payload;
+        if (payload == null || payload.isEmpty) {
+          continue;
+        }
+
+        final parsedPayload = _parseNotificationPayload(payload);
+        if (parsedPayload?.notificationId == notificationId) {
+          cancellations.add(_notifications.cancel(id: request.id));
+        }
+      }
+
+      if (cancellations.isNotEmpty) {
+        await Future.wait(cancellations);
+      }
+    } catch (e, stack) {
+      debugPrint(
+        '[NotificationService] Best-effort cancellation failed for '
+        'notificationId=$notificationId: $e',
+      );
+      CrashlyticsService.recordError(
+        e,
+        stack,
+        reason: 'Best-effort notification cancellation failed',
+      );
+    }
   }
 
   Future<void> _cancelMissedTaskReminders(TankNotification notification) async {
