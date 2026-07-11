@@ -6,7 +6,7 @@ import '../services/analytics_service.dart';
 
 /// A dialog that surfaces a server-side message pushed via Firebase Remote Config.
 ///
-/// The dialog shows once per unique [RemoteConfigService.serverMessageId]. The
+/// The dialog shows once per unique [messageId]. The
 /// user can either:
 /// * **Dismiss forever** – the message is permanently hidden for this ID.
 /// * **Remind me in 3 days** (or tap the barrier) – the dialog will reappear
@@ -17,6 +17,8 @@ import '../services/analytics_service.dart';
 ///   dismissed message.
 /// * `server_message_remind_after` – epoch-millisecond timestamp after which
 ///   the dialog may appear again (snooze).
+/// * `server_message_remind_after_id` – stores which message ID the current
+///   snooze timestamp belongs to.
 class ServerMessageDialog extends StatelessWidget {
   const ServerMessageDialog({
     super.key,
@@ -39,6 +41,8 @@ class ServerMessageDialog extends StatelessWidget {
   static const String _dismissedIdKey = 'server_message_dismissed_id';
   static const String _remindAfterKey = 'server_message_remind_after';
   static const String _remindAfterIdKey = 'server_message_remind_after_id';
+  static const String _dismissedPopResult = 'dismissed';
+  static const String _snoozedPopResult = 'snoozed';
 
   /// Duration to snooze when the user chooses "Remind me in 3 days".
   static const Duration _snoozeDuration = Duration(days: 3);
@@ -107,7 +111,11 @@ class ServerMessageDialog extends StatelessWidget {
     return PopScope(
       // Barrier dismiss / back button → treated as "remind later".
       onPopInvokedWithResult: (didPop, result) async {
-        if (didPop && result == null) await _snooze(messageId);
+        if (didPop &&
+            result != _dismissedPopResult &&
+            result != _snoozedPopResult) {
+          await _snooze(messageId);
+        }
       },
       child: AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -141,7 +149,9 @@ class ServerMessageDialog extends StatelessWidget {
                 parameters: {'message_id': messageId},
               );
               await _dismiss(messageId);
-              if (context.mounted) Navigator.of(context).pop('dismissed');
+              if (context.mounted) {
+                Navigator.of(context).pop(_dismissedPopResult);
+              }
             },
             child: Text(
               l10n.serverMessageDismiss,
@@ -155,7 +165,9 @@ class ServerMessageDialog extends StatelessWidget {
                 parameters: {'message_id': messageId},
               );
               await _snooze(messageId);
-              if (context.mounted) Navigator.of(context).pop('snoozed');
+              if (context.mounted) {
+                Navigator.of(context).pop(_snoozedPopResult);
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.primary,
