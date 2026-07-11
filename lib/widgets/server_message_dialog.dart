@@ -102,8 +102,8 @@ class ServerMessageDialog extends StatelessWidget {
 
     return PopScope(
       // Barrier dismiss / back button → treated as "remind later".
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) _snooze();
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) await _snooze();
       },
       child: AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

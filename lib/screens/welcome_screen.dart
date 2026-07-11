@@ -167,6 +167,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const String _hiddenFeaturesKey = 'hiddenWelcomeFeatures';
   static const String _showCommunityCardKey = 'welcomeShowCommunityCard';
 
+  /// Delay before the server message dialog is shown, allowing other startup
+  /// dialogs (changelog, app update) to appear first.
+  static const Duration _serverMessageDialogDelay = Duration(seconds: 2);
+
   // Promo card keys
   static const String _docsPromoShownAtKey = 'welcomeDocsPromoShownAt';
   static const String _docsPromoDismissedKey = 'welcomeDocsPromoDismissed';
@@ -858,8 +862,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       parameters: {'message_id': messageId},
     );
 
-    // Short delay so other startup dialogs have time to appear first.
-    Timer(const Duration(seconds: 2), () {
+    // Short delay so other startup dialogs (changelog, update) settle first.
+    Timer(_serverMessageDialogDelay, () {
       if (!mounted) return;
       showDialog<void>(
         context: context,
