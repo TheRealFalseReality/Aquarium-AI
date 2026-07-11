@@ -82,8 +82,9 @@ void main() {
 
       final navigatorKey = GlobalKey<NavigatorState>();
       await _showDialog(tester, navigatorKey);
+      final l10n = AppLocalizations.of(navigatorKey.currentContext!)!;
 
-      await tester.tap(find.text('Dismiss'));
+      await tester.tap(find.text(l10n.serverMessageDismiss));
       await tester.pumpAndSettle();
 
       final prefs = await SharedPreferences.getInstance();
@@ -95,8 +96,9 @@ void main() {
     testWidgets('remind later stores snooze ID and timestamp', (tester) async {
       final navigatorKey = GlobalKey<NavigatorState>();
       await _showDialog(tester, navigatorKey);
+      final l10n = AppLocalizations.of(navigatorKey.currentContext!)!;
 
-      await tester.tap(find.text('Remind in 3 Days'));
+      await tester.tap(find.text(l10n.serverMessageRemindLater));
       await tester.pumpAndSettle();
 
       final prefs = await SharedPreferences.getInstance();
