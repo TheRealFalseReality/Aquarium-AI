@@ -2182,5 +2182,8 @@
   "recommendedModelsDescription": "Vous ne savez pas quel modèle choisir ? Voici quelques conseils pour chaque fournisseur.",
   "geminiModelTip": "gemini-flash-latest — Rapide et adapté au niveau gratuit, idéal pour un usage quotidien.\ngemini-2.0-pro-exp — Qualité maximale, plus lent et consomme plus de quota.",
   "groqModelTip": "llama-3.3-70b-versatile — Meilleure qualité sur Groq avec une inférence ultra-rapide.\nllama-3.1-8b-instant — Option la plus rapide, idéale pour les requêtes rapides.",
-  "openAIModelTip": "gpt-4o — Meilleure qualité, support multimodal, coût plus élevé.\ngpt-4o-mini — Rapide et économique pour la plupart des tâches."
+  "openAIModelTip": "gpt-4o — Meilleure qualité, support multimodal, coût plus élevé.\ngpt-4o-mini — Rapide et économique pour la plupart des tâches.",
+  "serverMessageDefaultTitle": "Message du développeur",
+  "serverMessageDismiss": "Fermer",
+  "serverMessageRemindLater": "Me rappeler dans 3 jours"
 }

@@ -6219,6 +6219,18 @@
   "openAIModelTip": "gpt-4o — Best quality, multimodal support, higher cost.\ngpt-4o-mini — Fast and cost-effective for most tasks.",
   "@openAIModelTip": {
     "description": "Model recommendation tip for OpenAI in AI settings"
+  },
+  "serverMessageDefaultTitle": "Message from Developer",
+  "@serverMessageDefaultTitle": {
+    "description": "Fallback title for the server-pushed message dialog when no title is provided via Remote Config"
+  },
+  "serverMessageDismiss": "Dismiss",
+  "@serverMessageDismiss": {
+    "description": "Button label to permanently dismiss the server message dialog"
+  },
+  "serverMessageRemindLater": "Remind in 3 Days",
+  "@serverMessageRemindLater": {
+    "description": "Button label to snooze the server message dialog for 3 days"
   }
 
 }

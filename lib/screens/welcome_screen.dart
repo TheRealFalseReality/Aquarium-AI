@@ -41,6 +41,7 @@ import '../widgets/aquapi_promotion_dialog.dart';
 import '../widgets/founder_upsell_banner.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/remove_ads_dialog.dart';
+import '../widgets/server_message_dialog.dart';
 import 'changelog_screen.dart';
 import 'community_post_screen.dart';
 import 'markdown_viewer_screen.dart';
@@ -236,6 +237,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       _checkShowChangelogDialog();
       // Check if an app update is available and show a dismissible popup.
       _checkShowAppUpdateDialog();
+      // Check if there is a new server-side message to show.
+      _checkShowServerMessage();
     });
   }
 
@@ -837,6 +840,37 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     } catch (e) {
       debugPrint('Error checking app update popup: $e');
     }
+  }
+
+  Future<void> _checkShowServerMessage() async {
+    final messageId = RemoteConfigService.serverMessageId;
+    final message = RemoteConfigService.serverMessage;
+    final title = RemoteConfigService.serverMessageTitle;
+
+    final show = await ServerMessageDialog.shouldShow(
+      id: messageId,
+      body: message,
+    );
+    if (!show || !mounted) return;
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'server_message_shown',
+      parameters: {'message_id': messageId},
+    );
+
+    // Short delay so other startup dialogs have time to appear first.
+    Timer(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (_) => ServerMessageDialog(
+          messageId: messageId,
+          title: title,
+          message: message,
+        ),
+      );
+    });
   }
 
   Future<void> _dismissChangelogBanner() async {

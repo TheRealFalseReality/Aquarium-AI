@@ -192,6 +192,19 @@ const int rcDefaultFounderChatHistoryLimit = 10;
 const double rcDefaultSignedInRateLimitMultiplier = 2.0;
 
 // ---------------------------------------------------------------------------
+// Server message defaults
+// ---------------------------------------------------------------------------
+
+/// Default server message identifier. Empty string means no message is active.
+const String rcDefaultServerMessageId = '';
+
+/// Default server message title. Empty string means use a generic title.
+const String rcDefaultServerMessageTitle = '';
+
+/// Default server message body. Empty string means no message is shown.
+const String rcDefaultServerMessage = '';
+
+// ---------------------------------------------------------------------------
 // Deep linking constants
 // ---------------------------------------------------------------------------
 
@@ -381,4 +394,19 @@ class RemoteConfigKeys {
   /// Default 2.0 = double the anonymous baseline.
   static const String signedInRateLimitMultiplier =
       'signed_in_rate_limit_multiplier';
+
+  // ── Server message ─────────────────────────────────────────────────────────
+  /// String — unique identifier for the current server message.
+  /// Changing this value causes the popup to appear again for all users
+  /// (even those who previously snoozed it for this ID).
+  /// Set to an empty string (default) to disable the feature.
+  static const String serverMessageId = 'server_message_id';
+
+  /// String — title text shown in the server message dialog.
+  /// Leave empty to use a generic "Message from Developer" title.
+  static const String serverMessageTitle = 'server_message_title';
+
+  /// String — body text shown in the server message dialog.
+  /// Set to an empty string (default) to show no message.
+  static const String serverMessage = 'server_message';
 }

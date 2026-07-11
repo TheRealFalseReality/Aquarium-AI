@@ -75,6 +75,9 @@ class RemoteConfigService {
         RemoteConfigKeys.ccaWebsiteUrl: rcDefaultCcaWebsiteUrl,
         RemoteConfigKeys.gitHubRepoUrl: rcDefaultGitHubRepoUrl,
         RemoteConfigKeys.gitHubIssuesUrl: rcDefaultGitHubIssuesUrl,
+        RemoteConfigKeys.serverMessageId: rcDefaultServerMessageId,
+        RemoteConfigKeys.serverMessageTitle: rcDefaultServerMessageTitle,
+        RemoteConfigKeys.serverMessage: rcDefaultServerMessage,
       });
 
       // Refresh at most once per hour in production; more frequently in debug.
@@ -396,4 +399,25 @@ class RemoteConfigService {
   /// Defaults to [rcDefaultGitHubIssuesUrl].
   static String get gitHubIssuesUrl =>
       _modelString(RemoteConfigKeys.gitHubIssuesUrl, rcDefaultGitHubIssuesUrl);
+
+  // ── Server message ─────────────────────────────────────────────────────────
+
+  /// Unique identifier for the active server message.
+  /// An empty string means no message is configured.
+  /// Updating this value in Remote Config causes the popup to appear again
+  /// for all users (including those who previously snoozed).
+  static String get serverMessageId =>
+      _modelString(RemoteConfigKeys.serverMessageId, rcDefaultServerMessageId);
+
+  /// Title of the server message dialog.
+  /// An empty string signals the UI to use a generic fallback title.
+  static String get serverMessageTitle => _modelString(
+    RemoteConfigKeys.serverMessageTitle,
+    rcDefaultServerMessageTitle,
+  );
+
+  /// Body text of the server message dialog.
+  /// An empty string means no message should be shown.
+  static String get serverMessage =>
+      _modelString(RemoteConfigKeys.serverMessage, rcDefaultServerMessage);
 }
