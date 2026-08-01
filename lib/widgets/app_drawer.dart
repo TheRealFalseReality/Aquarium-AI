@@ -439,6 +439,7 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
       'notifications',
       'community',
       'profile',
+      'developer-message',
       'information',
     ];
 
@@ -699,6 +700,14 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           title: Text(l10n.information),
           subtitle: Text(l10n.informationDescription),
           onTap: () => navigate('/information'),
+        );
+        break;
+      case 'developer-message':
+        tile = ListTile(
+          leading: Icon(Icons.campaign_outlined, color: cs.tertiary),
+          title: Text(l10n.developerMessage),
+          subtitle: Text(l10n.developerMessageDrawerDescription),
+          onTap: () => navigate('/developer-message'),
         );
         break;
       default:

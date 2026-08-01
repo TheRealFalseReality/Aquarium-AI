@@ -6231,6 +6231,18 @@
   "serverMessageRemindLater": "Remind in 3 Days",
   "@serverMessageRemindLater": {
     "description": "Button label to snooze the server message dialog for 3 days"
+  },
+  "developerMessage": "Developer Message",
+  "@developerMessage": {
+    "description": "Drawer item and screen title for viewing the latest developer message"
+  },
+  "developerMessageDrawerDescription": "View the latest message from the developer",
+  "@developerMessageDrawerDescription": {
+    "description": "Drawer subtitle for the developer message entry"
+  },
+  "serverMessageNoCurrentMessage": "No current message.",
+  "@serverMessageNoCurrentMessage": {
+    "description": "Shown when no active server message is available"
   }
 
 }

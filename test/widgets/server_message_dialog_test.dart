@@ -62,7 +62,7 @@ void main() {
 
       showDialog<void>(
         context: key.currentContext!,
-        barrierDismissible: true,
+        barrierDismissible: false,
         builder: (_) => const ServerMessageDialog(
           messageId: 'message_a',
           title: 'Title',
@@ -107,7 +107,9 @@ void main() {
       expect(prefs.getString(remindAfterIdKey), 'message_a');
     });
 
-    testWidgets('barrier/back pop snoozes current message ID', (tester) async {
+    testWidgets('back pop is blocked and does not create snooze state', (
+      tester,
+    ) async {
       final navigatorKey = GlobalKey<NavigatorState>();
       await _showDialog(tester, navigatorKey);
 
@@ -115,9 +117,9 @@ void main() {
       await tester.pumpAndSettle();
 
       final prefs = await SharedPreferences.getInstance();
-      final remindAfter = prefs.getInt(remindAfterKey) ?? 0;
-      expect(remindAfter, greaterThan(DateTime.now().millisecondsSinceEpoch));
-      expect(prefs.getString(remindAfterIdKey), 'message_a');
+      expect(prefs.containsKey(remindAfterKey), isFalse);
+      expect(prefs.containsKey(remindAfterIdKey), isFalse);
+      expect(find.byType(ServerMessageDialog), findsOneWidget);
     });
   });
 }

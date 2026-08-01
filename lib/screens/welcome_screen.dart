@@ -873,7 +873,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       if (!mounted) return;
       showDialog<void>(
         context: context,
-        barrierDismissible: true,
+        barrierDismissible: false,
         builder: (_) => ServerMessageDialog(
           messageId: messageId,
           title: title,

@@ -180,6 +180,18 @@ class RemoteConfigService {
     return (value != null && value.isNotEmpty) ? value : fallback;
   }
 
+  static bool get _isAnyServerMessageKeyUsingInAppDefault {
+    final remoteConfig = _instance;
+    if (remoteConfig == null) return true;
+
+    bool usesInAppDefault(String key) =>
+        remoteConfig.getValue(key).source == ValueSource.valueDefault;
+
+    return usesInAppDefault(RemoteConfigKeys.serverMessageId) ||
+        usesInAppDefault(RemoteConfigKeys.serverMessageTitle) ||
+        usesInAppDefault(RemoteConfigKeys.serverMessage);
+  }
+
   /// Default Gemini text/chat model name.
   static String get defaultGeminiModel =>
       _modelString(RemoteConfigKeys.defaultGeminiModel, rcDefaultGeminiModel);
@@ -430,18 +442,25 @@ class RemoteConfigService {
   /// An empty string means no message is configured.
   /// Updating this value in Remote Config causes the popup to appear again
   /// for all users (including those who previously snoozed).
-  static String get serverMessageId =>
-      _modelString(RemoteConfigKeys.serverMessageId, rcDefaultServerMessageId);
+  static String get serverMessageId {
+    if (_isAnyServerMessageKeyUsingInAppDefault) return '';
+    return _modelString(RemoteConfigKeys.serverMessageId, rcDefaultServerMessageId);
+  }
 
   /// Title of the server message dialog.
   /// An empty string signals the UI to use a generic fallback title.
-  static String get serverMessageTitle => _modelString(
-    RemoteConfigKeys.serverMessageTitle,
-    rcDefaultServerMessageTitle,
-  );
+  static String get serverMessageTitle {
+    if (_isAnyServerMessageKeyUsingInAppDefault) return '';
+    return _modelString(
+      RemoteConfigKeys.serverMessageTitle,
+      rcDefaultServerMessageTitle,
+    );
+  }
 
   /// Body text of the server message dialog.
   /// An empty string means no message should be shown.
-  static String get serverMessage =>
-      _modelString(RemoteConfigKeys.serverMessage, rcDefaultServerMessage);
+  static String get serverMessage {
+    if (_isAnyServerMessageKeyUsingInAppDefault) return '';
+    return _modelString(RemoteConfigKeys.serverMessage, rcDefaultServerMessage);
+  }
 }

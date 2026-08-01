@@ -2185,5 +2185,8 @@
   "openAIModelTip": "gpt-4o — Mejor calidad, soporte multimodal, mayor costo.\ngpt-4o-mini — Rápido y económico para la mayoría de tareas.",
   "serverMessageDefaultTitle": "Mensaje del desarrollador",
   "serverMessageDismiss": "Descartar",
-  "serverMessageRemindLater": "Recordar en 3 días"
+  "serverMessageRemindLater": "Recordar en 3 días",
+  "developerMessage": "Mensaje del desarrollador",
+  "developerMessageDrawerDescription": "Ver el último mensaje del desarrollador",
+  "serverMessageNoCurrentMessage": "No hay ningún mensaje actual."
 }
