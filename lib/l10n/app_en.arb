@@ -5072,9 +5072,31 @@
   "@recordPassing": {
     "description": "Label for the action that marks an inhabitant as having passed away"
   },
+  "memorializeInhabitantConfirm": "Memorializing \"{inhabitantName}\" removes it from the active tank list while preserving its photos, notes, and timeline in the memorial section.\n\nYou'll choose the date passed next.",
+  "@memorializeInhabitantConfirm": {
+    "description": "Detailed confirmation shown before memorializing an inhabitant",
+    "placeholders": {
+      "inhabitantName": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseDatePassed": "Choose Date Passed",
+  "@chooseDatePassed": {
+    "description": "Button label that opens the date picker for the recorded passing date"
+  },
   "restoreToActiveTank": "Restore to Tank",
   "@restoreToActiveTank": {
     "description": "Label for the action that restores a memorialized inhabitant to the active tank list"
+  },
+  "restoreMemorializedInhabitantConfirm": "Restore \"{inhabitantName}\" to the active tank? This clears the recorded passing date and removes its memorial status.",
+  "@restoreMemorializedInhabitantConfirm": {
+    "description": "Confirmation message shown before restoring a memorialized inhabitant to the active tank list",
+    "placeholders": {
+      "inhabitantName": {
+        "type": "String"
+      }
+    }
   },
   "inMemoryOf": "In memory of {inhabitantName}",
   "@inMemoryOf": {

@@ -2996,7 +2996,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
-                    Icons.favorite,
+                    Icons.heart_broken_outlined,
                     color: cs.onTertiaryContainer,
                     size: 20,
                   ),
@@ -3048,7 +3048,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                             fishImageUrl == null ? cs.tertiaryContainer : null,
                         child: fishImageUrl == null
                             ? Icon(
-                                Icons.favorite_border,
+                                Icons.heart_broken_outlined,
                                 color: cs.onTertiaryContainer,
                                 size: 22,
                               )

@@ -185,6 +185,29 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
   }
 
   Future<void> _recordPassing(TankInhabitant inhabitant, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.recordPassing),
+        content: Text(
+          l10n.memorializeInhabitantConfirm(inhabitant.customName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            icon: const Icon(Icons.heart_broken_outlined),
+            label: Text(l10n.chooseDatePassed),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     final selectedDate = await showDatePicker(
       context: context,
       initialDate: inhabitant.dateDied ?? DateTime.now(),
@@ -210,7 +233,29 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
     );
   }
 
-  void _restoreToActiveTank(TankInhabitant inhabitant, Tank tank) {
+  Future<void> _restoreToActiveTank(TankInhabitant inhabitant, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.restoreToActiveTank),
+        content: Text(
+          l10n.restoreMemorializedInhabitantConfirm(inhabitant.customName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.restore),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
     final restored = inhabitant.copyWith(clearDateDied: true);
     final updatedTank = tank.copyWith(
       inhabitants: [...tank.inhabitants, restored],
@@ -324,7 +369,7 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
             icon: Icon(
               isMemorialized
                   ? Icons.restart_alt_outlined
-                  : Icons.favorite_border,
+                  : Icons.heart_broken_outlined,
             ),
             tooltip: isMemorialized
                 ? l10n.restoreToActiveTank
@@ -569,7 +614,7 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(Icons.favorite, color: cs.secondary),
+            Icon(Icons.heart_broken_outlined, color: cs.secondary),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
