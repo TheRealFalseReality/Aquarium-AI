@@ -556,7 +556,7 @@ class CommunityService {
           .doc(comment.id)
           .update({
             'body': trimmedBody,
-            'updatedAt': Timestamp.fromDate(DateTime.now()),
+            'updatedAt': FieldValue.serverTimestamp(),
           });
       return true;
     } catch (e) {
