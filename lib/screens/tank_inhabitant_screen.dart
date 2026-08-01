@@ -60,10 +60,10 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
       (t) => t.id == widget.tank.id,
       orElse: () => widget.tank,
     );
-    return [
-      ...tank.inhabitants,
-      ...tank.memorializedInhabitants,
-    ].firstWhere((i) => i.id == widget.inhabitant.id, orElse: () => widget.inhabitant);
+    return [...tank.inhabitants, ...tank.memorializedInhabitants].firstWhere(
+      (i) => i.id == widget.inhabitant.id,
+      orElse: () => widget.inhabitant,
+    );
   }
 
   Tank _getCurrentTank() {
@@ -96,7 +96,8 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
 
   Tank _removeInhabitant(Tank tank, TankInhabitant inhabitant) {
     return tank.copyWith(
-      inhabitants: tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
+      inhabitants:
+          tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
       memorializedInhabitants: tank.memorializedInhabitants
           .where((i) => i.id != inhabitant.id)
           .toList(),
@@ -194,7 +195,8 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
 
     final memorialized = inhabitant.copyWith(dateDied: selectedDate);
     final updatedTank = tank.copyWith(
-      inhabitants: tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
+      inhabitants:
+          tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
       memorializedInhabitants: [
         ...tank.memorializedInhabitants.where((i) => i.id != inhabitant.id),
         memorialized,
@@ -319,19 +321,21 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
         title: Text(inhabitant.customName),
         actions: [
           IconButton(
-          icon: Icon(
-            isMemorialized ? Icons.restart_alt_outlined : Icons.favorite_border,
+            icon: Icon(
+              isMemorialized
+                  ? Icons.restart_alt_outlined
+                  : Icons.favorite_border,
+            ),
+            tooltip: isMemorialized
+                ? l10n.restoreToActiveTank
+                : l10n.recordPassing,
+            onPressed: () => isMemorialized
+                ? _restoreToActiveTank(inhabitant, tank)
+                : _recordPassing(inhabitant, tank),
           ),
-          tooltip: isMemorialized
-              ? l10n.restoreToActiveTank
-              : l10n.recordPassing,
-          onPressed: () => isMemorialized
-              ? _restoreToActiveTank(inhabitant, tank)
-              : _recordPassing(inhabitant, tank),
-        ),
-        IconButton(
-          icon: const Icon(Icons.add_a_photo_outlined),
-          tooltip: l10n.addPhoto,
+          IconButton(
+            icon: const Icon(Icons.add_a_photo_outlined),
+            tooltip: l10n.addPhoto,
             onPressed: () => _pickCustomImage(inhabitant, tank),
           ),
           IconButton(
