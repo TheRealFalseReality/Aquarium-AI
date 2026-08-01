@@ -60,10 +60,10 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
       (t) => t.id == widget.tank.id,
       orElse: () => widget.tank,
     );
-    return tank.inhabitants.firstWhere(
-      (i) => i.id == widget.inhabitant.id,
-      orElse: () => widget.inhabitant,
-    );
+    return [
+      ...tank.inhabitants,
+      ...tank.memorializedInhabitants,
+    ].firstWhere((i) => i.id == widget.inhabitant.id, orElse: () => widget.inhabitant);
   }
 
   Tank _getCurrentTank() {
@@ -74,18 +74,43 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
     );
   }
 
+  bool _isMemorialized(Tank tank, TankInhabitant inhabitant) =>
+      tank.memorializedInhabitants.any((i) => i.id == inhabitant.id);
+
+  Tank _replaceInhabitant(Tank tank, TankInhabitant updated) {
+    final isMemorialized = _isMemorialized(tank, updated);
+    return tank.copyWith(
+      inhabitants: isMemorialized
+          ? tank.inhabitants
+          : tank.inhabitants
+              .map((i) => i.id == updated.id ? updated : i)
+              .toList(),
+      memorializedInhabitants: isMemorialized
+          ? tank.memorializedInhabitants
+              .map((i) => i.id == updated.id ? updated : i)
+              .toList()
+          : tank.memorializedInhabitants,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  Tank _removeInhabitant(Tank tank, TankInhabitant inhabitant) {
+    return tank.copyWith(
+      inhabitants: tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
+      memorializedInhabitants: tank.memorializedInhabitants
+          .where((i) => i.id != inhabitant.id)
+          .toList(),
+      updatedAt: DateTime.now(),
+    );
+  }
+
   void _saveNotes(TankInhabitant inhabitant, Tank tank) {
     final notes = _notesController.text.trim();
     final updated = inhabitant.copyWith(
       userNotes: notes.isEmpty ? null : notes,
       clearUserNotes: notes.isEmpty,
     );
-    final updatedTank = tank.copyWith(
-      inhabitants: tank.inhabitants
-          .map((i) => i.id == inhabitant.id ? updated : i)
-          .toList(),
-      updatedAt: DateTime.now(),
-    );
+    final updatedTank = _replaceInhabitant(tank, updated);
     ref.read(tankProvider.notifier).updateTank(updatedTank);
     setState(() {
       _editingNotes = false;
@@ -109,12 +134,7 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
         availableFish: fishList,
         existingInhabitant: inhabitant,
         onAdd: (updated) {
-          final updatedTank = tank.copyWith(
-            inhabitants: tank.inhabitants
-                .map((i) => i.id == updated.id ? updated : i)
-                .toList(),
-            updatedAt: DateTime.now(),
-          );
+          final updatedTank = _replaceInhabitant(tank, updated);
           ref.read(tankProvider.notifier).updateTank(updatedTank);
           AnalyticsService.logFeatureUsed(
             featureName: 'inhabitant_edited_from_detail',
@@ -157,14 +177,51 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
   /// Removes the inhabitant from the tank without showing a confirmation.
   /// Used when confirmation has already been obtained (e.g., from the edit dialog).
   void _performDeleteInhabitant(TankInhabitant inhabitant, Tank tank) {
-    final updatedTank = tank.copyWith(
-      inhabitants:
-          tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
-      updatedAt: DateTime.now(),
-    );
+    final updatedTank = _removeInhabitant(tank, inhabitant);
     ref.read(tankProvider.notifier).updateTank(updatedTank);
     AnalyticsService.logFeatureUsed(featureName: 'inhabitant_deleted');
     if (mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _recordPassing(TankInhabitant inhabitant, Tank tank) async {
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: inhabitant.dateDied ?? DateTime.now(),
+      firstDate: inhabitant.dateAdded ?? DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (selectedDate == null) return;
+
+    final memorialized = inhabitant.copyWith(dateDied: selectedDate);
+    final updatedTank = tank.copyWith(
+      inhabitants: tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
+      memorializedInhabitants: [
+        ...tank.memorializedInhabitants.where((i) => i.id != inhabitant.id),
+        memorialized,
+      ],
+      updatedAt: DateTime.now(),
+    );
+    ref.read(tankProvider.notifier).updateTank(updatedTank);
+    AnalyticsService.logFeatureUsed(
+      featureName: 'inhabitant_passing_recorded',
+      parameters: {'fish_type': memorialized.fishUnit},
+    );
+  }
+
+  void _restoreToActiveTank(TankInhabitant inhabitant, Tank tank) {
+    final restored = inhabitant.copyWith(clearDateDied: true);
+    final updatedTank = tank.copyWith(
+      inhabitants: [...tank.inhabitants, restored],
+      memorializedInhabitants: tank.memorializedInhabitants
+          .where((i) => i.id != inhabitant.id)
+          .toList(),
+      updatedAt: DateTime.now(),
+    );
+    ref.read(tankProvider.notifier).updateTank(updatedTank);
+    AnalyticsService.logFeatureUsed(
+      featureName: 'inhabitant_memorial_restored',
+      parameters: {'fish_type': restored.fishUnit},
+    );
   }
 
   Future<void> _pickCustomImage(TankInhabitant inhabitant, Tank tank) async {
@@ -197,12 +254,7 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
       if (picked == null) return;
 
       final updated = inhabitant.copyWith(customImagePath: picked.path);
-      final updatedTank = tank.copyWith(
-        inhabitants: tank.inhabitants
-            .map((i) => i.id == inhabitant.id ? updated : i)
-            .toList(),
-        updatedAt: DateTime.now(),
-      );
+      final updatedTank = _replaceInhabitant(tank, updated);
       ref.read(tankProvider.notifier).updateTank(updatedTank);
       AnalyticsService.logFeatureUsed(
           featureName: 'inhabitant_custom_image_set');
@@ -252,6 +304,7 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
     final cs = Theme.of(context).colorScheme;
     final inhabitant = _getCurrentInhabitant();
     final tank = _getCurrentTank();
+    final isMemorialized = _isMemorialized(tank, inhabitant);
 
     final fishDataAsync = ref.watch(fishDataProvider);
     final fishData = fishDataAsync.maybeWhen(
@@ -266,8 +319,19 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
         title: Text(inhabitant.customName),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_a_photo_outlined),
-            tooltip: l10n.addPhoto,
+          icon: Icon(
+            isMemorialized ? Icons.restart_alt_outlined : Icons.favorite_border,
+          ),
+          tooltip: isMemorialized
+              ? l10n.restoreToActiveTank
+              : l10n.recordPassing,
+          onPressed: () => isMemorialized
+              ? _restoreToActiveTank(inhabitant, tank)
+              : _recordPassing(inhabitant, tank),
+        ),
+        IconButton(
+          icon: const Icon(Icons.add_a_photo_outlined),
+          tooltip: l10n.addPhoto,
             onPressed: () => _pickCustomImage(inhabitant, tank),
           ),
           IconButton(
@@ -291,6 +355,10 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
           _buildImageSection(context, imageUrl, inhabitant, tank, cs, l10n),
           const SizedBox(height: 20),
           // Info card
+          if (isMemorialized) ...[
+            _buildMemorialCard(context, inhabitant, cs, l10n),
+            const SizedBox(height: 16),
+          ],
           _buildInfoCard(context, inhabitant, cs, l10n),
           const SizedBox(height: 16),
           // Species tags
@@ -455,6 +523,58 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
                 cs,
               ),
             ],
+            if (inhabitant.dateDied != null) ...[
+              const Divider(height: 20),
+              _infoRow(
+                context,
+                Icons.heart_broken_outlined,
+                l10n.datePassed,
+                DateFormat.yMMMd().format(inhabitant.dateDied!),
+                cs,
+              ),
+              if (inhabitant.dateAdded != null) ...[
+                const Divider(height: 20),
+                _infoRow(
+                  context,
+                  Icons.auto_awesome_outlined,
+                  l10n.lifespan,
+                  _formatDuration(
+                    context,
+                    inhabitant.dateAdded!,
+                    inhabitant.dateDied!,
+                  ),
+                  cs,
+                ),
+              ],
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMemorialCard(
+    BuildContext context,
+    TankInhabitant inhabitant,
+    ColorScheme cs,
+    AppLocalizations l10n,
+  ) {
+    return Card(
+      color: cs.secondaryContainer.withOpacity(0.5),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(Icons.favorite, color: cs.secondary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                l10n.inMemoryOf(inhabitant.customName),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
       ),
@@ -494,10 +614,16 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
 
   /// Returns a compact age string (e.g. "2y 5m") for a given start date.
   String _formatAge(BuildContext context, DateTime since) {
+    return _formatDuration(context, since, DateTime.now());
+  }
+
+  String _formatDuration(BuildContext context, DateTime since, DateTime until) {
     final l10n = AppLocalizations.of(context)!;
-    final now = DateTime.now();
-    int years = now.year - since.year;
-    int months = now.month - since.month;
+    int years = until.year - since.year;
+    int months = until.month - since.month;
+    if (until.day < since.day) {
+      months--;
+    }
     if (months < 0) {
       years--;
       months += 12;

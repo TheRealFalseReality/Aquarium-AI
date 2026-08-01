@@ -153,6 +153,7 @@ void main() {
       final tank = Tank.fromJson(json);
 
       expect(tank.photos, isEmpty);
+      expect(tank.memorializedInhabitants, isEmpty);
     });
 
     test('should handle Tank with no waterParameters (backwards compatibility)', () {
@@ -383,6 +384,88 @@ void main() {
       expect(copy.fishUuid, equals(testUuid));
       expect(copy.quantity, equals(3));
     });
+
+    test('TankInhabitant serializes dateDied when memorialized', () {
+      final dateDied = DateTime(2024, 6, 1);
+      final inhabitant = TankInhabitant(
+        id: 'inh-1',
+        customName: 'My Clownfish',
+        fishUnit: 'Clownfish',
+        quantity: 1,
+        dateAdded: DateTime(2023, 1, 1),
+        dateDied: dateDied,
+      );
+
+      final json = inhabitant.toJson();
+      final recreated = TankInhabitant.fromJson(json);
+
+      expect(json['dateDied'], dateDied.toIso8601String());
+      expect(recreated.dateDied, equals(dateDied));
+    });
+
+    test('TankInhabitant.copyWith can clear dateDied', () {
+      final original = TankInhabitant(
+        id: 'inh-1',
+        customName: 'My Clownfish',
+        fishUnit: 'Clownfish',
+        quantity: 1,
+        dateDied: DateTime(2024, 6, 1),
+      );
+
+      final restored = original.copyWith(clearDateDied: true);
+
+      expect(restored.dateDied, isNull);
+    });
+  });
+
+  group('Tank memorialized inhabitants', () {
+    test('Tank serializes memorialized inhabitants', () {
+      final tank = Tank.create(
+        name: 'Memorial Tank',
+        type: 'freshwater',
+        memorializedInhabitants: [
+          TankInhabitant(
+            id: 'mem-1',
+            customName: 'Bubbles',
+            fishUnit: 'Betta',
+            quantity: 1,
+            dateAdded: DateTime(2023, 1, 1),
+            dateDied: DateTime(2024, 2, 1),
+          ),
+        ],
+      );
+
+      final json = tank.toJson();
+      final recreated = Tank.fromJson(json);
+
+      expect((json['memorializedInhabitants'] as List).length, 1);
+      expect(recreated.memorializedInhabitants.length, 1);
+      expect(
+        recreated.memorializedInhabitants.first.customName,
+        equals('Bubbles'),
+      );
+      expect(
+        recreated.memorializedInhabitants.first.dateDied,
+        equals(DateTime(2024, 2, 1)),
+      );
+    });
+
+    test('Tank handles missing memorializedInhabitants (backward compat)', () {
+      final tank = Tank.fromJson({
+        'id': 'tank-1',
+        'name': 'My Tank',
+        'type': 'freshwater',
+        'inhabitants': [],
+        'sizeGallons': null,
+        'sizeLiters': null,
+        'notes': null,
+        'harmonyScore': null,
+        'calculationBreakdown': null,
+        'createdAt': '2024-01-01T00:00:00.000',
+        'updatedAt': '2024-01-01T00:00:00.000',
+      });
+
+      expect(tank.memorializedInhabitants, isEmpty);
+    });
   });
 }
-

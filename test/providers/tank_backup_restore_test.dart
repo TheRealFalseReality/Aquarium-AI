@@ -120,6 +120,16 @@ void main() {
             customImageUrl: 'https://example.com/fish.jpg',
           ),
         ],
+        memorializedInhabitants: [
+          TankInhabitant(
+            id: 'memorial-fish',
+            customName: 'Old Friend',
+            fishUnit: 'Guppy',
+            quantity: 1,
+            dateAdded: DateTime(2023, 1, 1),
+            dateDied: DateTime(2024, 1, 1),
+          ),
+        ],
       );
 
       // Convert to JSON and back
@@ -154,6 +164,11 @@ void main() {
       expect(restoredInhabitant.fishUnit, equals(originalInhabitant.fishUnit));
       expect(restoredInhabitant.quantity, equals(originalInhabitant.quantity));
       expect(restoredInhabitant.customImageUrl, equals(originalInhabitant.customImageUrl));
+      expect(restoredTank.memorializedInhabitants.length, equals(1));
+      expect(
+        restoredTank.memorializedInhabitants.first.customName,
+        equals('Old Friend'),
+      );
     });
 
     test('backup format validation for invalid data', () {
