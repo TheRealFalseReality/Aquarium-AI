@@ -19,13 +19,14 @@ extension AccessibleFeedbackContext on BuildContext {
   }
 }
 
-/// Provides accessible feedback to users without using deprecated AnnounceSemanticsEvent.
-/// This replaces SnackBars with semantic announcements that are properly accessible.
+/// Provides accessible feedback to users via the Scaffold messaging system.
+///
+/// Uses [ScaffoldMessenger.showSnackBar] with live-region semantics so screen
+/// readers announce the message automatically.  Using [ScaffoldMessenger]
+/// instead of a raw [OverlayEntry] ensures the overlay lifecycle is managed
+/// correctly across navigation transitions, preventing duplicate-GlobalKey
+/// widget-tree errors that can arise from static [OverlayEntry] state.
 class AccessibleFeedback {
-  /// Shows an accessible message using semantic properties instead of deprecated announcements.
-  /// This creates a temporary overlay with live region semantics for screen readers.
-  static OverlayEntry? _currentEntry;
-
   static void showMessage(
     BuildContext context, {
     required String message,
@@ -35,169 +36,28 @@ class AccessibleFeedback {
     Color? backgroundColor,
     Color? textColor,
   }) {
-    // Remove any existing feedback
-    _currentEntry?.remove();
-    _currentEntry = null;
+    final colorScheme = Theme.of(context).colorScheme;
+    final effectiveBg = backgroundColor ?? colorScheme.inverseSurface;
+    final effectiveFg = textColor ?? colorScheme.onInverseSurface;
 
-    final overlay = Overlay.of(context);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    // Create overlay entry with semantic live region
-    _currentEntry = OverlayEntry(
-      builder: (context) => _AccessibleFeedbackWidget(
-        message: message,
-        onAction: onAction,
-        actionLabel: actionLabel,
-        backgroundColor: backgroundColor ?? colorScheme.inverseSurface,
-        textColor: textColor ?? colorScheme.onInverseSurface,
-        onDismiss: () {
-          _currentEntry?.remove();
-          _currentEntry = null;
-        },
-      ),
-    );
-
-    overlay.insert(_currentEntry!);
-
-    // Auto-dismiss after duration
-    Future.delayed(duration, () {
-      _currentEntry?.remove();
-      _currentEntry = null;
-    });
-  }
-
-  /// Dismisses any currently shown message
-  static void dismiss() {
-    _currentEntry?.remove();
-    _currentEntry = null;
-  }
-}
-
-class _AccessibleFeedbackWidget extends StatefulWidget {
-  final String message;
-  final VoidCallback? onAction;
-  final String? actionLabel;
-  final Color backgroundColor;
-  final Color textColor;
-  final VoidCallback onDismiss;
-
-  const _AccessibleFeedbackWidget({
-    required this.message,
-    this.onAction,
-    this.actionLabel,
-    required this.backgroundColor,
-    required this.textColor,
-    required this.onDismiss,
-  });
-
-  @override
-  State<_AccessibleFeedbackWidget> createState() =>
-      _AccessibleFeedbackWidgetState();
-}
-
-class _AccessibleFeedbackWidgetState extends State<_AccessibleFeedbackWidget>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _fadeAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: 16,
-      right: 16,
-      bottom: 16,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: Semantics(
-            // Use live region for accessibility announcements
-            liveRegion: true,
-            label: widget.message,
-            child: Material(
-              color: widget.backgroundColor,
-              borderRadius: BorderRadius.circular(4),
-              elevation: 6,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.message,
-                        style: TextStyle(color: widget.textColor, fontSize: 14),
-                      ),
-                    ),
-                    if (widget.onAction != null &&
-                        widget.actionLabel != null) ...[
-                      const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: () {
-                          widget.onAction!();
-                          widget.onDismiss();
-                        },
-                        child: Text(
-                          widget.actionLabel!,
-                          style: TextStyle(
-                            color: widget.textColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: Icon(
-                        Icons.close,
-                        color: widget.textColor,
-                        size: 20,
-                      ),
-                      onPressed: widget.onDismiss,
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
-                      ),
-                      padding: EdgeInsets.zero,
-                      tooltip: 'Dismiss',
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Semantics(
+          liveRegion: true,
+          label: message,
+          child: Text(message, style: TextStyle(color: effectiveFg)),
         ),
+        backgroundColor: effectiveBg,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        duration: duration,
+        action: onAction != null && actionLabel != null
+            ? SnackBarAction(
+                label: actionLabel,
+                onPressed: onAction,
+                textColor: effectiveFg,
+              )
+            : null,
       ),
     );
   }
