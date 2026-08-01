@@ -151,6 +151,30 @@ class WelcomeScreen extends ConsumerStatefulWidget {
       debugPrint('Error checking promotion dialog status: $e');
     }
   }
+
+  // Static method to check server message state with a fresh RC fetch (debug only)
+  static Future<void> checkServerMessageStatus() async {
+    if (!kDebugMode) return;
+    try {
+      final fetched = await RemoteConfigService.debugFetchAndActivate();
+      final messageId = RemoteConfigService.serverMessageId;
+      final title = RemoteConfigService.serverMessageTitle;
+      final message = RemoteConfigService.serverMessage;
+      final shouldShow = await ServerMessageDialog.shouldShow(
+        id: messageId,
+        body: message,
+      );
+
+      debugPrint('Server message status:');
+      debugPrint('  Fetched latest RC values: $fetched');
+      debugPrint('  Message ID: $messageId');
+      debugPrint('  Title: $title');
+      debugPrint('  Body empty: ${message.isEmpty}');
+      debugPrint('  shouldShow: $shouldShow');
+    } catch (e) {
+      debugPrint('Error checking server message status: $e');
+    }
+  }
 }
 
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {

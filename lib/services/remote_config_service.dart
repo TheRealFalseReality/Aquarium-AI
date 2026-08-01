@@ -12,6 +12,21 @@ import '../constants.dart';
 class RemoteConfigService {
   static FirebaseRemoteConfig? _instance;
 
+  /// Debug helper that forces a fresh Remote Config fetch and activate cycle.
+  ///
+  /// Useful when testing server-message updates in debug builds.
+  static Future<bool> debugFetchAndActivate() async {
+    if (!kDebugMode) return false;
+    try {
+      final remoteConfig = _instance ?? FirebaseRemoteConfig.instance;
+      _instance = remoteConfig;
+      return await remoteConfig.fetchAndActivate();
+    } catch (e) {
+      debugPrint('[RemoteConfigService] Debug fetch error: $e');
+      return false;
+    }
+  }
+
   /// Initialize Remote Config, apply in-app defaults, then fetch & activate
   /// the latest values from the server.
   ///
