@@ -171,6 +171,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   /// Delay before the server message dialog is shown, allowing other startup
   /// dialogs (changelog, app update) to appear first.
   static const Duration _serverMessageDialogDelay = Duration(seconds: 2);
+  static const String _serverMessageLastFetchAtKey =
+      'server_message_last_fetch_at';
+  static const Duration _serverMessageReleaseFetchCadence = Duration(days: 1);
 
   // Promo card keys
   static const String _docsPromoShownAtKey = 'welcomeDocsPromoShownAt';
@@ -848,6 +851,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
 
   Future<void> _checkShowServerMessage() async {
+    await _refreshServerMessageIfNeeded();
+
     final messageId = RemoteConfigService.serverMessageId;
     final message = RemoteConfigService.serverMessage;
     final title = RemoteConfigService.serverMessageTitle;
@@ -876,6 +881,30 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         ),
       );
     });
+  }
+
+  Future<void> _refreshServerMessageIfNeeded() async {
+    if (kDebugMode) {
+      await RemoteConfigService.debugFetchAndActivate();
+      return;
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final lastFetchAt = prefs.getInt(_serverMessageLastFetchAtKey) ?? 0;
+      final cadenceMs = _serverMessageReleaseFetchCadence.inMilliseconds;
+      final shouldFetch = now - lastFetchAt >= cadenceMs;
+
+      if (!shouldFetch) return;
+
+      await RemoteConfigService.fetchAndActivateLatest();
+      await prefs.setInt(_serverMessageLastFetchAtKey, now);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error refreshing server message config: $e');
+      }
+    }
   }
 
   Future<void> _dismissChangelogBanner() async {

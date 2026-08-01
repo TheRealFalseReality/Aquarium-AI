@@ -17,12 +17,21 @@ class RemoteConfigService {
   /// Useful when testing server-message updates in debug builds.
   static Future<bool> debugFetchAndActivate() async {
     if (!kDebugMode) return false;
+    return fetchAndActivateLatest();
+  }
+
+  /// Fetches and activates the latest Remote Config values.
+  ///
+  /// Safe to call multiple times; errors are caught and return `false`.
+  static Future<bool> fetchAndActivateLatest() async {
     try {
       final remoteConfig = _instance ?? FirebaseRemoteConfig.instance;
       _instance = remoteConfig;
       return await remoteConfig.fetchAndActivate();
     } catch (e) {
-      debugPrint('[RemoteConfigService] Debug fetch error: $e');
+      if (kDebugMode) {
+        debugPrint('[RemoteConfigService] Fetch error: $e');
+      }
       return false;
     }
   }
@@ -95,13 +104,13 @@ class RemoteConfigService {
         RemoteConfigKeys.serverMessage: rcDefaultServerMessage,
       });
 
-      // Refresh at most once per hour in production; more frequently in debug.
+      // Refresh every launch in debug and at most once per day in release.
       await remoteConfig.setConfigSettings(
         RemoteConfigSettings(
           fetchTimeout: const Duration(seconds: 10),
           minimumFetchInterval: kDebugMode
               ? Duration.zero
-              : const Duration(hours: 1),
+              : const Duration(days: 1),
         ),
       );
 
