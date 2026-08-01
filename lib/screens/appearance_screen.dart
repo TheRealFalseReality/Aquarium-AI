@@ -488,6 +488,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
       'notifications',
       'community',
       'profile',
+      'developer-message',
       'information',
     ];
 
@@ -505,6 +506,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
       'notifications': l10n.allNotifications,
       'community': l10n.communityTitle,
       'profile': l10n.profileTitle,
+      'developer-message': l10n.developerMessage,
       'information': l10n.information,
     };
 

@@ -27,6 +27,7 @@ import './screens/auth_screen.dart';
 import './screens/calculators_screen.dart';
 import './screens/chatbot_screen.dart';
 import './screens/community_screen.dart';
+import './screens/developer_message_screen.dart';
 import './screens/dosing_calculator.dart';
 import './screens/fish_compat_editor_screen.dart';
 import './screens/fish_compat_browser_screen.dart';
@@ -619,6 +620,10 @@ class MyApp extends ConsumerWidget {
               case '/information':
                 page = const InformationScreen();
                 screenName = 'information_screen';
+                break;
+              case '/developer-message':
+                page = const DeveloperMessageScreen();
+                screenName = 'developer_message_screen';
                 break;
               case '/tank-volume':
                 page = const TankVolumeCalculator();

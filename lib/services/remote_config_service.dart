@@ -12,6 +12,30 @@ import '../constants.dart';
 class RemoteConfigService {
   static FirebaseRemoteConfig? _instance;
 
+  /// Debug helper that forces a fresh Remote Config fetch and activate cycle.
+  ///
+  /// Useful when testing server-message updates in debug builds.
+  static Future<bool> debugFetchAndActivate() async {
+    if (!kDebugMode) return false;
+    return fetchAndActivateLatest();
+  }
+
+  /// Fetches and activates the latest Remote Config values.
+  ///
+  /// Safe to call multiple times; errors are caught and return `false`.
+  static Future<bool> fetchAndActivateLatest() async {
+    try {
+      final remoteConfig = _instance ?? FirebaseRemoteConfig.instance;
+      _instance = remoteConfig;
+      return await remoteConfig.fetchAndActivate();
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('[RemoteConfigService] Fetch error: $e');
+      }
+      return false;
+    }
+  }
+
   /// Initialize Remote Config, apply in-app defaults, then fetch & activate
   /// the latest values from the server.
   ///
@@ -75,15 +99,18 @@ class RemoteConfigService {
         RemoteConfigKeys.ccaWebsiteUrl: rcDefaultCcaWebsiteUrl,
         RemoteConfigKeys.gitHubRepoUrl: rcDefaultGitHubRepoUrl,
         RemoteConfigKeys.gitHubIssuesUrl: rcDefaultGitHubIssuesUrl,
+        RemoteConfigKeys.serverMessageId: rcDefaultServerMessageId,
+        RemoteConfigKeys.serverMessageTitle: rcDefaultServerMessageTitle,
+        RemoteConfigKeys.serverMessage: rcDefaultServerMessage,
       });
 
-      // Refresh at most once per hour in production; more frequently in debug.
+      // Refresh every launch in debug and at most once per day in release.
       await remoteConfig.setConfigSettings(
         RemoteConfigSettings(
           fetchTimeout: const Duration(seconds: 10),
           minimumFetchInterval: kDebugMode
               ? Duration.zero
-              : const Duration(hours: 1),
+              : const Duration(days: 1),
         ),
       );
 
@@ -151,6 +178,18 @@ class RemoteConfigService {
   static String _modelString(String key, String fallback) {
     final value = _instance?.getString(key);
     return (value != null && value.isNotEmpty) ? value : fallback;
+  }
+
+  static bool get _isAnyServerMessageKeyUsingInAppDefault {
+    final remoteConfig = _instance;
+    if (remoteConfig == null) return true;
+
+    bool usesInAppDefault(String key) =>
+        remoteConfig.getValue(key).source == ValueSource.valueDefault;
+
+    return usesInAppDefault(RemoteConfigKeys.serverMessageId) ||
+        usesInAppDefault(RemoteConfigKeys.serverMessageTitle) ||
+        usesInAppDefault(RemoteConfigKeys.serverMessage);
   }
 
   /// Default Gemini text/chat model name.
@@ -396,4 +435,32 @@ class RemoteConfigService {
   /// Defaults to [rcDefaultGitHubIssuesUrl].
   static String get gitHubIssuesUrl =>
       _modelString(RemoteConfigKeys.gitHubIssuesUrl, rcDefaultGitHubIssuesUrl);
+
+  // ── Server message ─────────────────────────────────────────────────────────
+
+  /// Unique identifier for the active server message.
+  /// An empty string means no message is configured.
+  /// Updating this value in Remote Config causes the popup to appear again
+  /// for all users (including those who previously snoozed).
+  static String get serverMessageId {
+    if (_isAnyServerMessageKeyUsingInAppDefault) return '';
+    return _modelString(RemoteConfigKeys.serverMessageId, rcDefaultServerMessageId);
+  }
+
+  /// Title of the server message dialog.
+  /// An empty string signals the UI to use a generic fallback title.
+  static String get serverMessageTitle {
+    if (_isAnyServerMessageKeyUsingInAppDefault) return '';
+    return _modelString(
+      RemoteConfigKeys.serverMessageTitle,
+      rcDefaultServerMessageTitle,
+    );
+  }
+
+  /// Body text of the server message dialog.
+  /// An empty string means no message should be shown.
+  static String get serverMessage {
+    if (_isAnyServerMessageKeyUsingInAppDefault) return '';
+    return _modelString(RemoteConfigKeys.serverMessage, rcDefaultServerMessage);
+  }
 }

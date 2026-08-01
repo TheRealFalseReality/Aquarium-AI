@@ -21,6 +21,7 @@ const List<String> defaultSidebarOrder = [
   'compat-browser',
   'community',
   'profile',
+  'developer-message',
   'information',
 ];
 
