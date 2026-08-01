@@ -256,6 +256,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     final isTankShowcase = widget.post.type == PostType.tankShowcase;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(title: Text(l10n.communityPostDetail)),
       body: Column(
         children: [
@@ -911,11 +912,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   ) {
     final theme = Theme.of(context);
     return Container(
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         left: 12,
         right: 12,
         top: 8,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+        bottom: 8,
       ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
