@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/community_comment.dart';
 import '../models/community_post.dart';
 import '../providers/community_provider.dart';
 import '../services/analytics_service.dart';
@@ -199,10 +200,110 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     }
   }
 
-  Future<void> _deleteComment(String commentId, String userId) async {
+  Future<void> _editComment(CommunityComment comment) async {
     final authState = ref.read(authStateProvider);
     final currentUserId = authState.asData?.value?.uid ?? '';
-    if (currentUserId != userId) return;
+    if (currentUserId != comment.userId) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final screenContext = context;
+    AnalyticsService.logCommunityAction(
+      action: 'comment_edit_started',
+      additionalData: {'post_type': widget.post.type.value},
+    );
+
+    final controller = TextEditingController(text: comment.body);
+    try {
+      final updated = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          var isSaving = false;
+
+          return StatefulBuilder(
+            builder: (_, setDialogState) {
+              Future<void> submit() async {
+                final nextBody = controller.text.trim();
+                if (isSaving || nextBody.isEmpty) return;
+                if (nextBody == comment.body.trim()) {
+                  Navigator.of(dialogContext).pop(false);
+                  return;
+                }
+
+                setDialogState(() => isSaving = true);
+                final success = await CommunityService.updateComment(
+                  postId: widget.post.id,
+                  comment: comment,
+                  body: nextBody,
+                );
+
+                if (!dialogContext.mounted) return;
+                if (success) {
+                  Navigator.of(dialogContext).pop(true);
+                  return;
+                }
+
+                setDialogState(() => isSaving = false);
+                if (!mounted) return;
+                ScaffoldMessenger.of(screenContext).showSnackBar(
+                  SnackBar(content: Text(l10n.communityEditCommentError)),
+                );
+              }
+
+              return AlertDialog(
+                title: Text(l10n.communityEditComment),
+                content: TextField(
+                  controller: controller,
+                  autofocus: true,
+                  minLines: 3,
+                  maxLines: 6,
+                  maxLength: 2000,
+                  decoration: InputDecoration(
+                    hintText: l10n.communityAddComment,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: isSaving
+                        ? null
+                        : () => Navigator.of(dialogContext).pop(false),
+                    child: Text(l10n.cancel),
+                  ),
+                  TextButton(
+                    onPressed: isSaving ? null : submit,
+                    child: isSaving
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(l10n.save),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+
+      if (updated == true && mounted) {
+        ScaffoldMessenger.of(screenContext).showSnackBar(
+          SnackBar(content: Text(l10n.communityCommentEdited)),
+        );
+        AnalyticsService.logCommunityAction(
+          action: 'comment_edited',
+          additionalData: {'post_type': widget.post.type.value},
+        );
+      }
+    } finally {
+      controller.dispose();
+    }
+  }
+
+  Future<void> _deleteComment(CommunityComment comment) async {
+    final authState = ref.read(authStateProvider);
+    final currentUserId = authState.asData?.value?.uid ?? '';
+    if (currentUserId != comment.userId) return;
 
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
@@ -227,15 +328,6 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
     );
     if (confirmed != true) return;
 
-    // Create a lightweight comment object just to pass userId
-    final commentsAsync = ref.read(
-      communityCommentsStreamProvider(widget.post.id),
-    );
-    final comments = commentsAsync.asData?.value ?? [];
-    final comment = comments.firstWhere(
-      (c) => c.id == commentId,
-      orElse: () => comments.first,
-    );
     await CommunityService.deleteComment(widget.post.id, comment);
     AnalyticsService.logCommunityAction(
       action: 'comment_deleted',
@@ -352,7 +444,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                         return CommentTile(
                           comment: c,
                           currentUserId: currentUserId,
-                          onDelete: () => _deleteComment(c.id, c.userId),
+                          onEdit: () => _editComment(c),
+                          onDelete: () => _deleteComment(c),
                         );
                       }).toList(),
                     );

@@ -120,6 +120,7 @@ void main() {
       String? id,
       String? userId,
       String? avatarUrl,
+      DateTime? updatedAt,
     }) {
       return CommunityComment(
         id: id ?? 'comment1',
@@ -129,6 +130,7 @@ void main() {
         avatarUrl: avatarUrl,
         body: 'Great tip!',
         createdAt: now,
+        updatedAt: updatedAt ?? now,
       );
     }
 
@@ -141,6 +143,7 @@ void main() {
       expect(comment.displayName, 'Aquarist A1B2C3');
       expect(comment.body, 'Great tip!');
       expect(comment.createdAt, now);
+      expect(comment.updatedAt, now);
       expect(comment.avatarUrl, isNull);
     });
 
@@ -153,6 +156,7 @@ void main() {
       expect(map['displayName'], 'Aquarist A1B2C3');
       expect(map['body'], 'Great tip!');
       expect(map.containsKey('avatarUrl'), isFalse);
+      expect(map.containsKey('updatedAt'), isTrue);
     });
 
     test('toFirestore includes avatarUrl when set', () {
@@ -160,6 +164,14 @@ void main() {
       final map = comment.toFirestore();
 
       expect(map['avatarUrl'], 'https://example.com/avatar.jpg');
+    });
+
+    test('updatedAt can differ from createdAt after edits', () {
+      final later = now.add(const Duration(minutes: 5));
+      final comment = makeComment(updatedAt: later);
+
+      expect(comment.updatedAt, later);
+      expect(comment.updatedAt.isAfter(comment.createdAt), isTrue);
     });
   });
 }

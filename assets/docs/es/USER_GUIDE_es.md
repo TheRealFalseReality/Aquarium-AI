@@ -374,7 +374,8 @@ automáticamente.
 **Ruta:** Menú principal → *Comunidad*
 
 Navega y comparte publicaciones con otros usuarios de Aquarium AI. Inicia sesión
-(anónimamente o con Google/Facebook) para publicar, comentar y reaccionar.
+(anónimamente o con Google/Facebook) para publicar, comentar, reaccionar y editar
+o eliminar tus propios comentarios después de publicarlos.
 
 ### Tipos de publicación
 

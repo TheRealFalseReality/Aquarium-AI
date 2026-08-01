@@ -3096,6 +3096,22 @@
   "@communityCommentError": {
     "description": "Error message when comment submission fails"
   },
+  "communityEditComment": "Edit comment",
+  "@communityEditComment": {
+    "description": "Title and tooltip for editing a comment"
+  },
+  "communityCommentEdited": "Comment updated successfully!",
+  "@communityCommentEdited": {
+    "description": "Snackbar message after editing a comment"
+  },
+  "communityEditCommentError": "Failed to update comment. Please try again.",
+  "@communityEditCommentError": {
+    "description": "Error message when comment editing fails"
+  },
+  "communityEditedLabel": "Edited",
+  "@communityEditedLabel": {
+    "description": "Short label shown beside edited community comments"
+  },
   "communityDeleteComment": "Delete comment",
   "@communityDeleteComment": {
     "description": "Tooltip for delete comment icon"
