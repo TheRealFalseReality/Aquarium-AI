@@ -225,7 +225,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                 final nextBody = controller.text.trim();
                 if (isSaving || nextBody.isEmpty) return;
                 if (nextBody == comment.body.trim()) {
-                  FocusScope.of(dialogContext).unfocus();
+                  FocusManager.instance.primaryFocus?.unfocus();
                   Navigator.of(dialogContext).pop(false);
                   return;
                 }
@@ -239,7 +239,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
 
                 if (!dialogContext.mounted) return;
                 if (success) {
-                  FocusScope.of(dialogContext).unfocus();
+                  FocusManager.instance.primaryFocus?.unfocus();
                   Navigator.of(dialogContext).pop(true);
                   return;
                 }
@@ -269,7 +269,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                     onPressed: isSaving
                         ? null
                         : () {
-                            FocusScope.of(dialogContext).unfocus();
+                            FocusManager.instance.primaryFocus?.unfocus();
                             Navigator.of(dialogContext).pop(false);
                           },
                     child: Text(l10n.cancel),
