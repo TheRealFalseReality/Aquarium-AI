@@ -5085,6 +5085,10 @@
   "@chooseDatePassed": {
     "description": "Button label that opens the date picker for the recorded passing date"
   },
+  "deceasedCountLabel": "How many passed away?",
+  "@deceasedCountLabel": {
+    "description": "Label shown above the deceased count selector when an inhabitant has quantity > 1"
+  },
   "memorialNoteLabel": "Memorial Note (Optional)",
   "@memorialNoteLabel": {
     "description": "Label for the optional note field shown when memorializing an inhabitant"

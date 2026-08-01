@@ -1,11 +1,10 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-
+import 'package:uuid/uuid.dart';
 import '../l10n/app_localizations.dart';
 import '../models/fish.dart';
 import '../models/tank.dart';
@@ -166,44 +165,83 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
   Future<void> _recordPassing(TankInhabitant inhabitant, Tank tank) async {
     final l10n = AppLocalizations.of(context)!;
     final noteController = TextEditingController();
-    final confirmed = await showDialog<bool>(
+    // deceasedCount is returned by the dialog; null means cancelled.
+    final deceasedCount = await showDialog<int>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.recordPassing),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.memorializeInhabitantConfirm(inhabitant.customName)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: noteController,
-              decoration: InputDecoration(
-                labelText: l10n.memorialNoteLabel,
-                hintText: l10n.memorialNoteHint,
-                border: const OutlineInputBorder(),
+      builder: (ctx) {
+        int selected = inhabitant.quantity;
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) => AlertDialog(
+            title: Text(l10n.recordPassing),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.memorializeInhabitantConfirm(inhabitant.customName)),
+                  if (inhabitant.quantity > 1) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.deceasedCountLabel,
+                      style: Theme.of(ctx).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove),
+                          onPressed: selected > 1
+                              ? () => setDialogState(() => selected--)
+                              : null,
+                        ),
+                        Expanded(
+                          child: Text(
+                            '$selected / ${inhabitant.quantity}',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(ctx).textTheme.titleMedium,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: selected < inhabitant.quantity
+                              ? () => setDialogState(() => selected++)
+                              : null,
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: noteController,
+                    decoration: InputDecoration(
+                      labelText: l10n.memorialNoteLabel,
+                      hintText: l10n.memorialNoteHint,
+                      border: const OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                ],
               ),
-              maxLines: 3,
-              textCapitalization: TextCapitalization.sentences,
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(null),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(ctx).pop(selected),
+                icon: const Icon(Icons.heart_broken_outlined),
+                label: Text(l10n.chooseDatePassed),
+              ),
+            ],
           ),
-          FilledButton.icon(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            icon: const Icon(Icons.heart_broken_outlined),
-            label: Text(l10n.chooseDatePassed),
-          ),
-        ],
-      ),
+        );
+      },
     );
     final note = noteController.text.trim();
     noteController.dispose();
-    if (confirmed != true || !mounted) return;
+    if (deceasedCount == null || !mounted) return;
 
     final selectedDate = await showDatePicker(
       context: context,
@@ -213,14 +251,26 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
     );
     if (selectedDate == null || !mounted) return;
 
+    final remainingCount = inhabitant.quantity - deceasedCount;
+    // When only some of the group die, give the memorial record its own id to
+    // avoid colliding with the surviving active entry that keeps the original id.
+    final memorialId =
+        remainingCount > 0 ? const Uuid().v4() : inhabitant.id;
     final memorialized = inhabitant.copyWith(
+      id: memorialId,
+      quantity: deceasedCount,
       dateDied: selectedDate,
       memorialNote: note.isEmpty ? null : note,
       clearMemorialNote: note.isEmpty,
     );
+
+    // Rebuild inhabitants: remove the old entry; if some survive, keep them.
+    final updatedInhabitants = [
+      ...tank.inhabitants.where((i) => i.id != inhabitant.id),
+      if (remainingCount > 0) inhabitant.copyWith(quantity: remainingCount),
+    ];
     final updatedTank = tank.copyWith(
-      inhabitants:
-          tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
+      inhabitants: updatedInhabitants,
       memorializedInhabitants: [
         ...tank.memorializedInhabitants.where((i) => i.id != inhabitant.id),
         memorialized,
@@ -230,7 +280,11 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
     ref.read(tankProvider.notifier).updateTank(updatedTank);
     AnalyticsService.logFeatureUsed(
       featureName: 'inhabitant_passing_recorded',
-      parameters: {'fish_type': memorialized.fishUnit},
+      parameters: {
+        'fish_type': memorialized.fishUnit,
+        'deceased_count': deceasedCount,
+        'partial': remainingCount > 0,
+      },
     );
   }
 

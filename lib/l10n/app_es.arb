@@ -1184,6 +1184,7 @@
   "recordPassing": "Registrar fallecimiento",
   "memorializeInhabitantConfirm": "Al conmemorar a \"{inhabitantName}\", se eliminará de la lista activa del acuario, pero se conservarán sus fotos, notas e historial en la sección conmemorativa.\n\nA continuación elegirás la fecha del fallecimiento.",
   "chooseDatePassed": "Elegir fecha de fallecimiento",
+  "deceasedCountLabel": "¿Cuántos han fallecido?",
   "memorialNoteLabel": "Nota conmemorativa (Opcional)",
   "memorialNoteHint": "Añade una nota sobre este fallecimiento...",
   "restoreToActiveTank": "Restaurar al acuario",
