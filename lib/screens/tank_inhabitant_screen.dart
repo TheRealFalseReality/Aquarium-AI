@@ -53,31 +53,6 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
     super.dispose();
   }
 
-  /// Always read the latest inhabitant state from the provider.
-  TankInhabitant _getCurrentInhabitant() {
-    final tanks = ref.watch(tankProvider).tanks;
-    final tank = tanks.firstWhere(
-      (t) => t.id == widget.tank.id,
-      orElse: () => widget.tank,
-    );
-    final active = tank.inhabitants.firstWhere(
-      (i) => i.id == widget.inhabitant.id,
-      orElse: () => tank.memorializedInhabitants.firstWhere(
-        (i) => i.id == widget.inhabitant.id,
-        orElse: () => widget.inhabitant,
-      ),
-    );
-    return active;
-  }
-
-  Tank _getCurrentTank() {
-    final tanks = ref.watch(tankProvider).tanks;
-    return tanks.firstWhere(
-      (t) => t.id == widget.tank.id,
-      orElse: () => widget.tank,
-    );
-  }
-
   bool _isMemorialized(Tank tank, TankInhabitant inhabitant) =>
       tank.memorializedInhabitants.any((i) => i.id == inhabitant.id);
 
@@ -378,8 +353,20 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    final inhabitant = _getCurrentInhabitant();
-    final tank = _getCurrentTank();
+    // Resolve the latest tank and inhabitant directly in build() so that
+    // ref.watch() is only ever called from the build method itself.
+    final tanks = ref.watch(tankProvider).tanks;
+    final tank = tanks.firstWhere(
+      (t) => t.id == widget.tank.id,
+      orElse: () => widget.tank,
+    );
+    final inhabitant = tank.inhabitants.firstWhere(
+      (i) => i.id == widget.inhabitant.id,
+      orElse: () => tank.memorializedInhabitants.firstWhere(
+        (i) => i.id == widget.inhabitant.id,
+        orElse: () => widget.inhabitant,
+      ),
+    );
     final isMemorialized = _isMemorialized(tank, inhabitant);
 
     final fishDataAsync = ref.watch(fishDataProvider);
