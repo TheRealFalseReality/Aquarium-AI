@@ -112,6 +112,7 @@ class TankInhabitant {
   final List<String>
   speciesTags; // Selected species tags for more granular identification
   final String? userNotes; // User-added notes/details about this inhabitant
+  final String? memorialNote; // Optional note added when memorializing
 
   TankInhabitant({
     required this.id,
@@ -125,6 +126,7 @@ class TankInhabitant {
     this.dateDied,
     List<String>? speciesTags,
     this.userNotes,
+    this.memorialNote,
   }) : speciesTags = speciesTags ?? [];
 
   Map<String, dynamic> toJson({bool includeLocalPaths = true}) {
@@ -142,6 +144,7 @@ class TankInhabitant {
       'dateDied': dateDied?.toIso8601String(),
       'speciesTags': speciesTags,
       if (userNotes != null) 'userNotes': userNotes,
+      if (memorialNote != null) 'memorialNote': memorialNote,
     };
   }
 
@@ -164,6 +167,7 @@ class TankInhabitant {
           (json['speciesTags'] as List?)?.map((t) => t.toString()).toList() ??
           [],
       userNotes: json['userNotes'] as String?,
+      memorialNote: json['memorialNote'] as String?,
     );
   }
 
@@ -179,8 +183,10 @@ class TankInhabitant {
     DateTime? dateDied,
     List<String>? speciesTags,
     String? userNotes,
+    String? memorialNote,
     bool clearUserNotes = false,
     bool clearDateDied = false,
+    bool clearMemorialNote = false,
   }) {
     return TankInhabitant(
       id: id ?? this.id,
@@ -194,6 +200,9 @@ class TankInhabitant {
       dateDied: clearDateDied ? null : (dateDied ?? this.dateDied),
       speciesTags: speciesTags ?? this.speciesTags,
       userNotes: clearUserNotes ? null : (userNotes ?? this.userNotes),
+      memorialNote: clearMemorialNote
+          ? null
+          : (memorialNote ?? this.memorialNote),
     );
   }
 }

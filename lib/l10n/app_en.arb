@@ -5085,6 +5085,14 @@
   "@chooseDatePassed": {
     "description": "Button label that opens the date picker for the recorded passing date"
   },
+  "memorialNoteLabel": "Memorial Note (Optional)",
+  "@memorialNoteLabel": {
+    "description": "Label for the optional note field shown when memorializing an inhabitant"
+  },
+  "memorialNoteHint": "Add a note about this passing...",
+  "@memorialNoteHint": {
+    "description": "Placeholder hint for the optional memorial note text field"
+  },
   "restoreToActiveTank": "Restore to Tank",
   "@restoreToActiveTank": {
     "description": "Label for the action that restores a memorialized inhabitant to the active tank list"

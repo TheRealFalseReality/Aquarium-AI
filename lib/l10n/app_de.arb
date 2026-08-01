@@ -1184,6 +1184,8 @@
   "recordPassing": "Tod erfassen",
   "memorializeInhabitantConfirm": "\"{inhabitantName}\" wird aus der aktiven Bewohnerliste entfernt, während Fotos, Notizen und Verlauf im Gedenkbereich erhalten bleiben.\n\nAls Nächstes wählst du das Todesdatum aus.",
   "chooseDatePassed": "Todesdatum auswählen",
+  "memorialNoteLabel": "Gedenknotiz (Optional)",
+  "memorialNoteHint": "Notiz zu diesem Verlust hinzufügen...",
   "restoreToActiveTank": "In den Tank zurücksetzen",
   "restoreMemorializedInhabitantConfirm": "\"{inhabitantName}\" in den aktiven Tank zurücksetzen? Dadurch werden das gespeicherte Todesdatum und der Gedenkstatus entfernt.",
   "inMemoryOf": "In Erinnerung an {inhabitantName}",

@@ -1184,6 +1184,8 @@
   "recordPassing": "Enregistrer le décès",
   "memorializeInhabitantConfirm": "Commémorer \"{inhabitantName}\" le retire de la liste active du bac tout en conservant ses photos, ses notes et son historique dans la section commémorative.\n\nVous choisirez ensuite la date du décès.",
   "chooseDatePassed": "Choisir la date du décès",
+  "memorialNoteLabel": "Note commémorative (Optionnel)",
+  "memorialNoteHint": "Ajouter une note sur ce décès...",
   "restoreToActiveTank": "Restaurer dans le bac",
   "restoreMemorializedInhabitantConfirm": "Restaurer \"{inhabitantName}\" dans le bac actif ? Cela effacera la date du décès enregistrée et retirera son statut commémoratif.",
   "inMemoryOf": "En mémoire de {inhabitantName}",

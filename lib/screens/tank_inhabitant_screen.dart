@@ -60,10 +60,14 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
       (t) => t.id == widget.tank.id,
       orElse: () => widget.tank,
     );
-    return [...tank.inhabitants, ...tank.memorializedInhabitants].firstWhere(
+    final active = tank.inhabitants.firstWhere(
       (i) => i.id == widget.inhabitant.id,
-      orElse: () => widget.inhabitant,
+      orElse: () => tank.memorializedInhabitants.firstWhere(
+        (i) => i.id == widget.inhabitant.id,
+        orElse: () => widget.inhabitant,
+      ),
     );
+    return active;
   }
 
   Tank _getCurrentTank() {
@@ -186,12 +190,28 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
 
   Future<void> _recordPassing(TankInhabitant inhabitant, Tank tank) async {
     final l10n = AppLocalizations.of(context)!;
+    final noteController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.recordPassing),
-        content: Text(
-          l10n.memorializeInhabitantConfirm(inhabitant.customName),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.memorializeInhabitantConfirm(inhabitant.customName)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: noteController,
+              decoration: InputDecoration(
+                labelText: l10n.memorialNoteLabel,
+                hintText: l10n.memorialNoteHint,
+                border: const OutlineInputBorder(),
+              ),
+              maxLines: 3,
+              textCapitalization: TextCapitalization.sentences,
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -206,6 +226,8 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
         ],
       ),
     );
+    final note = noteController.text.trim();
+    noteController.dispose();
     if (confirmed != true || !mounted) return;
 
     final selectedDate = await showDatePicker(
@@ -214,9 +236,13 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
       firstDate: inhabitant.dateAdded ?? DateTime(2000),
       lastDate: DateTime.now(),
     );
-    if (selectedDate == null) return;
+    if (selectedDate == null || !mounted) return;
 
-    final memorialized = inhabitant.copyWith(dateDied: selectedDate);
+    final memorialized = inhabitant.copyWith(
+      dateDied: selectedDate,
+      memorialNote: note.isEmpty ? null : note,
+      clearMemorialNote: note.isEmpty,
+    );
     final updatedTank = tank.copyWith(
       inhabitants:
           tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
@@ -254,11 +280,14 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
         ],
       ),
     );
-    if (confirmed != true) return;
+    if (confirmed != true || !mounted) return;
 
-    final restored = inhabitant.copyWith(clearDateDied: true);
+    final restored = inhabitant.copyWith(clearDateDied: true, clearMemorialNote: true);
     final updatedTank = tank.copyWith(
-      inhabitants: [...tank.inhabitants, restored],
+      inhabitants: [
+        ...tank.inhabitants.where((i) => i.id != inhabitant.id),
+        restored,
+      ],
       memorializedInhabitants: tank.memorializedInhabitants
           .where((i) => i.id != inhabitant.id)
           .toList(),
@@ -612,18 +641,34 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
       color: cs.secondaryContainer.withOpacity(0.5),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.heart_broken_outlined, color: cs.secondary),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                l10n.inMemoryOf(inhabitant.customName),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
+            Row(
+              children: [
+                Icon(Icons.heart_broken_outlined, color: cs.secondary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    l10n.inMemoryOf(inhabitant.customName),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              ],
             ),
+            if (inhabitant.memorialNote != null &&
+                inhabitant.memorialNote!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                inhabitant.memorialNote!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: cs.onSecondaryContainer,
+                      fontStyle: FontStyle.italic,
+                    ),
+              ),
+            ],
           ],
         ),
       ),
