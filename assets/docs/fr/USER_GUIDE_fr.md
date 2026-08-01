@@ -382,8 +382,8 @@ ici.
 **Route :** Menu principal → *Communauté*
 
 Parcourez et partagez des publications avec d'autres utilisateurs d'Aquarium AI.
-Connectez-vous (anonymement ou avec Google/Facebook) pour publier, commenter et
-réagir.
+Connectez-vous (anonymement ou avec Google/Facebook) pour publier, commenter,
+réagir et modifier ou supprimer vos propres commentaires après publication.
 
 ### Types de publication
 

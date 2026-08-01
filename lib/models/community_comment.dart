@@ -8,6 +8,7 @@ class CommunityComment {
   final String? avatarUrl;
   final String body;
   final DateTime createdAt;
+  final DateTime updatedAt;
 
   const CommunityComment({
     required this.id,
@@ -17,10 +18,13 @@ class CommunityComment {
     this.avatarUrl,
     required this.body,
     required this.createdAt,
+    required this.updatedAt,
   });
 
   factory CommunityComment.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    final createdAt =
+        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
     return CommunityComment(
       id: doc.id,
       postId: data['postId'] as String? ?? '',
@@ -28,7 +32,8 @@ class CommunityComment {
       displayName: data['displayName'] as String? ?? 'Anonymous',
       avatarUrl: data['avatarUrl'] as String?,
       body: data['body'] as String? ?? '',
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: createdAt,
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? createdAt,
     );
   }
 
@@ -40,6 +45,7 @@ class CommunityComment {
       if (avatarUrl != null) 'avatarUrl': avatarUrl,
       'body': body,
       'createdAt': Timestamp.fromDate(createdAt),
+      'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 }

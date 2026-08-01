@@ -377,7 +377,8 @@ Fisch-Info, Fotoanalyse) wird hier automatisch gespeichert.
 **Route:** Hauptmenü → *Community*
 
 Beiträge anderer Aquarium AI-Benutzer durchsuchen und teilen. Anmelden (anonym oder
-mit Google/Facebook), um Beiträge zu verfassen, zu kommentieren und zu reagieren.
+mit Google/Facebook), um Beiträge zu verfassen, zu kommentieren, zu reagieren und
+eigene Kommentare nach dem Veröffentlichen zu bearbeiten oder zu löschen.
 
 ### Beitragstypen
 

@@ -382,7 +382,7 @@ Every AI result (compatibility report, stocking recommendation, water parameter 
 
 **Route:** Main menu → *Community*
 
-Browse and share posts with other Aquarium AI users. Sign in (anonymously or with Google/Facebook) to post, comment, and react.
+Browse and share posts with other Aquarium AI users. Sign in (anonymously or with Google/Facebook) to post, comment, react, and edit or delete your own comments after posting.
 
 ### Post Types
 

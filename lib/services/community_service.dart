@@ -469,6 +469,7 @@ class CommunityService {
         avatarUrl: user.photoURL,
         body: body,
         createdAt: now,
+        updatedAt: now,
       );
 
       await commentRef.set(comment.toFirestore());
@@ -530,6 +531,37 @@ class CommunityService {
     } catch (e) {
       if (kDebugMode) {
         debugPrint('CommunityService deleteComment error: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Updates an existing comment body.
+  static Future<bool> updateComment({
+    required String postId,
+    required CommunityComment comment,
+    required String body,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null || user.uid != comment.userId) return false;
+
+    final trimmedBody = body.trim();
+    if (trimmedBody.isEmpty) return false;
+
+    try {
+      await _firestore
+          .collection(_postsCollection)
+          .doc(postId)
+          .collection(_commentsCollection)
+          .doc(comment.id)
+          .update({
+            'body': trimmedBody,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('CommunityService updateComment error: $e');
       }
       return false;
     }
