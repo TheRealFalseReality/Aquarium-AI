@@ -100,6 +100,10 @@ onglets :
 - **Dosage** – journal des traitements / suppléments
 - **Activité** – événements récents
 
+Si un habitant décède, ouvrez son écran de détails et utilisez
+**Enregistrer le décès** pour le déplacer vers la liste commémorative du bac
+tout en conservant sa photo, ses notes et ses dates.
+
 ### Outils AI depuis un bac
 
 Depuis une carte de bac ou son écran de détails, vous pouvez lancer des outils AI

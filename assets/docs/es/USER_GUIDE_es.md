@@ -99,6 +99,10 @@ Toca cualquier tarjeta de acuario para abrir sus detalles, organizados en pesta�
 - **Dosificación** – registro de tratamientos / suplementos
 - **Actividad** – eventos recientes
 
+Si un habitante fallece, abre su pantalla de detalles y usa
+**Registrar fallecimiento** para moverlo a la lista conmemorativa del acuario
+sin perder su foto, notas ni fechas.
+
 ### Herramientas AI desde un acuario
 
 Desde una tarjeta de acuario o su pantalla de detalles puedes lanzar herramientas AI

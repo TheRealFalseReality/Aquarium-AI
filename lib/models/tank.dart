@@ -108,9 +108,11 @@ class TankInhabitant {
   final String?
   customImagePath; // User-provided image file path (for local images)
   final DateTime? dateAdded; // Date when inhabitant was added to tank
+  final DateTime? dateDied; // Date when inhabitant passed away
   final List<String>
   speciesTags; // Selected species tags for more granular identification
   final String? userNotes; // User-added notes/details about this inhabitant
+  final String? memorialNote; // Optional note added when memorializing
 
   TankInhabitant({
     required this.id,
@@ -121,8 +123,10 @@ class TankInhabitant {
     this.customImageUrl,
     this.customImagePath,
     this.dateAdded,
+    this.dateDied,
     List<String>? speciesTags,
     this.userNotes,
+    this.memorialNote,
   }) : speciesTags = speciesTags ?? [];
 
   Map<String, dynamic> toJson({bool includeLocalPaths = true}) {
@@ -137,8 +141,10 @@ class TankInhabitant {
       if (includeLocalPaths && customImagePath != null)
         'customImagePath': customImagePath,
       'dateAdded': dateAdded?.toIso8601String(),
+      'dateDied': dateDied?.toIso8601String(),
       'speciesTags': speciesTags,
       if (userNotes != null) 'userNotes': userNotes,
+      if (memorialNote != null) 'memorialNote': memorialNote,
     };
   }
 
@@ -154,10 +160,14 @@ class TankInhabitant {
       dateAdded: json['dateAdded'] != null
           ? DateTime.parse(json['dateAdded'] as String)
           : null,
+      dateDied: json['dateDied'] != null
+          ? DateTime.parse(json['dateDied'] as String)
+          : null,
       speciesTags:
           (json['speciesTags'] as List?)?.map((t) => t.toString()).toList() ??
           [],
       userNotes: json['userNotes'] as String?,
+      memorialNote: json['memorialNote'] as String?,
     );
   }
 
@@ -170,9 +180,13 @@ class TankInhabitant {
     String? customImageUrl,
     String? customImagePath,
     DateTime? dateAdded,
+    DateTime? dateDied,
     List<String>? speciesTags,
     String? userNotes,
+    String? memorialNote,
     bool clearUserNotes = false,
+    bool clearDateDied = false,
+    bool clearMemorialNote = false,
   }) {
     return TankInhabitant(
       id: id ?? this.id,
@@ -183,8 +197,12 @@ class TankInhabitant {
       customImageUrl: customImageUrl ?? this.customImageUrl,
       customImagePath: customImagePath ?? this.customImagePath,
       dateAdded: dateAdded ?? this.dateAdded,
+      dateDied: clearDateDied ? null : (dateDied ?? this.dateDied),
       speciesTags: speciesTags ?? this.speciesTags,
       userNotes: clearUserNotes ? null : (userNotes ?? this.userNotes),
+      memorialNote: clearMemorialNote
+          ? null
+          : (memorialNote ?? this.memorialNote),
     );
   }
 }
@@ -219,6 +237,8 @@ class Tank {
   final List<NotificationLog> notificationLogs; // Notification action logs
   final List<TankNote> tankNotes; // User notes for the tank
   final List<TankTag> tags; // User-created tags for this tank
+  final List<TankInhabitant>
+  memorializedInhabitants; // Inhabitants preserved after they pass away
 
   Tank({
     required this.id,
@@ -247,13 +267,15 @@ class Tank {
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
     List<TankTag>? tags,
+    List<TankInhabitant>? memorializedInhabitants,
   }) : photos = photos ?? [],
        waterParameters = waterParameters ?? [],
        dosingEntries = dosingEntries ?? [],
        notifications = notifications ?? [],
        notificationLogs = notificationLogs ?? [],
        tankNotes = tankNotes ?? [],
-       tags = tags ?? [];
+       tags = tags ?? [],
+       memorializedInhabitants = memorializedInhabitants ?? [];
 
   factory Tank.create({
     required String name,
@@ -280,6 +302,7 @@ class Tank {
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
     List<TankTag>? tags,
+    List<TankInhabitant>? memorializedInhabitants,
   }) {
     final now = DateTime.now();
     return Tank(
@@ -309,6 +332,7 @@ class Tank {
       notificationLogs: notificationLogs,
       tankNotes: tankNotes,
       tags: tags,
+      memorializedInhabitants: memorializedInhabitants,
     );
   }
 
@@ -346,6 +370,9 @@ class Tank {
       'notificationLogs': notificationLogs.map((nl) => nl.toJson()).toList(),
       'tankNotes': tankNotes.map((tn) => tn.toJson()).toList(),
       'tags': tags.map((t) => t.toJson()).toList(),
+      'memorializedInhabitants': memorializedInhabitants
+          .map((i) => i.toJson(includeLocalPaths: includeLocalPaths))
+          .toList(),
     };
   }
 
@@ -405,6 +432,10 @@ class Tank {
       tags:
           (json['tags'] as List?)?.map((t) => TankTag.fromJson(t)).toList() ??
           [],
+      memorializedInhabitants: (json['memorializedInhabitants'] as List?)
+             ?.map((i) => TankInhabitant.fromJson(i))
+             .toList() ??
+         [],
     );
   }
 
@@ -437,6 +468,7 @@ class Tank {
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
     List<TankTag>? tags,
+    List<TankInhabitant>? memorializedInhabitants,
     bool clearCustomBackgroundPhotoId = false,
     bool clearCustomIconPhotoId = false,
     bool clearBannerPhotoId = false,
@@ -481,6 +513,8 @@ class Tank {
       notificationLogs: notificationLogs ?? this.notificationLogs,
       tankNotes: tankNotes ?? this.tankNotes,
       tags: tags ?? this.tags,
+      memorializedInhabitants:
+          memorializedInhabitants ?? this.memorializedInhabitants,
     );
   }
 }

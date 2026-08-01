@@ -5024,6 +5024,10 @@
   "@dateAdded": {
     "description": "Label for the date-added field on the inhabitant detail screen"
   },
+  "datePassed": "Date Passed",
+  "@datePassed": {
+    "description": "Label for the date-passed field on the inhabitant detail screen"
+  },
   "speciesType": "Species Type",
   "@speciesType": {
     "description": "Label for the species type field on the inhabitant detail screen"
@@ -5052,6 +5056,10 @@
   "@inhabitantAge": {
     "description": "Label for the inhabitant age chip on the detail screen"
   },
+  "lifespan": "Lifespan",
+  "@lifespan": {
+    "description": "Label for the calculated lifespan of a memorialized inhabitant"
+  },
   "harmonyDelta": "Harmony Delta",
   "@harmonyDelta": {
     "description": "Label for the harmony score change chip toggle in settings"
@@ -5075,6 +5083,61 @@
   "editInhabitant": "Edit Inhabitant",
   "@editInhabitant": {
     "description": "Tooltip / label for the Edit Inhabitant FAB on TankInhabitantScreen"
+  },
+  "recordPassing": "Record Passing",
+  "@recordPassing": {
+    "description": "Label for the action that marks an inhabitant as having passed away"
+  },
+  "memorializeInhabitantConfirm": "Memorializing \"{inhabitantName}\" removes it from the active tank list while preserving its photos, notes, and timeline in the memorial section.\n\nYou'll choose the date passed next.",
+  "@memorializeInhabitantConfirm": {
+    "description": "Detailed confirmation shown before memorializing an inhabitant",
+    "placeholders": {
+      "inhabitantName": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseDatePassed": "Choose Date Passed",
+  "@chooseDatePassed": {
+    "description": "Button label that opens the date picker for the recorded passing date"
+  },
+  "deceasedCountLabel": "How many passed away?",
+  "@deceasedCountLabel": {
+    "description": "Label shown above the deceased count selector when an inhabitant has quantity > 1"
+  },
+  "memorialNoteLabel": "Memorial Note (Optional)",
+  "@memorialNoteLabel": {
+    "description": "Label for the optional note field shown when memorializing an inhabitant"
+  },
+  "memorialNoteHint": "Add a note about this passing...",
+  "@memorialNoteHint": {
+    "description": "Placeholder hint for the optional memorial note text field"
+  },
+  "restoreToActiveTank": "Restore to Tank",
+  "@restoreToActiveTank": {
+    "description": "Label for the action that restores a memorialized inhabitant to the active tank list"
+  },
+  "restoreMemorializedInhabitantConfirm": "Restore \"{inhabitantName}\" to the active tank? This clears the recorded passing date and removes its memorial status.",
+  "@restoreMemorializedInhabitantConfirm": {
+    "description": "Confirmation message shown before restoring a memorialized inhabitant to the active tank list",
+    "placeholders": {
+      "inhabitantName": {
+        "type": "String"
+      }
+    }
+  },
+  "inMemoryOf": "In memory of {inhabitantName}",
+  "@inMemoryOf": {
+    "description": "Memorial heading shown for a deceased inhabitant",
+    "placeholders": {
+      "inhabitantName": {
+        "type": "String"
+      }
+    }
+  },
+  "memorializedInhabitants": "Memorialized Inhabitants",
+  "@memorializedInhabitants": {
+    "description": "Section heading for inhabitants that have passed away but are kept for remembrance"
   },
   "inhabitantFishTypeNoLongerAvailable": "The previous fish type \"{fishUnit}\" is no longer available. Please select a new fish type.",
   "@inhabitantFishTypeNoLongerAvailable": {
