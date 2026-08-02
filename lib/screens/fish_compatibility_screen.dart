@@ -37,7 +37,6 @@ class FishCompatibilityScreen extends ConsumerStatefulWidget {
 class FishCompatibilityScreenState
     extends ConsumerState<FishCompatibilityScreen> {
   String _selectedCategory = 'freshwater';
-  OverlayEntry? _loadingOverlayEntry;
   List<Fish> _filteredFishList = [];
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
@@ -58,7 +57,6 @@ class FishCompatibilityScreenState
 
   @override
   void dispose() {
-    _loadingOverlayEntry?.remove();
     _searchController.removeListener(_filterFishList);
     _searchController.dispose();
     _interstitialAdService.dispose();
@@ -246,16 +244,22 @@ class FishCompatibilityScreenState
     _updateAndFilterFishList();
   }
 
-  void _showLoadingOverlay(
+  void _openReport(CompatibilityReport report, {bool fromHistory = false}) {
+    showReportDialog(
+      context,
+      report,
+      fromHistory: fromHistory,
+      fishType: _selectedCategory,
+    );
+  }
+
+  Widget _buildLoadingOverlay(
     BuildContext context,
     List<Fish> selectedFish,
-    String category,
+    AppLocalizations l10n,
   ) {
-    final l10n = AppLocalizations.of(context)!;
-    if (_loadingOverlayEntry != null) return;
-
-    _loadingOverlayEntry = OverlayEntry(
-      builder: (context) => Stack(
+    return Positioned.fill(
+      child: Stack(
         children: [
           Positioned.fill(
             child: BackdropFilter(
@@ -297,11 +301,10 @@ class FishCompatibilityScreenState
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              // MODIFIED: This section is now corrected to allow wrapping.
                               SizedBox(
-                                width: 100, // Constrains the text width
+                                width: 100,
                                 child: Text(
-                                  fish.name, // Use the full name
+                                  fish.name,
                                   style: Theme.of(context).textTheme.bodyLarge
                                       ?.copyWith(color: Colors.white),
                                   maxLines: 2,
@@ -336,22 +339,6 @@ class FishCompatibilityScreenState
         ],
       ),
     );
-
-    Overlay.of(context).insert(_loadingOverlayEntry!);
-  }
-
-  void _hideLoadingOverlay() {
-    _loadingOverlayEntry?.remove();
-    _loadingOverlayEntry = null;
-  }
-
-  void _openReport(CompatibilityReport report, {bool fromHistory = false}) {
-    showReportDialog(
-      context,
-      report,
-      fromHistory: fromHistory,
-      fishType: _selectedCategory,
-    );
   }
 
   @override
@@ -370,12 +357,6 @@ class FishCompatibilityScreenState
       previous,
       next,
     ) {
-      if (next.isLoading && !(previous?.isLoading ?? false)) {
-        _showLoadingOverlay(context, next.selectedFish, _selectedCategory);
-      } else if (!next.isLoading && (previous?.isLoading ?? false)) {
-        _hideLoadingOverlay();
-      }
-
       if (next.report != null && previous?.report != next.report) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -416,21 +397,25 @@ class FishCompatibilityScreenState
         ? 84.0
         : 0.0;
 
-    return MainLayout(
-      title: l10n.aiCompatibilityCalculator,
-      bottomNavigationBar: const AdBanner(),
-      child: Stack(
-        children: [
-          providerState.fishData.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stackTrace) => Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.cloud_off,
+    // Wrap the full screen in a Stack so the loading overlay can cover the
+    // AppBar and bottom navigation as well, without touching the global Overlay.
+    return Stack(
+      children: [
+        MainLayout(
+          title: l10n.aiCompatibilityCalculator,
+          bottomNavigationBar: const AdBanner(),
+          child: Stack(
+            children: [
+              providerState.fishData.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stackTrace) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.cloud_off,
                       size: 48,
                       color: Theme.of(context).colorScheme.error,
                     ),
@@ -677,7 +662,11 @@ class FishCompatibilityScreenState
               ),
             ),
         ],
-      ),
+            ),
+          ),
+        if (providerState.isLoading)
+          _buildLoadingOverlay(context, providerState.selectedFish, l10n),
+      ],
     );
   }
 

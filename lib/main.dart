@@ -398,7 +398,22 @@ void main() async {
     }
   });
 
-  runApp(const ProviderScope(child: MyApp()));
+  // runZonedGuarded catches async errors from Timer callbacks and Future
+  // chains that don't route through PlatformDispatcher (belt-and-suspenders
+  // in addition to FlutterError.onError + PlatformDispatcher.instance.onError).
+  // Recommended by https://docs.flutter.dev/testing/errors
+  runZonedGuarded(
+    () => runApp(const ProviderScope(child: MyApp())),
+    (error, stack) {
+      if (kDebugMode) {
+        // ignore: avoid_print
+        print('Zone error: $error\n$stack');
+      }
+      if (_firebaseInitialized) {
+        CrashlyticsService.recordError(error, stack, fatal: true);
+      }
+    },
+  );
 }
 
 class MyApp extends ConsumerWidget {
