@@ -120,14 +120,14 @@ const String rcDefaultOpenAIImageModel = 'gpt-4-vision-preview';
 // Placeholder model shown in API Provider settings for the Groq text field.
 const String rcDefaultGroqModel = 'llama-3.3-70b-versatile';
 const String rcDefaultGroqImageModel =
-    'meta-llama/llama-4-scout-17b-16e-instruct';
+    'meta-llama/llama-prompt-guard-2-22m';
 // Free-tier model names (used when the developer Groq key is active).
 const String rcDefaultFounderGroqModel = 'llama-3.3-70b-versatile';
 const String rcDefaultFreeGroqModel = 'llama-3.1-8b-instant';
 const String rcDefaultFounderGroqImageModel =
-    'meta-llama/llama-4-maverick-17b-128e-instruct';
+    'meta-llama/llama-prompt-guard-2-86m';
 const String rcDefaultFreeGroqImageModel =
-    'meta-llama/llama-4-scout-17b-16e-instruct';
+    'meta-llama/llama-prompt-guard-2-22m';
 
 // AquaPi promotion image URLs (empty = use bundled asset)
 const String rcDefaultAquapiOriginalImageUrl = '';
