@@ -26,7 +26,7 @@ dependencies:
   cupertino_icons: ^1.0.9
   google_mobile_ads: ^8.0.0
   firebase_analytics: ^12.3.0
-  firebase_app_check: ^0.4.3
+  firebase_app_check: ^0.4.6
   firebase_core: ^4.6.0 
   firebase_crashlytics: ^5.2.3
   firebase_remote_config: ^6.5.3
