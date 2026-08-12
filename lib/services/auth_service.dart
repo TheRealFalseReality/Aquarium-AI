@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -7,7 +9,14 @@ import 'package:google_sign_in/google_sign_in.dart';
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  /// Cached initialization future so `initialize()` is called exactly once.
+  static Future<void>? _googleSignInInitFuture;
+
+  static Future<void> _ensureGoogleSignInInitialized() {
+    _googleSignInInitFuture ??= GoogleSignIn.instance.initialize();
+    return _googleSignInInitFuture!;
+  }
 
   /// The currently signed-in user, or null if not signed in.
   static User? get currentUser => _auth.currentUser;
@@ -150,14 +159,47 @@ class AuthService {
         return user;
       }
 
-      // Mobile: use google_sign_in package
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null; // User cancelled
+      // Mobile: use google_sign_in package (v7 singleton + stream-based API)
+      await _ensureGoogleSignInInitialized();
+
+      // Capture the next authentication event before triggering sign-in.
+      final completer = Completer<GoogleSignInAccount?>();
+      final sub = GoogleSignIn.instance.authenticationEvents.listen(
+        (account) {
+          if (!completer.isCompleted) completer.complete(account);
+        },
+        onError: (Object error) {
+          if (!completer.isCompleted) completer.completeError(error);
+        },
+      );
+
+      try {
+        await GoogleSignIn.instance.authenticate();
+      } on GoogleSignInException catch (e) {
+        await sub.cancel();
+        if (e.code == GoogleSignInExceptionCode.canceled) return null;
+        rethrow;
+      } catch (e) {
+        await sub.cancel();
+        rethrow;
+      }
+
+      final GoogleSignInAccount? googleUser = await completer.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          sub.cancel();
+          return null;
+        },
+      );
+      await sub.cancel();
+
+      if (googleUser == null) return null;
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+      // In google_sign_in v7, accessToken is obtained via authorizationForScopes.
+      // For Firebase auth, only the idToken is required.
       credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
@@ -250,10 +292,16 @@ class AuthService {
   /// Sign out the current user (also signs out from Google / Facebook if needed).
   static Future<void> signOut() async {
     try {
+      // Check Google sign-in before clearing Firebase auth state.
+      final googleSignedIn =
+          _googleSignInInitFuture != null &&
+          (_auth.currentUser?.providerData.any(
+                (p) => p.providerId == 'google.com',
+              ) ??
+              false);
       await _auth.signOut();
-      // Also sign out from Google if the user signed in that way
-      if (await _googleSignIn.isSignedIn()) {
-        await _googleSignIn.signOut();
+      if (googleSignedIn) {
+        await GoogleSignIn.instance.signOut();
       }
     } catch (e) {
       if (kDebugMode) {
