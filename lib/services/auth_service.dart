@@ -188,9 +188,9 @@ class AuthService {
             }
           }
         },
-        onError: (Object error) {
+        onError: (Object error, StackTrace stackTrace) {
           if (authenticateCalled && !completer.isCompleted) {
-            completer.completeError(error);
+            completer.completeError(error, stackTrace);
           }
         },
       );
