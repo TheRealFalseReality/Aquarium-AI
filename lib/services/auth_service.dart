@@ -174,15 +174,19 @@ class AuthService {
       // to avoid missing the event, but guard the Completer against completing
       // with a stale account that was already current before this call.
       final completer = Completer<GoogleSignInAccount?>();
-      StreamSubscription<GoogleSignInAccount>? sub;
+      StreamSubscription<GoogleSignInAuthenticationEvent>? sub;
       bool authenticateCalled = false;
 
       sub = GoogleSignIn.instance.authenticationEvents.listen(
-        (account) {
+        (event) {
           // Ignore events that arrive before authenticate() has been called
           // (e.g., a replay of a previously authenticated account).
           if (authenticateCalled && !completer.isCompleted) {
-            completer.complete(account);
+            if (event is GoogleSignInAuthenticationEventSignIn) {
+              completer.complete(event.user);
+            } else if (event is GoogleSignInAuthenticationEventSignOut) {
+              completer.complete(null);
+            }
           }
         },
         onError: (Object error) {
