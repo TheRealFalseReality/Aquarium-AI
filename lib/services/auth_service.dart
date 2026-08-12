@@ -16,9 +16,9 @@ class AuthService {
   static Future<void> _ensureGoogleSignInInitialized() {
     if (_googleSignInInitFuture == null) {
       _googleSignInInitFuture = GoogleSignIn.instance.initialize().catchError(
-        (Object e) {
+        (Object e, StackTrace stackTrace) {
           _googleSignInInitFuture = null; // Allow retry on next call
-          throw e;
+          return Future<void>.error(e, stackTrace);
         },
       );
     }
@@ -174,10 +174,9 @@ class AuthService {
       // to avoid missing the event, but guard the Completer against completing
       // with a stale account that was already current before this call.
       final completer = Completer<GoogleSignInAccount?>();
-      StreamSubscription<GoogleSignInAuthenticationEvent>? sub;
       bool authenticateCalled = false;
 
-      sub = GoogleSignIn.instance.authenticationEvents.listen(
+      final sub = GoogleSignIn.instance.authenticationEvents.listen(
         (event) {
           // Ignore events that arrive before authenticate() has been called
           // (e.g., a replay of a previously authenticated account).
@@ -210,8 +209,8 @@ class AuthService {
 
       final GoogleSignInAccount? googleUser = await completer.future.timeout(
         const Duration(seconds: 30),
-        onTimeout: () {
-          sub?.cancel();
+        onTimeout: () async {
+          await sub.cancel();
           return null;
         },
       );
@@ -318,16 +317,14 @@ class AuthService {
     try {
       // Capture Google provider status before clearing Firebase auth state.
       final googleSignedIn =
-          _googleSignInInitFuture != null &&
-          (_auth.currentUser?.providerData.any(
-                (p) => p.providerId == 'google.com',
-              ) ??
-              false);
+          _auth.currentUser?.providerData.any(
+            (p) => p.providerId == 'google.com',
+          ) ??
+          false;
       await _auth.signOut();
       if (googleSignedIn) {
-        // Only call signOut if initialization actually completed successfully.
         try {
-          await _googleSignInInitFuture;
+          await _ensureGoogleSignInInitialized();
           await GoogleSignIn.instance.signOut();
         } catch (_) {
           // Initialization failed or signOut threw — nothing to do.
