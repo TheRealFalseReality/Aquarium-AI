@@ -116,18 +116,18 @@ const int rcDefaultFreeTierChatHistoryLimit = 3;
 const String rcDefaultGeminiModel = 'gemini-flash-latest';
 const String rcDefaultGeminiImageModel = 'gemini-flash-latest';
 const String rcDefaultOpenAIModel = 'gpt-4o';
-const String rcDefaultOpenAIImageModel = 'gpt-4-vision-preview';
+const String rcDefaultOpenAIImageModel = 'gpt-4o';
 // Placeholder model shown in API Provider settings for the Groq text field.
 const String rcDefaultGroqModel = 'llama-3.3-70b-versatile';
 const String rcDefaultGroqImageModel =
-    'meta-llama/llama-prompt-guard-2-22m';
+    'meta-llama/llama-4-scout-17b-16e-instruct';
 // Free-tier model names (used when the developer Groq key is active).
 const String rcDefaultFounderGroqModel = 'llama-3.3-70b-versatile';
 const String rcDefaultFreeGroqModel = 'llama-3.1-8b-instant';
 const String rcDefaultFounderGroqImageModel =
-    'meta-llama/llama-prompt-guard-2-86m';
+    'meta-llama/llama-4-scout-17b-16e-instruct';
 const String rcDefaultFreeGroqImageModel =
-    'meta-llama/llama-prompt-guard-2-22m';
+    'meta-llama/llama-4-scout-17b-16e-instruct';
 
 // AquaPi promotion image URLs (empty = use bundled asset)
 const String rcDefaultAquapiOriginalImageUrl = '';
