@@ -14,7 +14,14 @@ class AuthService {
   static Future<void>? _googleSignInInitFuture;
 
   static Future<void> _ensureGoogleSignInInitialized() {
-    _googleSignInInitFuture ??= GoogleSignIn.instance.initialize();
+    if (_googleSignInInitFuture == null) {
+      _googleSignInInitFuture = GoogleSignIn.instance.initialize().catchError(
+        (Object e) {
+          _googleSignInInitFuture = null; // Allow retry on next call
+          throw e;
+        },
+      );
+    }
     return _googleSignInInitFuture!;
   }
 
@@ -162,18 +169,31 @@ class AuthService {
       // Mobile: use google_sign_in package (v7 singleton + stream-based API)
       await _ensureGoogleSignInInitialized();
 
-      // Capture the next authentication event before triggering sign-in.
+      // In google_sign_in v7, authenticate() is void and the resulting account
+      // is posted to authenticationEvents. Subscribe before calling authenticate
+      // to avoid missing the event, but guard the Completer against completing
+      // with a stale account that was already current before this call.
       final completer = Completer<GoogleSignInAccount?>();
-      final sub = GoogleSignIn.instance.authenticationEvents.listen(
+      StreamSubscription<GoogleSignInAccount>? sub;
+      bool authenticateCalled = false;
+
+      sub = GoogleSignIn.instance.authenticationEvents.listen(
         (account) {
-          if (!completer.isCompleted) completer.complete(account);
+          // Ignore events that arrive before authenticate() has been called
+          // (e.g., a replay of a previously authenticated account).
+          if (authenticateCalled && !completer.isCompleted) {
+            completer.complete(account);
+          }
         },
         onError: (Object error) {
-          if (!completer.isCompleted) completer.completeError(error);
+          if (authenticateCalled && !completer.isCompleted) {
+            completer.completeError(error);
+          }
         },
       );
 
       try {
+        authenticateCalled = true;
         await GoogleSignIn.instance.authenticate();
       } on GoogleSignInException catch (e) {
         await sub.cancel();
@@ -187,7 +207,7 @@ class AuthService {
       final GoogleSignInAccount? googleUser = await completer.future.timeout(
         const Duration(seconds: 30),
         onTimeout: () {
-          sub.cancel();
+          sub?.cancel();
           return null;
         },
       );
@@ -292,7 +312,7 @@ class AuthService {
   /// Sign out the current user (also signs out from Google / Facebook if needed).
   static Future<void> signOut() async {
     try {
-      // Check Google sign-in before clearing Firebase auth state.
+      // Capture Google provider status before clearing Firebase auth state.
       final googleSignedIn =
           _googleSignInInitFuture != null &&
           (_auth.currentUser?.providerData.any(
@@ -301,7 +321,13 @@ class AuthService {
               false);
       await _auth.signOut();
       if (googleSignedIn) {
-        await GoogleSignIn.instance.signOut();
+        // Only call signOut if initialization actually completed successfully.
+        try {
+          await _googleSignInInitFuture;
+          await GoogleSignIn.instance.signOut();
+        } catch (_) {
+          // Initialization failed or signOut threw — nothing to do.
+        }
       }
     } catch (e) {
       if (kDebugMode) {
