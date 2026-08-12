@@ -10,7 +10,7 @@ class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Cached initialization future so `initialize()` is called exactly once.
+  /// Cached initialization future so concurrent callers share one attempt.
   static Future<void>? _googleSignInInitFuture;
 
   static Future<void> _ensureGoogleSignInInitialized() {
@@ -195,26 +195,20 @@ class AuthService {
         },
       );
 
+      final GoogleSignInAccount? googleUser;
       try {
         authenticateCalled = true;
         await GoogleSignIn.instance.authenticate();
+        googleUser = await completer.future.timeout(
+          const Duration(seconds: 30),
+          onTimeout: () => null,
+        );
       } on GoogleSignInException catch (e) {
-        await sub.cancel();
         if (e.code == GoogleSignInExceptionCode.canceled) return null;
         rethrow;
-      } catch (e) {
+      } finally {
         await sub.cancel();
-        rethrow;
       }
-
-      final GoogleSignInAccount? googleUser = await completer.future.timeout(
-        const Duration(seconds: 30),
-        onTimeout: () async {
-          await sub.cancel();
-          return null;
-        },
-      );
-      await sub.cancel();
 
       if (googleUser == null) return null;
 
