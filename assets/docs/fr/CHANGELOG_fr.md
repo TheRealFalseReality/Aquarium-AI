@@ -2,6 +2,12 @@
 
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 
+## [3.6.00] - 03/05/2026 • Commémoration et communication à l'intention des habitants
+- Ajouter la possibilité pour le propriétaire de modifier les commentaires des publications de la communauté
+- Ajouter un suivi des pensionnaires décédés du réservoir
+
+### Ajouts
+
 ## [3.3.00] - 03/05/2026 • Calculateur de substrat, Sauvegarde cloud, Améliorations de confort
 
 ### Ajouts
