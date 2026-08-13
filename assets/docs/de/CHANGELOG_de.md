@@ -2,6 +2,13 @@
 
 Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
 
+## [3.6.00] – 08.2026 • Gedenken an die Bewohner, Kommunikation
+
+### Hinzugefügt
+- Problem behoben, bei dem die Kommentarleiste beim Öffnen der Tastatur über den Beitragsinhalt verschoben wurde.
+- Bearbeitung von Kommentaren in Community-Beiträgen durch den/die Besitzer/in.
+- Gedenkfunktion für verstorbene Beckenbewohner.
+
 ## [3.3.00] – 03.05.2026 • Bodengrund-Rechner, Cloud-Backup, Quality-of-Life-Updates
 
 ### Hinzugefügt
