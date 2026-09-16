@@ -336,6 +336,42 @@ void main() {
 
       expect(tank.parameterProfiles, isEmpty);
     });
+
+    test('backup payload roundtrip keeps parameterProfiles', () {
+      final sourceTank = Tank.create(
+        name: 'Backup Tank',
+        type: 'marine',
+        parameterProfiles: const [
+          TankParameterProfile(
+            parameterType: 'salinity',
+            preferredUnit: 'SG',
+            minValue: 1.023,
+            maxValue: 1.025,
+          ),
+          TankParameterProfile(
+            parameterType: 'strontium',
+            preferredUnit: 'ppm',
+            maxValue: 10,
+            isCustom: true,
+          ),
+        ],
+      );
+
+      final backupPayload = {
+        'version': '3.0.10',
+        'tanks': [sourceTank.toJson()],
+      };
+
+      final restoredTank = Tank.fromJson(
+        (backupPayload['tanks'] as List).first as Map<String, dynamic>,
+      );
+
+      expect(restoredTank.parameterProfiles, hasLength(2));
+      expect(restoredTank.parameterProfiles[0].parameterType, 'salinity');
+      expect(restoredTank.parameterProfiles[0].preferredUnit, 'SG');
+      expect(restoredTank.parameterProfiles[1].parameterType, 'strontium');
+      expect(restoredTank.parameterProfiles[1].isCustom, isTrue);
+    });
   });
 
   group('TankInhabitant fishUuid', () {
