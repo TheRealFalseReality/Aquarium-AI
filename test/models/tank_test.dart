@@ -468,4 +468,37 @@ void main() {
       expect(tank.memorializedInhabitants, isEmpty);
     });
   });
+
+  group('Tank specialized types', () {
+    test('serializes specialized and custom tank type fields', () {
+      final tank = Tank.create(
+        name: 'Mangrove Predator',
+        type: 'marine',
+        specialization: 'predator',
+        customTypeName: 'Mangrove Hunter Lagoon',
+        customTypeDescription:
+            'Focus on hardy predator fish with mangrove roots and macroalgae.',
+      );
+
+      final json = tank.toJson();
+      final recreated = Tank.fromJson(json);
+
+      expect(json['specialization'], equals('predator'));
+      expect(json['customTypeName'], equals('Mangrove Hunter Lagoon'));
+      expect(
+        json['customTypeDescription'],
+        equals(
+          'Focus on hardy predator fish with mangrove roots and macroalgae.',
+        ),
+      );
+      expect(recreated.specialization, equals('predator'));
+      expect(recreated.customTypeName, equals('Mangrove Hunter Lagoon'));
+      expect(
+        recreated.customTypeDescription,
+        equals(
+          'Focus on hardy predator fish with mangrove roots and macroalgae.',
+        ),
+      );
+    });
+  });
 }

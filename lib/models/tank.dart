@@ -210,9 +210,12 @@ class TankInhabitant {
 class Tank {
   final String id;
   final String name;
-  final String type; // 'freshwater' or 'marine'
+  final String type; // Base water category: 'freshwater' or 'marine'
   final bool isReef; // Only relevant when type == 'marine'
   final String? freshwaterSubtype; // Only relevant when type == 'freshwater': 'planted' or 'brackish'
+  final String? specialization; // Optional specialized setup id, e.g. 'fowlr' or 'predator'
+  final String? customTypeName; // Optional user-defined tank type name
+  final String? customTypeDescription; // Optional AI guidance for custom tank types
   final double? substrateOverrideLbs; // User-specified substrate amount (lbs); overrides calculated recommendation
   final List<TankInhabitant> inhabitants;
   final double? sizeGallons; // Tank size in gallons
@@ -246,6 +249,9 @@ class Tank {
     required this.type,
     this.isReef = false,
     this.freshwaterSubtype,
+    this.specialization,
+    this.customTypeName,
+    this.customTypeDescription,
     this.substrateOverrideLbs,
     required this.inhabitants,
     this.sizeGallons,
@@ -282,6 +288,9 @@ class Tank {
     required String type,
     bool isReef = false,
     String? freshwaterSubtype,
+    String? specialization,
+    String? customTypeName,
+    String? customTypeDescription,
     double? substrateOverrideLbs,
     List<TankInhabitant>? inhabitants,
     double? sizeGallons,
@@ -311,6 +320,9 @@ class Tank {
       type: type,
       isReef: isReef,
       freshwaterSubtype: freshwaterSubtype,
+      specialization: specialization,
+      customTypeName: customTypeName,
+      customTypeDescription: customTypeDescription,
       substrateOverrideLbs: substrateOverrideLbs,
       inhabitants: inhabitants ?? [],
       sizeGallons: sizeGallons,
@@ -343,6 +355,10 @@ class Tank {
       'type': type,
       'isReef': isReef,
       if (freshwaterSubtype != null) 'freshwaterSubtype': freshwaterSubtype,
+      if (specialization != null) 'specialization': specialization,
+      if (customTypeName != null) 'customTypeName': customTypeName,
+      if (customTypeDescription != null)
+        'customTypeDescription': customTypeDescription,
       if (substrateOverrideLbs != null)
         'substrateOverrideLbs': substrateOverrideLbs,
       'inhabitants': inhabitants
@@ -383,6 +399,9 @@ class Tank {
       type: json['type'] as String,
       isReef: json['isReef'] as bool? ?? false,
       freshwaterSubtype: json['freshwaterSubtype'] as String?,
+      specialization: json['specialization'] as String?,
+      customTypeName: json['customTypeName'] as String?,
+      customTypeDescription: json['customTypeDescription'] as String?,
       substrateOverrideLbs: json['substrateOverrideLbs']?.toDouble(),
       inhabitants: (json['inhabitants'] as List)
           .map((i) => TankInhabitant.fromJson(i))
@@ -446,6 +465,12 @@ class Tank {
     bool? isReef,
     String? freshwaterSubtype,
     bool clearFreshwaterSubtype = false,
+    String? specialization,
+    bool clearSpecialization = false,
+    String? customTypeName,
+    bool clearCustomTypeName = false,
+    String? customTypeDescription,
+    bool clearCustomTypeDescription = false,
     double? substrateOverrideLbs,
     bool clearSubstrateOverrideLbs = false,
     List<TankInhabitant>? inhabitants,
@@ -482,6 +507,15 @@ class Tank {
       freshwaterSubtype: clearFreshwaterSubtype
           ? null
           : (freshwaterSubtype ?? this.freshwaterSubtype),
+      specialization: clearSpecialization
+          ? null
+          : (specialization ?? this.specialization),
+      customTypeName: clearCustomTypeName
+          ? null
+          : (customTypeName ?? this.customTypeName),
+      customTypeDescription: clearCustomTypeDescription
+          ? null
+          : (customTypeDescription ?? this.customTypeDescription),
       substrateOverrideLbs: clearSubstrateOverrideLbs
           ? null
           : (substrateOverrideLbs ?? this.substrateOverrideLbs),

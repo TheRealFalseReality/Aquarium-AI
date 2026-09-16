@@ -11,6 +11,7 @@ import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../utils/parameter_range_alerts.dart';
 import '../utils/parameter_trend_alerts.dart';
+import '../utils/tank_type_utils.dart';
 import '../widgets/out_of_range_alerts_banner.dart';
 
 /// Returns the localized display name for [parameterType].
@@ -145,10 +146,11 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final l10n = AppLocalizations.of(context)!;
     final currentTank = _getCurrentTank();
     final parameterLabel = _getParameterLabel(parameter.parameterType, context);
+    final tankTypeContext = getTankTypeAiContext(currentTank);
     final prompt = parameter.notes != null && parameter.notes!.trim().isNotEmpty
         ? l10n.analyzeReadingPromptWithNotes(
             currentTank.name,
-            currentTank.type,
+            tankTypeContext,
             parameterLabel,
             parameter.value.toString(),
             parameter.unit ?? '',
@@ -157,7 +159,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
           )
         : l10n.analyzeReadingPromptWithoutNotes(
             currentTank.name,
-            currentTank.type,
+            tankTypeContext,
             parameterLabel,
             parameter.value.toString(),
             parameter.unit ?? '',

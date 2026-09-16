@@ -21,6 +21,7 @@ import '../utils/groq_helper.dart';
 import '../utils/json_utils.dart';
 import '../utils/openai_retry_helper.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../utils/tank_type_utils.dart';
 import 'analysis_history_provider.dart';
 import 'app_settings_provider.dart';
 import 'fish_compatibility_provider.dart';
@@ -650,7 +651,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
                 resultData: {
                   'recommendations': finalRecs.map((r) => r.toJson()).toList(),
                   'tankName': tank.name,
-                  'tankType': tank.type,
+                  'tankType': getTankTypeAiContext(tank),
                 },
               ),
             );

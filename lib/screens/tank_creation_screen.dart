@@ -15,6 +15,7 @@ import '../providers/tank_tags_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
 import '../utils/tank_harmony_calculator.dart';
+import '../utils/tank_type_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/modern_chip.dart';
 import '../widgets/tag_picker_dialog.dart';
@@ -35,10 +36,11 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
   final _sizeGallonsController = TextEditingController();
   final _sizeLitersController = TextEditingController();
   final _notesController = TextEditingController();
+  final _customTankTypeNameController = TextEditingController();
+  final _customTankTypeDescriptionController = TextEditingController();
 
   String _selectedCategory = 'freshwater';
-  bool _isReef = false;
-  String? _freshwaterSubtype; // 'planted' or 'brackish'; null = standard
+  String? _selectedSpecialization;
   List<TankInhabitant> _inhabitants = [];
   List<Fish> _availableFish = [];
   DateTime _creationDate = DateTime.now();
@@ -64,12 +66,21 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
     if (widget.existingTank != null) {
       _tankNameController.text = widget.existingTank!.name;
       _selectedCategory = widget.existingTank!.type;
-      _isReef = widget.existingTank!.isReef;
-      _freshwaterSubtype = widget.existingTank!.freshwaterSubtype;
+      _selectedSpecialization = normalizeTankTypeSelection(
+        category: widget.existingTank!.type,
+        isReef: widget.existingTank!.isReef,
+        freshwaterSubtype: widget.existingTank!.freshwaterSubtype,
+        specialization: widget.existingTank!.specialization,
+        customTypeName: widget.existingTank!.customTypeName,
+      );
       _inhabitants = List.from(widget.existingTank!.inhabitants);
       _creationDate = widget.existingTank!.createdAt;
       _tankPhotos = List.from(widget.existingTank!.photos);
       _tankTags = List.from(widget.existingTank!.tags);
+      _customTankTypeNameController.text =
+          widget.existingTank!.customTypeName ?? '';
+      _customTankTypeDescriptionController.text =
+          widget.existingTank!.customTypeDescription ?? '';
       if (widget.existingTank!.sizeGallons != null) {
         _sizeGallonsController.text = widget.existingTank!.sizeGallons!
             .toString();
@@ -94,6 +105,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
     _sizeGallonsController.dispose();
     _sizeLitersController.dispose();
     _notesController.dispose();
+    _customTankTypeNameController.dispose();
+    _customTankTypeDescriptionController.dispose();
     super.dispose();
   }
 
@@ -173,15 +186,22 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
     setState(() {
       _selectedCategory = category;
       _inhabitants.clear(); // Clear inhabitants when changing category
-      if (category != 'marine') _isReef = false;
-      if (category != 'freshwater') _freshwaterSubtype = null;
+      if (_selectedSpecialization != null &&
+          !(getTankTypeOptionById(_selectedSpecialization)?.supportsCategory(
+                category,
+              ) ??
+              false)) {
+        _selectedSpecialization = null;
+      }
     });
     _loadFishData();
   }
 
-  void _toggleFreshwaterSubtype(String subtype) {
+  void _onSpecializationChanged(String specialization) {
     setState(() {
-      _freshwaterSubtype = _freshwaterSubtype == subtype ? null : subtype;
+      _selectedSpecialization = _selectedSpecialization == specialization
+          ? null
+          : specialization;
     });
   }
 
@@ -485,9 +505,19 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
               TankHarmonyCalculator.generateCalculationBreakdown(tankFish);
         }
 
-        final isReef = _selectedCategory == 'marine' ? _isReef : false;
-        final freshwaterSubtype =
-            _selectedCategory == 'freshwater' ? _freshwaterSubtype : null;
+        final specialization = _selectedSpecialization;
+        final customTypeName = specialization == customTankTypeId
+            ? _customTankTypeNameController.text.trim()
+            : '';
+        final customTypeDescription = specialization == customTankTypeId
+            ? _customTankTypeDescriptionController.text.trim()
+            : '';
+        final isReef = _selectedCategory == 'marine' &&
+            (specialization == 'reef' || specialization == 'nano_reef');
+        final freshwaterSubtype = _selectedCategory == 'freshwater' &&
+                (specialization == 'planted' || specialization == 'brackish')
+            ? specialization
+            : null;
         final tank = widget.existingTank != null
             ? widget.existingTank!.copyWith(
                 name: _tankNameController.text.trim(),
@@ -495,6 +525,14 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
                 isReef: isReef,
                 freshwaterSubtype: freshwaterSubtype,
                 clearFreshwaterSubtype: freshwaterSubtype == null,
+                specialization: specialization,
+                clearSpecialization: specialization == null,
+                customTypeName: customTypeName.isNotEmpty ? customTypeName : null,
+                clearCustomTypeName: customTypeName.isEmpty,
+                customTypeDescription: customTypeDescription.isNotEmpty
+                    ? customTypeDescription
+                    : null,
+                clearCustomTypeDescription: customTypeDescription.isEmpty,
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
@@ -514,6 +552,11 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
                 type: _selectedCategory,
                 isReef: isReef,
                 freshwaterSubtype: freshwaterSubtype,
+                specialization: specialization,
+                customTypeName: customTypeName.isNotEmpty ? customTypeName : null,
+                customTypeDescription: customTypeDescription.isNotEmpty
+                    ? customTypeDescription
+                    : null,
                 inhabitants: _inhabitants,
                 sizeGallons: sizeGallons,
                 sizeLiters: sizeLiters,
@@ -892,124 +935,81 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
               ),
             ],
           ),
-          // Reef toggle – only visible for saltwater tanks, shown as a subtype
-          AnimatedSize(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut,
-            child: _selectedCategory == 'marine'
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 2,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.4),
-                            borderRadius: BorderRadius.circular(1),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Builder(
-                          builder: (context) {
-                            final l10n = AppLocalizations.of(context)!;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.saltwaterSubtype,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
-                                      ),
-                                ),
-                                const SizedBox(height: 6),
-                                ModernSelectableChip(
-                                  label: l10n.markAsReef,
-                                  emoji: '🪸',
-                                  selected: _isReef,
-                                  onTap: () =>
-                                      setState(() => _isReef = !_isReef),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink(),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  l10n.tankSpecializationLabel,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.onboardingOptional,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
-          // Freshwater subtype – only visible for freshwater tanks
+          const SizedBox(height: 10),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: getTankTypeOptionsForCategory(_selectedCategory)
+                .map(
+                  (option) => ModernSelectableChip(
+                    label: getTankTypeDisplayLabelFromParts(
+                      l10n,
+                      category: _selectedCategory,
+                      specialization: option.id,
+                    ),
+                    emoji: option.emoji,
+                    selected: _selectedSpecialization == option.id,
+                    onTap: () => _onSpecializationChanged(option.id),
+                  ),
+                )
+                .toList(),
+          ),
           AnimatedSize(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
-            child: _selectedCategory == 'freshwater'
+            child: _selectedSpecialization == customTankTypeId
                 ? Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Column(
                       children: [
-                        Container(
-                          width: 2,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.4),
-                            borderRadius: BorderRadius.circular(1),
+                        TextFormField(
+                          controller: _customTankTypeNameController,
+                          decoration: InputDecoration(
+                            labelText: l10n.customTankTypeNameLabel,
+                            hintText: l10n.customTankTypeNameHint,
+                            border: const OutlineInputBorder(),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Builder(
-                          builder: (context) {
-                            final l10n = AppLocalizations.of(context)!;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.freshwaterSubtype,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
-                                      ),
-                                ),
-                                const SizedBox(height: 6),
-                                Wrap(
-                                  spacing: 8,
-                                  children: [
-                                    ModernSelectableChip(
-                                      label: l10n.plantedTank,
-                                      emoji: '🌿',
-                                      selected:
-                                          _freshwaterSubtype == 'planted',
-                                      onTap: () =>
-                                          _toggleFreshwaterSubtype('planted'),
-                                    ),
-                                    ModernSelectableChip(
-                                      label: l10n.brackishTank,
-                                      emoji: '🦀',
-                                      selected:
-                                          _freshwaterSubtype == 'brackish',
-                                      onTap: () =>
-                                          _toggleFreshwaterSubtype('brackish'),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            );
+                          validator: (value) {
+                            if (_selectedSpecialization == customTankTypeId &&
+                                (value == null || value.trim().isEmpty)) {
+                              return l10n.pleaseEnterCustomTankTypeName;
+                            }
+                            return null;
                           },
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _customTankTypeDescriptionController,
+                          decoration: InputDecoration(
+                            labelText: l10n.customTankTypeDescriptionLabel,
+                            hintText: l10n.customTankTypeDescriptionHint,
+                            border: const OutlineInputBorder(),
+                          ),
+                          minLines: 2,
+                          maxLines: 4,
                         ),
                       ],
                     ),

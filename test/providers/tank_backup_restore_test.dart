@@ -108,6 +108,10 @@ void main() {
       final originalTank = Tank.create(
         name: 'Test Tank',
         type: 'freshwater',
+        specialization: 'community',
+        customTypeName: 'Riverbank Community',
+        customTypeDescription:
+            'Soft-flow community with tannins, floating plants, and peaceful schooling fish.',
         sizeGallons: 40.0,
         sizeLiters: 151.4,
         notes: 'Test notes',
@@ -153,6 +157,12 @@ void main() {
       // Verify restored tank matches original
       expect(restoredTank.name, equals(originalTank.name));
       expect(restoredTank.type, equals(originalTank.type));
+      expect(restoredTank.specialization, equals(originalTank.specialization));
+      expect(restoredTank.customTypeName, equals(originalTank.customTypeName));
+      expect(
+        restoredTank.customTypeDescription,
+        equals(originalTank.customTypeDescription),
+      );
       expect(restoredTank.sizeGallons, equals(originalTank.sizeGallons));
       expect(restoredTank.sizeLiters, equals(originalTank.sizeLiters));
       expect(restoredTank.notes, equals(originalTank.notes));
