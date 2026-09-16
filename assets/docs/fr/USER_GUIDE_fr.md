@@ -332,6 +332,19 @@ Suivez la qualité de l'eau au fil du temps avec des graphiques et des journaux.
 3. Entrez la valeur et l'unité.
 4. Appuyez sur **Enregistrer**.
 
+### Plages personnalisées et paramètres personnalisés
+
+Utilisez **Gérer les plages de paramètres** (icône de réglage en haut à droite
+du Journal des paramètres) pour :
+
+- définir des **limites min/max** propres à ce bac pour les paramètres intégrés,
+- créer des **paramètres personnalisés** réutilisables (par ex. : Fer, Cuivre,
+  Strontium),
+- définir une unité par défaut préférée pour chaque paramètre.
+
+Lorsque des limites personnalisées sont configurées, les alertes hors plage
+utilisent les limites de votre bac au lieu des valeurs intégrées par défaut.
+
 ### Graphiques
 
 Appuyez sur la flèche **développer** d'un groupe de paramètres pour afficher un

@@ -325,6 +325,19 @@ Rastrea la calidad del agua a lo largo del tiempo con gráficos y registros.
 3. Introduce el valor y la unidad.
 4. Toca **Guardar**.
 
+### Rangos personalizados y parámetros personalizados
+
+Usa **Gestionar rangos de parámetros** (icono de ajustes en la parte superior
+derecha del Registro de parámetros) para:
+
+- definir **límites mínimos/máximos** por acuario para parámetros integrados,
+- crear **parámetros personalizados** reutilizables (por ejemplo: Hierro, Cobre,
+  Estroncio),
+- establecer una unidad predeterminada preferida por parámetro.
+
+Cuando configuras límites personalizados, las advertencias fuera de rango usan
+los límites de tu acuario en lugar de los valores predeterminados integrados.
+
 ### Gráficos
 
 Toca la flecha de **expandir** en un grupo de parámetros para ver un gráfico de serie

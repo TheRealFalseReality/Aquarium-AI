@@ -5931,7 +5931,9 @@
   "@careRemindersSetUpForTank": {
     "description": "Button label to confirm opening the notification manager for a specific tank",
     "placeholders": {
-      "tankName": {"type": "String"}
+      "tankName": {
+        "type": "String"
+      }
     }
   },
   "reschedule": "Reschedule",
@@ -6193,7 +6195,9 @@
   "@cloudBackupFailed": {
     "description": "Snackbar message when cloud backup fails",
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "cloudRestoreDialogTitle": "Cloud Restore",
@@ -6204,8 +6208,12 @@
   "@cloudRestoreDialogContent": {
     "description": "Body text for the cloud restore confirmation dialog",
     "placeholders": {
-      "date": {"type": "String"},
-      "count": {"type": "int"}
+      "date": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "cloudRestoreSuccess": "Data restored from cloud successfully",
@@ -6216,7 +6224,9 @@
   "@cloudRestoreFailed": {
     "description": "Snackbar message when cloud restore fails",
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "noCloudBackupFound": "No cloud backup found for your account.",
@@ -6322,6 +6332,85 @@
   "serverMessageNoCurrentMessage": "No current message.",
   "@serverMessageNoCurrentMessage": {
     "description": "Shown when no active server message is available"
+  },
+  "manageParameterRanges": "Manage Parameter Ranges",
+  "@manageParameterRanges": {
+    "description": "Button/title for managing per-tank parameter ranges and custom parameter profiles"
+  },
+  "manageParameterRangesDescription": "Set custom min/max bounds and reusable custom parameters for this tank.",
+  "@manageParameterRangesDescription": {
+    "description": "Description text in parameter range manager sheet"
+  },
+  "addCustomParameter": "Add Custom Parameter",
+  "@addCustomParameter": {
+    "description": "Action to create a reusable custom parameter profile"
+  },
+  "editParameterBoundsTitle": "Edit {parameterName} Range",
+  "@editParameterBoundsTitle": {
+    "description": "Dialog title for editing one parameter profile range",
+    "placeholders": {
+      "parameterName": {
+        "type": "String"
+      }
+    }
+  },
+  "parameterTypeLabel": "Parameter Type",
+  "@parameterTypeLabel": {
+    "description": "Field label for parameter type in parameter profile editor"
+  },
+  "customParameterHint": "e.g., Iron, Copper, Strontium",
+  "@customParameterHint": {
+    "description": "Hint for custom parameter name input"
+  },
+  "defaultUnitLabel": "Default Unit",
+  "@defaultUnitLabel": {
+    "description": "Field label for preferred unit in parameter profile editor"
+  },
+  "minBoundLabel": "Minimum Bound",
+  "@minBoundLabel": {
+    "description": "Field label for minimum acceptable value"
+  },
+  "maxBoundLabel": "Maximum Bound",
+  "@maxBoundLabel": {
+    "description": "Field label for maximum acceptable value"
+  },
+  "optionalLabel": "Optional",
+  "@optionalLabel": {
+    "description": "Hint indicating an input field is optional"
+  },
+  "minMustBeLessOrEqualMax": "Minimum bound must be less than or equal to maximum bound.",
+  "@minMustBeLessOrEqualMax": {
+    "description": "Validation error when min bound is greater than max bound"
+  },
+  "parameterBoundsSaved": "Parameter bounds saved.",
+  "@parameterBoundsSaved": {
+    "description": "Snackbar shown when parameter profile changes are saved"
+  },
+  "parameterRemoved": "Parameter removed from quick list.",
+  "@parameterRemoved": {
+    "description": "Snackbar shown when custom parameter profile is removed"
+  },
+  "usingDefaultRange": "Using built-in default range",
+  "@usingDefaultRange": {
+    "description": "Summary text when no custom bounds are configured"
+  },
+  "noneLabel": "None",
+  "@noneLabel": {
+    "description": "Generic none label"
+  },
+  "parameterProfileSummary": "Min: {min} · Max: {max} · Unit: {unit}",
+  "@parameterProfileSummary": {
+    "description": "Compact summary of custom parameter profile settings",
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
   }
-
 }
