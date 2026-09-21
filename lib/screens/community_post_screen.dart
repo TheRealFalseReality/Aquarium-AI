@@ -1028,6 +1028,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
             child: TextField(
               controller: _commentController,
               enabled: currentUserId.isNotEmpty,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
+              minLines: 3,
+              maxLines: 6,
               decoration: InputDecoration(
                 hintText: currentUserId.isEmpty
                     ? l10n.communitySignInToComment
@@ -1041,8 +1045,6 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                 ),
                 isDense: true,
               ),
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => _submitComment(l10n),
             ),
           ),
           const SizedBox(width: 8),
