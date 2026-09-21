@@ -61,11 +61,16 @@ La gestion des bacs est le hub central pour suivre vos aquariums.
 ### Créer un bac
 
 1. Appuyez sur le bouton **+** (en bas à droite).
-2. Renseignez le **Nom**, le **Type** (Eau douce / Marine) et le **Volume** (gallons ou
-   litres).
-3. Ajoutez optionnellement une **Description**, un indicateur compatible récif, et une
-   **photo** ou une **image de bannière**.
-4. Appuyez sur **Enregistrer**.
+2. Renseignez le **Nom**, choisissez le **Type** de base (Eau douce / Marine), puis
+   saisissez le **Volume** (gallons ou litres).
+3. Vous pouvez aussi choisir une **configuration spécialisée** comme Communautaire,
+   Planté, Eau noire, Cichlidés, Poissons uniquement, FOWLR, Récif, Prédateur,
+   Quarantaine, et plus encore.
+4. Vous pouvez également choisir **Personnalisé** et saisir votre propre type
+   d'aquarium avec des **notes IA sur l'aquarium** pour obtenir des recommandations
+   mieux adaptées à votre installation.
+5. Ajoutez si besoin une **Description**, des photos et d'autres détails du bac, puis
+   appuyez sur **Enregistrer**.
 
 ### Cartes de bac
 
@@ -120,7 +125,7 @@ Utilisez **Paramètres → Sauvegarde / Restauration** pour exporter et importer
 
 #### Sauvegarde et restauration locale
 
-Enregistrez un fichier de sauvegarde JSON complet sur votre appareil et restaurez-le sur n'importe quel appareil.
+Enregistrez un fichier de sauvegarde JSON complet sur votre appareil et restaurez-le sur n'importe quel appareil. Les sauvegardes incluent aussi les types de bacs spécialisés et les notes IA personnalisées.
 
 #### Sauvegarde et restauration en ligne *(Aquariophile Fondateur sur mobile/desktop ; tous les utilisateurs sur le web)*
 

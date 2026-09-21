@@ -19,6 +19,7 @@ import '../services/fish_data_service.dart';
 import '../services/notification_service.dart';
 import '../utils/backup_restore_utils.dart';
 import '../utils/parameter_range_alerts.dart';
+import '../utils/tank_type_utils.dart' as tank_type_utils;
 import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
 import '../widgets/accessible_feedback.dart';
@@ -880,16 +881,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                               const SizedBox(width: 4),
                               Flexible(
                                 child: Text(
-                                  tank.type == 'freshwater'
-                                      ? (tank.freshwaterSubtype == 'planted'
-                                            ? l10n.plantedFreshwaterTank
-                                            : tank.freshwaterSubtype ==
-                                                    'brackish'
-                                            ? l10n.brackishTank
-                                            : l10n.freshwaterTank)
-                                      : (tank.isReef
-                                            ? l10n.reefTank
-                                            : l10n.saltwaterTank),
+                                  tank_type_utils.getTankTypeDisplayLabel(
+                                    l10n,
+                                    tank,
+                                  ),
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium
@@ -2611,13 +2606,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
 
   /// Returns the emoji representing this tank's type/subtype.
   String _tankTypeEmoji(Tank tank) {
-    if (tank.type == 'freshwater') {
-      if (tank.freshwaterSubtype == 'planted') return '🌿';
-      if (tank.freshwaterSubtype == 'brackish') return '🦀';
-      return '🐟'; // plain freshwater
-    }
-    if (tank.isReef) return '🪸';
-    return '🌊'; // plain marine/saltwater
+    return tank_type_utils.getTankTypeEmoji(tank);
   }
 
   /// Returns the substrate lbs-per-gallon midpoint for the given tank's type.

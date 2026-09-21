@@ -20,6 +20,7 @@ import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 import '../theme_colors.dart';
 import '../utils/storage_image_utils.dart';
+import '../utils/tank_type_utils.dart';
 import '../widgets/post_card.dart';
 
 // ─── Icon catalogue shared by view + edit ────────────────────────────────────
@@ -784,9 +785,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
   String _tankSubtitle(AppLocalizations l10n, ProfileTankSummary tank) {
-    final type = tank.isReef
-        ? l10n.profileTankTypeReef
-        : _tankTypeLabel(l10n, tank.type);
+    final type = getTankTypeDisplayLabelFromParts(
+      l10n,
+      category: tank.type,
+      isReef: tank.isReef,
+      specialization: tank.specialization,
+      customTypeName: tank.customTypeName,
+    );
     if (tank.sizeGallons != null) {
       return '$type • ${tank.sizeGallons!.toStringAsFixed(0)} gal';
     }

@@ -708,6 +708,98 @@
   "@freshwaterSubtype": {
     "description": "Label shown above freshwater subtype chips (Planted, Brackish) in tank creation"
   },
+  "tankSpecializationLabel": "Specialized Setup",
+  "@tankSpecializationLabel": {
+    "description": "Label shown above specialized tank type options in tank creation and onboarding"
+  },
+  "tankTypeCommunity": "Community",
+  "@tankTypeCommunity": {
+    "description": "Community tank type label"
+  },
+  "tankTypeBlackwater": "Blackwater",
+  "@tankTypeBlackwater": {
+    "description": "Blackwater tank type label"
+  },
+  "tankTypeCichlid": "Cichlid",
+  "@tankTypeCichlid": {
+    "description": "Cichlid tank type label"
+  },
+  "tankTypeShrimp": "Shrimp",
+  "@tankTypeShrimp": {
+    "description": "Shrimp tank type label"
+  },
+  "tankTypeNano": "Nano",
+  "@tankTypeNano": {
+    "description": "Nano tank type label"
+  },
+  "tankTypeFishOnly": "Fish-Only",
+  "@tankTypeFishOnly": {
+    "description": "Fish-only marine tank type label"
+  },
+  "tankTypeFowlr": "FOWLR",
+  "@tankTypeFowlr": {
+    "description": "Fish-only with live rock tank type label"
+  },
+  "tankTypeNanoReef": "Nano Reef",
+  "@tankTypeNanoReef": {
+    "description": "Nano reef tank type label"
+  },
+  "tankTypeLagoon": "Lagoon",
+  "@tankTypeLagoon": {
+    "description": "Lagoon tank type label"
+  },
+  "tankTypeInvertOnly": "Invert-Only",
+  "@tankTypeInvertOnly": {
+    "description": "Invertebrate-only tank type label"
+  },
+  "tankTypeSeahorse": "Seahorse",
+  "@tankTypeSeahorse": {
+    "description": "Seahorse tank type label"
+  },
+  "tankTypePredator": "Predator",
+  "@tankTypePredator": {
+    "description": "Predator tank type label"
+  },
+  "tankTypeSpeciesOnly": "Species-Only",
+  "@tankTypeSpeciesOnly": {
+    "description": "Species-only tank type label"
+  },
+  "tankTypeBreeding": "Breeding",
+  "@tankTypeBreeding": {
+    "description": "Breeding tank type label"
+  },
+  "tankTypeQuarantine": "Quarantine",
+  "@tankTypeQuarantine": {
+    "description": "Quarantine tank type label"
+  },
+  "tankTypeHospital": "Hospital",
+  "@tankTypeHospital": {
+    "description": "Hospital tank type label"
+  },
+  "tankTypeCustom": "Custom",
+  "@tankTypeCustom": {
+    "description": "Custom user-defined tank type label"
+  },
+  "customTankTypeNameLabel": "Custom Tank Type",
+  "@customTankTypeNameLabel": {
+    "description": "Label for the custom tank type name field"
+  },
+  "customTankTypeNameHint": "Mangrove Macroalgae Lagoon",
+  "@customTankTypeNameHint": {
+    "description": "Hint for the custom tank type name field"
+  },
+  "pleaseEnterCustomTankTypeName": "Please enter a custom tank type",
+  "@pleaseEnterCustomTankTypeName": {
+    "description": "Validation message for missing custom tank type name"
+  },
+  "customTankTypeDescriptionLabel": "AI Tank Notes",
+  "@customTankTypeDescriptionLabel": {
+    "description": "Label for user notes that explain a custom tank type to the AI"
+  },
+  "customTankTypeDescriptionHint": "Describe the livestock, goals, water style, or special care needs for this custom setup.",
+  "@customTankTypeDescriptionHint": {
+    "description": "Hint for user notes that explain a custom tank type to the AI"
+  },
   "substrateRecommendedLbs": "~{amount} lbs substrate",
   "@substrateRecommendedLbs": {
     "description": "Substrate recommendation chip label in tank details (imperial)",

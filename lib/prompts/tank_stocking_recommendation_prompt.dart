@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:fish_ai/models/fish.dart';
 import 'package:fish_ai/models/tank.dart';
+import 'package:fish_ai/utils/tank_type_utils.dart';
 
 String buildTankStockingRecommendationPrompt(
   Tank tank,
@@ -83,7 +84,7 @@ String buildTankStockingRecommendationPrompt(
     Tank Information:
     - Tank Name: "${tank.name}"
     - Tank Size: "$tankSizeText"
-    - Tank Type: "${tank.type}"
+    - Tank Type: "${getTankTypeAiContext(tank)}"
     - Tank Notes: "${tank.notes ?? 'No specific notes provided'}"
     - Current Harmony Score: $currentHarmonyPercentage%
     - Current Inhabitants (fish types): ${json.encode(existingFishNames)}

@@ -97,6 +97,8 @@ class ProfileTankSummary {
   final String name;
   final String type; // 'freshwater' or 'marine'
   final bool isReef;
+  final String? specialization;
+  final String? customTypeName;
   final double? sizeGallons;
   final double? sizeLiters;
   final int inhabitantCount;
@@ -110,6 +112,8 @@ class ProfileTankSummary {
     required this.name,
     required this.type,
     required this.isReef,
+    this.specialization,
+    this.customTypeName,
     this.sizeGallons,
     this.sizeLiters,
     required this.inhabitantCount,
@@ -121,6 +125,8 @@ class ProfileTankSummary {
     'name': name,
     'type': type,
     'isReef': isReef,
+    if (specialization != null) 'specialization': specialization,
+    if (customTypeName != null) 'customTypeName': customTypeName,
     if (sizeGallons != null) 'sizeGallons': sizeGallons,
     if (sizeLiters != null) 'sizeLiters': sizeLiters,
     'inhabitantCount': inhabitantCount,
@@ -133,6 +139,8 @@ class ProfileTankSummary {
         name: map['name'] as String? ?? '',
         type: map['type'] as String? ?? 'freshwater',
         isReef: map['isReef'] as bool? ?? false,
+        specialization: map['specialization'] as String?,
+        customTypeName: map['customTypeName'] as String?,
         sizeGallons: (map['sizeGallons'] as num?)?.toDouble(),
         sizeLiters: (map['sizeLiters'] as num?)?.toDouble(),
         inhabitantCount: map['inhabitantCount'] as int? ?? 0,
