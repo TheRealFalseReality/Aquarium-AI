@@ -1030,7 +1030,6 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
               enabled: currentUserId.isNotEmpty,
               keyboardType: TextInputType.multiline,
               textInputAction: TextInputAction.newline,
-              minLines: 3,
               maxLines: 6,
               decoration: InputDecoration(
                 hintText: currentUserId.isEmpty
