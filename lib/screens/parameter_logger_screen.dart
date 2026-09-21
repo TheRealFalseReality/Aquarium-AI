@@ -58,6 +58,33 @@ String _parameterLabel(String parameterType, BuildContext context) {
   }
 }
 
+const List<String> _freshwaterDefaultParameterTypes = [
+  'temperature',
+  'ammonia',
+  'nitrite',
+  'nitrate',
+  'phosphate',
+  'kh',
+  'gh',
+  'alkalinity',
+  'orp',
+  'ph',
+  'potassium',
+  'tds',
+];
+
+const List<String> _marineOnlyParameterTypes = [
+  'salinity',
+  'calcium',
+  'magnesium',
+  'iodine',
+];
+
+List<String> _defaultParameterTypesForTank(Tank tank) =>
+    tank.type == 'marine'
+        ? [..._freshwaterDefaultParameterTypes, ..._marineOnlyParameterTypes]
+        : _freshwaterDefaultParameterTypes;
+
 class ParameterLoggerScreen extends ConsumerStatefulWidget {
   final Tank tank;
   final bool openAddDialog;
@@ -95,6 +122,31 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     );
   }
 
+  Map<String, ParameterBoundsConfig> _customBoundsByType(Tank tank) {
+    return {
+      for (final profile in tank.parameterProfiles)
+        if (profile.minValue != null || profile.maxValue != null)
+          profile.parameterType: ParameterBoundsConfig(
+            minValue: profile.minValue,
+            maxValue: profile.maxValue,
+          ),
+    };
+  }
+
+  List<String> _allParameterTypesForTank(Tank tank) {
+    final ordered = <String>[];
+    final seen = <String>{};
+    final defaults = _defaultParameterTypesForTank(tank);
+    final profileTypes = tank.parameterProfiles.map((p) => p.parameterType);
+    final loggedTypes = tank.waterParameters.map((p) => p.parameterType);
+    for (final type in [...defaults, ...profileTypes, ...loggedTypes]) {
+      if (seen.add(type)) {
+        ordered.add(type);
+      }
+    }
+    return ordered;
+  }
+
   void _addParameter(BuildContext context) {
     final currentTank = _getCurrentTank();
     showModalBottomSheet(
@@ -111,6 +163,18 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       isScrollControlled: true,
       builder: (context) =>
           _AddParameterSheet(tank: currentTank, existingParameter: parameter),
+    );
+  }
+
+  void _openParameterProfiles(BuildContext context) {
+    AnalyticsService.logFeatureUsed(
+      featureName: 'parameter_profiles_opened',
+      parameters: {'source': 'parameter_logger'},
+    );
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => _ParameterProfilesSheet(tankId: widget.tank.id),
     );
   }
 
@@ -278,193 +342,24 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     }
   }
 
-  Color _getThresholdColor(String parameterType, double value, {String? unit}) {
-    switch (parameterType) {
-      case 'ammonia':
-        if (value == 0) return Colors.green;
-        if (value <= 1) return Colors.yellow.shade700;
-        if (value < 4) return Colors.orange;
-        return Colors.red;
-
-      case 'nitrite':
-        if (value == 0) return Colors.green;
-        if (value <= 1) return Colors.yellow.shade700;
-        if (value < 2) return Colors.orange;
-        return Colors.red;
-
-      case 'nitrate':
-        if (value == 0) return Colors.green;
-        if (value <= 5) return Colors.green.shade300;
-        if (value <= 40) return Colors.blue.shade400;
-        return Colors.blue.shade900;
-
-      case 'phosphate':
-        if (value == 0) return Colors.green;
-        if (value < 1) return Colors.yellow.shade700;
-        if (value < 5) return Colors.orange;
-        return Colors.red;
-
-      case 'salinity':
-        // Determine if using ppt or SG
-        final isSG = unit == 'SG';
-
-        if (isSG) {
-          // SG thresholds (1.020-1.026 is ideal)
-          if (value >= 1.023 && value <= 1.025) return Colors.green;
-          if (value >= 1.021 && value <= 1.027) return Colors.yellow.shade700;
-          if (value >= 1.019 && value <= 1.029) return Colors.orange;
-          return Colors.red;
-        } else {
-          // ppt thresholds
-          if (value >= 32 && value <= 35) return Colors.green;
-          if ((value >= 31 && value < 32) || (value > 35 && value <= 36)) {
-            return Colors.yellow.shade700;
-          }
-          if ((value >= 29 && value < 31) || (value > 36 && value <= 38)) {
-            return Colors.orange;
-          }
-          return Colors.red;
-        }
-
-      case 'calcium':
-        // Calcium thresholds for marine tanks (ppm)
-        if (value >= 400 && value <= 450) return Colors.green;
-        if ((value >= 380 && value < 400) || (value > 450 && value <= 480)) {
-          return Colors.yellow.shade700;
-        }
-        if ((value >= 350 && value < 380) || (value > 480 && value <= 520)) {
-          return Colors.orange;
-        }
-        return Colors.red;
-
-      case 'magnesium':
-        // Magnesium thresholds for marine tanks (ppm)
-        if (value >= 1250 && value <= 1350) return Colors.green;
-        if ((value >= 1200 && value < 1250) || (value > 1350 && value <= 1400)) {
-          return Colors.yellow.shade700;
-        }
-        if ((value >= 1100 && value < 1200) || (value > 1400 && value <= 1500)) {
-          return Colors.orange;
-        }
-        return Colors.red;
-
-      case 'kh':
-        // KH thresholds (dKH)
-        if (value >= 4 && value <= 8) return Colors.green;
-        if ((value >= 3 && value < 4) || (value > 8 && value <= 10)) {
-          return Colors.yellow.shade700;
-        }
-        if ((value >= 2 && value < 3) || (value > 10 && value <= 12)) {
-          return Colors.orange;
-        }
-        return Colors.red;
-
-      case 'gh':
-        // GH thresholds (dGH) - general range for freshwater
-        if (value >= 4 && value <= 12) return Colors.green;
-        if ((value >= 3 && value < 4) || (value > 12 && value <= 15)) {
-          return Colors.yellow.shade700;
-        }
-        if ((value >= 2 && value < 3) || (value > 15 && value <= 18)) {
-          return Colors.orange;
-        }
-        return Colors.red;
-
-      case 'alkalinity':
-        // Alkalinity thresholds (meq/L or dKH)
-        if (value >= 2.5 && value <= 4.0) return Colors.green;
-        if ((value >= 2.0 && value < 2.5) || (value > 4.0 && value <= 5.0)) {
-          return Colors.yellow.shade700;
-        }
-        if ((value >= 1.5 && value < 2.0) || (value > 5.0 && value <= 6.0)) {
-          return Colors.orange;
-        }
-        return Colors.red;
-
-      case 'orp':
-        // ORP thresholds (mV) - higher is better for most aquariums
-        if (value >= 300 && value <= 450) return Colors.green;
-        if ((value >= 250 && value < 300) || (value > 450 && value <= 500)) {
-          return Colors.yellow.shade700;
-        }
-        if ((value >= 200 && value < 250) || (value > 500 && value <= 550)) {
-          return Colors.orange;
-        }
-        return Colors.red;
-
-      case 'ph':
-        // pH thresholds - general range (6.5-8.0 is typical)
-        if (value >= 6.8 && value <= 7.8) return Colors.green;
-        if ((value >= 6.5 && value < 6.8) || (value > 7.8 && value <= 8.2)) {
-          return Colors.yellow.shade700;
-        }
-        if ((value >= 6.0 && value < 6.5) || (value > 8.2 && value <= 8.5)) {
-          return Colors.orange;
-        }
-        return Colors.red;
-
-      case 'potassium':
-        // Potassium thresholds (ppm) - for planted tanks
-        if (value >= 10 && value <= 30) return Colors.green;
-        if ((value >= 5 && value < 10) || (value > 30 && value <= 40)) {
-          return Colors.yellow.shade700;
-        }
-        if ((value >= 2 && value < 5) || (value > 40 && value <= 50)) {
-          return Colors.orange;
-        }
-        return Colors.red;
-
-      case 'tds':
-        // TDS thresholds (ppm) - general freshwater range
-        if (value >= 150 && value <= 250) return Colors.green;
-        if ((value >= 100 && value < 150) || (value > 250 && value <= 350)) {
-          return Colors.yellow.shade700;
-        }
-        if ((value >= 50 && value < 100) || (value > 350 && value <= 450)) {
-          return Colors.orange;
-        }
-        return Colors.red;
-
-      case 'iodine':
-        // Iodine thresholds for marine tanks (ppm)
-        if (value >= 0.06 && value <= 0.10) return Colors.green;
-        if ((value >= 0.04 && value < 0.06) || (value > 0.10 && value <= 0.12)) {
-          return Colors.yellow.shade700;
-        }
-        if ((value >= 0.02 && value < 0.04) || (value > 0.12 && value <= 0.15)) {
-          return Colors.orange;
-        }
-        return Colors.red;
-
-      case 'temperature':
-        // Temperature thresholds - check unit for °F or °C
-        final isFahrenheit = unit == '°F';
-
-        if (isFahrenheit) {
-          // Fahrenheit thresholds (75-82°F is ideal for most tropical fish)
-          if (value >= 76 && value <= 80) return Colors.green;
-          if ((value >= 72 && value < 76) || (value > 80 && value <= 84)) {
-            return Colors.yellow.shade700;
-          }
-          if ((value >= 68 && value < 72) || (value > 84 && value <= 88)) {
-            return Colors.orange;
-          }
-          return Colors.red;
-        } else {
-          // Celsius thresholds (24-28°C is ideal for most tropical fish)
-          if (value >= 24 && value <= 27) return Colors.green;
-          if ((value >= 22 && value < 24) || (value > 27 && value <= 29)) {
-            return Colors.yellow.shade700;
-          }
-          if ((value >= 20 && value < 22) || (value > 29 && value <= 31)) {
-            return Colors.orange;
-          }
-          return Colors.red;
-        }
-
-      default:
-        return Colors.grey;
-    }
+  Color _getThresholdColor(
+    String parameterType,
+    double value, {
+    String? unit,
+    Map<String, ParameterBoundsConfig>? customBounds,
+  }) {
+    final status = getParameterStatus(
+      parameterType,
+      value,
+      unit: unit,
+      customBounds: customBounds,
+    );
+    return switch (status) {
+      ParameterStatus.normal => Colors.green,
+      ParameterStatus.caution => Colors.yellow.shade700,
+      ParameterStatus.warning => Colors.orange,
+      ParameterStatus.critical => Colors.red,
+    };
   }
 
   /// Minimum number of entries to show on the graph when falling back from the 30-day filter
@@ -504,6 +399,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   Widget _buildParameterGraph(
     List<WaterParameter> parameters,
     String parameterType,
+    Map<String, ParameterBoundsConfig> customBounds,
   ) {
     if (parameters.isEmpty) {
       return const SizedBox.shrink();
@@ -540,6 +436,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
       parameterType,
       latestValue,
       unit: latestUnit,
+      customBounds: customBounds,
     );
 
     // Create data spots with color segments
@@ -554,7 +451,12 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
           .toDouble();
       spots.add(FlSpot(daysDiff, param.value));
       spotColors.add(
-        _getThresholdColor(parameterType, param.value, unit: param.unit),
+        _getThresholdColor(
+          parameterType,
+          param.value,
+          unit: param.unit,
+          customBounds: customBounds,
+        ),
       );
     }
 
@@ -775,6 +677,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final currentTank = _getCurrentTank();
+    final customBounds = _customBoundsByType(currentTank);
     final groupedParameters = _groupParametersByType(currentTank);
     final proactiveAlerts = buildProactiveParameterAlerts(
       currentTank.waterParameters,
@@ -782,42 +685,10 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final outOfRangeAlerts = buildCurrentOutOfRangeAlerts(
       currentTank.waterParameters,
       tankType: currentTank.type,
+      customBounds: customBounds,
     );
 
-    // Only show salinity, calcium, magnesium, and iodine for marine tanks
-    final parameterTypes = currentTank.type == 'marine'
-        ? [
-            'temperature',
-            'ammonia',
-            'nitrite',
-            'nitrate',
-            'phosphate',
-            'salinity',
-            'calcium',
-            'magnesium',
-            'iodine',
-            'kh',
-            'gh',
-            'alkalinity',
-            'orp',
-            'ph',
-            'potassium',
-            'tds',
-          ]
-        : [
-            'temperature',
-            'ammonia',
-            'nitrite',
-            'nitrate',
-            'phosphate',
-            'kh',
-            'gh',
-            'alkalinity',
-            'orp',
-            'ph',
-            'potassium',
-            'tds',
-          ];
+    final parameterTypes = _allParameterTypesForTank(currentTank);
 
     return MainLayout(
       title: '${currentTank.name} - Parameters',
@@ -829,6 +700,11 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
               icon: const Icon(Icons.add),
               onPressed: () => _addParameter(context),
               tooltip: 'Add Parameter',
+            ),
+            IconButton(
+              icon: const Icon(Icons.tune),
+              onPressed: () => _openParameterProfiles(context),
+              tooltip: l10n.manageParameterRanges,
             ),
           ],
         ),
@@ -875,6 +751,7 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                       paramType,
                       parameters.first.value,
                       unit: parameters.first.unit,
+                      customBounds: customBounds,
                     );
 
                     return Card(
@@ -930,7 +807,11 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
                           ),
                           if (isExpanded) ...[
                             const Divider(height: 1),
-                            _buildParameterGraph(parameters, paramType),
+                            _buildParameterGraph(
+                              parameters,
+                              paramType,
+                              customBounds,
+                            ),
                             const Divider(height: 1),
                             Padding(
                               padding: const EdgeInsets.symmetric(
@@ -1107,10 +988,12 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
     final dateFormat = DateFormat('MMM d, yyyy - h:mm a');
+    final customBounds = _customBoundsByType(_getCurrentTank());
     final thresholdColor = _getThresholdColor(
       parameter.parameterType,
       parameter.value,
       unit: parameter.unit,
+      customBounds: customBounds,
     );
 
     return ListTile(
@@ -1200,6 +1083,357 @@ class ParameterLoggerScreenState extends ConsumerState<ParameterLoggerScreen> {
   }
 }
 
+class _ParameterProfilesSheet extends ConsumerStatefulWidget {
+  final String tankId;
+
+  const _ParameterProfilesSheet({required this.tankId});
+
+  @override
+  ConsumerState<_ParameterProfilesSheet> createState() =>
+      _ParameterProfilesSheetState();
+}
+
+class _ParameterProfilesSheetState
+    extends ConsumerState<_ParameterProfilesSheet> {
+  Tank? _currentTank() {
+    final tanks = ref.watch(tankProvider).tanks;
+    for (final tank in tanks) {
+      if (tank.id == widget.tankId) return tank;
+    }
+    return null;
+  }
+
+  bool _isBuiltInForTank(String parameterType, Tank tank) {
+    return _defaultParameterTypesForTank(tank).contains(parameterType);
+  }
+
+  Future<void> _deleteCustomProfile(
+    BuildContext context,
+    Tank tank,
+    String parameterType,
+  ) async {
+    final updatedProfiles = tank.parameterProfiles
+        .where((p) => p.parameterType != parameterType)
+        .toList();
+    final updatedTank = tank.copyWith(
+      parameterProfiles: updatedProfiles,
+      updatedAt: DateTime.now(),
+    );
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
+    AnalyticsService.logFeatureUsed(
+      featureName: 'parameter_profile_removed',
+      parameters: {
+        'parameter_type': parameterType,
+        'tank_type': tank.type,
+      },
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(AppLocalizations.of(context)!.parameterRemoved)),
+    );
+  }
+
+  Future<void> _openProfileEditor(
+    BuildContext context,
+    Tank tank, {
+    TankParameterProfile? existing,
+    String? fixedType,
+    bool creatingCustom = false,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final typeController = TextEditingController(
+      text: fixedType ?? existing?.parameterType ?? '',
+    );
+    final unitController = TextEditingController(
+      text: existing?.preferredUnit ?? '',
+    );
+    final minController = TextEditingController(
+      text: existing?.minValue?.toString() ?? '',
+    );
+    final maxController = TextEditingController(
+      text: existing?.maxValue?.toString() ?? '',
+    );
+
+    final didSave = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          creatingCustom
+              ? l10n.addCustomParameter
+              : l10n.editParameterBoundsTitle(
+                  _parameterLabel(
+                    fixedType ?? existing?.parameterType ?? '',
+                    context,
+                  ),
+                ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: typeController,
+                enabled: creatingCustom,
+                decoration: InputDecoration(
+                  labelText: l10n.parameterTypeLabel,
+                  hintText: l10n.customParameterHint,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: unitController,
+                decoration: InputDecoration(labelText: l10n.defaultUnitLabel),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: minController,
+                decoration: InputDecoration(
+                  labelText: l10n.minBoundLabel,
+                  hintText: l10n.optionalLabel,
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: maxController,
+                decoration: InputDecoration(
+                  labelText: l10n.maxBoundLabel,
+                  hintText: l10n.optionalLabel,
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final parameterType = typeController.text.trim().toLowerCase();
+              final minText = minController.text.trim();
+              final maxText = maxController.text.trim();
+              final minValue = minText.isEmpty ? null : double.tryParse(minText);
+              final maxValue = maxText.isEmpty ? null : double.tryParse(maxText);
+
+              if (parameterType.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.parameterNameRequired)),
+                );
+                return;
+              }
+
+              if ((minText.isNotEmpty && minValue == null) ||
+                  (maxText.isNotEmpty && maxValue == null)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.enterValidNumber)),
+                );
+                return;
+              }
+
+              if (minValue != null &&
+                  maxValue != null &&
+                  minValue > maxValue) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.minMustBeLessOrEqualMax)),
+                );
+                return;
+              }
+
+              final isBuiltIn = _isBuiltInForTank(parameterType, tank);
+              final preferredUnit = unitController.text.trim().isEmpty
+                  ? null
+                  : unitController.text.trim();
+              final shouldRemoveOverride =
+                  isBuiltIn &&
+                  !creatingCustom &&
+                  minValue == null &&
+                  maxValue == null &&
+                  preferredUnit == null;
+
+              final updatedProfiles = [...tank.parameterProfiles];
+              updatedProfiles.removeWhere(
+                (p) => p.parameterType == parameterType,
+              );
+              if (!shouldRemoveOverride) {
+                updatedProfiles.add(
+                  TankParameterProfile(
+                    parameterType: parameterType,
+                    preferredUnit: preferredUnit,
+                    minValue: minValue,
+                    maxValue: maxValue,
+                    isCustom:
+                        creatingCustom ||
+                        existing?.isCustom == true ||
+                        !_isBuiltInForTank(parameterType, tank),
+                  ),
+                );
+              }
+
+              final updatedTank = tank.copyWith(
+                parameterProfiles: updatedProfiles,
+                updatedAt: DateTime.now(),
+              );
+              ref.read(tankProvider.notifier).updateTank(updatedTank);
+              AnalyticsService.logFeatureUsed(
+                featureName: 'parameter_profile_saved',
+                parameters: {
+                  'parameter_type': parameterType,
+                  'tank_type': tank.type,
+                  'is_custom': (creatingCustom || existing?.isCustom == true)
+                      ? 'true'
+                      : 'false',
+                  'has_min': minValue != null ? 'true' : 'false',
+                  'has_max': maxValue != null ? 'true' : 'false',
+                },
+              );
+              Navigator.pop(context, true);
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+
+    if (didSave == true && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.parameterBoundsSaved)),
+      );
+    }
+  }
+
+  String _profileSummary(
+    BuildContext context,
+    TankParameterProfile? profile,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    if (profile == null) return l10n.usingDefaultRange;
+    final minText = profile.minValue?.toString() ?? '—';
+    final maxText = profile.maxValue?.toString() ?? '—';
+    final unitText = profile.preferredUnit?.isNotEmpty == true
+        ? profile.preferredUnit!
+        : l10n.noneLabel;
+    return l10n.parameterProfileSummary(minText, maxText, unitText);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final tank = _currentTank();
+    if (tank == null) {
+      return const SizedBox.shrink();
+    }
+
+    final profileByType = {
+      for (final profile in tank.parameterProfiles) profile.parameterType: profile,
+    };
+    final availableTypes = <String>[];
+    final seen = <String>{};
+    for (final type in [
+      ..._defaultParameterTypesForTank(tank),
+      ...tank.waterParameters.map((p) => p.parameterType),
+      ...tank.parameterProfiles.map((p) => p.parameterType),
+    ]) {
+      if (seen.add(type)) availableTypes.add(type);
+    }
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.manageParameterRanges,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            Text(
+              l10n.manageParameterRangesDescription,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _openProfileEditor(
+                  context,
+                  tank,
+                  creatingCustom: true,
+                ),
+                icon: const Icon(Icons.add),
+                label: Text(l10n.addCustomParameter),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.5,
+              child: ListView.builder(
+                itemCount: availableTypes.length,
+                itemBuilder: (context, index) {
+                  final type = availableTypes[index];
+                  final profile = profileByType[type];
+                  final isCustom = profile?.isCustom == true &&
+                      !_isBuiltInForTank(type, tank);
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      title: Text(_parameterLabel(type, context)),
+                      subtitle: Text(_profileSummary(context, profile)),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit_outlined),
+                            onPressed: () => _openProfileEditor(
+                              context,
+                              tank,
+                              existing: profile,
+                              fixedType: type,
+                            ),
+                          ),
+                          if (isCustom)
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              color: Colors.red,
+                              onPressed: () => _deleteCustomProfile(
+                                context,
+                                tank,
+                                type,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _AddParameterSheet extends ConsumerStatefulWidget {
   final Tank tank;
   final WaterParameter? existingParameter;
@@ -1252,14 +1486,49 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     ],
   };
 
+  List<TankParameterProfile> get _profiles => widget.tank.parameterProfiles;
+
+  List<String> get _availableParameterTypes {
+    final types = <String>[];
+    final seen = <String>{};
+    for (final type in [
+      ..._defaultParameterTypesForTank(widget.tank),
+      ..._profiles.map((p) => p.parameterType),
+    ]) {
+      if (seen.add(type)) {
+        types.add(type);
+      }
+    }
+    return types;
+  }
+
+  TankParameterProfile? _profileForType(String type) {
+    for (final profile in _profiles) {
+      if (profile.parameterType == type) {
+        return profile;
+      }
+    }
+    return null;
+  }
+
+  List<String> _unitsForParameter(String type) {
+    final fromProfile = _profileForType(type)?.preferredUnit;
+    final base = List<String>.from(_unitOptions[type] ?? _unitOptions['custom']!);
+    if (fromProfile == null || fromProfile.isEmpty) {
+      return base;
+    }
+    base.remove(fromProfile);
+    return [fromProfile, ...base];
+  }
+
   @override
   void initState() {
     super.initState();
+    final availableTypes = _availableParameterTypes;
     if (widget.existingParameter != null) {
       // Initialize with existing parameter data
       final existingType = widget.existingParameter!.parameterType;
-      // Check if it's a predefined parameter type
-      if (_unitOptions.containsKey(existingType) && existingType != 'custom') {
+      if (availableTypes.contains(existingType) && existingType != 'custom') {
         _selectedParameter = existingType;
       } else {
         // It's a custom parameter
@@ -1274,7 +1543,12 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       // Initialize with default values for new parameter
       _selectedParameter = 'temperature';
       _selectedDate = DateTime.now();
-      _selectedUnit = '°F';
+      _selectedUnit = _unitsForParameter(_selectedParameter).first;
+    }
+
+    final validUnits = _unitsForParameter(_selectedParameter);
+    if (!validUnits.contains(_selectedUnit)) {
+      _selectedUnit = validUnits.first;
     }
   }
 
@@ -1321,12 +1595,49 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
     return _selectedParameter;
   }
 
+  List<TankParameterProfile> _withUpdatedPreferredUnit(
+    List<TankParameterProfile> profiles,
+    String parameterType,
+    String selectedUnit, {
+    required bool isCustomSelection,
+  }) {
+    final updatedProfiles = [...profiles];
+    final existingIndex = updatedProfiles.indexWhere(
+      (p) => p.parameterType == parameterType,
+    );
+
+    if (existingIndex >= 0) {
+      updatedProfiles[existingIndex] = updatedProfiles[existingIndex].copyWith(
+        preferredUnit: selectedUnit,
+      );
+      return updatedProfiles;
+    }
+
+    if (isCustomSelection) {
+      updatedProfiles.add(
+        TankParameterProfile(
+          parameterType: parameterType,
+          preferredUnit: selectedUnit,
+          isCustom: true,
+        ),
+      );
+    }
+
+    return updatedProfiles;
+  }
+
   void _saveParameter() {
     final l10n = AppLocalizations.of(context)!;
     if (_formKey.currentState!.validate()) {
       final WaterParameter parameter;
       final isEditing = widget.existingParameter != null;
       final parameterType = _getParameterType();
+      final updatedProfiles = _withUpdatedPreferredUnit(
+        widget.tank.parameterProfiles,
+        parameterType,
+        _selectedUnit,
+        isCustomSelection: _selectedParameter == 'custom',
+      );
 
       // Additional safety check: prevent saving with empty parameter type
       if (parameterType.isEmpty) {
@@ -1358,6 +1669,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
 
         final updatedTank = widget.tank.copyWith(
           waterParameters: updatedParameters,
+          parameterProfiles: updatedProfiles,
           updatedAt: DateTime.now(),
         );
 
@@ -1392,6 +1704,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
         final updatedParameters = [...widget.tank.waterParameters, parameter];
         final updatedTank = widget.tank.copyWith(
           waterParameters: updatedParameters,
+          parameterProfiles: updatedProfiles,
           updatedAt: DateTime.now(),
         );
 
@@ -1424,10 +1737,19 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       // context may be unmounted once Navigator.pop removes the bottom sheet.
       final messenger = ScaffoldMessenger.of(context);
       final parameterName = _parameterLabel(parameterType, context);
+      final customBounds = {
+        for (final profile in updatedProfiles)
+          if (profile.minValue != null || profile.maxValue != null)
+            profile.parameterType: ParameterBoundsConfig(
+              minValue: profile.minValue,
+              maxValue: profile.maxValue,
+            ),
+      };
       final status = getParameterStatus(
         parameterType,
         parameter.value,
         unit: _selectedUnit,
+        customBounds: customBounds,
       );
 
       Navigator.pop(context);
@@ -1517,52 +1839,18 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                   border: OutlineInputBorder(),
                 ),
                 items: [
-                  DropdownMenuItem(
-                    value: 'temperature',
-                    child: Text(l10n.temperature),
-                  ),
-                  DropdownMenuItem(value: 'ammonia', child: Text(l10n.ammonia)),
-                  DropdownMenuItem(value: 'nitrite', child: Text(l10n.nitrite)),
-                  DropdownMenuItem(value: 'nitrate', child: Text(l10n.nitrate)),
-                  DropdownMenuItem(
-                    value: 'phosphate',
-                    child: Text(l10n.phosphate),
-                  ),
-                  DropdownMenuItem(value: 'kh', child: Text(l10n.kh)),
-                  DropdownMenuItem(value: 'gh', child: Text(l10n.gh)),
-                  DropdownMenuItem(
-                    value: 'alkalinity',
-                    child: Text(l10n.alkalinity),
-                  ),
-                  DropdownMenuItem(value: 'orp', child: Text(l10n.orp)),
-                  DropdownMenuItem(value: 'ph', child: Text(l10n.ph)),
-                  DropdownMenuItem(
-                    value: 'potassium',
-                    child: Text(l10n.potassium),
-                  ),
-                  DropdownMenuItem(value: 'tds', child: Text(l10n.tds)),
-                  // Only show salinity, calcium, magnesium, and iodine for marine tanks
-                  if (widget.tank.type == 'marine') ...[
-                    DropdownMenuItem(
-                      value: 'salinity',
-                      child: Text(l10n.salinity),
+                  ..._availableParameterTypes.map(
+                    (type) => DropdownMenuItem(
+                      value: type,
+                      child: Text(_parameterLabel(type, context)),
                     ),
-                    DropdownMenuItem(
-                      value: 'calcium',
-                      child: Text(l10n.calcium),
-                    ),
-                    DropdownMenuItem(
-                      value: 'magnesium',
-                      child: Text(l10n.magnesium),
-                    ),
-                    DropdownMenuItem(value: 'iodine', child: Text(l10n.iodine)),
-                  ],
+                  ),
                   DropdownMenuItem(value: 'custom', child: Text(l10n.custom)),
                 ],
                 onChanged: (value) {
                   setState(() {
                     _selectedParameter = value!;
-                    _selectedUnit = _unitOptions[value]!.first;
+                    _selectedUnit = _unitsForParameter(value).first;
                     // Clear custom name when switching away from "Custom"
                     if (value != 'custom') {
                       _customParameterNameController.clear();
@@ -1624,7 +1912,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
                         labelText: 'Unit',
                         border: OutlineInputBorder(),
                       ),
-                      items: _unitOptions[_selectedParameter]!
+                      items: _unitsForParameter(_selectedParameter)
                           .map(
                             (unit) => DropdownMenuItem(
                               value: unit,

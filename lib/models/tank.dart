@@ -94,6 +94,62 @@ class TankPhoto {
   }
 }
 
+/// Per-tank parameter profile that stores user-defined ranges and defaults.
+class TankParameterProfile {
+  final String parameterType;
+  final String? preferredUnit;
+  final double? minValue;
+  final double? maxValue;
+  final bool isCustom;
+
+  const TankParameterProfile({
+    required this.parameterType,
+    this.preferredUnit,
+    this.minValue,
+    this.maxValue,
+    this.isCustom = false,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'parameterType': parameterType,
+    if (preferredUnit != null) 'preferredUnit': preferredUnit,
+    if (minValue != null) 'minValue': minValue,
+    if (maxValue != null) 'maxValue': maxValue,
+    'isCustom': isCustom,
+  };
+
+  factory TankParameterProfile.fromJson(Map<String, dynamic> json) {
+    return TankParameterProfile(
+      parameterType: json['parameterType'] as String,
+      preferredUnit: json['preferredUnit'] as String?,
+      minValue: (json['minValue'] as num?)?.toDouble(),
+      maxValue: (json['maxValue'] as num?)?.toDouble(),
+      isCustom: json['isCustom'] as bool? ?? false,
+    );
+  }
+
+  TankParameterProfile copyWith({
+    String? parameterType,
+    String? preferredUnit,
+    bool clearPreferredUnit = false,
+    double? minValue,
+    bool clearMinValue = false,
+    double? maxValue,
+    bool clearMaxValue = false,
+    bool? isCustom,
+  }) {
+    return TankParameterProfile(
+      parameterType: parameterType ?? this.parameterType,
+      preferredUnit: clearPreferredUnit
+          ? null
+          : (preferredUnit ?? this.preferredUnit),
+      minValue: clearMinValue ? null : (minValue ?? this.minValue),
+      maxValue: clearMaxValue ? null : (maxValue ?? this.maxValue),
+      isCustom: isCustom ?? this.isCustom,
+    );
+  }
+}
+
 class TankInhabitant {
   final String id;
   final String customName;
@@ -237,6 +293,8 @@ class Tank {
   final List<NotificationLog> notificationLogs; // Notification action logs
   final List<TankNote> tankNotes; // User notes for the tank
   final List<TankTag> tags; // User-created tags for this tank
+  final List<TankParameterProfile>
+  parameterProfiles; // User-defined parameter bounds/defaults
   final List<TankInhabitant>
   memorializedInhabitants; // Inhabitants preserved after they pass away
 
@@ -267,6 +325,7 @@ class Tank {
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
     List<TankTag>? tags,
+    List<TankParameterProfile>? parameterProfiles,
     List<TankInhabitant>? memorializedInhabitants,
   }) : photos = photos ?? [],
        waterParameters = waterParameters ?? [],
@@ -275,6 +334,7 @@ class Tank {
        notificationLogs = notificationLogs ?? [],
        tankNotes = tankNotes ?? [],
        tags = tags ?? [],
+       parameterProfiles = parameterProfiles ?? [],
        memorializedInhabitants = memorializedInhabitants ?? [];
 
   factory Tank.create({
@@ -302,6 +362,7 @@ class Tank {
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
     List<TankTag>? tags,
+    List<TankParameterProfile>? parameterProfiles,
     List<TankInhabitant>? memorializedInhabitants,
   }) {
     final now = DateTime.now();
@@ -332,6 +393,7 @@ class Tank {
       notificationLogs: notificationLogs,
       tankNotes: tankNotes,
       tags: tags,
+      parameterProfiles: parameterProfiles,
       memorializedInhabitants: memorializedInhabitants,
     );
   }
@@ -370,6 +432,7 @@ class Tank {
       'notificationLogs': notificationLogs.map((nl) => nl.toJson()).toList(),
       'tankNotes': tankNotes.map((tn) => tn.toJson()).toList(),
       'tags': tags.map((t) => t.toJson()).toList(),
+      'parameterProfiles': parameterProfiles.map((pp) => pp.toJson()).toList(),
       'memorializedInhabitants': memorializedInhabitants
           .map((i) => i.toJson(includeLocalPaths: includeLocalPaths))
           .toList(),
@@ -432,6 +495,11 @@ class Tank {
       tags:
           (json['tags'] as List?)?.map((t) => TankTag.fromJson(t)).toList() ??
           [],
+      parameterProfiles:
+          (json['parameterProfiles'] as List?)
+              ?.map((pp) => TankParameterProfile.fromJson(pp))
+              .toList() ??
+          [],
       memorializedInhabitants: (json['memorializedInhabitants'] as List?)
              ?.map((i) => TankInhabitant.fromJson(i))
              .toList() ??
@@ -468,6 +536,7 @@ class Tank {
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
     List<TankTag>? tags,
+    List<TankParameterProfile>? parameterProfiles,
     List<TankInhabitant>? memorializedInhabitants,
     bool clearCustomBackgroundPhotoId = false,
     bool clearCustomIconPhotoId = false,
@@ -513,6 +582,7 @@ class Tank {
       notificationLogs: notificationLogs ?? this.notificationLogs,
       tankNotes: tankNotes ?? this.tankNotes,
       tags: tags ?? this.tags,
+      parameterProfiles: parameterProfiles ?? this.parameterProfiles,
       memorializedInhabitants:
           memorializedInhabitants ?? this.memorializedInhabitants,
     );

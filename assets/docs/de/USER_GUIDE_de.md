@@ -328,6 +328,19 @@ Verfolgen Sie die Wasserqualität im Laufe der Zeit mit Diagrammen und Protokoll
 3. Geben Sie den Wert und die Einheit ein.
 4. Tippen Sie auf **Speichern**.
 
+### Eigene Bereiche und benutzerdefinierte Parameter
+
+Verwenden Sie **Parameterbereiche verwalten** (Regler-Symbol oben rechts im
+Parameter-Logger), um:
+
+- tankspezifische **Mindest-/Höchstgrenzen** für integrierte Parameter festzulegen,
+- wiederverwendbare **benutzerdefinierte Parameter** anzulegen (z. B. Eisen, Kupfer,
+  Strontium),
+- eine bevorzugte Standardeinheit pro Parameter festzulegen.
+
+Wenn eigene Grenzen gesetzt sind, verwenden Warnungen diese Tank-Grenzen statt
+der integrierten Standardbereiche.
+
 ### Diagramme
 
 Tippen Sie auf den **Erweitern**-Pfeil einer Parametergruppe, um ein Zeitreihendiagramm
