@@ -16,6 +16,7 @@ import '../utils/ai_language_utils.dart';
 import '../utils/api_error_handler.dart';
 import '../utils/cancellable_completer.dart';
 import '../utils/dev_rate_limiter.dart';
+import '../utils/established_tank_context.dart';
 import '../utils/groq_helper.dart';
 import '../utils/json_utils.dart';
 import '../utils/openai_retry_helper.dart';
@@ -24,6 +25,7 @@ import 'analysis_history_provider.dart';
 import 'app_settings_provider.dart';
 import 'model_provider.dart';
 import 'purchase_provider.dart' show isFounderProvider;
+import 'tank_provider.dart';
 
 // Helper function to safely parse compatible fish array from AI response
 List<String> parseCompatibleFish(dynamic compatibleFishData) {
@@ -190,13 +192,17 @@ class FishCompatibilityNotifier extends Notifier<FishCompatibilityState> {
       state.selectedFish,
     );
     final fishNames = state.selectedFish.map((f) => f.name).toList();
+    final userContext = mergeUserContextWithEstablishedTanks(
+      tanks: ref.read(tankProvider).tanks,
+      userContext: additionalNotes,
+    );
     // EDITED: The prompt no longer needs to generate the breakdown.
     final prompt = appendAiContextInstructions(
       buildFishCompatibilityPrompt(
         category,
         fishNames,
         harmonyScore,
-        additionalNotes: additionalNotes,
+        additionalNotes: userContext.isEmpty ? null : userContext,
       ),
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
