@@ -33,7 +33,7 @@ plugins {
 
 android {
     namespace = "com.cca.fishai"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = maxOf(flutter.compileSdkVersion, 35)
     ndkVersion = "28.2.13676358"
 
     compileOptions {
@@ -54,7 +54,7 @@ android {
     defaultConfig {
         applicationId = "com.cca.fishai"
         minSdk = maxOf(flutter.minSdkVersion, 21)
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = maxOf(flutter.targetSdkVersion, 35)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         // Facebook SDK requires the App ID and Client Token at native build time.
