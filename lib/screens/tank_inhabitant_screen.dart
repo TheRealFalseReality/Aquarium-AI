@@ -329,6 +329,63 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
     );
   }
 
+  Future<void> _moveInhabitant(TankInhabitant inhabitant, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    final destinations = ref
+        .read(tankProvider)
+        .tanks
+        .where((candidate) => candidate.id != tank.id)
+        .toList();
+    if (destinations.isEmpty) return;
+
+    final destinationTankId = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.moveInhabitant),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 320),
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(l10n.selectDestinationTank),
+              ),
+              ...destinations.map(
+                (destination) => ListTile(
+                  leading: const Icon(Icons.water),
+                  title: Text(destination.name),
+                  onTap: () => Navigator.of(ctx).pop(destination.id),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.cancel),
+          ),
+        ],
+      ),
+    );
+    if (destinationTankId == null || !mounted) return;
+
+    final moved = await ref.read(tankProvider.notifier).moveInhabitant(
+          inhabitantId: inhabitant.id,
+          sourceTankId: tank.id,
+          destinationTankId: destinationTankId,
+        );
+    if (!mounted) return;
+    if (moved) {
+      Navigator.of(context).pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.moveInhabitantFailed)),
+      );
+    }
+  }
+
   Future<void> _pickCustomImage(TankInhabitant inhabitant, Tank tank) async {
     final picker = ImagePicker();
     final source = await showDialog<ImageSource>(
@@ -448,6 +505,12 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
                 ? _restoreToActiveTank(inhabitant, tank)
                 : _recordPassing(inhabitant, tank),
           ),
+          if (!isMemorialized && tanks.any((candidate) => candidate.id != tank.id))
+            IconButton(
+              icon: const Icon(Icons.drive_file_move_outline),
+              tooltip: l10n.moveInhabitant,
+              onPressed: () => _moveInhabitant(inhabitant, tank),
+            ),
           IconButton(
             icon: const Icon(Icons.add_a_photo_outlined),
             tooltip: l10n.addPhoto,
