@@ -27,8 +27,10 @@ import '../utils/ai_language_utils.dart';
 import '../utils/api_error_handler.dart';
 import '../utils/cancellable_completer.dart';
 import '../utils/dev_rate_limiter.dart';
+import '../utils/established_tank_context.dart';
 import '../utils/groq_helper.dart';
 import '../utils/json_utils.dart';
+import 'tank_provider.dart';
 import 'analysis_history_provider.dart';
 import 'app_settings_provider.dart';
 import 'model_provider.dart';
@@ -819,13 +821,17 @@ class ChatNotifier extends StateNotifier<ChatState> {
         '${params['additionalInfo']!.isNotEmpty ? ', Additional Info: ${params['additionalInfo']}' : ''}';
     _prepareForSending(userMsg);
     final settings = _ref.read(appSettingsProvider);
+    final establishedContext = mergeUserContextWithEstablishedTanks(
+      tanks: _ref.read(tankProvider).tanks,
+      userContext: params['additionalInfo'],
+    );
     final prompt = appendAiContextInstructions(
       buildWaterAnalysisPrompt(
         tankType: params['tankType']!,
         ph: params['ph']!,
         temp: params['temp']!,
         salinity: params['salinity']!,
-        additionalInfo: params['additionalInfo']!,
+        additionalInfo: establishedContext,
         tempUnit: params['tempUnit']!,
         salinityUnit: params['salinityUnit']!,
       ),
@@ -993,11 +999,15 @@ class ChatNotifier extends StateNotifier<ChatState> {
         '${additionalNotes != null && additionalNotes.isNotEmpty ? '. Notes: $additionalNotes' : ''}.';
     _prepareForSending(userMsg);
     final settings = _ref.read(appSettingsProvider);
+    final establishedContext = mergeUserContextWithEstablishedTanks(
+      tanks: _ref.read(tankProvider).tanks,
+      userContext: additionalNotes,
+    );
     final prompt = appendAiContextInstructions(
       buildFishInfoPrompt(
         fishNames: fishNames,
         tankSize: tankSize,
-        additionalNotes: additionalNotes,
+        additionalNotes: establishedContext.isEmpty ? null : establishedContext,
       ),
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
@@ -1142,8 +1152,12 @@ class ChatNotifier extends StateNotifier<ChatState> {
       state = ChatState(messages: state.messages, isLoading: true);
     }
     final settings = _ref.read(appSettingsProvider);
+    final establishedContext = mergeUserContextWithEstablishedTanks(
+      tanks: _ref.read(tankProvider).tanks,
+      userContext: note,
+    );
     final prompt = appendAiContextInstructions(
-      buildPhotoAnalysisPrompt(note),
+      buildPhotoAnalysisPrompt(establishedContext),
       aiResponseLanguage: settings.aiResponseLanguage,
       localeCode: settings.localeCode,
       experienceLevel: settings.userExperienceLevel,
