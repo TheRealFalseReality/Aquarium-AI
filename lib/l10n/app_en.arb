@@ -5173,6 +5173,18 @@
       }
     }
   },
+  "moveInhabitant": "Move to Another Tank",
+  "@moveInhabitant": {
+    "description": "Label for the action that moves an inhabitant to another tank"
+  },
+  "selectDestinationTank": "Select the tank to move this inhabitant to.",
+  "@selectDestinationTank": {
+    "description": "Prompt shown when selecting the destination tank for an inhabitant"
+  },
+  "moveInhabitantFailed": "Unable to move this inhabitant. Please try again.",
+  "@moveInhabitantFailed": {
+    "description": "Message shown when an inhabitant could not be moved to another tank"
+  },
   "onboardingSkip": "Skip",
   "@onboardingSkip": {
     "description": "Button label to skip the onboarding flow"

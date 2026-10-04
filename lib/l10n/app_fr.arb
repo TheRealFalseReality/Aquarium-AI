@@ -1212,6 +1212,9 @@
       }
     }
   },
+  "moveInhabitant": "Déplacer vers un autre aquarium",
+  "selectDestinationTank": "Sélectionnez l’aquarium vers lequel déplacer cet habitant.",
+  "moveInhabitantFailed": "Impossible de déplacer cet habitant. Veuillez réessayer.",
   "onboardingSkip": "Passer",
   "@onboardingSkip": {
     "description": "Button label to skip the onboarding flow"
