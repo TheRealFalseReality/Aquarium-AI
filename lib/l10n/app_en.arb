@@ -6322,6 +6322,13 @@
   "serverMessageNoCurrentMessage": "No current message.",
   "@serverMessageNoCurrentMessage": {
     "description": "Shown when no active server message is available"
-  }
-
+  },
+  "verifyScheduleTitle": "Verify Notification Details",
+  "@verifyScheduleTitle": {"description": "Title of the dialog verifying notification details before saving"},
+  "verifyScheduleMessage": "Please verify the details below. The notification will be scheduled directly from this date and time.",
+  "@verifyScheduleMessage": {"description": "Message in the verify notification dialog"},
+  "verifyScheduleName": "Name",
+  "@verifyScheduleName": {"description": "Label for notification name in verify dialog"},
+  "verifyScheduleDateTime": "Date & Time",
+  "@verifyScheduleDateTime": {"description": "Label for date and time in verify dialog"}
 }

@@ -22,7 +22,7 @@ import '../utils/parameter_range_alerts.dart';
 import '../models/notification_log.dart';
 import '../models/tank_notification.dart';
 import '../widgets/accessible_feedback.dart';
-import '../widgets/notification_reschedule_dialog.dart';
+import '../widgets/notification_reschedule_picker.dart';
 import '../widgets/out_of_range_alerts_banner.dart';
 import 'dosing_logger_screen.dart';
 import 'notification_logger_screen.dart';
@@ -1877,6 +1877,11 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                     ],
                   ),
                 ),
+                IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () =>
+                      _showUpcomingNotificationOptions(tank, notification),
+                ),
               ],
             ),
             if (notification.notes != null &&
@@ -2043,47 +2048,148 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
     );
   }
 
+  /// Bottom sheet menu identical to the one in the manage notifications screen
+  void _showUpcomingNotificationOptions(
+    Tank tank,
+    TankNotification notification,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: Text(l10n.edit),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => NotificationFormScreen(
+                      tank: _getCurrentTank(),
+                      existingNotification: notification,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.send),
+              title: Text(l10n.sendTestNotification),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _sendTestNotificationFromUpcoming(notification);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: Text(
+                l10n.delete,
+                style: const TextStyle(color: Colors.red),
+              ),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _confirmDeleteFromUpcoming(notification);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _sendTestNotificationFromUpcoming(
+    TankNotification notification,
+  ) async {
+    await NotificationService().sendTestNotification(
+      tankName: _getCurrentTank().name,
+      type: notification.type,
+      customTitle: notification.customTitle,
+      customBody: notification.notes,
+    );
+
+    if (mounted) {
+      context.showAccessibleMessage(
+        AppLocalizations.of(context)!.testNotificationSent,
+      );
+    }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'send_test_notification',
+      parameters: {'type': notification.type.name},
+    );
+  }
+
+  void _confirmDeleteFromUpcoming(TankNotification notification) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.deleteNotification),
+        content: Text(l10n.deleteNotificationConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await _deleteFromUpcoming(notification);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteFromUpcoming(TankNotification notification) async {
+    final currentTank = _getCurrentTank();
+    final updatedTank = currentTank.copyWith(
+      notifications: currentTank.notifications
+          .where((n) => n.id != notification.id)
+          .toList(),
+      updatedAt: DateTime.now(),
+    );
+
+    await ref.read(tankProvider.notifier).updateTank(updatedTank);
+    await NotificationService().cancelNotification(notification);
+
+    if (mounted) {
+      context.showAccessibleMessage(
+        AppLocalizations.of(context)!.notificationDeleted,
+      );
+    }
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'delete_notification',
+      parameters: {'type': notification.type.name},
+    );
+  }
+
   /// Reschedule a notification from the upcoming notifications tab
   Future<void> _rescheduleFromUpcoming(
     Tank tank,
     TankNotification notification,
   ) async {
-    final option = await NotificationRescheduleDialog.show(
+    final picked = await pickNotificationRescheduleDateTime(
       context,
       notification,
     );
 
-    if (option == null || !mounted) return;
+    if (picked == null || !mounted) return;
 
-    final currentTank = _getCurrentTank();
     final notificationService = NotificationService();
+    final currentTank = _getCurrentTank();
 
-    TankNotification updatedNotification;
-    switch (option) {
-      case RescheduleOption.rescheduleFromNow:
-        final nextDate = notification.getNextNotificationDateFromBase(
-          DateTime.now(),
-          useCurrentTime: true,
-        );
-        updatedNotification = notification.copyWith(
-          scheduledNextDate: nextDate,
-          updatedAt: DateTime.now(),
-        );
-        break;
-      case RescheduleOption.keepOriginal:
-        final nextDate = notification.getNextNotificationDateFromBase(
-          DateTime.now(),
-          useCurrentTime: false,
-        );
-        updatedNotification = notification.copyWith(
-          scheduledNextDate: nextDate,
-          updatedAt: DateTime.now(),
-        );
-        break;
-      case RescheduleOption.doNothing:
-      case RescheduleOption.cancelAll:
-        return;
-    }
+    final updatedNotification = notification.copyWith(
+      scheduledNextDate: picked,
+      updatedAt: DateTime.now(),
+    );
 
     // Update the notification in the tank
     final updatedNotifications = currentTank.notifications
@@ -2102,7 +2208,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
       tankId: currentTank.id,
       tankName: currentTank.name,
       notification: updatedNotification,
-      activityLogs: currentTank.notificationLogs,
+      useScheduledNextDate: true,
     );
 
     if (mounted) {
@@ -2112,10 +2218,7 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
 
     AnalyticsService.logFeatureUsed(
       featureName: 'reschedule_from_upcoming',
-      parameters: {
-        'type': notification.type.name,
-        'option': option.name,
-      },
+      parameters: {'type': notification.type.name},
     );
   }
 

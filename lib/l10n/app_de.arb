@@ -2204,5 +2204,9 @@
   "serverMessageRemindLater": "In 3 Tagen erinnern",
   "developerMessage": "Entwicklernachricht",
   "developerMessageDrawerDescription": "Neueste Nachricht vom Entwickler anzeigen",
-  "serverMessageNoCurrentMessage": "Derzeit keine Nachricht."
+  "serverMessageNoCurrentMessage": "Derzeit keine Nachricht.",
+  "verifyScheduleTitle": "Benachrichtigungsdetails überprüfen",
+  "verifyScheduleMessage": "Bitte überprüfen Sie die Details unten. Die Benachrichtigung wird direkt für dieses Datum und diese Uhrzeit geplant.",
+  "verifyScheduleName": "Name",
+  "verifyScheduleDateTime": "Datum & Uhrzeit"
 }
