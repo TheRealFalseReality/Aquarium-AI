@@ -37,6 +37,7 @@ import '../widgets/accessible_feedback.dart';
 import '../widgets/remove_ads_dialog.dart';
 import '../widgets/server_message_dialog.dart';
 import 'changelog_screen.dart';
+import 'home_assistant_test_screen.dart';
 import 'onboarding_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -1369,6 +1370,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           iconColor: Theme.of(context).colorScheme.tertiary,
           onTap: () => _showDataManagementDialog(),
+        ),
+        const SizedBox(height: 16),
+        _buildMenuCard(
+          context: context,
+          title: 'Home Assistant (Test)',
+          subtitle: 'Experimental: connect and view sensor data',
+          icon: Icons.sensors,
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+              Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.3),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          iconColor: Theme.of(context).colorScheme.secondary,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomeAssistantTestScreen(),
+            ),
+          ),
         ),
         const SizedBox(height: 16),
         _buildMenuCard(
