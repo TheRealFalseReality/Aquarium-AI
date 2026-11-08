@@ -144,7 +144,7 @@ const String rcDefaultBuyMeACoffeeUrl =
 // product listing page. Can be overridden via Remote Config to point to a
 // different product variant, store category, or landing page.
 const String rcDefaultAquapiStoreUrl =
-    'https://www.capitalcityaquatics.com/store/p/aquapi-wmgdj';
+    'https://www.capitalcityaquatics.com/store/';
 
 // Groq proxy Cloud Function endpoint URL
 const String rcDefaultGroqProxyUrl =
