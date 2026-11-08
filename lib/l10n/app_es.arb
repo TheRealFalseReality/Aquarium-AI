@@ -1937,7 +1937,9 @@
   "@careRemindersSetUpForTank": {
     "description": "Button label to confirm opening the notification manager for a specific tank",
     "placeholders": {
-      "tankName": {"type": "String"}
+      "tankName": {
+        "type": "String"
+      }
     }
   },
   "reschedule": "Reprogramar",
@@ -2204,5 +2206,85 @@
   "serverMessageRemindLater": "Recordar en 3 días",
   "developerMessage": "Mensaje del desarrollador",
   "developerMessageDrawerDescription": "Ver el último mensaje del desarrollador",
-  "serverMessageNoCurrentMessage": "No hay ningún mensaje actual."
+  "serverMessageNoCurrentMessage": "No hay ningún mensaje actual.",
+  "manageParameterRanges": "Gestionar rangos de parámetros",
+  "@manageParameterRanges": {
+    "description": "Button/title for managing per-tank parameter ranges and custom parameter profiles"
+  },
+  "manageParameterRangesDescription": "Define límites mínimos/máximos personalizados y parámetros personalizados reutilizables para este acuario.",
+  "@manageParameterRangesDescription": {
+    "description": "Description text in parameter range manager sheet"
+  },
+  "addCustomParameter": "Añadir parámetro personalizado",
+  "@addCustomParameter": {
+    "description": "Action to create a reusable custom parameter profile"
+  },
+  "editParameterBoundsTitle": "Editar rango de {parameterName}",
+  "@editParameterBoundsTitle": {
+    "description": "Dialog title for editing one parameter profile range",
+    "placeholders": {
+      "parameterName": {
+        "type": "String"
+      }
+    }
+  },
+  "parameterTypeLabel": "Tipo de parámetro",
+  "@parameterTypeLabel": {
+    "description": "Field label for parameter type in parameter profile editor"
+  },
+  "customParameterHint": "p. ej., Hierro, Cobre, Estroncio",
+  "@customParameterHint": {
+    "description": "Hint for custom parameter name input"
+  },
+  "defaultUnitLabel": "Unidad predeterminada",
+  "@defaultUnitLabel": {
+    "description": "Field label for preferred unit in parameter profile editor"
+  },
+  "minBoundLabel": "Límite mínimo",
+  "@minBoundLabel": {
+    "description": "Field label for minimum acceptable value"
+  },
+  "maxBoundLabel": "Límite máximo",
+  "@maxBoundLabel": {
+    "description": "Field label for maximum acceptable value"
+  },
+  "optionalLabel": "Opcional",
+  "@optionalLabel": {
+    "description": "Hint indicating an input field is optional"
+  },
+  "minMustBeLessOrEqualMax": "El límite mínimo debe ser menor o igual que el límite máximo.",
+  "@minMustBeLessOrEqualMax": {
+    "description": "Validation error when min bound is greater than max bound"
+  },
+  "parameterBoundsSaved": "Límites de parámetros guardados.",
+  "@parameterBoundsSaved": {
+    "description": "Snackbar shown when parameter profile changes are saved"
+  },
+  "parameterRemoved": "Parámetro eliminado de la lista rápida.",
+  "@parameterRemoved": {
+    "description": "Snackbar shown when custom parameter profile is removed"
+  },
+  "usingDefaultRange": "Usando el rango predeterminado integrado",
+  "@usingDefaultRange": {
+    "description": "Summary text when no custom bounds are configured"
+  },
+  "noneLabel": "Ninguno",
+  "@noneLabel": {
+    "description": "Generic none label"
+  },
+  "parameterProfileSummary": "Mín: {min} · Máx: {max} · Unidad: {unit}",
+  "@parameterProfileSummary": {
+    "description": "Compact summary of custom parameter profile settings",
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  }
 }
