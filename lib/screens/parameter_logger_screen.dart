@@ -1229,8 +1229,10 @@ class _ParameterProfilesSheetState
                 return;
               }
 
-              if ((minText.isNotEmpty && minValue == null) ||
-                  (maxText.isNotEmpty && maxValue == null)) {
+              if ((minText.isNotEmpty &&
+                      (minValue == null || !minValue.isFinite)) ||
+                  (maxText.isNotEmpty &&
+                      (maxValue == null || !maxValue.isFinite))) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(l10n.enterValidNumber)),
                 );
@@ -1384,8 +1386,7 @@ class _ParameterProfilesSheetState
               ),
             ),
             const SizedBox(height: 12),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.5,
+            Flexible(
               child: ListView.builder(
                 itemCount: availableTypes.length,
                 itemBuilder: (context, index) {
@@ -1495,7 +1496,7 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
       ..._defaultParameterTypesForTank(widget.tank),
       ..._profiles.map((p) => p.parameterType),
     ]) {
-      if (seen.add(type)) {
+      if (type != 'custom' && seen.add(type)) {
         types.add(type);
       }
     }
@@ -1514,6 +1515,17 @@ class _AddParameterSheetState extends ConsumerState<_AddParameterSheet> {
   List<String> _unitsForParameter(String type) {
     final fromProfile = _profileForType(type)?.preferredUnit;
     final base = List<String>.from(_unitOptions[type] ?? _unitOptions['custom']!);
+    final existing = widget.existingParameter;
+    final existingUnit = existing?.unit;
+    if (existing != null &&
+        existingUnit != null &&
+        existingUnit.isNotEmpty &&
+        (existing.parameterType == type ||
+            (type == 'custom' &&
+                !_availableParameterTypes.contains(existing.parameterType))) &&
+        !base.contains(existingUnit)) {
+      base.add(existingUnit);
+    }
     if (fromProfile == null || fromProfile.isEmpty) {
       return base;
     }
