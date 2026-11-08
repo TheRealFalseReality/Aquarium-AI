@@ -1,11 +1,10 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-
+import 'package:uuid/uuid.dart';
 import '../l10n/app_localizations.dart';
 import '../models/fish.dart';
 import '../models/tank.dart';
@@ -53,24 +52,34 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
     super.dispose();
   }
 
-  /// Always read the latest inhabitant state from the provider.
-  TankInhabitant _getCurrentInhabitant() {
-    final tanks = ref.watch(tankProvider).tanks;
-    final tank = tanks.firstWhere(
-      (t) => t.id == widget.tank.id,
-      orElse: () => widget.tank,
-    );
-    return tank.inhabitants.firstWhere(
-      (i) => i.id == widget.inhabitant.id,
-      orElse: () => widget.inhabitant,
+  bool _isMemorialized(Tank tank, TankInhabitant inhabitant) =>
+      tank.memorializedInhabitants.any((i) => i.id == inhabitant.id);
+
+  Tank _replaceInhabitant(Tank tank, TankInhabitant updated) {
+    final isMemorialized = _isMemorialized(tank, updated);
+    return tank.copyWith(
+      inhabitants: isMemorialized
+          ? tank.inhabitants
+          : tank.inhabitants
+              .map((i) => i.id == updated.id ? updated : i)
+              .toList(),
+      memorializedInhabitants: isMemorialized
+          ? tank.memorializedInhabitants
+              .map((i) => i.id == updated.id ? updated : i)
+              .toList()
+          : tank.memorializedInhabitants,
+      updatedAt: DateTime.now(),
     );
   }
 
-  Tank _getCurrentTank() {
-    final tanks = ref.watch(tankProvider).tanks;
-    return tanks.firstWhere(
-      (t) => t.id == widget.tank.id,
-      orElse: () => widget.tank,
+  Tank _removeInhabitant(Tank tank, TankInhabitant inhabitant) {
+    return tank.copyWith(
+      inhabitants:
+          tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
+      memorializedInhabitants: tank.memorializedInhabitants
+          .where((i) => i.id != inhabitant.id)
+          .toList(),
+      updatedAt: DateTime.now(),
     );
   }
 
@@ -80,12 +89,7 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
       userNotes: notes.isEmpty ? null : notes,
       clearUserNotes: notes.isEmpty,
     );
-    final updatedTank = tank.copyWith(
-      inhabitants: tank.inhabitants
-          .map((i) => i.id == inhabitant.id ? updated : i)
-          .toList(),
-      updatedAt: DateTime.now(),
-    );
+    final updatedTank = _replaceInhabitant(tank, updated);
     ref.read(tankProvider.notifier).updateTank(updatedTank);
     setState(() {
       _editingNotes = false;
@@ -109,12 +113,7 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
         availableFish: fishList,
         existingInhabitant: inhabitant,
         onAdd: (updated) {
-          final updatedTank = tank.copyWith(
-            inhabitants: tank.inhabitants
-                .map((i) => i.id == updated.id ? updated : i)
-                .toList(),
-            updatedAt: DateTime.now(),
-          );
+          final updatedTank = _replaceInhabitant(tank, updated);
           ref.read(tankProvider.notifier).updateTank(updatedTank);
           AnalyticsService.logFeatureUsed(
             featureName: 'inhabitant_edited_from_detail',
@@ -157,14 +156,177 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
   /// Removes the inhabitant from the tank without showing a confirmation.
   /// Used when confirmation has already been obtained (e.g., from the edit dialog).
   void _performDeleteInhabitant(TankInhabitant inhabitant, Tank tank) {
-    final updatedTank = tank.copyWith(
-      inhabitants:
-          tank.inhabitants.where((i) => i.id != inhabitant.id).toList(),
-      updatedAt: DateTime.now(),
-    );
+    final updatedTank = _removeInhabitant(tank, inhabitant);
     ref.read(tankProvider.notifier).updateTank(updatedTank);
     AnalyticsService.logFeatureUsed(featureName: 'inhabitant_deleted');
     if (mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _recordPassing(TankInhabitant inhabitant, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    final noteController = TextEditingController();
+    // deceasedCount is returned by the dialog; null means cancelled.
+    final deceasedCount = await showDialog<int>(
+      context: context,
+      builder: (ctx) {
+        int selected = inhabitant.quantity;
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) => AlertDialog(
+            title: Text(l10n.recordPassing),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.memorializeInhabitantConfirm(inhabitant.customName)),
+                  if (inhabitant.quantity > 1) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.deceasedCountLabel,
+                      style: Theme.of(ctx).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove),
+                          onPressed: selected > 1
+                              ? () => setDialogState(() => selected--)
+                              : null,
+                        ),
+                        Expanded(
+                          child: Text(
+                            '$selected / ${inhabitant.quantity}',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(ctx).textTheme.titleMedium,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: selected < inhabitant.quantity
+                              ? () => setDialogState(() => selected++)
+                              : null,
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: noteController,
+                    decoration: InputDecoration(
+                      labelText: l10n.memorialNoteLabel,
+                      hintText: l10n.memorialNoteHint,
+                      border: const OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(null),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(ctx).pop(selected),
+                icon: const Icon(Icons.heart_broken_outlined),
+                label: Text(l10n.chooseDatePassed),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    final note = noteController.text.trim();
+    noteController.dispose();
+    if (deceasedCount == null || !mounted) return;
+
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: inhabitant.dateDied ?? DateTime.now(),
+      firstDate: inhabitant.dateAdded ?? DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (selectedDate == null || !mounted) return;
+
+    final remainingCount = inhabitant.quantity - deceasedCount;
+    // When only some of the group die, give the memorial record its own id to
+    // avoid colliding with the surviving active entry that keeps the original id.
+    final memorialId =
+        remainingCount > 0 ? const Uuid().v4() : inhabitant.id;
+    final memorialized = inhabitant.copyWith(
+      id: memorialId,
+      quantity: deceasedCount,
+      dateDied: selectedDate,
+      memorialNote: note.isEmpty ? null : note,
+      clearMemorialNote: note.isEmpty,
+    );
+
+    // Rebuild inhabitants: remove the old entry; if some survive, keep them.
+    final updatedInhabitants = [
+      ...tank.inhabitants.where((i) => i.id != inhabitant.id),
+      if (remainingCount > 0) inhabitant.copyWith(quantity: remainingCount),
+    ];
+    final updatedTank = tank.copyWith(
+      inhabitants: updatedInhabitants,
+      memorializedInhabitants: [
+        ...tank.memorializedInhabitants.where((i) => i.id != inhabitant.id),
+        memorialized,
+      ],
+      updatedAt: DateTime.now(),
+    );
+    ref.read(tankProvider.notifier).updateTank(updatedTank);
+    AnalyticsService.logFeatureUsed(
+      featureName: 'inhabitant_passing_recorded',
+      parameters: {
+        'fish_type': memorialized.fishUnit,
+        'deceased_count': deceasedCount,
+        'partial': remainingCount > 0,
+      },
+    );
+  }
+
+  Future<void> _restoreToActiveTank(TankInhabitant inhabitant, Tank tank) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.restoreToActiveTank),
+        content: Text(
+          l10n.restoreMemorializedInhabitantConfirm(inhabitant.customName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.restore),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final restored = inhabitant.copyWith(clearDateDied: true, clearMemorialNote: true);
+    final updatedTank = tank.copyWith(
+      inhabitants: [
+        ...tank.inhabitants.where((i) => i.id != inhabitant.id),
+        restored,
+      ],
+      memorializedInhabitants: tank.memorializedInhabitants
+          .where((i) => i.id != inhabitant.id)
+          .toList(),
+      updatedAt: DateTime.now(),
+    );
+    ref.read(tankProvider.notifier).updateTank(updatedTank);
+    AnalyticsService.logFeatureUsed(
+      featureName: 'inhabitant_memorial_restored',
+      parameters: {'fish_type': restored.fishUnit},
+    );
   }
 
   Future<void> _pickCustomImage(TankInhabitant inhabitant, Tank tank) async {
@@ -197,12 +359,7 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
       if (picked == null) return;
 
       final updated = inhabitant.copyWith(customImagePath: picked.path);
-      final updatedTank = tank.copyWith(
-        inhabitants: tank.inhabitants
-            .map((i) => i.id == inhabitant.id ? updated : i)
-            .toList(),
-        updatedAt: DateTime.now(),
-      );
+      final updatedTank = _replaceInhabitant(tank, updated);
       ref.read(tankProvider.notifier).updateTank(updatedTank);
       AnalyticsService.logFeatureUsed(
           featureName: 'inhabitant_custom_image_set');
@@ -250,8 +407,21 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final cs = Theme.of(context).colorScheme;
-    final inhabitant = _getCurrentInhabitant();
-    final tank = _getCurrentTank();
+    // Resolve the latest tank and inhabitant directly in build() so that
+    // ref.watch() is only ever called from the build method itself.
+    final tanks = ref.watch(tankProvider).tanks;
+    final tank = tanks.firstWhere(
+      (t) => t.id == widget.tank.id,
+      orElse: () => widget.tank,
+    );
+    final inhabitant = tank.inhabitants.firstWhere(
+      (i) => i.id == widget.inhabitant.id,
+      orElse: () => tank.memorializedInhabitants.firstWhere(
+        (i) => i.id == widget.inhabitant.id,
+        orElse: () => widget.inhabitant,
+      ),
+    );
+    final isMemorialized = _isMemorialized(tank, inhabitant);
 
     final fishDataAsync = ref.watch(fishDataProvider);
     final fishData = fishDataAsync.maybeWhen(
@@ -265,6 +435,19 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
       appBar: AppBar(
         title: Text(inhabitant.customName),
         actions: [
+          IconButton(
+            icon: Icon(
+              isMemorialized
+                  ? Icons.restart_alt_outlined
+                  : Icons.heart_broken_outlined,
+            ),
+            tooltip: isMemorialized
+                ? l10n.restoreToActiveTank
+                : l10n.recordPassing,
+            onPressed: () => isMemorialized
+                ? _restoreToActiveTank(inhabitant, tank)
+                : _recordPassing(inhabitant, tank),
+          ),
           IconButton(
             icon: const Icon(Icons.add_a_photo_outlined),
             tooltip: l10n.addPhoto,
@@ -291,6 +474,10 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
           _buildImageSection(context, imageUrl, inhabitant, tank, cs, l10n),
           const SizedBox(height: 20),
           // Info card
+          if (isMemorialized) ...[
+            _buildMemorialCard(context, inhabitant, cs, l10n),
+            const SizedBox(height: 16),
+          ],
           _buildInfoCard(context, inhabitant, cs, l10n),
           const SizedBox(height: 16),
           // Species tags
@@ -455,6 +642,74 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
                 cs,
               ),
             ],
+            if (inhabitant.dateDied != null) ...[
+              const Divider(height: 20),
+              _infoRow(
+                context,
+                Icons.heart_broken_outlined,
+                l10n.datePassed,
+                DateFormat.yMMMd().format(inhabitant.dateDied!),
+                cs,
+              ),
+              if (inhabitant.dateAdded != null) ...[
+                const Divider(height: 20),
+                _infoRow(
+                  context,
+                  Icons.auto_awesome_outlined,
+                  l10n.lifespan,
+                  _formatDuration(
+                    context,
+                    inhabitant.dateAdded!,
+                    inhabitant.dateDied!,
+                  ),
+                  cs,
+                ),
+              ],
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMemorialCard(
+    BuildContext context,
+    TankInhabitant inhabitant,
+    ColorScheme cs,
+    AppLocalizations l10n,
+  ) {
+    return Card(
+      color: cs.secondaryContainer.withOpacity(0.5),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.heart_broken_outlined, color: cs.secondary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    l10n.inMemoryOf(inhabitant.customName),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+            if (inhabitant.memorialNote != null &&
+                inhabitant.memorialNote!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                inhabitant.memorialNote!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: cs.onSecondaryContainer,
+                      fontStyle: FontStyle.italic,
+                    ),
+              ),
+            ],
           ],
         ),
       ),
@@ -494,10 +749,16 @@ class _TankInhabitantScreenState extends ConsumerState<TankInhabitantScreen> {
 
   /// Returns a compact age string (e.g. "2y 5m") for a given start date.
   String _formatAge(BuildContext context, DateTime since) {
+    return _formatDuration(context, since, DateTime.now());
+  }
+
+  String _formatDuration(BuildContext context, DateTime since, DateTime until) {
     final l10n = AppLocalizations.of(context)!;
-    final now = DateTime.now();
-    int years = now.year - since.year;
-    int months = now.month - since.month;
+    int years = until.year - since.year;
+    int months = until.month - since.month;
+    if (until.day < since.day) {
+      months--;
+    }
     if (months < 0) {
       years--;
       months += 12;

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.6.00] - 2026-8 •  Inhabitant Memorialization, Messaging
+
+### Added
+- Add owner-side editing for community post comments
+- Add memorial tracking for deceased tank inhabitants
+
+### Added
+
 ## [3.3.00] - 2026-5-3 • Substrate Calculator, Cloud Backup, Quality of Life Updates
 
 ### Added

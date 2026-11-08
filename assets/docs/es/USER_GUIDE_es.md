@@ -99,6 +99,10 @@ Toca cualquier tarjeta de acuario para abrir sus detalles, organizados en pesta�
 - **Dosificación** – registro de tratamientos / suplementos
 - **Actividad** – eventos recientes
 
+Si un habitante fallece, abre su pantalla de detalles y usa
+**Registrar fallecimiento** para moverlo a la lista conmemorativa del acuario
+sin perder su foto, notas ni fechas.
+
 ### Herramientas AI desde un acuario
 
 Desde una tarjeta de acuario o su pantalla de detalles puedes lanzar herramientas AI
@@ -374,7 +378,8 @@ automáticamente.
 **Ruta:** Menú principal → *Comunidad*
 
 Navega y comparte publicaciones con otros usuarios de Aquarium AI. Inicia sesión
-(anónimamente o con Google/Facebook) para publicar, comentar y reaccionar.
+(anónimamente o con Google/Facebook) para publicar, comentar, reaccionar y editar
+o eliminar tus propios comentarios después de publicarlos.
 
 ### Tipos de publicación
 

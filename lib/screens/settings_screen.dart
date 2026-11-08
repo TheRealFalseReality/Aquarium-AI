@@ -35,6 +35,7 @@ import '../widgets/dosing_preset_editor_dialog.dart';
 import '../utils/backup_restore_utils.dart';
 import '../widgets/accessible_feedback.dart';
 import '../widgets/remove_ads_dialog.dart';
+import '../widgets/server_message_dialog.dart';
 import 'changelog_screen.dart';
 import 'onboarding_screen.dart';
 
@@ -1722,6 +1723,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     _populateDebugTanks();
                   },
                 ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.campaign_outlined, color: Colors.purple),
+                  title: const Text('Show Server Message'),
+                  subtitle: const Text(
+                    'Fetch latest Remote Config and show server message dialog',
+                  ),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    _showServerMessageDebugPopup();
+                  },
+                ),
               ],
             ),
           ),
@@ -1736,6 +1749,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _showServerMessageDebugPopup() async {
+    if (!kDebugMode) return;
+    try {
+      await RemoteConfigService.debugFetchAndActivate();
+      final messageId = RemoteConfigService.serverMessageId;
+      final title = RemoteConfigService.serverMessageTitle;
+      final message = RemoteConfigService.serverMessage;
+
+      if (messageId.isEmpty || message.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No server message is currently configured.')),
+        );
+        return;
+      }
+
+      if (!mounted) return;
+      showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (_) => ServerMessageDialog(
+          messageId: messageId,
+          title: title,
+          message: message,
+        ),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error showing debug server message: $e');
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Failed to load server message.')));
+    }
   }
 
   Future<void> _populateDebugTanks() async {

@@ -41,6 +41,7 @@ import '../widgets/aquapi_promotion_dialog.dart';
 import '../widgets/founder_upsell_banner.dart';
 import '../widgets/gradient_text.dart';
 import '../widgets/remove_ads_dialog.dart';
+import '../widgets/server_message_dialog.dart';
 import 'changelog_screen.dart';
 import 'community_post_screen.dart';
 import 'markdown_viewer_screen.dart';
@@ -150,6 +151,7 @@ class WelcomeScreen extends ConsumerStatefulWidget {
       debugPrint('Error checking promotion dialog status: $e');
     }
   }
+
 }
 
 class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
@@ -165,6 +167,13 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   static const int _changelogBannerAutoDismissDays = 3;
   static const String _hiddenFeaturesKey = 'hiddenWelcomeFeatures';
   static const String _showCommunityCardKey = 'welcomeShowCommunityCard';
+
+  /// Delay before the server message dialog is shown, allowing other startup
+  /// dialogs (changelog, app update) to appear first.
+  static const Duration _serverMessageDialogDelay = Duration(seconds: 2);
+  static const String _serverMessageLastFetchAtKey =
+      'server_message_last_fetch_at';
+  static const Duration _serverMessageReleaseFetchCadence = Duration(days: 1);
 
   // Promo card keys
   static const String _docsPromoShownAtKey = 'welcomeDocsPromoShownAt';
@@ -236,6 +245,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       _checkShowChangelogDialog();
       // Check if an app update is available and show a dismissible popup.
       _checkShowAppUpdateDialog();
+      // Check if there is a new server-side message to show.
+      _checkShowServerMessage();
     });
   }
 
@@ -836,6 +847,63 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
       );
     } catch (e) {
       debugPrint('Error checking app update popup: $e');
+    }
+  }
+
+  Future<void> _checkShowServerMessage() async {
+    await _refreshServerMessageIfNeeded();
+
+    final messageId = RemoteConfigService.serverMessageId;
+    final message = RemoteConfigService.serverMessage;
+    final title = RemoteConfigService.serverMessageTitle;
+
+    final show = await ServerMessageDialog.shouldShow(
+      id: messageId,
+      body: message,
+    );
+    if (!show || !mounted) return;
+
+    AnalyticsService.logFeatureUsed(
+      featureName: 'server_message_shown',
+      parameters: {'message_id': messageId},
+    );
+
+    // Short delay so other startup dialogs (changelog, update) settle first.
+    Timer(_serverMessageDialogDelay, () {
+      if (!mounted) return;
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => ServerMessageDialog(
+          messageId: messageId,
+          title: title,
+          message: message,
+        ),
+      );
+    });
+  }
+
+  Future<void> _refreshServerMessageIfNeeded() async {
+    if (kDebugMode) {
+      await RemoteConfigService.debugFetchAndActivate();
+      return;
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final lastFetchAt = prefs.getInt(_serverMessageLastFetchAtKey) ?? 0;
+      final cadenceMs = _serverMessageReleaseFetchCadence.inMilliseconds;
+      final shouldFetch = now - lastFetchAt >= cadenceMs;
+
+      if (!shouldFetch) return;
+
+      await RemoteConfigService.fetchAndActivateLatest();
+      await prefs.setInt(_serverMessageLastFetchAtKey, now);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error refreshing server message config: $e');
+      }
     }
   }
 

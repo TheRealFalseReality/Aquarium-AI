@@ -120,14 +120,14 @@ const String rcDefaultOpenAIImageModel = 'gpt-4-vision-preview';
 // Placeholder model shown in API Provider settings for the Groq text field.
 const String rcDefaultGroqModel = 'llama-3.3-70b-versatile';
 const String rcDefaultGroqImageModel =
-    'meta-llama/llama-4-scout-17b-16e-instruct';
+    'meta-llama/llama-prompt-guard-2-22m';
 // Free-tier model names (used when the developer Groq key is active).
 const String rcDefaultFounderGroqModel = 'llama-3.3-70b-versatile';
 const String rcDefaultFreeGroqModel = 'llama-3.1-8b-instant';
 const String rcDefaultFounderGroqImageModel =
-    'meta-llama/llama-4-maverick-17b-128e-instruct';
+    'meta-llama/llama-prompt-guard-2-86m';
 const String rcDefaultFreeGroqImageModel =
-    'meta-llama/llama-4-scout-17b-16e-instruct';
+    'meta-llama/llama-prompt-guard-2-22m';
 
 // AquaPi promotion image URLs (empty = use bundled asset)
 const String rcDefaultAquapiOriginalImageUrl = '';
@@ -144,7 +144,7 @@ const String rcDefaultBuyMeACoffeeUrl =
 // product listing page. Can be overridden via Remote Config to point to a
 // different product variant, store category, or landing page.
 const String rcDefaultAquapiStoreUrl =
-    'https://www.capitalcityaquatics.com/store/p/aquapi-wmgdj';
+    'https://www.capitalcityaquatics.com/store/';
 
 // Groq proxy Cloud Function endpoint URL
 const String rcDefaultGroqProxyUrl =
@@ -190,6 +190,19 @@ const int rcDefaultFounderChatHistoryLimit = 10;
 // Applies to per-minute, per-day, and per-photo limits.
 // Defaults to 2× the anonymous free-tier baseline; can be adjusted via RC.
 const double rcDefaultSignedInRateLimitMultiplier = 2.0;
+
+// ---------------------------------------------------------------------------
+// Server message defaults
+// ---------------------------------------------------------------------------
+
+/// Default server message identifier. Empty string means no message is active.
+const String rcDefaultServerMessageId = '';
+
+/// Default server message title. Empty string means use a generic title.
+const String rcDefaultServerMessageTitle = '';
+
+/// Default server message body. Empty string means no message is shown.
+const String rcDefaultServerMessage = '';
 
 // ---------------------------------------------------------------------------
 // Deep linking constants
@@ -381,4 +394,19 @@ class RemoteConfigKeys {
   /// Default 2.0 = double the anonymous baseline.
   static const String signedInRateLimitMultiplier =
       'signed_in_rate_limit_multiplier';
+
+  // ── Server message ─────────────────────────────────────────────────────────
+  /// String — unique identifier for the current server message.
+  /// Changing this value causes the popup to appear again for all users
+  /// (even those who previously snoozed it for this ID).
+  /// Set to an empty string (default) to disable the feature.
+  static const String serverMessageId = 'server_message_id';
+
+  /// String — title text shown in the server message dialog.
+  /// Leave empty to use a generic "Message from Developer" title.
+  static const String serverMessageTitle = 'server_message_title';
+
+  /// String — body text shown in the server message dialog.
+  /// Set to an empty string (default) to show no message.
+  static const String serverMessage = 'server_message';
 }

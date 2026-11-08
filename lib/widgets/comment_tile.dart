@@ -8,12 +8,14 @@ import '../utils/storage_image_utils.dart';
 class CommentTile extends StatelessWidget {
   final CommunityComment comment;
   final String currentUserId;
+  final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
   const CommentTile({
     super.key,
     required this.comment,
     required this.currentUserId,
+    this.onEdit,
     this.onDelete,
   });
 
@@ -22,6 +24,7 @@ class CommentTile extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final isOwner = currentUserId == comment.userId;
+    final timestamp = _formatTimestamp(comment, l10n);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -36,30 +39,53 @@ class CommentTile extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      comment.displayName,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      _formatDate(comment.createdAt, l10n),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (isOwner)
-                      GestureDetector(
-                        onTap: onDelete,
-                        child: Icon(
-                          Icons.delete_outline,
-                          size: 16,
-                          color: theme.colorScheme.error,
-                          semanticLabel: l10n.communityDeleteComment,
-                        ),
-                      ),
+                   Expanded(
+                     child: Row(
+                       children: [
+                         Flexible(
+                           child: Text(
+                             comment.displayName,
+                             overflow: TextOverflow.ellipsis,
+                             style: theme.textTheme.labelMedium?.copyWith(
+                               fontWeight: FontWeight.w600,
+                             ),
+                           ),
+                         ),
+                         const SizedBox(width: 6),
+                         Flexible(
+                           child: Text(
+                             timestamp,
+                             overflow: TextOverflow.ellipsis,
+                             style: theme.textTheme.labelSmall?.copyWith(
+                               color: theme.colorScheme.onSurfaceVariant,
+                             ),
+                           ),
+                         ),
+                       ],
+                     ),
+                   ),
+                   if (isOwner)
+                     IconButton(
+                       onPressed: onEdit,
+                       icon: const Icon(Icons.edit_outlined, size: 18),
+                       padding: EdgeInsets.zero,
+                       constraints: const BoxConstraints(),
+                       visualDensity: VisualDensity.compact,
+                       color: theme.colorScheme.primary,
+                       tooltip: l10n.communityEditComment,
+                     ),
+                   if (isOwner) ...[
+                     const SizedBox(width: 8),
+                     IconButton(
+                       onPressed: onDelete,
+                       icon: const Icon(Icons.delete_outline, size: 18),
+                       padding: EdgeInsets.zero,
+                       constraints: const BoxConstraints(),
+                       visualDensity: VisualDensity.compact,
+                       color: theme.colorScheme.error,
+                       tooltip: l10n.communityDeleteComment,
+                     ),
+                   ],
                   ],
                 ),
                 const SizedBox(height: 2),
@@ -70,6 +96,14 @@ class CommentTile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatTimestamp(CommunityComment comment, AppLocalizations l10n) {
+    final createdLabel = _formatDate(comment.createdAt, l10n);
+    if (comment.updatedAt.isAfter(comment.createdAt)) {
+      return '$createdLabel • ${l10n.communityEditedLabel}';
+    }
+    return createdLabel;
   }
 
   Widget _buildAvatar(ThemeData theme) {

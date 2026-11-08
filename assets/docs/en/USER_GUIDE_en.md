@@ -89,6 +89,9 @@ Tap any tank card to open its details, organized into tabs:
 - **Dosing** – treatment / supplement log
 - **Activity** – recent events
 
+If an inhabitant passes away, open its detail screen and use **Record Passing** to
+move it into the tank's memorial list while preserving its photo, notes, and dates.
+
 ### AI Tools from a Tank
 
 From a tank card or its detail screen you can launch AI tools pre-loaded with your tank's data:
@@ -382,7 +385,7 @@ Every AI result (compatibility report, stocking recommendation, water parameter 
 
 **Route:** Main menu → *Community*
 
-Browse and share posts with other Aquarium AI users. Sign in (anonymously or with Google/Facebook) to post, comment, and react.
+Browse and share posts with other Aquarium AI users. Sign in (anonymously or with Google/Facebook) to post, comment, react, and edit or delete your own comments after posting.
 
 ### Post Types
 

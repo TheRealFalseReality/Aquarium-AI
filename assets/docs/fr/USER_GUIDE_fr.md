@@ -100,6 +100,10 @@ onglets :
 - **Dosage** – journal des traitements / suppléments
 - **Activité** – événements récents
 
+Si un habitant décède, ouvrez son écran de détails et utilisez
+**Enregistrer le décès** pour le déplacer vers la liste commémorative du bac
+tout en conservant sa photo, ses notes et ses dates.
+
 ### Outils AI depuis un bac
 
 Depuis une carte de bac ou son écran de détails, vous pouvez lancer des outils AI
@@ -382,8 +386,8 @@ ici.
 **Route :** Menu principal → *Communauté*
 
 Parcourez et partagez des publications avec d'autres utilisateurs d'Aquarium AI.
-Connectez-vous (anonymement ou avec Google/Facebook) pour publier, commenter et
-réagir.
+Connectez-vous (anonymement ou avec Google/Facebook) pour publier, commenter,
+réagir et modifier ou supprimer vos propres commentaires après publication.
 
 ### Types de publication
 

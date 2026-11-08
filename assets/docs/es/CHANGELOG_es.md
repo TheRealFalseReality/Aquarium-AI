@@ -2,6 +2,13 @@
 
 Todos los cambios notables de este proyecto se documentan en este archivo.
 
+## [3.6.00] - 308.2026 • Conmemoración y comunicación dirigidas a los residentes
+
+- Añadir la opción de edición por parte del propietario para los comentarios de las publicaciones de la comunidad
+ -Añadir un registro conmemorativo para los habitantes del acuario fallecidos
+
+### Añadido
+
 ## [3.3.00] - 3 de mayo de 2026 • Calculadora de sustrato, Copia de seguridad en la nube, Mejoras de calidad de vida
 
 ### Añadido

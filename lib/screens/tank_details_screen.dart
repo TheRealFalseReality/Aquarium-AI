@@ -948,6 +948,10 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
           _buildInhabitantsSection(context, tank, fishData),
           const SizedBox(height: 16),
         ],
+        if (tank.memorializedInhabitants.isNotEmpty && fishData != null) ...[
+          _buildMemorialSection(context, tank, fishData),
+          const SizedBox(height: 16),
+        ],
 
         // Compatibility calculation breakdown
         if (tank.inhabitants.isNotEmpty &&
@@ -2942,11 +2946,134 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                               ),
                             if (inhabitant.dateAdded != null)
                               Text(
-                                'Added: ${inhabitant.dateAdded!.month}/${inhabitant.dateAdded!.day}/${inhabitant.dateAdded!.year}',
+                                '${l10n.dateAdded}: ${DateFormat.yMMMd().format(inhabitant.dateAdded!)}',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color:
                                           cs.onSurfaceVariant.withOpacity(0.7),
+                                      fontSize: 11,
+                                    ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: cs.onSurface.withOpacity(0.35),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMemorialSection(
+    BuildContext context,
+    Tank tank,
+    Map<String, List<Fish>> fishData,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: cs.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.heart_broken_outlined,
+                    color: cs.onTertiaryContainer,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    l10n.memorializedInhabitants,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ...tank.memorializedInhabitants.map((inhabitant) {
+              final fishImageUrl = _getFishImageUrl(
+                tank.type,
+                inhabitant.fishUnit,
+                fishData,
+                inhabitant: inhabitant,
+              );
+              return InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => TankInhabitantScreen(
+                        tank: tank,
+                        inhabitant: inhabitant,
+                        availableFish: fishData[tank.type] ?? const [],
+                      ),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 22,
+                        backgroundImage: fishImageUrl != null
+                            ? (fishImageUrl.startsWith('http')
+                                  ? CachedNetworkImageProvider(fishImageUrl)
+                                  : FileImage(File(fishImageUrl)) as ImageProvider)
+                            : null,
+                        backgroundColor:
+                            fishImageUrl == null ? cs.tertiaryContainer : null,
+                        child: fishImageUrl == null
+                            ? Icon(
+                                Icons.heart_broken_outlined,
+                                color: cs.onTertiaryContainer,
+                                size: 22,
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              inhabitant.customName,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              inhabitant.fishUnit,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            if (inhabitant.dateDied != null)
+                              Text(
+                                '${l10n.datePassed}: ${DateFormat.yMMMd().format(inhabitant.dateDied!)}',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: cs.onSurfaceVariant.withOpacity(0.7),
                                       fontSize: 11,
                                     ),
                               ),

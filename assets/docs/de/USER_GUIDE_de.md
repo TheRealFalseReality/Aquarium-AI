@@ -100,6 +100,10 @@ Tippen Sie auf eine Tank-Karte, um deren Details zu öffnen, in Tabs organisiert
 - **Dosierung** – Behandlungs-/Ergänzungsprotokoll
 - **Aktivität** – Aktuelle Ereignisse
 
+Wenn ein Bewohner stirbt, öffnen Sie dessen Detailansicht und verwenden Sie
+**Tod erfassen**, um ihn in die Gedenkliste des Tanks zu verschieben, ohne Foto,
+Notizen oder Daten zu verlieren.
+
 ### AI-Tools aus einem Tank
 
 Von einer Tank-Karte oder deren Detailansicht können Sie AI-Tools starten, die mit
@@ -377,7 +381,8 @@ Fisch-Info, Fotoanalyse) wird hier automatisch gespeichert.
 **Route:** Hauptmenü → *Community*
 
 Beiträge anderer Aquarium AI-Benutzer durchsuchen und teilen. Anmelden (anonym oder
-mit Google/Facebook), um Beiträge zu verfassen, zu kommentieren und zu reagieren.
+mit Google/Facebook), um Beiträge zu verfassen, zu kommentieren, zu reagieren und
+eigene Kommentare nach dem Veröffentlichen zu bearbeiten oder zu löschen.
 
 ### Beitragstypen
 
