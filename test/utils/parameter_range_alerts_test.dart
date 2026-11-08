@@ -142,6 +142,24 @@ void main() {
         ParameterStatus.normal,
       );
     });
+
+    test('uses custom bounds when provided', () {
+      final customBounds = {
+        'ph': const ParameterBoundsConfig(minValue: 7.0, maxValue: 7.4),
+      };
+      expect(
+        getParameterStatus('ph', 7.2, customBounds: customBounds),
+        ParameterStatus.normal,
+      );
+      expect(
+        getParameterStatus('ph', 7.45, customBounds: customBounds),
+        ParameterStatus.caution,
+      );
+      expect(
+        getParameterStatus('ph', 7.8, customBounds: customBounds),
+        ParameterStatus.critical,
+      );
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -267,6 +285,18 @@ void main() {
         ]);
         expect(alerts, hasLength(2));
       });
+    });
+
+    test('applies custom bounds to out-of-range alerts', () {
+      final alerts = buildCurrentOutOfRangeAlerts(
+        [_make('iron', 0.8)],
+        customBounds: {
+          'iron': const ParameterBoundsConfig(minValue: 0, maxValue: 0.5),
+        },
+      );
+      expect(alerts, hasLength(1));
+      expect(alerts.first.parameterType, 'iron');
+      expect(alerts.first.status, ParameterStatus.critical);
     });
   });
 }

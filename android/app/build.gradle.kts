@@ -25,7 +25,6 @@ if (project.hasProperty("dart-defines")) {
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
-    id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.firebase.crashlytics") version "3.0.6"
     id("com.google.firebase.firebase-perf")
@@ -40,6 +39,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
+    }
+
+    buildFeatures {
+        resValues = true
     }
 
     signingConfigs {
