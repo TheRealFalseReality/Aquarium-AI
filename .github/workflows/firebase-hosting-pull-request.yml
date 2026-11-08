@@ -9,7 +9,7 @@ permissions:
   pull-requests: write
 jobs:
   build_and_preview:
-    if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
+    if: '${{ github.event.pull_request.head.repo.full_name == github.repository && github.actor != ''dependabot[bot]'' }}'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_FISHAI_31D40 }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_FISH_AI_CE60C }}'
           projectId: fishai-31d40
           entryPoint: "./"
         env:
