@@ -74,6 +74,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
 
   void _startPolling() {
     _timer?.cancel();
+    if (!mounted) return;
     _timer = Timer.periodic(
       Duration(seconds: _intervalSeconds),
       (_) => _refreshReadings(),

@@ -117,9 +117,10 @@ class HomeAssistantService {
   };
 
   Future<dynamic> _get(String path) async {
-    final uri = Uri.parse('${normalizeUrl(baseUrl)}$path');
+    final Uri uri;
     final http.Response res;
     try {
+      uri = Uri.parse('${normalizeUrl(baseUrl)}$path');
       res = await _client
           .get(uri, headers: _headers)
           .timeout(const Duration(seconds: 15));
@@ -135,7 +136,11 @@ class HomeAssistantService {
     if (res.statusCode != 200) {
       throw HaException('Home Assistant returned ${res.statusCode}.');
     }
-    return jsonDecode(utf8.decode(res.bodyBytes));
+    try {
+      return jsonDecode(utf8.decode(res.bodyBytes));
+    } on FormatException catch (e) {
+      throw HaException(e.message);
+    }
   }
 
   /// Returns the HA welcome message on success.
