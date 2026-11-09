@@ -26,13 +26,13 @@ plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.firebase.crashlytics") version "3.0.6"
+    id("com.google.firebase.crashlytics") version "3.0.8"
     id("com.google.firebase.firebase-perf")
 }
 
 android {
     namespace = "com.cca.fishai"
-    compileSdk = maxOf(flutter.compileSdkVersion, 35)
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = "28.2.13676358"
 
     compileOptions {
@@ -122,15 +122,15 @@ kotlin {
 }
 
 dependencies {
-    implementation("com.google.android.material:material:1.13.0")
-    implementation("androidx.core:core-ktx:1.17.0")
+    implementation("com.google.android.material:material:1.14.0")
+    implementation("androidx.core:core-ktx:1.19.1")
 
     // Core library desugaring for flutter_local_notifications
     // Updated to 2.1.4+ to satisfy flutter_local_notifications AAR metadata
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
     // Add the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
+    implementation(platform("com.google.firebase:firebase-bom:35.1.0"))
     // Add the Crashlytics dependency
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-auth")
@@ -142,7 +142,7 @@ dependencies {
     // Facebook Login SDK – required by flutter_facebook_auth for Android.
     // Pinned to the same version that flutter_facebook_auth 7.x bundles so
     // that Gradle resolves a single consistent version.
-    implementation("com.facebook.android:facebook-login:17.0.2")
+    implementation("com.facebook.android:facebook-login:19.0.1")
     // Performance Monitoring SDK
     implementation("com.google.firebase:firebase-perf")
 }
