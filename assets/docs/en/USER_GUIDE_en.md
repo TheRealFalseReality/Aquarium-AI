@@ -338,6 +338,16 @@ Track water quality over time with charts and logs.
 3. Enter the value and unit.
 4. Tap **Save**.
 
+### Custom Ranges and Custom Parameters
+
+Use **Manage Parameter Ranges** (tune icon in the top-right of Parameter Logger) to:
+
+- Set tank-specific **minimum/maximum bounds** for built-in parameters.
+- Add reusable **custom parameters** (for example: Iron, Copper, Strontium).
+- Set a preferred default unit per parameter.
+
+When custom bounds are configured, out-of-range warnings use your tank's bounds instead of the built-in defaults.
+
 ### Charts
 
 Tap the **expand** arrow on a parameter group to view a time-series chart. Useful for spotting trends and validating the impact of water changes.

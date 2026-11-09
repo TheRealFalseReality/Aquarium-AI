@@ -25,7 +25,6 @@ if (project.hasProperty("dart-defines")) {
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
-    id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
     id("com.google.firebase.crashlytics") version "3.0.6"
     id("com.google.firebase.firebase-perf")
@@ -33,13 +32,17 @@ plugins {
 
 android {
     namespace = "com.cca.fishai"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = maxOf(flutter.compileSdkVersion, 35)
     ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
+    }
+
+    buildFeatures {
+        resValues = true
     }
 
     signingConfigs {
@@ -54,7 +57,7 @@ android {
     defaultConfig {
         applicationId = "com.cca.fishai"
         minSdk = maxOf(flutter.minSdkVersion, 21)
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = maxOf(flutter.targetSdkVersion, 35)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         // Facebook SDK requires the App ID and Client Token at native build time.
