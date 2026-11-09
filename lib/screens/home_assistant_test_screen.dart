@@ -36,6 +36,9 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
   bool _isEditMode = false;
   final List<List<HaSensorConfig>> _undoStack = [];
 
+  String _summaryTitle = 'My Aquarium';
+  List<String> _summaryEntityIds = [];
+
   @override
   void initState() {
     super.initState();
@@ -52,10 +55,13 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
 
   Future<void> _init() async {
     final (service, selected) = await HomeAssistantService.load();
+    final (summaryTitle, summaryEntityIds) = await HomeAssistantService.loadSummary();
     if (!mounted) return;
     setState(() {
       _service = service;
       _selected = selected;
+      _summaryTitle = summaryTitle;
+      _summaryEntityIds = summaryEntityIds;
       _urlController.text = service.baseUrl;
       _tokenController.text = service.token;
       _loaded = true;
@@ -209,6 +215,8 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
       _statusIsError = false;
       _isEditMode = false;
       _undoStack.clear();
+      _summaryTitle = 'My Aquarium';
+      _summaryEntityIds = [];
     });
   }
 
@@ -363,6 +371,8 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
               children: [
                 _buildConnectionCard(context),
                 const SizedBox(height: 16),
+                _buildTankSummaryWidget(context),
+                const SizedBox(height: 16),
                 _buildDashboard(context),
                 const SizedBox(height: 16),
                 _buildPicker(context),
@@ -451,6 +461,227 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showSummaryConfigOverlay(BuildContext context) {
+    String tempTitle = _summaryTitle;
+    List<String> tempIds = List.from(_summaryEntityIds);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom,
+                left: 16,
+                right: 16,
+                top: 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Configure Tank Overview', style: Theme.of(ctx).textTheme.titleLarge),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    initialValue: tempTitle,
+                    decoration: const InputDecoration(labelText: 'Tank Name', border: OutlineInputBorder()),
+                    onChanged: (v) => tempTitle = v,
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Select Sensors for Overview', style: Theme.of(ctx).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  if (_selected.isEmpty)
+                    const Text('No sensors in dashboard to select from.')
+                  else
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 250),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: _selected.length,
+                        itemBuilder: (context, i) {
+                          final config = _selected[i];
+                          final isChecked = tempIds.contains(config.entityId);
+                          final sensor = _available.firstWhere((s) => s.entityId == config.entityId, orElse: () => HaSensor(entityId: config.entityId, name: config.entityId, state: ''));
+                          return CheckboxListTile(
+                            title: Text(config.customName ?? sensor.name),
+                            subtitle: Text(config.entityId),
+                            value: isChecked,
+                            onChanged: (v) {
+                              setModalState(() {
+                                if (v == true) {
+                                  tempIds.add(config.entityId);
+                                } else {
+                                  tempIds.remove(config.entityId);
+                                }
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          setState(() {
+                            _summaryTitle = tempTitle.trim().isEmpty ? 'My Aquarium' : tempTitle.trim();
+                            _summaryEntityIds = tempIds;
+                          });
+                          await HomeAssistantService.saveSummary(_summaryTitle, _summaryEntityIds);
+                        },
+                        child: const Text('Save'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSummarySensorItem(BuildContext context, String entityId) {
+    final theme = Theme.of(context);
+    final config = _selected.firstWhere((c) => c.entityId == entityId, orElse: () => HaSensorConfig(entityId: entityId));
+    final reading = _readings.firstWhere(
+      (r) => r.entityId == entityId,
+      orElse: () => HaSensor(entityId: entityId, name: config.customName ?? entityId, state: '—'),
+    );
+    
+    String value = reading.isAvailable ? reading.state : '—';
+    if (reading.isAvailable && config.fractionDigits != null) {
+      final numVal = double.tryParse(reading.state);
+      if (numVal != null) {
+        value = numVal.toStringAsFixed(config.fractionDigits!);
+      }
+    }
+    final displayName = config.customName ?? reading.name;
+    
+    return Container(
+      width: 120, // fixed width to allow them to flow nicely
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            displayName,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSecondaryContainer.withValues(alpha: 0.8),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Flexible(
+                child: Text(
+                  value,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
+                ),
+              ),
+              if (reading.unit != null && reading.isAvailable) ...[
+                const SizedBox(width: 2),
+                Text(
+                  reading.unit!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSecondaryContainer,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTankSummaryWidget(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Tank Overview Widget', style: theme.textTheme.titleLarge),
+            IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: 'Configure Overview Widget',
+              onPressed: () => _showSummaryConfigOverlay(context),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Card(
+          color: scheme.secondaryContainer,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: scheme.outlineVariant),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  _summaryTitle,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: scheme.onSecondaryContainer,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (_summaryEntityIds.isEmpty)
+                  Text(
+                    'Tap the settings icon to add sensors to this overview.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: scheme.onSecondaryContainer.withValues(alpha: 0.7)),
+                  )
+                else
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      for (final id in _summaryEntityIds)
+                        if (_selected.any((c) => c.entityId == id))
+                          _buildSummarySensorItem(context, id),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

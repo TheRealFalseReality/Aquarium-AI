@@ -86,6 +86,8 @@ class HomeAssistantService {
   static const _urlKey = 'ha_base_url';
   static const _tokenKey = 'ha_token';
   static const _selectedKey = 'ha_selected_entities';
+  static const _summaryTitleKey = 'ha_summary_title';
+  static const _summarySensorsKey = 'ha_summary_sensors';
 
   final http.Client _client;
   String baseUrl;
@@ -200,5 +202,21 @@ class HomeAssistantService {
     await prefs.remove(_urlKey);
     await prefs.remove(_tokenKey);
     await prefs.remove(_selectedKey);
+    await prefs.remove(_summaryTitleKey);
+    await prefs.remove(_summarySensorsKey);
+  }
+
+  static Future<void> saveSummary(String title, List<String> entityIds) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_summaryTitleKey, title);
+    await prefs.setStringList(_summarySensorsKey, entityIds);
+  }
+
+  static Future<(String, List<String>)> loadSummary() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (
+      prefs.getString(_summaryTitleKey) ?? 'My Aquarium',
+      prefs.getStringList(_summarySensorsKey) ?? <String>[],
+    );
   }
 }
