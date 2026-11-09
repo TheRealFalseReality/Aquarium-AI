@@ -80,7 +80,8 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
       _customTankTypeNameController.text =
           widget.existingTank!.customTypeName ?? '';
       _customTankTypeDescriptionController.text =
-          widget.existingTank!.customTypeDescription ?? '';
+          widget.existingTank!.customTypeDescription ??
+          (getTankTypeOptionById(_selectedSpecialization)?.aiDescription ?? '');
       if (widget.existingTank!.sizeGallons != null) {
         _sizeGallonsController.text = widget.existingTank!.sizeGallons!
             .toString();
@@ -191,7 +192,15 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
                 category,
               ) ??
               false)) {
+        final oldSpec = _selectedSpecialization;
         _selectedSpecialization = null;
+        final oldOption = getTankTypeOptionById(oldSpec);
+        final currentText = _customTankTypeDescriptionController.text.trim();
+        if (oldOption != null &&
+            (currentText == oldOption.aiDescription ||
+                tankTypeOptions.any((opt) => opt.aiDescription == currentText))) {
+          _customTankTypeDescriptionController.text = '';
+        }
       }
     });
     _loadFishData();
@@ -199,9 +208,36 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
 
   void _onSpecializationChanged(String specialization) {
     setState(() {
+      final previousSpec = _selectedSpecialization;
       _selectedSpecialization = _selectedSpecialization == specialization
           ? null
           : specialization;
+
+      if (_selectedSpecialization != null) {
+        final previousOption = getTankTypeOptionById(previousSpec);
+        final newOption = getTankTypeOptionById(_selectedSpecialization);
+        final currentText = _customTankTypeDescriptionController.text.trim();
+
+        final isPreWritten = currentText.isEmpty ||
+            (previousOption != null &&
+                currentText == previousOption.aiDescription) ||
+            tankTypeOptions.any((opt) => opt.aiDescription == currentText);
+
+        if (isPreWritten) {
+          _customTankTypeDescriptionController.text =
+              newOption?.id == customTankTypeId
+                  ? ''
+                  : (newOption?.aiDescription ?? '');
+        }
+      } else {
+        final previousOption = getTankTypeOptionById(previousSpec);
+        final currentText = _customTankTypeDescriptionController.text.trim();
+        if (previousOption != null &&
+            (currentText == previousOption.aiDescription ||
+                tankTypeOptions.any((opt) => opt.aiDescription == currentText))) {
+          _customTankTypeDescriptionController.text = '';
+        }
+      }
     });
   }
 
@@ -509,7 +545,7 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
         final customTypeName = specialization == customTankTypeId
             ? _customTankTypeNameController.text.trim()
             : '';
-        final customTypeDescription = specialization == customTankTypeId
+        final customTypeDescription = specialization != null
             ? _customTankTypeDescriptionController.text.trim()
             : '';
         final isReef = _selectedCategory == 'marine' &&
@@ -981,27 +1017,29 @@ class TankCreationScreenState extends ConsumerState<TankCreationScreen>
           AnimatedSize(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
-            child: _selectedSpecialization == customTankTypeId
+            child: _selectedSpecialization != null
                 ? Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: Column(
                       children: [
-                        TextFormField(
-                          controller: _customTankTypeNameController,
-                          decoration: InputDecoration(
-                            labelText: l10n.customTankTypeNameLabel,
-                            hintText: l10n.customTankTypeNameHint,
-                            border: const OutlineInputBorder(),
+                        if (_selectedSpecialization == customTankTypeId) ...[
+                          TextFormField(
+                            controller: _customTankTypeNameController,
+                            decoration: InputDecoration(
+                              labelText: l10n.customTankTypeNameLabel,
+                              hintText: l10n.customTankTypeNameHint,
+                              border: const OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (_selectedSpecialization == customTankTypeId &&
+                                  (value == null || value.trim().isEmpty)) {
+                                return l10n.pleaseEnterCustomTankTypeName;
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (_selectedSpecialization == customTankTypeId &&
-                                (value == null || value.trim().isEmpty)) {
-                              return l10n.pleaseEnterCustomTankTypeName;
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
+                        ],
                         TextFormField(
                           controller: _customTankTypeDescriptionController,
                           decoration: InputDecoration(

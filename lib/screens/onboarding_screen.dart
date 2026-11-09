@@ -235,7 +235,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final customTypeName = specialization == customTankTypeId
         ? _customTankTypeNameController.text.trim()
         : '';
-    final customTypeDescription = specialization == customTankTypeId
+    final customTypeDescription = specialization != null
         ? _customTankTypeDescriptionController.text.trim()
         : '';
 
@@ -298,7 +298,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 !(getTankTypeOptionById(_selectedSpecialization)
                         ?.supportsCategory(newType) ??
                     false)) {
+              final oldSpec = _selectedSpecialization;
               _selectedSpecialization = null;
+              final oldOption = getTankTypeOptionById(oldSpec);
+              final currentText =
+                  _customTankTypeDescriptionController.text.trim();
+              if (oldOption != null &&
+                  (currentText == oldOption.aiDescription ||
+                      tankTypeOptions.any(
+                          (opt) => opt.aiDescription == currentText))) {
+                _customTankTypeDescriptionController.text = '';
+              }
             }
           });
           _loadFishData();
@@ -311,7 +321,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             !(getTankTypeOptionById(_selectedSpecialization)
                     ?.supportsCategory(newType) ??
                 false)) {
+          final oldSpec = _selectedSpecialization;
           _selectedSpecialization = null;
+          final oldOption = getTankTypeOptionById(oldSpec);
+          final currentText =
+              _customTankTypeDescriptionController.text.trim();
+          if (oldOption != null &&
+              (currentText == oldOption.aiDescription ||
+                  tankTypeOptions.any(
+                      (opt) => opt.aiDescription == currentText))) {
+            _customTankTypeDescriptionController.text = '';
+          }
         }
       });
       _loadFishData();
@@ -320,9 +340,36 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _onSpecializationChanged(String specialization) {
     setState(() {
+      final previousSpec = _selectedSpecialization;
       _selectedSpecialization = _selectedSpecialization == specialization
           ? null
           : specialization;
+
+      if (_selectedSpecialization != null) {
+        final previousOption = getTankTypeOptionById(previousSpec);
+        final newOption = getTankTypeOptionById(_selectedSpecialization);
+        final currentText = _customTankTypeDescriptionController.text.trim();
+
+        final isPreWritten = currentText.isEmpty ||
+            (previousOption != null &&
+                currentText == previousOption.aiDescription) ||
+            tankTypeOptions.any((opt) => opt.aiDescription == currentText);
+
+        if (isPreWritten) {
+          _customTankTypeDescriptionController.text =
+              newOption?.id == customTankTypeId
+                  ? ''
+                  : (newOption?.aiDescription ?? '');
+        }
+      } else {
+        final previousOption = getTankTypeOptionById(previousSpec);
+        final currentText = _customTankTypeDescriptionController.text.trim();
+        if (previousOption != null &&
+            (currentText == previousOption.aiDescription ||
+                tankTypeOptions.any((opt) => opt.aiDescription == currentText))) {
+          _customTankTypeDescriptionController.text = '';
+        }
+      }
     });
     _markInteracted(2);
   }
@@ -998,22 +1045,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           AnimatedSize(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
-            child: _selectedSpecialization == customTankTypeId
+            child: _selectedSpecialization != null
                 ? Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: Column(
                       children: [
-                        TextField(
-                          controller: _customTankTypeNameController,
-                          decoration: InputDecoration(
-                            labelText: l10n.customTankTypeNameLabel,
-                            hintText: l10n.customTankTypeNameHint,
-                            border: const OutlineInputBorder(),
+                        if (_selectedSpecialization == customTankTypeId) ...[
+                          TextField(
+                            controller: _customTankTypeNameController,
+                            decoration: InputDecoration(
+                              labelText: l10n.customTankTypeNameLabel,
+                              hintText: l10n.customTankTypeNameHint,
+                              border: const OutlineInputBorder(),
+                            ),
+                            textCapitalization: TextCapitalization.words,
+                            onChanged: (_) => _markInteracted(2),
                           ),
-                          textCapitalization: TextCapitalization.words,
-                          onChanged: (_) => _markInteracted(2),
-                        ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
+                        ],
                         TextField(
                           controller: _customTankTypeDescriptionController,
                           decoration: InputDecoration(

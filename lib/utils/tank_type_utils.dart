@@ -338,7 +338,10 @@ String getTankTypeAiContext(Tank tank) {
     parts.add('custom tank name: $customName');
   }
   if (customDescription != null && customDescription.isNotEmpty) {
-    parts.add('user notes for AI: $customDescription');
+    if (effectiveType == customTankTypeId ||
+        customDescription != option?.aiDescription) {
+      parts.add('user notes for AI: $customDescription');
+    }
   }
 
   return parts.join('. ');

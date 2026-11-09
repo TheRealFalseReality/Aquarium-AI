@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fish_ai/models/tank.dart';
 import 'package:fish_ai/models/water_parameter.dart';
+import 'package:fish_ai/utils/tank_type_utils.dart';
 
 void main() {
   group('TankPhoto', () {
@@ -578,6 +579,36 @@ void main() {
         recreated.customTypeDescription,
         equals(
           'Focus on hardy predator fish with mangrove roots and macroalgae.',
+        ),
+      );
+    });
+
+    test('getTankTypeAiContext returns pre-written description for specialized setup', () {
+      final tank = Tank.create(
+        name: 'My Planted Tank',
+        type: 'freshwater',
+        specialization: 'planted',
+        customTypeDescription: 'a planted freshwater aquarium with live plants',
+      );
+
+      final context = getTankTypeAiContext(tank);
+      expect(context, equals('a planted freshwater aquarium with live plants'));
+    });
+
+    test('getTankTypeAiContext appends user notes when modified for specialized setup', () {
+      final tank = Tank.create(
+        name: 'My Custom Planted Tank',
+        type: 'freshwater',
+        specialization: 'planted',
+        customTypeDescription:
+            'a planted freshwater aquarium with live plants. High lighting and CO2 injection.',
+      );
+
+      final context = getTankTypeAiContext(tank);
+      expect(
+        context,
+        equals(
+          'a planted freshwater aquarium with live plants. user notes for AI: a planted freshwater aquarium with live plants. High lighting and CO2 injection.',
         ),
       );
     });
