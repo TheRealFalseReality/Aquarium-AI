@@ -2286,5 +2286,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "verifyScheduleTitle": "Verificar detalles de la notificación",
+  "verifyScheduleMessage": "Verifique los detalles a continuación. La notificación se programará directamente a partir de esta fecha y hora.",
+  "verifyScheduleName": "Nombre",
+  "verifyScheduleDateTime": "Fecha y hora"
 }

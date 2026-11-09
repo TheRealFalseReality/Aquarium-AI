@@ -11,7 +11,6 @@ import '../services/analytics_service.dart';
 import '../services/crashlytics_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/accessible_feedback.dart';
-import '../widgets/notification_schedule_option_dialog.dart';
 
 class NotificationManagementScreen extends ConsumerStatefulWidget {
   final Tank tank;
@@ -744,7 +743,7 @@ class _NotificationManagementScreenState
   void _showNotificationDialog(TankNotification? existingNotification) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => _NotificationFormScreen(
+        builder: (context) => NotificationFormScreen(
           tank: widget.tank,
           existingNotification: existingNotification,
         ),
@@ -753,22 +752,22 @@ class _NotificationManagementScreenState
   }
 }
 
-class _NotificationFormScreen extends ConsumerStatefulWidget {
+class NotificationFormScreen extends ConsumerStatefulWidget {
   final Tank tank;
   final TankNotification? existingNotification;
 
-  const _NotificationFormScreen({
+  const NotificationFormScreen({
     required this.tank,
     this.existingNotification,
   });
 
   @override
-  ConsumerState<_NotificationFormScreen> createState() =>
-      _NotificationFormScreenState();
+  ConsumerState<NotificationFormScreen> createState() =>
+      NotificationFormScreenState();
 }
 
-class _NotificationFormScreenState
-    extends ConsumerState<_NotificationFormScreen> {
+class NotificationFormScreenState
+    extends ConsumerState<NotificationFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _notesController = TextEditingController();
   final _titleController = TextEditingController();
@@ -1205,6 +1204,70 @@ class _NotificationFormScreenState
     );
   }
 
+  Future<bool?> _showVerifyDialog(
+    TankNotification notification,
+    DateTime dateTime,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final dateText = DateFormat('MMM d, y h:mm a').format(dateTime);
+    final repeatText = _repeatFrequency == RepeatFrequency.none
+        ? RepeatFrequency.none.displayName
+        : (_repeatInterval == 1
+              ? _repeatFrequency.displayName
+              : '${_repeatFrequency.displayName} ($_repeatInterval)');
+    final title = _titleController.text.trim();
+    final notes = _notesController.text.trim();
+
+    Widget row(String label, String value) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '$label: ',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
+      ),
+    );
+
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.verifyScheduleTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.verifyScheduleMessage),
+              const SizedBox(height: 12),
+              row(
+                l10n.verifyScheduleName,
+                title.isNotEmpty ? title : notification.getDisplayName(),
+              ),
+              row(l10n.verifyScheduleDateTime, dateText),
+              row(l10n.repeat, repeatText),
+              if (notes.isNotEmpty) row(l10n.notes, notes),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.goBack),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _saveNotification() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -1291,52 +1354,14 @@ class _NotificationFormScreenState
               .toList()
         : [...currentTank.notifications, notification];
 
-    // Determine if we should show the schedule option dialog
-    // Show dialog when:
-    // 1. Notification is enabled
-    // 2. Notification has a repeat frequency (not one-time)
-    // 3. There are matching activity logs for this notification type
-    bool useActivityLogs = false; // Default: use specified time
-    bool useExactDateTime =
-        false; // Whether to use exact date/time (ignoring all calculations)
-
-    if (_enabled && _repeatFrequency != RepeatFrequency.none) {
-      // Check for matching activity logs
-      final matchingLogs = currentTank.notificationLogs.where((log) {
-        return notification.matchesActivityLog(log.type, log.customCategory);
-      }).toList();
-
-      if (matchingLogs.isNotEmpty && mounted) {
-        // Sort by date (newest first) and get the most recent activity log
-        matchingLogs.sort((a, b) => b.loggedAt.compareTo(a.loggedAt));
-        final lastActivityLog = matchingLogs.first;
-
-        // Show dialog to let user choose scheduling method BEFORE saving
-        final scheduleOption = await NotificationScheduleOptionDialog.show(
-          context,
-          notification,
-          lastActivityLog: lastActivityLog,
-          specifiedDateTime: notificationDateTime,
-        );
-
-        if (scheduleOption == ScheduleOption.useLastActivity) {
-          // User chose to schedule from last activity
-          useActivityLogs = true;
-        } else if (scheduleOption == ScheduleOption.useSpecifiedTime) {
-          // User explicitly chose to use the specified time - use exact date/time
-          useExactDateTime = true;
-        } else if (scheduleOption == ScheduleOption.goBackToEdit) {
-          // User chose to go back to edit - do nothing and stay on the form
-          return;
-        } else if (scheduleOption == ScheduleOption.discardChanges ||
-            scheduleOption == null) {
-          // User chose to discard changes - go back to notification list without saving
-          if (mounted) {
-            Navigator.of(context).pop();
-          }
-          return;
-        }
-      }
+    // Ask the user to verify the date/time and other details before saving.
+    // The schedule is then calculated directly from the verified date/time.
+    final confirmed = await _showVerifyDialog(
+      notification,
+      notificationDateTime,
+    );
+    if (confirmed != true || !mounted) {
+      return;
     }
 
     // Now save the notification after user has confirmed via dialog (or no dialog needed)
@@ -1353,10 +1378,8 @@ class _NotificationFormScreenState
         tankId: currentTank.id,
         tankName: currentTank.name,
         notification: notification,
-        // Pass activity logs only if user chose "From Last Activity"
-        activityLogs: useActivityLogs ? currentTank.notificationLogs : null,
-        // Use exact date/time if user explicitly chose "Use Specified Time"
-        useExactDateTime: useExactDateTime,
+        // Schedule directly from the verified date/time
+        useExactDateTime: true,
       );
 
       // Update the notification with the calculated scheduledNextDate

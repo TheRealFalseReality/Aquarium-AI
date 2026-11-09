@@ -2286,5 +2286,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "verifyScheduleTitle": "Benachrichtigungsdetails überprüfen",
+  "verifyScheduleMessage": "Bitte überprüfen Sie die Details unten. Die Benachrichtigung wird direkt für dieses Datum und diese Uhrzeit geplant.",
+  "verifyScheduleName": "Name",
+  "verifyScheduleDateTime": "Datum & Uhrzeit"
 }
