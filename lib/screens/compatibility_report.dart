@@ -11,6 +11,7 @@ import '../models/tank_notification.dart';
 import '../providers/fish_compatibility_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
+import '../utils/tank_type_utils.dart';
 import '../utils/share_utils.dart';
 import '../widgets/ad_component.dart';
 import '../widgets/modern_chip.dart';
@@ -298,7 +299,7 @@ Future<void> _openCareReminderFlow(
                       return ListTile(
                         leading: const Icon(Icons.water),
                         title: Text(tank.name),
-                        subtitle: tank.type.isEmpty ? null : Text(tank.type),
+                        subtitle: Text(getTankTypeDisplayLabel(l10n, tank)),
                         onTap: () => Navigator.of(context).pop(tank),
                       );
                     },

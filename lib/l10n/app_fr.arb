@@ -177,6 +177,29 @@
   "plantedTank": "Planté",
   "brackishTank": "Saumâtre",
   "freshwaterSubtype": "Sous-type d'eau douce :",
+  "tankSpecializationLabel": "Configuration spécialisée",
+  "tankTypeCommunity": "Communautaire",
+  "tankTypeBlackwater": "Eau noire",
+  "tankTypeCichlid": "Cichlidés",
+  "tankTypeShrimp": "Crevettes",
+  "tankTypeNano": "Nano",
+  "tankTypeFishOnly": "Poissons uniquement",
+  "tankTypeFowlr": "FOWLR",
+  "tankTypeNanoReef": "Nano récif",
+  "tankTypeLagoon": "Lagon",
+  "tankTypeInvertOnly": "Invertébrés uniquement",
+  "tankTypeSeahorse": "Hippocampes",
+  "tankTypePredator": "Prédateur",
+  "tankTypeSpeciesOnly": "Espèce unique",
+  "tankTypeBreeding": "Reproduction",
+  "tankTypeQuarantine": "Quarantaine",
+  "tankTypeHospital": "Hôpital",
+  "tankTypeCustom": "Personnalisé",
+  "customTankTypeNameLabel": "Type d'aquarium personnalisé",
+  "customTankTypeNameHint": "Lagon à mangroves et macroalgues",
+  "pleaseEnterCustomTankTypeName": "Veuillez saisir un type d'aquarium personnalisé",
+  "customTankTypeDescriptionLabel": "Notes IA sur l'aquarium",
+  "customTankTypeDescriptionHint": "Décrivez le vivant, les objectifs, le style d'eau ou les besoins de maintenance particuliers de cette configuration personnalisée.",
   "substrateRecommendedLbs": "~{amount} lbs de substrat",
   "substrateRecommendedLiters": "~{amount} L de substrat",
   "substrateCustomLbs": "{amount} lbs de substrat",
@@ -1937,7 +1960,9 @@
   "@careRemindersSetUpForTank": {
     "description": "Button label to confirm opening the notification manager for a specific tank",
     "placeholders": {
-      "tankName": {"type": "String"}
+      "tankName": {
+        "type": "String"
+      }
     }
   },
   "reschedule": "Replanifier",
@@ -2204,5 +2229,89 @@
   "serverMessageRemindLater": "Me rappeler dans 3 jours",
   "developerMessage": "Message du développeur",
   "developerMessageDrawerDescription": "Voir le dernier message du développeur",
-  "serverMessageNoCurrentMessage": "Aucun message actuel."
+  "serverMessageNoCurrentMessage": "Aucun message actuel.",
+  "manageParameterRanges": "Gérer les plages de paramètres",
+  "@manageParameterRanges": {
+    "description": "Button/title for managing per-tank parameter ranges and custom parameter profiles"
+  },
+  "manageParameterRangesDescription": "Définissez des limites min/max personnalisées et des paramètres personnalisés réutilisables pour ce bac.",
+  "@manageParameterRangesDescription": {
+    "description": "Description text in parameter range manager sheet"
+  },
+  "addCustomParameter": "Ajouter un paramètre personnalisé",
+  "@addCustomParameter": {
+    "description": "Action to create a reusable custom parameter profile"
+  },
+  "editParameterBoundsTitle": "Modifier la plage de {parameterName}",
+  "@editParameterBoundsTitle": {
+    "description": "Dialog title for editing one parameter profile range",
+    "placeholders": {
+      "parameterName": {
+        "type": "String"
+      }
+    }
+  },
+  "parameterTypeLabel": "Type de paramètre",
+  "@parameterTypeLabel": {
+    "description": "Field label for parameter type in parameter profile editor"
+  },
+  "customParameterHint": "ex. : Fer, Cuivre, Strontium",
+  "@customParameterHint": {
+    "description": "Hint for custom parameter name input"
+  },
+  "defaultUnitLabel": "Unité par défaut",
+  "@defaultUnitLabel": {
+    "description": "Field label for preferred unit in parameter profile editor"
+  },
+  "minBoundLabel": "Limite minimale",
+  "@minBoundLabel": {
+    "description": "Field label for minimum acceptable value"
+  },
+  "maxBoundLabel": "Limite maximale",
+  "@maxBoundLabel": {
+    "description": "Field label for maximum acceptable value"
+  },
+  "optionalLabel": "Optionnel",
+  "@optionalLabel": {
+    "description": "Hint indicating an input field is optional"
+  },
+  "minMustBeLessOrEqualMax": "La limite minimale doit être inférieure ou égale à la limite maximale.",
+  "@minMustBeLessOrEqualMax": {
+    "description": "Validation error when min bound is greater than max bound"
+  },
+  "parameterBoundsSaved": "Limites des paramètres enregistrées.",
+  "@parameterBoundsSaved": {
+    "description": "Snackbar shown when parameter profile changes are saved"
+  },
+  "parameterRemoved": "Paramètre retiré de la liste rapide.",
+  "@parameterRemoved": {
+    "description": "Snackbar shown when custom parameter profile is removed"
+  },
+  "usingDefaultRange": "Utilisation de la plage par défaut intégrée",
+  "@usingDefaultRange": {
+    "description": "Summary text when no custom bounds are configured"
+  },
+  "noneLabel": "Aucun",
+  "@noneLabel": {
+    "description": "Generic none label"
+  },
+  "parameterProfileSummary": "Min : {min} · Max : {max} · Unité : {unit}",
+  "@parameterProfileSummary": {
+    "description": "Compact summary of custom parameter profile settings",
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyScheduleTitle": "Vérifier les détails de la notification",
+  "verifyScheduleMessage": "Veuillez vérifier les détails ci-dessous. La notification sera planifiée directement à partir de cette date et heure.",
+  "verifyScheduleName": "Nom",
+  "verifyScheduleDateTime": "Date et heure"
 }

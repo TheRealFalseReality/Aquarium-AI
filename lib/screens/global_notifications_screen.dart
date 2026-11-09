@@ -11,7 +11,7 @@ import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/accessible_feedback.dart';
-import '../widgets/notification_reschedule_dialog.dart';
+import '../widgets/notification_reschedule_picker.dart';
 import 'notification_management_screen.dart';
 
 /// Global notification screen showing upcoming notifications across all tanks.
@@ -434,12 +434,12 @@ class _GlobalNotificationsScreenState
   Future<void> _reschedule(_TankNotificationEntry entry) async {
     final notification = entry.notification;
 
-    final option = await NotificationRescheduleDialog.show(
+    final picked = await pickNotificationRescheduleDateTime(
       context,
       notification,
     );
 
-    if (option == null || !mounted) return;
+    if (picked == null || !mounted) return;
 
     final notificationService = NotificationService();
     final currentTank = ref
@@ -447,32 +447,10 @@ class _GlobalNotificationsScreenState
         .tanks
         .firstWhere((t) => t.id == entry.tank.id, orElse: () => entry.tank);
 
-    TankNotification updatedNotification;
-    switch (option) {
-      case RescheduleOption.rescheduleFromNow:
-        final nextDate = notification.getNextNotificationDateFromBase(
-          DateTime.now(),
-          useCurrentTime: true,
-        );
-        updatedNotification = notification.copyWith(
-          scheduledNextDate: nextDate,
-          updatedAt: DateTime.now(),
-        );
-        break;
-      case RescheduleOption.keepOriginal:
-        final nextDate = notification.getNextNotificationDateFromBase(
-          DateTime.now(),
-          useCurrentTime: false,
-        );
-        updatedNotification = notification.copyWith(
-          scheduledNextDate: nextDate,
-          updatedAt: DateTime.now(),
-        );
-        break;
-      case RescheduleOption.doNothing:
-      case RescheduleOption.cancelAll:
-        return;
-    }
+    final updatedNotification = notification.copyWith(
+      scheduledNextDate: picked,
+      updatedAt: DateTime.now(),
+    );
 
     final updatedNotifications = currentTank.notifications
         .map((n) => n.id == notification.id ? updatedNotification : n)
@@ -489,7 +467,7 @@ class _GlobalNotificationsScreenState
       tankId: currentTank.id,
       tankName: currentTank.name,
       notification: updatedNotification,
-      activityLogs: currentTank.notificationLogs,
+      useScheduledNextDate: true,
     );
 
     if (mounted) {
@@ -499,10 +477,7 @@ class _GlobalNotificationsScreenState
 
     AnalyticsService.logFeatureUsed(
       featureName: 'reschedule_from_global_notifications',
-      parameters: {
-        'type': notification.type.name,
-        'option': option.name,
-      },
+      parameters: {'type': notification.type.name},
     );
   }
 

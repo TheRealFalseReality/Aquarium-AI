@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../models/water_parameter.dart';
 
 /// Severity level for a parameter reading.
@@ -31,16 +33,30 @@ class ParameterRangeAlert {
   });
 }
 
+/// Optional user-defined bounds for a specific parameter type.
+class ParameterBoundsConfig {
+  final double? minValue;
+  final double? maxValue;
+
+  const ParameterBoundsConfig({this.minValue, this.maxValue});
+}
+
 /// Returns the [ParameterStatus] for the given [parameterType] value.
 ///
-/// Thresholds mirror the colour bands used in [_getThresholdColor] in
-/// `parameter_logger_screen.dart`.  Custom / unknown parameter types always
-/// return [ParameterStatus.normal] because no reference range is available.
+/// Uses user-defined [customBounds] when available; otherwise falls back to
+/// built-in thresholds.
 ParameterStatus getParameterStatus(
   String parameterType,
   double value, {
   String? unit,
+  Map<String, ParameterBoundsConfig>? customBounds,
 }) {
+  final customBound = customBounds?[parameterType];
+  if (customBound != null &&
+      (customBound.minValue != null || customBound.maxValue != null)) {
+    return _getCustomBoundStatus(value, customBound);
+  }
+
   switch (parameterType) {
     case 'ammonia':
       if (value == 0) return ParameterStatus.normal;
@@ -215,6 +231,37 @@ ParameterStatus getParameterStatus(
   }
 }
 
+ParameterStatus _getCustomBoundStatus(double value, ParameterBoundsConfig bounds) {
+  var minValue = bounds.minValue;
+  var maxValue = bounds.maxValue;
+
+  if (minValue != null && maxValue != null && minValue > maxValue) {
+    final temp = minValue;
+    minValue = maxValue;
+    maxValue = temp;
+  }
+
+  final inRange = (minValue == null || value >= minValue) &&
+      (maxValue == null || value <= maxValue);
+  if (inRange) {
+    return ParameterStatus.normal;
+  }
+
+  final nearestBound = minValue != null && value < minValue
+      ? minValue
+      : maxValue ?? minValue;
+  final delta = (value - nearestBound!).abs();
+  final span = minValue != null && maxValue != null
+      ? (maxValue - minValue).abs()
+      : nearestBound.abs();
+  final cautionDelta = math.max(span * 0.1, 0.05);
+  final warningDelta = math.max(span * 0.25, 0.1);
+
+  if (delta <= cautionDelta) return ParameterStatus.caution;
+  if (delta <= warningDelta) return ParameterStatus.warning;
+  return ParameterStatus.critical;
+}
+
 /// Parameter types that are only relevant to marine tanks.
 ///
 /// Out-of-range alerts for these types are suppressed when [tankType] is not
@@ -239,6 +286,7 @@ const _marineOnlyParameters = {
 List<ParameterRangeAlert> buildCurrentOutOfRangeAlerts(
   List<WaterParameter> parameters, {
   String? tankType,
+  Map<String, ParameterBoundsConfig>? customBounds,
 }) {
   // Keep only the most recent reading per parameter type.
   // When two readings share the same timestamp, prefer the one with the
@@ -262,7 +310,12 @@ List<ParameterRangeAlert> buildCurrentOutOfRangeAlerts(
         _marineOnlyParameters.contains(p.parameterType)) {
       continue;
     }
-    final status = getParameterStatus(p.parameterType, p.value, unit: p.unit);
+    final status = getParameterStatus(
+      p.parameterType,
+      p.value,
+      unit: p.unit,
+      customBounds: customBounds,
+    );
     if (status != ParameterStatus.normal) {
       alerts.add(
         ParameterRangeAlert(

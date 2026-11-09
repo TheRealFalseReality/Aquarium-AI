@@ -94,6 +94,62 @@ class TankPhoto {
   }
 }
 
+/// Per-tank parameter profile that stores user-defined ranges and defaults.
+class TankParameterProfile {
+  final String parameterType;
+  final String? preferredUnit;
+  final double? minValue;
+  final double? maxValue;
+  final bool isCustom;
+
+  const TankParameterProfile({
+    required this.parameterType,
+    this.preferredUnit,
+    this.minValue,
+    this.maxValue,
+    this.isCustom = false,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'parameterType': parameterType,
+    if (preferredUnit != null) 'preferredUnit': preferredUnit,
+    if (minValue != null) 'minValue': minValue,
+    if (maxValue != null) 'maxValue': maxValue,
+    'isCustom': isCustom,
+  };
+
+  factory TankParameterProfile.fromJson(Map<String, dynamic> json) {
+    return TankParameterProfile(
+      parameterType: json['parameterType'] as String,
+      preferredUnit: json['preferredUnit'] as String?,
+      minValue: (json['minValue'] as num?)?.toDouble(),
+      maxValue: (json['maxValue'] as num?)?.toDouble(),
+      isCustom: json['isCustom'] as bool? ?? false,
+    );
+  }
+
+  TankParameterProfile copyWith({
+    String? parameterType,
+    String? preferredUnit,
+    bool clearPreferredUnit = false,
+    double? minValue,
+    bool clearMinValue = false,
+    double? maxValue,
+    bool clearMaxValue = false,
+    bool? isCustom,
+  }) {
+    return TankParameterProfile(
+      parameterType: parameterType ?? this.parameterType,
+      preferredUnit: clearPreferredUnit
+          ? null
+          : (preferredUnit ?? this.preferredUnit),
+      minValue: clearMinValue ? null : (minValue ?? this.minValue),
+      maxValue: clearMaxValue ? null : (maxValue ?? this.maxValue),
+      isCustom: isCustom ?? this.isCustom,
+    );
+  }
+}
+
 class TankInhabitant {
   final String id;
   final String customName;
@@ -210,9 +266,12 @@ class TankInhabitant {
 class Tank {
   final String id;
   final String name;
-  final String type; // 'freshwater' or 'marine'
+  final String type; // Base water category: 'freshwater' or 'marine'
   final bool isReef; // Only relevant when type == 'marine'
   final String? freshwaterSubtype; // Only relevant when type == 'freshwater': 'planted' or 'brackish'
+  final String? specialization; // Optional specialized setup id, e.g. 'fowlr' or 'predator'
+  final String? customTypeName; // Optional user-defined tank type name
+  final String? customTypeDescription; // Optional AI guidance for custom tank types
   final double? substrateOverrideLbs; // User-specified substrate amount (lbs); overrides calculated recommendation
   final List<TankInhabitant> inhabitants;
   final double? sizeGallons; // Tank size in gallons
@@ -237,6 +296,8 @@ class Tank {
   final List<NotificationLog> notificationLogs; // Notification action logs
   final List<TankNote> tankNotes; // User notes for the tank
   final List<TankTag> tags; // User-created tags for this tank
+  final List<TankParameterProfile>
+  parameterProfiles; // User-defined parameter bounds/defaults
   final List<TankInhabitant>
   memorializedInhabitants; // Inhabitants preserved after they pass away
 
@@ -246,6 +307,9 @@ class Tank {
     required this.type,
     this.isReef = false,
     this.freshwaterSubtype,
+    this.specialization,
+    this.customTypeName,
+    this.customTypeDescription,
     this.substrateOverrideLbs,
     required this.inhabitants,
     this.sizeGallons,
@@ -267,6 +331,7 @@ class Tank {
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
     List<TankTag>? tags,
+    List<TankParameterProfile>? parameterProfiles,
     List<TankInhabitant>? memorializedInhabitants,
   }) : photos = photos ?? [],
        waterParameters = waterParameters ?? [],
@@ -275,6 +340,7 @@ class Tank {
        notificationLogs = notificationLogs ?? [],
        tankNotes = tankNotes ?? [],
        tags = tags ?? [],
+       parameterProfiles = parameterProfiles ?? [],
        memorializedInhabitants = memorializedInhabitants ?? [];
 
   factory Tank.create({
@@ -282,6 +348,9 @@ class Tank {
     required String type,
     bool isReef = false,
     String? freshwaterSubtype,
+    String? specialization,
+    String? customTypeName,
+    String? customTypeDescription,
     double? substrateOverrideLbs,
     List<TankInhabitant>? inhabitants,
     double? sizeGallons,
@@ -302,6 +371,7 @@ class Tank {
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
     List<TankTag>? tags,
+    List<TankParameterProfile>? parameterProfiles,
     List<TankInhabitant>? memorializedInhabitants,
   }) {
     final now = DateTime.now();
@@ -311,6 +381,9 @@ class Tank {
       type: type,
       isReef: isReef,
       freshwaterSubtype: freshwaterSubtype,
+      specialization: specialization,
+      customTypeName: customTypeName,
+      customTypeDescription: customTypeDescription,
       substrateOverrideLbs: substrateOverrideLbs,
       inhabitants: inhabitants ?? [],
       sizeGallons: sizeGallons,
@@ -332,6 +405,7 @@ class Tank {
       notificationLogs: notificationLogs,
       tankNotes: tankNotes,
       tags: tags,
+      parameterProfiles: parameterProfiles,
       memorializedInhabitants: memorializedInhabitants,
     );
   }
@@ -343,6 +417,10 @@ class Tank {
       'type': type,
       'isReef': isReef,
       if (freshwaterSubtype != null) 'freshwaterSubtype': freshwaterSubtype,
+      if (specialization != null) 'specialization': specialization,
+      if (customTypeName != null) 'customTypeName': customTypeName,
+      if (customTypeDescription != null)
+        'customTypeDescription': customTypeDescription,
       if (substrateOverrideLbs != null)
         'substrateOverrideLbs': substrateOverrideLbs,
       'inhabitants': inhabitants
@@ -370,6 +448,7 @@ class Tank {
       'notificationLogs': notificationLogs.map((nl) => nl.toJson()).toList(),
       'tankNotes': tankNotes.map((tn) => tn.toJson()).toList(),
       'tags': tags.map((t) => t.toJson()).toList(),
+      'parameterProfiles': parameterProfiles.map((pp) => pp.toJson()).toList(),
       'memorializedInhabitants': memorializedInhabitants
           .map((i) => i.toJson(includeLocalPaths: includeLocalPaths))
           .toList(),
@@ -383,6 +462,9 @@ class Tank {
       type: json['type'] as String,
       isReef: json['isReef'] as bool? ?? false,
       freshwaterSubtype: json['freshwaterSubtype'] as String?,
+      specialization: json['specialization'] as String?,
+      customTypeName: json['customTypeName'] as String?,
+      customTypeDescription: json['customTypeDescription'] as String?,
       substrateOverrideLbs: json['substrateOverrideLbs']?.toDouble(),
       inhabitants: (json['inhabitants'] as List)
           .map((i) => TankInhabitant.fromJson(i))
@@ -432,6 +514,11 @@ class Tank {
       tags:
           (json['tags'] as List?)?.map((t) => TankTag.fromJson(t)).toList() ??
           [],
+      parameterProfiles:
+          (json['parameterProfiles'] as List?)
+              ?.map((pp) => TankParameterProfile.fromJson(pp))
+              .toList() ??
+          [],
       memorializedInhabitants: (json['memorializedInhabitants'] as List?)
              ?.map((i) => TankInhabitant.fromJson(i))
              .toList() ??
@@ -446,6 +533,12 @@ class Tank {
     bool? isReef,
     String? freshwaterSubtype,
     bool clearFreshwaterSubtype = false,
+    String? specialization,
+    bool clearSpecialization = false,
+    String? customTypeName,
+    bool clearCustomTypeName = false,
+    String? customTypeDescription,
+    bool clearCustomTypeDescription = false,
     double? substrateOverrideLbs,
     bool clearSubstrateOverrideLbs = false,
     List<TankInhabitant>? inhabitants,
@@ -468,6 +561,7 @@ class Tank {
     List<NotificationLog>? notificationLogs,
     List<TankNote>? tankNotes,
     List<TankTag>? tags,
+    List<TankParameterProfile>? parameterProfiles,
     List<TankInhabitant>? memorializedInhabitants,
     bool clearCustomBackgroundPhotoId = false,
     bool clearCustomIconPhotoId = false,
@@ -482,6 +576,15 @@ class Tank {
       freshwaterSubtype: clearFreshwaterSubtype
           ? null
           : (freshwaterSubtype ?? this.freshwaterSubtype),
+      specialization: clearSpecialization
+          ? null
+          : (specialization ?? this.specialization),
+      customTypeName: clearCustomTypeName
+          ? null
+          : (customTypeName ?? this.customTypeName),
+      customTypeDescription: clearCustomTypeDescription
+          ? null
+          : (customTypeDescription ?? this.customTypeDescription),
       substrateOverrideLbs: clearSubstrateOverrideLbs
           ? null
           : (substrateOverrideLbs ?? this.substrateOverrideLbs),
@@ -513,6 +616,7 @@ class Tank {
       notificationLogs: notificationLogs ?? this.notificationLogs,
       tankNotes: tankNotes ?? this.tankNotes,
       tags: tags ?? this.tags,
+      parameterProfiles: parameterProfiles ?? this.parameterProfiles,
       memorializedInhabitants:
           memorializedInhabitants ?? this.memorializedInhabitants,
     );

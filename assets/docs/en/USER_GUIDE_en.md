@@ -57,9 +57,10 @@ Tank Management is the central hub for tracking your aquariums.
 ### Creating a Tank
 
 1. Tap the **+** button (bottom-right).
-2. Fill in **Name**, **Type** (Freshwater / Marine), and **Volume** (gallons or litres).
-3. Optionally add a **Description**, reef-safe flag, and a **photo** or **banner image**.
-4. Tap **Save**.
+2. Fill in **Name**, choose the base **Type** (Freshwater / Marine), and enter **Volume** (gallons or litres).
+3. Optionally choose a **Specialized Setup** such as Community, Planted, Blackwater, Cichlid, Fish-Only, FOWLR, Reef, Predator, Quarantine, and more.
+4. You can also choose **Custom** and enter your own tank type plus **AI Tank Notes** so recommendations better match your setup.
+5. Optionally add a **Description**, photos, and other tank details, then tap **Save**.
 
 ### Tank Cards
 
@@ -106,7 +107,7 @@ Use **Settings → Backup / Restore** to export and import all tank data.
 
 #### Local Backup & Restore
 
-Save a full JSON backup file to your device and restore from it on any device.
+Save a full JSON backup file to your device and restore from it on any device. Backups include specialized tank type selections and custom tank type AI notes.
 
 #### Cloud Backup & Restore *(Founder Aquarist on mobile/desktop; all users on web)*
 
@@ -337,6 +338,16 @@ Track water quality over time with charts and logs.
 2. Select the parameter type (pH, Ammonia, Nitrite, Nitrate, Temperature, Salinity, KH, etc.) or enter a custom name.
 3. Enter the value and unit.
 4. Tap **Save**.
+
+### Custom Ranges and Custom Parameters
+
+Use **Manage Parameter Ranges** (tune icon in the top-right of Parameter Logger) to:
+
+- Set tank-specific **minimum/maximum bounds** for built-in parameters.
+- Add reusable **custom parameters** (for example: Iron, Copper, Strontium).
+- Set a preferred default unit per parameter.
+
+When custom bounds are configured, out-of-range warnings use your tank's bounds instead of the built-in defaults.
 
 ### Charts
 

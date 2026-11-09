@@ -137,6 +137,8 @@ class ProfileService {
               name: t.name,
               type: t.type,
               isReef: t.isReef,
+              specialization: t.specialization,
+              customTypeName: t.customTypeName,
               sizeGallons: t.sizeGallons,
               sizeLiters: t.sizeLiters,
               inhabitantCount: t.inhabitants.fold(
