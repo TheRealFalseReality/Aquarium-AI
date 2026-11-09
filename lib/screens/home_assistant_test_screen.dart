@@ -16,12 +16,12 @@ class HomeAssistantTestScreen extends StatefulWidget {
 }
 
 class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
-  static const _intervals = [15, 30, 60, 120];
+  static const _intervals = [60, 120, 300, 600];
 
   final _urlController = TextEditingController();
   final _tokenController = TextEditingController();
   HomeAssistantService _service = HomeAssistantService();
-  List<String> _selected = [];
+  List<HaSensorConfig> _selected = [];
   List<HaSensor> _available = [];
   List<HaSensor> _readings = [];
   String _filter = '';
@@ -31,8 +31,10 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
   String? _status;
   bool _statusIsError = false;
   DateTime? _lastRefresh;
-  int _intervalSeconds = 30;
+  int _intervalSeconds = 60;
   Timer? _timer;
+  bool _isEditMode = false;
+  final List<List<HaSensorConfig>> _undoStack = [];
 
   @override
   void initState() {
@@ -145,10 +147,48 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
   Future<void> _toggle(String id, bool on) async {
     setState(() {
       if (on) {
-        if (!_selected.contains(id)) _selected = [..._selected, id];
+        if (!_selected.any((c) => c.entityId == id)) {
+          _selected = [..._selected, HaSensorConfig(entityId: id, fractionDigits: 2)];
+        }
       } else {
-        _selected = _selected.where((e) => e != id).toList();
+        _selected = _selected.where((c) => c.entityId != id).toList();
       }
+    });
+    await _service.save(_selected);
+    await _refreshReadings();
+  }
+
+  void _enterEditMode() {
+    setState(() {
+      _isEditMode = true;
+      _undoStack.clear();
+    });
+  }
+
+  void _exitEditMode() {
+    setState(() {
+      _isEditMode = false;
+      _undoStack.clear();
+    });
+  }
+
+  void _saveUndoState() {
+    _undoStack.add(List.from(_selected));
+  }
+
+  Future<void> _updateConfig(int index, HaSensorConfig newConfig) async {
+    _saveUndoState();
+    setState(() {
+      _selected[index] = newConfig;
+    });
+    await _service.save(_selected);
+    await _refreshReadings();
+  }
+
+  Future<void> _removeSensor(int index) async {
+    _saveUndoState();
+    setState(() {
+      _selected.removeAt(index);
     });
     await _service.save(_selected);
     await _refreshReadings();
@@ -167,13 +207,155 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
       _tokenController.clear();
       _status = 'Disconnected and cleared saved settings.';
       _statusIsError = false;
+      _isEditMode = false;
+      _undoStack.clear();
     });
+  }
+
+  void _showEditOverlay(BuildContext context, int index) {
+    final config = _selected[index];
+
+    String tempEntityId = config.entityId;
+    String? tempName = config.customName;
+    String tempDigits = config.fractionDigits?.toString() ?? '2';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final currentSensorInfo = _available.firstWhere(
+              (s) => s.entityId == tempEntityId,
+              orElse: () => _readings.firstWhere(
+                (r) => r.entityId == tempEntityId,
+                orElse: () => HaSensor(entityId: tempEntityId, name: tempEntityId, state: ''),
+              ),
+            );
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom,
+                left: 16,
+                right: 16,
+                top: 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Edit Sensor', style: Theme.of(ctx).textTheme.titleLarge),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: tempEntityId,
+                    decoration: const InputDecoration(labelText: 'Source Entity', border: OutlineInputBorder()),
+                    isExpanded: true,
+                    items: [
+                      if (!_available.any((s) => s.entityId == tempEntityId))
+                        DropdownMenuItem(value: tempEntityId, child: Text(tempEntityId)),
+                      ..._available.map((s) => DropdownMenuItem(
+                        value: s.entityId,
+                        child: Text('${s.name} (${s.entityId})', overflow: TextOverflow.ellipsis),
+                      )),
+                    ],
+                    onChanged: (v) {
+                      if (v != null) {
+                        setModalState(() => tempEntityId = v);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    initialValue: tempName,
+                    decoration: InputDecoration(
+                      labelText: 'Custom Name (leave blank for default)',
+                      hintText: currentSensorInfo.name,
+                      border: const OutlineInputBorder(),
+                    ),
+                    onChanged: (v) => tempName = v.trim().isEmpty ? null : v.trim(),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    initialValue: tempDigits,
+                    decoration: const InputDecoration(labelText: 'Decimal Points to Display', border: OutlineInputBorder()),
+                    keyboardType: TextInputType.number,
+                    onChanged: (v) => tempDigits = v,
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          _removeSensor(index);
+                        },
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        label: const Text('Delete', style: TextStyle(color: Colors.red)),
+                      ),
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text('Cancel'),
+                          ),
+                          const SizedBox(width: 8),
+                          FilledButton(
+                            onPressed: () {
+                              final newConfig = HaSensorConfig(
+                                entityId: tempEntityId,
+                                customName: tempName,
+                                fractionDigits: int.tryParse(tempDigits) ?? 2,
+                              );
+                              Navigator.pop(ctx);
+                              _updateConfig(index, newConfig);
+                            },
+                            child: const Text('Save'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      title: 'Home Assistant (Test)',
+      title: 'Home Assistant (BETA)',
+      floatingActionButton: _isEditMode
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (_undoStack.isNotEmpty)
+                  FloatingActionButton.small(
+                    onPressed: () async {
+                      setState(() {
+                        _selected = _undoStack.removeLast();
+                      });
+                      await _service.save(_selected);
+                      await _refreshReadings();
+                    },
+                    heroTag: 'undo',
+                    child: const Icon(Icons.undo),
+                  ),
+                if (_undoStack.isNotEmpty) const SizedBox(height: 8),
+                FloatingActionButton.extended(
+                  onPressed: _exitEditMode,
+                  icon: const Icon(Icons.check),
+                  label: const Text('Done'),
+                  heroTag: 'done',
+                ),
+              ],
+            )
+          : null,
       child: !_loaded
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -309,19 +491,86 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
               style: theme.textTheme.bodySmall,
             ),
           ),
-        if (_readings.isEmpty)
+        if (_selected.isEmpty)
           const Card(
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Text('No sensors selected yet. Pick some below.'),
             ),
           )
+        else if (_isEditMode)
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _selected.length,
+              onReorder: (oldIndex, newIndex) async {
+                if (newIndex > oldIndex) newIndex -= 1;
+                _saveUndoState();
+                final item = _selected.removeAt(oldIndex);
+                _selected.insert(newIndex, item);
+                setState(() {});
+                await _service.save(_selected);
+                await _refreshReadings();
+              },
+              itemBuilder: (context, index) {
+                final config = _selected[index];
+                final reading = _readings.firstWhere(
+                  (r) => r.entityId == config.entityId,
+                  orElse: () => HaSensor(entityId: config.entityId, name: config.customName ?? config.entityId, state: ''),
+                );
+                return ListTile(
+                  key: ValueKey(config.entityId),
+                  leading: const Icon(Icons.drag_handle),
+                  title: Text(config.customName ?? reading.name),
+                  subtitle: Text(config.entityId),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => _showEditOverlay(context, index),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _removeSensor(index),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          )
         else
           Wrap(
             spacing: 12,
             runSpacing: 12,
-            children: [for (final r in _readings) _SensorTile(sensor: r)],
+            children: [
+              for (int i = 0; i < _selected.length; i++)
+                GestureDetector(
+                  onLongPress: _enterEditMode,
+                  child: _SensorTile(
+                    config: _selected[i],
+                    sensor: _readings.firstWhere(
+                      (r) => r.entityId == _selected[i].entityId,
+                      orElse: () => HaSensor(entityId: _selected[i].entityId, name: _selected[i].entityId, state: 'unknown'),
+                    ),
+                  ),
+                ),
+            ],
           ),
+        if (_selected.isNotEmpty && !_isEditMode) ...[
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: _enterEditMode,
+              icon: const Icon(Icons.edit),
+              label: const Text('Edit Dashboard'),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -379,7 +628,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                     final s = filtered[i];
                     return CheckboxListTile(
                       dense: true,
-                      value: _selected.contains(s.entityId),
+                      value: _selected.any((c) => c.entityId == s.entityId),
                       title: Text(s.name),
                       subtitle: Text(
                         '${s.entityId} • ${s.state}${s.unit != null ? ' ${s.unit}' : ''}',
@@ -398,14 +647,26 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
 }
 
 class _SensorTile extends StatelessWidget {
+  final HaSensorConfig config;
   final HaSensor sensor;
-  const _SensorTile({required this.sensor});
+
+  const _SensorTile({required this.config, required this.sensor});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final value = sensor.isAvailable ? sensor.state : '—';
+
+    String value = sensor.isAvailable ? sensor.state : '—';
+    if (sensor.isAvailable && config.fractionDigits != null) {
+      final numVal = double.tryParse(sensor.state);
+      if (numVal != null) {
+        value = numVal.toStringAsFixed(config.fractionDigits!);
+      }
+    }
+
+    final displayName = config.customName ?? sensor.name;
+
     return SizedBox(
       width: 170,
       child: Card(
@@ -418,36 +679,43 @@ class _SensorTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                sensor.name,
+                displayName,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.labelLarge,
               ),
               const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Flexible(
-                    child: Text(
-                      value,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+              Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        value,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  if (sensor.unit != null && sensor.isAvailable) ...[
-                    const SizedBox(width: 4),
-                    Text(sensor.unit!, style: theme.textTheme.titleSmall),
+                    if (sensor.unit != null && sensor.isAvailable) ...[
+                      const SizedBox(width: 4),
+                      Text(sensor.unit!, style: theme.textTheme.titleSmall),
+                    ],
                   ],
-                ],
+                ),
               ),
               if (sensor.lastUpdated != null) ...[
                 const SizedBox(height: 4),
-                Text(
-                  'Changed ${TimeOfDay.fromDateTime(sensor.lastUpdated!).format(context)}',
-                  style: theme.textTheme.bodySmall,
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    'Updated ${TimeOfDay.fromDateTime(sensor.lastUpdated!).format(context)}',
+                    style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                  ),
                 ),
               ],
             ],

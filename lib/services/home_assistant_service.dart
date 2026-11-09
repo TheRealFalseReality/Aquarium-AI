@@ -3,6 +3,42 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+class HaSensorConfig {
+  final String entityId;
+  final String? customName;
+  final int? fractionDigits;
+
+  const HaSensorConfig({
+    required this.entityId,
+    this.customName,
+    this.fractionDigits,
+  });
+
+  factory HaSensorConfig.fromJson(Map<String, dynamic> json) => HaSensorConfig(
+    entityId: json['entityId'] as String,
+    customName: json['customName'] as String?,
+    fractionDigits: json['fractionDigits'] as int?,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'entityId': entityId,
+    if (customName != null) 'customName': customName,
+    if (fractionDigits != null) 'fractionDigits': fractionDigits,
+  };
+
+  HaSensorConfig copyWith({
+    String? entityId,
+    String? customName,
+    int? fractionDigits,
+  }) {
+    return HaSensorConfig(
+      entityId: entityId ?? this.entityId,
+      customName: customName ?? this.customName,
+      fractionDigits: fractionDigits ?? this.fractionDigits,
+    );
+  }
+}
+
 class HaSensor {
   final String entityId;
   final String name;
@@ -124,27 +160,38 @@ class HomeAssistantService {
     return HaSensor.fromJson((data as Map).cast<String, dynamic>());
   }
 
-  Future<List<HaSensor>> fetchSelected(List<String> ids) async {
+  Future<List<HaSensor>> fetchSelected(List<HaSensorConfig> configs) async {
     final all = await fetchSensors();
     final byId = {for (final s in all) s.entityId: s};
-    return [for (final id in ids) if (byId[id] != null) byId[id]!];
+    return [for (final config in configs) if (byId[config.entityId] != null) byId[config.entityId]!];
   }
 
-  Future<void> save(List<String> selected) async {
+  Future<void> save(List<HaSensorConfig> selected) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_urlKey, baseUrl);
     await prefs.setString(_tokenKey, token);
-    await prefs.setStringList(_selectedKey, selected);
+    await prefs.setStringList(
+        _selectedKey, selected.map((c) => jsonEncode(c.toJson())).toList());
   }
 
-  static Future<(HomeAssistantService, List<String>)> load() async {
+  static Future<(HomeAssistantService, List<HaSensorConfig>)> load() async {
     final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList(_selectedKey) ?? <String>[];
+    final configs = list.map((item) {
+      try {
+        if (item.startsWith('{')) {
+          return HaSensorConfig.fromJson(jsonDecode(item));
+        }
+      } catch (_) {}
+      return HaSensorConfig(entityId: item);
+    }).toList();
+
     return (
       HomeAssistantService(
         baseUrl: prefs.getString(_urlKey) ?? '',
         token: prefs.getString(_tokenKey) ?? '',
       ),
-      prefs.getStringList(_selectedKey) ?? <String>[],
+      configs,
     );
   }
 

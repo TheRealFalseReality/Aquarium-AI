@@ -1374,7 +1374,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         const SizedBox(height: 16),
         _buildMenuCard(
           context: context,
-          title: 'Home Assistant (Test)',
+          title: 'Home Assistant (BETA)',
           subtitle: 'Experimental: connect and view sensor data',
           icon: Icons.sensors,
           gradient: LinearGradient(
