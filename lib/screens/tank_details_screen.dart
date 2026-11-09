@@ -1385,9 +1385,18 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
         // Out-of-range alert banner
         Builder(
           builder: (context) {
+            final customBounds = {
+              for (final profile in tank.parameterProfiles)
+                if (profile.minValue != null || profile.maxValue != null)
+                  profile.parameterType: ParameterBoundsConfig(
+                    minValue: profile.minValue,
+                    maxValue: profile.maxValue,
+                  ),
+            };
             final outOfRangeAlerts = buildCurrentOutOfRangeAlerts(
               tank.waterParameters,
               tankType: tank.type,
+              customBounds: customBounds,
             );
             if (outOfRangeAlerts.isEmpty) return const SizedBox.shrink();
             return Padding(
