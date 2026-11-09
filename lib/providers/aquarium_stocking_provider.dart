@@ -651,7 +651,7 @@ class AquariumStockingNotifier extends StateNotifier<AquariumStockingState> {
                 resultData: {
                   'recommendations': finalRecs.map((r) => r.toJson()).toList(),
                   'tankName': tank.name,
-                  'tankType': getTankTypeAiContext(tank),
+                  'tankType': tank.type,
                 },
               ),
             );

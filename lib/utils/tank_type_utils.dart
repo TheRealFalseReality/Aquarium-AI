@@ -331,6 +331,8 @@ String getTankTypeAiContext(Tank tank) {
 
   final option = getTankTypeOptionById(effectiveType);
   final parts = <String>[
+    if (option != null && option.category == null)
+      'Base water category: $categoryLabel',
     option?.aiDescription ?? '$categoryLabel aquarium',
   ];
 
