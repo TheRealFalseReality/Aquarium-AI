@@ -12,6 +12,7 @@ import '../providers/app_settings_provider.dart';
 import '../providers/tank_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/fish_data_service.dart';
+import '../utils/tank_type_utils.dart';
 import '../services/remote_config_service.dart';
 import '../theme_colors.dart';
 import '../theme_provider.dart';
@@ -78,8 +79,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _sizeGallonsController = TextEditingController();
   final _sizeLitersController = TextEditingController();
   final _tankNotesController = TextEditingController();
+  final _customTankTypeNameController = TextEditingController();
+  final _customTankTypeDescriptionController = TextEditingController();
   String _selectedTankType = 'freshwater';
-  bool _isReef = false;
+  String? _selectedSpecialization;
   DateTime _tankCreatedDate = DateTime.now();
 
   // ── Step 3 state: inhabitants ────────────────────────────────────────────
@@ -112,6 +115,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _sizeGallonsController.dispose();
     _sizeLitersController.dispose();
     _tankNotesController.dispose();
+    _customTankTypeNameController.dispose();
+    _customTankTypeDescriptionController.dispose();
     super.dispose();
   }
 
@@ -226,11 +231,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     final gallons = double.tryParse(_sizeGallonsController.text.trim());
     final liters = double.tryParse(_sizeLitersController.text.trim());
+    final specialization = _selectedSpecialization;
+    final customTypeName = specialization == customTankTypeId
+        ? _customTankTypeNameController.text.trim()
+        : '';
+    final customTypeDescription = specialization != null
+        ? _customTankTypeDescriptionController.text.trim()
+        : '';
 
     final tank = Tank.create(
       name: name,
       type: _selectedTankType,
-      isReef: _isReef,
+      isReef: _selectedTankType == 'marine' &&
+          (specialization == 'reef' || specialization == 'nano_reef'),
+      freshwaterSubtype: _selectedTankType == 'freshwater' &&
+              (specialization == 'planted' || specialization == 'brackish')
+          ? specialization
+          : null,
+      specialization: specialization,
+      customTypeName: customTypeName.isEmpty ? null : customTypeName,
+      customTypeDescription: customTypeDescription.isEmpty
+          ? null
+          : customTypeDescription,
       sizeGallons: gallons,
       sizeLiters: liters,
       notes: _tankNotesController.text.trim().isEmpty
@@ -272,7 +294,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           setState(() {
             _selectedTankType = newType;
             _inhabitants = [];
-            if (newType != 'marine') _isReef = false;
+            if (_selectedSpecialization != null &&
+                !(getTankTypeOptionById(_selectedSpecialization)
+                        ?.supportsCategory(newType) ??
+                    false)) {
+              final oldSpec = _selectedSpecialization;
+              _selectedSpecialization = null;
+              final oldOption = getTankTypeOptionById(oldSpec);
+              final currentText =
+                  _customTankTypeDescriptionController.text.trim();
+              if (oldOption != null &&
+                  (currentText == oldOption.aiDescription ||
+                      tankTypeOptions.any(
+                          (opt) => opt.aiDescription == currentText))) {
+                _customTankTypeDescriptionController.text = '';
+              }
+            }
           });
           _loadFishData();
         }
@@ -280,10 +317,61 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     } else {
       setState(() {
         _selectedTankType = newType;
-        if (newType != 'marine') _isReef = false;
+        if (_selectedSpecialization != null &&
+            !(getTankTypeOptionById(_selectedSpecialization)
+                    ?.supportsCategory(newType) ??
+                false)) {
+          final oldSpec = _selectedSpecialization;
+          _selectedSpecialization = null;
+          final oldOption = getTankTypeOptionById(oldSpec);
+          final currentText =
+              _customTankTypeDescriptionController.text.trim();
+          if (oldOption != null &&
+              (currentText == oldOption.aiDescription ||
+                  tankTypeOptions.any(
+                      (opt) => opt.aiDescription == currentText))) {
+            _customTankTypeDescriptionController.text = '';
+          }
+        }
       });
       _loadFishData();
     }
+  }
+
+  void _onSpecializationChanged(String specialization) {
+    setState(() {
+      final previousSpec = _selectedSpecialization;
+      _selectedSpecialization = _selectedSpecialization == specialization
+          ? null
+          : specialization;
+
+      if (_selectedSpecialization != null) {
+        final previousOption = getTankTypeOptionById(previousSpec);
+        final newOption = getTankTypeOptionById(_selectedSpecialization);
+        final currentText = _customTankTypeDescriptionController.text.trim();
+
+        final isPreWritten = currentText.isEmpty ||
+            (previousOption != null &&
+                currentText == previousOption.aiDescription) ||
+            tankTypeOptions.any((opt) => opt.aiDescription == currentText);
+
+        if (isPreWritten) {
+          _customTankTypeDescriptionController.text =
+              newOption?.id == customTankTypeId
+                  ? ''
+                  : (newOption?.aiDescription ?? '');
+        }
+      } else {
+        final previousOption = getTankTypeOptionById(previousSpec);
+        final currentText = _customTankTypeDescriptionController.text.trim();
+        if (previousOption != null &&
+            (currentText == previousOption.aiDescription ||
+                tankTypeOptions.any((opt) => opt.aiDescription == currentText))) {
+          _customTankTypeDescriptionController.text = '';
+        }
+      }
+    });
+    _markInteracted(2);
   }
 
   // ── Inhabitants ───────────────────────────────────────────────────────────
@@ -915,45 +1003,76 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  l10n.tankSpecializationLabel,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.onboardingOptional,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: getTankTypeOptionsForCategory(_selectedTankType)
+                .map(
+                  (option) => ModernSelectableChip(
+                    label: getTankTypeDisplayLabelFromParts(
+                      l10n,
+                      category: _selectedTankType,
+                      specialization: option.id,
+                    ),
+                    emoji: option.emoji,
+                    selected: _selectedSpecialization == option.id,
+                    onTap: () => _onSpecializationChanged(option.id),
+                  ),
+                )
+                .toList(),
+          ),
           AnimatedSize(
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
-            child: _selectedTankType == 'marine'
+            child: _selectedSpecialization != null
                 ? Padding(
-                    padding: const EdgeInsets.only(top: 8, left: 20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Column(
                       children: [
-                        Container(
-                          width: 2,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: cs.primary.withOpacity(0.4),
-                            borderRadius: BorderRadius.circular(1),
+                        if (_selectedSpecialization == customTankTypeId) ...[
+                          TextField(
+                            controller: _customTankTypeNameController,
+                            decoration: InputDecoration(
+                              labelText: l10n.customTankTypeNameLabel,
+                              hintText: l10n.customTankTypeNameHint,
+                              border: const OutlineInputBorder(),
+                            ),
+                            textCapitalization: TextCapitalization.words,
+                            onChanged: (_) => _markInteracted(2),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.saltwaterSubtype,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: cs.onSurfaceVariant,
-                                  ),
-                            ),
-                            const SizedBox(height: 6),
-                            ModernSelectableChip(
-                              label: l10n.markAsReef,
-                              emoji: '🪸',
-                              selected: _isReef,
-                              onTap: () {
-                                setState(() => _isReef = !_isReef);
-                                _markInteracted(2);
-                              },
-                            ),
-                          ],
+                          const SizedBox(height: 12),
+                        ],
+                        TextField(
+                          controller: _customTankTypeDescriptionController,
+                          decoration: InputDecoration(
+                            labelText: l10n.customTankTypeDescriptionLabel,
+                            hintText: l10n.customTankTypeDescriptionHint,
+                            border: const OutlineInputBorder(),
+                          ),
+                          minLines: 2,
+                          maxLines: 4,
+                          onChanged: (_) => _markInteracted(2),
                         ),
                       ],
                     ),

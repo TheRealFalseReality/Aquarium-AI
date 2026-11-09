@@ -62,10 +62,16 @@ acuarios.
 ### Crear un acuario
 
 1. Toca el botón **+** (abajo a la derecha).
-2. Rellena el **Nombre**, **Tipo** (Agua dulce / Marina) y **Volumen** (galones o litros).
-3. Opcionalmente añade una **Descripción**, indicador apto para arrecife, y una **foto**
-   o **imagen de banner**.
-4. Toca **Guardar**.
+2. Rellena el **Nombre**, elige el **Tipo** base (Agua dulce / Marina) e introduce el
+   **Volumen** (galones o litros).
+3. Opcionalmente elige una **configuración especializada** como Comunitario,
+   Plantado, Aguas negras, Cíclidos, Solo peces, FOWLR, Arrecife, Depredador,
+   Cuarentena y más.
+4. También puedes elegir **Personalizado** y escribir tu propio tipo de acuario junto
+   con **Notas del acuario para la IA** para que las recomendaciones encajen mejor con
+   tu montaje.
+5. Opcionalmente añade una **Descripción**, fotos y otros detalles del acuario, y luego
+   toca **Guardar**.
 
 ### Tarjetas de acuario
 
@@ -118,7 +124,7 @@ Usa **Configuración → Copia de seguridad / Restauración** para exportar e im
 
 #### Copia de seguridad y restauración local
 
-Guarda un archivo de copia de seguridad JSON completo en tu dispositivo y restáuralo en cualquier dispositivo.
+Guarda un archivo de copia de seguridad JSON completo en tu dispositivo y restáuralo en cualquier dispositivo. Las copias de seguridad también incluyen los tipos de acuario especializados y las notas personalizadas para la IA.
 
 #### Copia de seguridad y restauración en la nube *(Acuarista Fundador en móvil/escritorio; todos los usuarios en web)*
 

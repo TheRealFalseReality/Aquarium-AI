@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fish_ai/models/tank.dart';
 import 'package:fish_ai/models/water_parameter.dart';
+import 'package:fish_ai/utils/tank_type_utils.dart';
 
 void main() {
   group('TankPhoto', () {
@@ -547,6 +548,69 @@ void main() {
       });
 
       expect(tank.memorializedInhabitants, isEmpty);
+    });
+  });
+
+  group('Tank specialized types', () {
+    test('serializes specialized and custom tank type fields', () {
+      final tank = Tank.create(
+        name: 'Mangrove Predator',
+        type: 'marine',
+        specialization: 'predator',
+        customTypeName: 'Mangrove Hunter Lagoon',
+        customTypeDescription:
+            'Focus on hardy predator fish with mangrove roots and macroalgae.',
+      );
+
+      final json = tank.toJson();
+      final recreated = Tank.fromJson(json);
+
+      expect(json['specialization'], equals('predator'));
+      expect(json['customTypeName'], equals('Mangrove Hunter Lagoon'));
+      expect(
+        json['customTypeDescription'],
+        equals(
+          'Focus on hardy predator fish with mangrove roots and macroalgae.',
+        ),
+      );
+      expect(recreated.specialization, equals('predator'));
+      expect(recreated.customTypeName, equals('Mangrove Hunter Lagoon'));
+      expect(
+        recreated.customTypeDescription,
+        equals(
+          'Focus on hardy predator fish with mangrove roots and macroalgae.',
+        ),
+      );
+    });
+
+    test('getTankTypeAiContext returns pre-written description for specialized setup', () {
+      final tank = Tank.create(
+        name: 'My Planted Tank',
+        type: 'freshwater',
+        specialization: 'planted',
+        customTypeDescription: 'a planted freshwater aquarium with live plants',
+      );
+
+      final context = getTankTypeAiContext(tank);
+      expect(context, equals('a planted freshwater aquarium with live plants'));
+    });
+
+    test('getTankTypeAiContext appends user notes when modified for specialized setup', () {
+      final tank = Tank.create(
+        name: 'My Custom Planted Tank',
+        type: 'freshwater',
+        specialization: 'planted',
+        customTypeDescription:
+            'a planted freshwater aquarium with live plants. High lighting and CO2 injection.',
+      );
+
+      final context = getTankTypeAiContext(tank);
+      expect(
+        context,
+        equals(
+          'a planted freshwater aquarium with live plants. user notes for AI: a planted freshwater aquarium with live plants. High lighting and CO2 injection.',
+        ),
+      );
     });
   });
 }

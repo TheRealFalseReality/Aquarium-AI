@@ -62,11 +62,15 @@ Die Tankverwaltung ist die zentrale Anlaufstelle für die Verfolgung Ihrer Aquar
 ### Einen Tank erstellen
 
 1. Tippen Sie auf die **+**-Schaltfläche (unten rechts).
-2. Geben Sie **Name**, **Typ** (Süßwasser / Meerwasser) und **Volumen** (Gallonen oder
-   Liter) ein.
-3. Optional: **Beschreibung**, riffverträglich-Flag und ein **Foto** oder **Bannerbild**
-   hinzufügen.
-4. Tippen Sie auf **Speichern**.
+2. Geben Sie **Name** ein, wählen Sie den Basis-**Typ** (Süßwasser / Meerwasser) und
+   tragen Sie das **Volumen** (Gallonen oder Liter) ein.
+3. Optional können Sie ein **spezialisiertes Setup** wie Gesellschaftsbecken,
+   Bepflanzt, Schwarzwasser, Buntbarschbecken, Nur Fische, FOWLR, Riff,
+   Räuberbecken, Quarantäne und mehr auswählen.
+4. Sie können auch **Benutzerdefiniert** wählen und einen eigenen Aquarientyp plus
+   **KI-Aquariumhinweise** eingeben, damit Empfehlungen besser zu Ihrem Setup passen.
+5. Optional: **Beschreibung**, Fotos und weitere Tankdetails hinzufügen und dann auf
+   **Speichern** tippen.
 
 ### Tank-Karten
 
@@ -119,7 +123,7 @@ Verwenden Sie **Einstellungen → Sicherung / Wiederherstellung**, um alle Tank-
 
 #### Lokale Sicherung & Wiederherstellung
 
-Speichern Sie eine vollständige JSON-Sicherungsdatei auf Ihrem Gerät und stellen Sie sie auf einem beliebigen Gerät wieder her.
+Speichern Sie eine vollständige JSON-Sicherungsdatei auf Ihrem Gerät und stellen Sie sie auf einem beliebigen Gerät wieder her. Sicherungen enthalten auch spezialisierte Tanktypen und benutzerdefinierte KI-Hinweise.
 
 #### Cloud-Sicherung & Wiederherstellung *(Gründer-Aquarianer auf Mobil/Desktop; alle Nutzer im Web)*
 
