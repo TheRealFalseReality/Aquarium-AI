@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import '../l10n/app_localizations.dart';
 import '../main_layout.dart';
 import '../services/home_assistant_service.dart';
 
@@ -400,10 +399,10 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
               controller: _urlController,
               keyboardType: TextInputType.url,
               autocorrect: false,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: AppLocalizations.of(context)!.haUrlLabel,
                 hintText: 'http://homeassistant.local:8123',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
@@ -725,9 +724,9 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
             ),
           ),
         if (_selected.isEmpty)
-          const Card(
+          Card(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Text(AppLocalizations.of(context)!.haNoSensorsSelected),
             ),
           )
@@ -844,10 +843,10 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
               Text(AppLocalizations.of(context)!.haConnectToLoadSensors)
             else ...[
               TextField(
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
                   hintText: AppLocalizations.of(context)!.haFilterSensors,
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 onChanged: (v) => setState(() => _filter = v),
               ),
