@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../main_layout.dart';
 import '../services/home_assistant_service.dart';
@@ -253,11 +254,11 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Edit Sensor', style: Theme.of(ctx).textTheme.titleLarge),
+                  Text(AppLocalizations.of(context)!.haEditSensor, style: Theme.of(ctx).textTheme.titleLarge),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     value: tempEntityId,
-                    decoration: const InputDecoration(labelText: 'Source Entity', border: OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: AppLocalizations.of(context)!.haSourceEntity, border: OutlineInputBorder()),
                     isExpanded: true,
                     items: [
                       if (!_available.any((s) => s.entityId == tempEntityId))
@@ -277,7 +278,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                   TextFormField(
                     initialValue: tempName,
                     decoration: InputDecoration(
-                      labelText: 'Custom Name (leave blank for default)',
+                      labelText: AppLocalizations.of(context)!.haCustomNameHint,
                       hintText: currentSensorInfo.name,
                       border: const OutlineInputBorder(),
                     ),
@@ -286,7 +287,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                   const SizedBox(height: 12),
                   TextFormField(
                     initialValue: tempDigits,
-                    decoration: const InputDecoration(labelText: 'Decimal Points to Display', border: OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: AppLocalizations.of(context)!.haDecimalPoints, border: OutlineInputBorder()),
                     keyboardType: TextInputType.number,
                     onChanged: (v) => tempDigits = v,
                   ),
@@ -300,13 +301,13 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                           _removeSensor(index);
                         },
                         icon: const Icon(Icons.delete, color: Colors.red),
-                        label: const Text('Delete', style: TextStyle(color: Colors.red)),
+                        label: Text(AppLocalizations.of(context)!.delete, style: TextStyle(color: Colors.red)),
                       ),
                       Row(
                         children: [
                           TextButton(
                             onPressed: () => Navigator.pop(ctx),
-                            child: const Text('Cancel'),
+                            child: Text(AppLocalizations.of(context)!.cancel),
                           ),
                           const SizedBox(width: 8),
                           FilledButton(
@@ -319,7 +320,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                               Navigator.pop(ctx);
                               _updateConfig(index, newConfig);
                             },
-                            child: const Text('Save'),
+                            child: Text(AppLocalizations.of(context)!.save),
                           ),
                         ],
                       ),
@@ -338,7 +339,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      title: 'Home Assistant (BETA)',
+      title: AppLocalizations.of(context)!.haTestScreenTitle,
       floatingActionButton: _isEditMode
           ? Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -359,7 +360,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                 FloatingActionButton.extended(
                   onPressed: _exitEditMode,
                   icon: const Icon(Icons.check),
-                  label: const Text('Done'),
+                  label: Text(AppLocalizations.of(context)!.haDone),
                   heroTag: 'done',
                 ),
               ],
@@ -400,7 +401,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
               keyboardType: TextInputType.url,
               autocorrect: false,
               decoration: const InputDecoration(
-                labelText: 'Home Assistant URL',
+                labelText: AppLocalizations.of(context)!.haUrlLabel,
                 hintText: 'http://homeassistant.local:8123',
                 border: OutlineInputBorder(),
               ),
@@ -412,7 +413,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
               autocorrect: false,
               enableSuggestions: false,
               decoration: InputDecoration(
-                labelText: 'Long-Lived Access Token',
+                labelText: AppLocalizations.of(context)!.haTokenLabel,
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -435,13 +436,13 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.link),
-                    label: const Text('Connect & load sensors'),
+                    label: Text(AppLocalizations.of(context)!.haConnectAndLoad),
                   ),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton(
                   onPressed: _busy ? null : _disconnect,
-                  child: const Text('Clear'),
+                  child: Text(AppLocalizations.of(context)!.clear),
                 ),
               ],
             ),
@@ -456,7 +457,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
             ],
             const SizedBox(height: 8),
             Text(
-              'Testing only: the token is stored unencrypted on this device.',
+              AppLocalizations.of(context)!.haTokenSecurelyEncrypted,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -486,18 +487,18 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Configure Tank Overview', style: Theme.of(ctx).textTheme.titleLarge),
+                  Text(AppLocalizations.of(context)!.haConfigOverviewTitle, style: Theme.of(ctx).textTheme.titleLarge),
                   const SizedBox(height: 16),
                   TextFormField(
                     initialValue: tempTitle,
-                    decoration: const InputDecoration(labelText: 'Tank Name', border: OutlineInputBorder()),
+                    decoration: InputDecoration(labelText: AppLocalizations.of(context)!.haTankNameLabel, border: OutlineInputBorder()),
                     onChanged: (v) => tempTitle = v,
                   ),
                   const SizedBox(height: 16),
-                  Text('Select Sensors for Overview', style: Theme.of(ctx).textTheme.titleMedium),
+                  Text(AppLocalizations.of(context)!.haSelectSensorsOverview, style: Theme.of(ctx).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   if (_selected.isEmpty)
-                    const Text('No sensors in dashboard to select from.')
+                    Text(AppLocalizations.of(context)!.haNoSensorsInDashboard)
                   else
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxHeight: 250),
@@ -531,7 +532,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Cancel'),
+                        child: Text(AppLocalizations.of(context)!.cancel),
                       ),
                       const SizedBox(width: 8),
                       FilledButton(
@@ -543,7 +544,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                           });
                           await HomeAssistantService.saveSummary(_summaryTitle, _summaryEntityIds);
                         },
-                        child: const Text('Save'),
+                        child: Text(AppLocalizations.of(context)!.save),
                       ),
                     ],
                   ),
@@ -631,10 +632,10 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Tank Overview Widget', style: theme.textTheme.titleLarge),
+            Text(AppLocalizations.of(context)!.haTankOverviewWidget, style: theme.textTheme.titleLarge),
             IconButton(
               icon: const Icon(Icons.settings),
-              tooltip: 'Configure Overview Widget',
+              tooltip: AppLocalizations.of(context)!.haConfigOverviewTooltip,
               onPressed: () => _showSummaryConfigOverlay(context),
             ),
           ],
@@ -663,7 +664,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
                 const SizedBox(height: 16),
                 if (_summaryEntityIds.isEmpty)
                   Text(
-                    'Tap the settings icon to add sensors to this overview.',
+                    AppLocalizations.of(context)!.haTapSettingsToAddSensors,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: scheme.onSecondaryContainer.withValues(alpha: 0.7)),
                   )
@@ -694,7 +695,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
         Row(
           children: [
             Expanded(
-              child: Text('Dashboard', style: theme.textTheme.titleLarge),
+              child: Text(AppLocalizations.of(context)!.haDashboard, style: theme.textTheme.titleLarge),
             ),
             DropdownButton<int>(
               value: _intervalSeconds,
@@ -709,7 +710,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
               },
             ),
             IconButton(
-              tooltip: 'Refresh now',
+              tooltip: AppLocalizations.of(context)!.haRefreshNow,
               icon: const Icon(Icons.refresh),
               onPressed: _refreshReadings,
             ),
@@ -727,7 +728,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
           const Card(
             child: Padding(
               padding: EdgeInsets.all(16),
-              child: Text('No sensors selected yet. Pick some below.'),
+              child: Text(AppLocalizations.of(context)!.haNoSensorsSelected),
             ),
           )
         else if (_isEditMode)
@@ -799,7 +800,7 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
             child: TextButton.icon(
               onPressed: _enterEditMode,
               icon: const Icon(Icons.edit),
-              label: const Text('Edit Dashboard'),
+              label: Text(AppLocalizations.of(context)!.haEditDashboard),
             ),
           ),
         ],
@@ -828,24 +829,24 @@ class _HomeAssistantTestScreenState extends State<HomeAssistantTestScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'Select sensors (${_selected.length})',
+                    '${AppLocalizations.of(context)!.haSelectSensors} (${_selected.length})',
                     style: theme.textTheme.titleLarge,
                   ),
                 ),
                 TextButton.icon(
                   onPressed: _busy ? null : _loadSensors,
                   icon: const Icon(Icons.sync),
-                  label: const Text('Reload'),
+                  label: Text(AppLocalizations.of(context)!.haReload),
                 ),
               ],
             ),
             if (_available.isEmpty)
-              const Text('Connect to load the list of available sensors.')
+              Text(AppLocalizations.of(context)!.haConnectToLoadSensors)
             else ...[
               TextField(
                 decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.search),
-                  hintText: 'Filter sensors',
+                  hintText: AppLocalizations.of(context)!.haFilterSensors,
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (v) => setState(() => _filter = v),

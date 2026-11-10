@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class HaSensorConfig {
   final String entityId;
@@ -176,7 +177,11 @@ class HomeAssistantService {
   Future<void> save(List<HaSensorConfig> selected) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_urlKey, baseUrl);
-    await prefs.setString(_tokenKey, token);
+    
+    const secureStorage = FlutterSecureStorage();
+    await secureStorage.write(key: _tokenKey, value: token);
+    await prefs.remove(_tokenKey); // Ensure it's not stored in plain text
+    
     await prefs.setStringList(
         _selectedKey, selected.map((c) => jsonEncode(c.toJson())).toList());
   }
@@ -193,10 +198,23 @@ class HomeAssistantService {
       return HaSensorConfig(entityId: item);
     }).toList();
 
+    const secureStorage = FlutterSecureStorage();
+    String? secureToken = await secureStorage.read(key: _tokenKey);
+    
+    // Migrate plain-text token if present
+    if (secureToken == null || secureToken.isEmpty) {
+      final oldToken = prefs.getString(_tokenKey);
+      if (oldToken != null && oldToken.isNotEmpty) {
+        secureToken = oldToken;
+        await secureStorage.write(key: _tokenKey, value: secureToken);
+        await prefs.remove(_tokenKey);
+      }
+    }
+
     return (
       HomeAssistantService(
         baseUrl: prefs.getString(_urlKey) ?? '',
-        token: prefs.getString(_tokenKey) ?? '',
+        token: secureToken ?? '',
       ),
       configs,
     );
@@ -209,6 +227,9 @@ class HomeAssistantService {
     await prefs.remove(_selectedKey);
     await prefs.remove(_summaryTitleKey);
     await prefs.remove(_summarySensorsKey);
+    
+    const secureStorage = FlutterSecureStorage();
+    await secureStorage.delete(key: _tokenKey);
   }
 
   static Future<void> saveSummary(String title, List<String> entityIds) async {
