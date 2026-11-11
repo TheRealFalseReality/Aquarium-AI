@@ -2,6 +2,19 @@
 
 Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
 
+# [3.6.11] - 2026-11 • Aktualisierungen und HA-Test
+
+### Hinzugefügt
+
+* Einführung tank-spezifischer Parameterprofile für benutzerdefinierte Grenzwerte sowie wiederverwendbare, eigene Messgrößen
+* Unterstützung für spezialisierte und benutzerdefinierte Tank-Typen, inklusive KI-gestützter Backup-Funktionalität
+* Experimentelles „Home Assistant REST“-Test-Dashboard unter „Einstellungen“ hinzugefügt
+
+### Behoben
+* Standard-Grok-Modelle
+* Eingabefeld für Community-Kommentare erweitert, um mehrzeilige Eingaben zu ermöglichen
+* Zeitplanung über Datums-/Uhrzeitauswahl angepasst; Benachrichtigungsmenü in den Tank-Details ergänzt; Pop-up für Zeitplanungsoptionen durch einen Bestätigungsdialog ersetzt
+
 ## [3.6.00] – 08.2026 • Gedenken an die Bewohner, Kommunikation
 
 ### Hinzugefügt

@@ -2,6 +2,22 @@
 
 Toutes les modifications notables apportées à ce projet sont documentées dans ce fichier.
 
+# [3.6.11] - 2026-11 • Mises à jour et test de haute disponibilité
+
+### Ajouts
+
+* Ajout de profils de paramètres par réservoir pour des limites personnalisées et des métriques personnalisées réutilisables
+* Ajout de types de réservoirs spécialisés et personnalisés avec prise en charge des sauvegardes intelligentes (IA)
+* Ajout d'un tableau de bord de test REST expérimental pour Home Assistant dans les Paramètres
+
+### Corrections
+
+* Modèles Grok par défaut
+
+* Le champ de saisie des commentaires de la communauté peut désormais être multiligne
+
+* Reprogrammation via le sélecteur de date/heure, ajout d'un menu de notifications dans les détails du réservoir, remplacement de la fenêtre contextuelle d'option de programmation par une boîte de dialogue de vérification
+
 ## [3.6.00] - 03/05/2026 • Commémoration et communication à l'intention des habitants
 - Ajouter la possibilité pour le propriétaire de modifier les commentaires des publications de la communauté
 - Ajouter un suivi des pensionnaires décédés du réservoir

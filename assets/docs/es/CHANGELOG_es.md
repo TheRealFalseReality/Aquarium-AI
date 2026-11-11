@@ -2,6 +2,20 @@
 
 Todos los cambios notables de este proyecto se documentan en este archivo.
 
+# [3.6.11] - 2026-11 • Actualizaciones y prueba de HA
+
+### Añadido
+
+* Inclusión de perfiles de parámetros por depósito para establecer límites personalizados y métricas reutilizables.
+* Incorporación de tipos de depósito especializados y personalizados, con soporte para copias de seguridad compatibles con IA.
+* Inclusión de un panel de pruebas experimental (basado en la API REST de Home Assistant) en la sección de Configuración.
+
+### Corregido
+
+* Modelos Grok predeterminados.
+* Ajuste del editor de comentarios de la comunidad para permitir la entrada de texto en varias líneas.
+* Reajuste de la programación mediante un selector de fecha/hora; incorporación de un menú de notificaciones en los detalles del depósito; sustitución de la ventana emergente de opciones de programación por un cuadro de diálogo de confirmación.
+
 ## [3.6.00] - 308.2026 • Conmemoración y comunicación dirigidas a los residentes
 
 - Añadir la opción de edición por parte del propietario para los comentarios de las publicaciones de la comunidad

@@ -2,7 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.6.00] - 2026-8 •  Inhabitant Memorialization, Messaging
+## [3.6.11] - 2026-11 • Updates and HA Test
+
+### Added
+
+* Add per-tank parameter profiles for custom bounds and reusable custom metrics
+* Add specialized and custom tank types with AI-aware backup support
+* Add experimental Home Assistant REST test dashboard under Settings
+
+### Fixed
+* Default Grok models
+* Make community comment composer expand for multiline input
+* Reschedule via date/time picker, add notification menu to tank details, replace schedule-option popup with verify dialog
+
+## [3.6.00] - 2026-8 • Inhabitant Memorialization, Messaging
 
 ### Added
 - Add owner-side editing for community post comments
