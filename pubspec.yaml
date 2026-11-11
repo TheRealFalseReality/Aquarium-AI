@@ -26,14 +26,14 @@ dependencies:
   scrollable_positioned_list: ^0.3.5
   cupertino_icons: ^2.0.0
   google_mobile_ads: ^9.1.0
-  firebase_analytics: ^12.3.0
-  firebase_app_check: ^0.4.6
-  firebase_core: ^4.6.0 
-  firebase_crashlytics: ^5.2.3
-  firebase_remote_config: ^6.5.3
-  firebase_auth: ^6.5.2
-  cloud_firestore: ^6.5.0
-  firebase_storage: ^13.3.0
+  firebase_analytics: ^13.0.1
+  firebase_app_check: 0.5.1
+  firebase_core: ^5.1.0
+  firebase_crashlytics: ^6.0.1
+  firebase_remote_config: ^7.0.1
+  firebase_auth: ^7.0.1
+  cloud_firestore: ^7.1.0
+  firebase_storage: ^14.0.1
   google_sign_in: ^7.2.0
   flutter_facebook_auth: ^7.2.0
   dart_openai: ^8.0.0
@@ -55,7 +55,7 @@ dependencies:
   flex_color_scheme: ^8.0.0
   flutter_colorpicker: ^1.1.0
   in_app_update: ^5.0.0
-  firebase_performance: ^0.11.3
+  firebase_performance: ^0.12.1
   app_links: ^7.2.1
 
 dev_dependencies:

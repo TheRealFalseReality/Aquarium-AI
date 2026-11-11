@@ -168,16 +168,16 @@ Future<void> _initializeAppCheck() async {
       // Play Integrity is the recommended provider for Play-distributed apps
       // and replaces the deprecated SafetyNet provider.
       // ---------------------------------------------------------------
-      androidProvider: kDebugMode
-          ? AndroidProvider.debug
-          : AndroidProvider.playIntegrity,
+      providerAndroid: kDebugMode
+          ? AndroidDebugProvider()
+          : AndroidPlayIntegrityProvider(),
 
       // ---------------------------------------------------------------
       // Apple (iOS / macOS): App Attest in release, debug in debug mode.
       // App Attest requires iOS 14+ / macOS 14+.  For older OS targets
-      // you can use AppleProvider.deviceCheckWithFallbackToAppAttest.
+      // you can use AppleAppAttestWithDeviceCheckFallbackProvider().
       // ---------------------------------------------------------------
-      appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.appAttest,
+      providerApple: kDebugMode ? AppleDebugProvider() : AppleAppAttestProvider(),
 
       // ---------------------------------------------------------------
       // Web: reCAPTCHA v3.
@@ -185,7 +185,7 @@ Future<void> _initializeAppCheck() async {
       // Override at build time with:
       //   flutter build web --dart-define=RECAPTCHA_V3_SITE_KEY=<key>
       // ---------------------------------------------------------------
-      webProvider: ReCaptchaV3Provider(reCaptchaV3SiteKey),
+      providerWeb: ReCaptchaV3Provider(reCaptchaV3SiteKey),
     );
 
     if (kDebugMode) {
