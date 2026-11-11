@@ -1,7 +1,7 @@
 name: fish_ai
 description: "AI tools for Aquarium!"
 publish_to: 'none'
-version: 3.6.10+3610
+version: 3.6.11+3611
 
 environment:
   sdk: ^3.11.1
