@@ -262,13 +262,12 @@ class TankNotifier extends StateNotifier<TankState> {
         outputPath = fileName;
       } else {
         // On mobile/desktop, use saveFile with all parameters
-        outputPath = await FilePicker.saveFile(
+        final uri = await FilePicker.saveFile(
           dialogTitle: 'Save Tank Backup',
           fileName: fileName,
-          type: FileType.custom,
-          allowedExtensions: ['json'],
           bytes: bytes, // Required for Android & iOS
         );
+        outputPath = uri?.path;
       }
 
       if (outputPath != null) {
@@ -337,12 +336,11 @@ class TankNotifier extends StateNotifier<TankState> {
       );
 
       // Pick a file - use FileType.any for better compatibility
-      final result = await FilePicker.pickFiles(
+      final platformFile = await FilePicker.pickFile(
         type: FileType.any,
-        allowMultiple: false,
       );
 
-      if (result == null || result.files.isEmpty) {
+      if (platformFile == null) {
         state = state.copyWith(isLoading: false);
 
         // Log restore cancellation
@@ -354,15 +352,11 @@ class TankNotifier extends StateNotifier<TankState> {
         return false;
       }
 
-      final platformFile = result.files.single;
       String jsonString;
 
       if (kIsWeb) {
         // On web, use bytes property
-        final bytes = platformFile.bytes;
-        if (bytes == null) {
-          throw Exception('Could not read file content on web platform');
-        }
+        final bytes = await platformFile.readAsBytes();
         jsonString = utf8.decode(bytes);
       } else {
         // On mobile/desktop, use path property
@@ -665,13 +659,12 @@ class TankNotifier extends StateNotifier<TankState> {
       }
 
       // Desktop: save-file dialog.
-      final outputPath = await FilePicker.saveFile(
+      final uri = await FilePicker.saveFile(
         dialogTitle: 'Save Tank Share File',
         fileName: fileName,
-        type: FileType.custom,
-        allowedExtensions: ['json'],
         bytes: bytes,
       );
+      final outputPath = uri?.path;
 
       AnalyticsService.logFeatureUsed(
         featureName: 'tank_share_export',
@@ -710,24 +703,19 @@ class TankNotifier extends StateNotifier<TankState> {
     try {
       state = state.copyWith(isLoading: true, clearError: true);
 
-      final result = await FilePicker.pickFiles(
+      final platformFile = await FilePicker.pickFile(
         type: FileType.any,
-        allowMultiple: false,
       );
 
-      if (result == null || result.files.isEmpty) {
+      if (platformFile == null) {
         state = state.copyWith(isLoading: false);
         return null;
       }
 
-      final platformFile = result.files.single;
       String jsonString;
 
       if (kIsWeb) {
-        final fileBytes = platformFile.bytes;
-        if (fileBytes == null) {
-          throw Exception('Could not read file content on web platform');
-        }
+        final fileBytes = await platformFile.readAsBytes();
         jsonString = utf8.decode(fileBytes);
       } else {
         final filePath = platformFile.path;

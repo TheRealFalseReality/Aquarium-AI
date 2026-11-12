@@ -653,14 +653,13 @@ class _FishCompatEditorScreenState extends State<FishCompatEditorScreen> {
           context,
         ).showSnackBar(const SnackBar(content: Text('Download started.')));
       } else {
-        final path = await FilePicker.saveFile(
+        final uri = await FilePicker.saveFile(
           dialogTitle: 'Save fishcompat.json',
           fileName: fileName,
-          type: FileType.custom,
-          allowedExtensions: ['json'],
           bytes: bytes,
         );
-        if (path != null) {
+        if (uri != null) {
+          final path = uri.path;
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text('Saved to $path')));
@@ -1749,15 +1748,13 @@ class _FishEditDialogState extends State<_FishEditDialog> {
   }
 
   Future<void> _pickImage() async {
-    final result = await FilePicker.pickFiles(
+    final file = await FilePicker.pickFile(
       type: FileType.image,
-      withData: true, // ensures bytes are available on web too
     );
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.single;
-    if (file.bytes == null) return;
+    if (file == null) return;
+    final bytes = await file.readAsBytes();
     setState(() {
-      _pendingImageBytes = file.bytes;
+      _pendingImageBytes = bytes;
       _pendingImageFileName = file.name;
     });
   }
