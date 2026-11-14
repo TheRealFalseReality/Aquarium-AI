@@ -150,6 +150,59 @@ class TankNotifier extends StateNotifier<TankState> {
     }
   }
 
+  Future<bool> moveInhabitant({
+    required String inhabitantId,
+    required String sourceTankId,
+    required String destinationTankId,
+  }) async {
+    if (sourceTankId == destinationTankId) return false;
+
+    Tank? sourceTank;
+    Tank? destinationTank;
+    for (final tank in state.tanks) {
+      if (tank.id == sourceTankId) sourceTank = tank;
+      if (tank.id == destinationTankId) destinationTank = tank;
+    }
+    if (sourceTank == null || destinationTank == null) return false;
+
+    final matchingInhabitants = sourceTank.inhabitants
+        .where((inhabitant) => inhabitant.id == inhabitantId);
+    if (matchingInhabitants.length != 1 ||
+        destinationTank.inhabitants.any(
+          (inhabitant) => inhabitant.id == inhabitantId,
+        ) ||
+        destinationTank.memorializedInhabitants.any(
+          (inhabitant) => inhabitant.id == inhabitantId,
+        )) {
+      return false;
+    }
+
+    final inhabitant = matchingInhabitants.single;
+    final now = DateTime.now();
+    final updatedTanks = state.tanks.map((tank) {
+      if (tank.id == sourceTankId) {
+        return tank.copyWith(
+          inhabitants: tank.inhabitants
+              .where((inhabitant) => inhabitant.id != inhabitantId)
+              .toList(),
+          updatedAt: now,
+        );
+      }
+      if (tank.id == destinationTankId) {
+        return tank.copyWith(
+          inhabitants: [...tank.inhabitants, inhabitant],
+          updatedAt: now,
+        );
+      }
+      return tank;
+    }).toList();
+
+    state = state.copyWith(tanks: updatedTanks, isLoading: false, clearError: true);
+    await _saveTanks();
+    AnalyticsService.logFeatureUsed(featureName: 'inhabitant_moved_tank');
+    return true;
+  }
+
   Future<void> deleteTank(String tankId) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
