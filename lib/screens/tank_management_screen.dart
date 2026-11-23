@@ -2092,7 +2092,7 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                 image: (backgroundPhoto.imageUrl?.startsWith('http') ?? false)
                     ? CachedNetworkImageProvider(backgroundPhoto.imageUrl!)
                           as ImageProvider
-                    : FileImage(File(backgroundPhoto.imagePath!)),
+                    : FileImage(File((backgroundPhoto.imagePath ?? backgroundPhoto.imageUrl)!)),
                 fit: BoxFit.cover,
                 opacity: 0.8,
                 colorFilter: ColorFilter.mode(
