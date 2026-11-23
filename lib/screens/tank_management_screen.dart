@@ -2099,6 +2099,11 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                   Colors.black.withOpacity(0.3),
                   BlendMode.darken,
                 ),
+                onError: (exception, stackTrace) {
+                  debugPrint(
+                    'Error loading tank background photo: $exception',
+                  );
+                },
               )
             : null,
         color: backgroundPhoto != null ? cs.surfaceContainerHighest : null,
@@ -4473,6 +4478,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                                 ? CachedNetworkImageProvider(fishImageUrl)
                                 : FileImage(File(fishImageUrl)) as ImageProvider)
                           : null,
+                      onBackgroundImageError: fishImageUrl != null
+                          ? (exception, stackTrace) {
+                              debugPrint(
+                                'Error loading fish image ($fishImageUrl): $exception',
+                              );
+                            }
+                          : null,
                       backgroundColor: fishImageUrl == null
                           ? Theme.of(context).colorScheme.primaryContainer
                           : null,
@@ -4573,6 +4585,13 @@ class TankManagementScreenState extends ConsumerState<TankManagementScreen> {
                     ? (fishImageUrl.startsWith('http')
                           ? CachedNetworkImageProvider(fishImageUrl)
                           : FileImage(File(fishImageUrl)) as ImageProvider)
+                    : null,
+                onBackgroundImageError: fishImageUrl != null
+                    ? (exception, stackTrace) {
+                        debugPrint(
+                          'Error loading fish image ($fishImageUrl): $exception',
+                        );
+                      }
                     : null,
                 backgroundColor: fishImageUrl == null
                     ? Theme.of(context).colorScheme.primaryContainer

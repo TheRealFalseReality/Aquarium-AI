@@ -2948,6 +2948,13 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                                       : FileImage(File(fishImageUrl))
                                             as ImageProvider)
                                 : null,
+                            onBackgroundImageError: fishImageUrl != null
+                                ? (exception, stackTrace) {
+                                    debugPrint(
+                                      'Error loading fish image ($fishImageUrl): $exception',
+                                    );
+                                  }
+                                : null,
                             backgroundColor: fishImageUrl == null
                                 ? cs.primaryContainer
                                 : null,
@@ -3144,6 +3151,13 @@ class TankDetailsScreenState extends ConsumerState<TankDetailsScreen>
                             ? (fishImageUrl.startsWith('http')
                                   ? CachedNetworkImageProvider(fishImageUrl)
                                   : FileImage(File(fishImageUrl)) as ImageProvider)
+                            : null,
+                        onBackgroundImageError: fishImageUrl != null
+                            ? (exception, stackTrace) {
+                                debugPrint(
+                                  'Error loading fish image ($fishImageUrl): $exception',
+                                );
+                              }
                             : null,
                         backgroundColor:
                             fishImageUrl == null ? cs.tertiaryContainer : null,
